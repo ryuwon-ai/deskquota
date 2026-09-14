@@ -4,6 +4,8 @@
 
 <h1 align="center">DeskQuota</h1>
 
+<p align="center">English · <a href="README.ko.md">한국어</a></p>
+
 <p align="center">
   <strong>Your LLM quota, managed at your desk.</strong><br>
   A small, native gateway for coding agents sharing a limited LLM endpoint.
@@ -165,8 +167,9 @@ The backfill mean includes successful requests completed during the subsequent
 drain. Each arm submitted 100 requests: 85 completed and 15 were deliberately
 cancelled. The short-request group includes model-list requests. These repeats
 vary arrival jitter in one workload, not five independent workload families.
-There is no demonstrated competitor-gateway speed advantage or real-API
-performance result yet.
+These seconds include quota waiting and upstream response time; they are not
+measurements of the gateway's own processing overhead. There is no demonstrated
+competitor-gateway speed advantage or real-API performance result yet.
 
 [Accepted package measurements](product/artifacts/native-final-integration-package/acceptance/README.md) ·
 [Backfill results and raw evidence](reports/backfill-experiment-results.md) ·
