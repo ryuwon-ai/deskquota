@@ -1,0 +1,76 @@
+{
+  "created_utc": "2026-09-12T11:16:52.750244+00:00",
+  "classification": "post_hoc_read_only_partial_matrix_boundary_observation",
+  "cases": [
+    {
+      "run": "quota-seed1-benchmark_rr",
+      "source": "product/artifacts/pilot-runs/quota-seed1-benchmark_rr.json",
+      "sha256": "46f3b7c772496a0934a471efd0481defc1a08c1d4e548913e5742e85c6849a56",
+      "attempt": "w3-burst-4/1",
+      "relative_receive_s": 252.36050033299762,
+      "post_measurement": false,
+      "requested_fixture_units": 221,
+      "live_rpm": 15,
+      "live_tpm_fixture_units": 5843,
+      "mock_limits": {
+        "rpm": 16,
+        "tpm": 6000
+      },
+      "nearest_expirations": [
+        {
+          "id": "w2-burst-4/1",
+          "fixture_units": 221,
+          "after_ms": 0.030667000828543678
+        },
+        {
+          "id": "w2-burst-5/1",
+          "fixture_units": 221,
+          "after_ms": 11.964417000854155
+        },
+        {
+          "id": "w2-burst-7/1",
+          "fixture_units": 221,
+          "after_ms": 23.739000000205124
+        }
+      ]
+    },
+    {
+      "run": "quota-seed4-production_rr",
+      "source": "product/artifacts/pilot-runs/quota-seed4-production_rr.json",
+      "sha256": "91791f41581cec0391b2ee782e22b4845ceb94bd290953560c5316ecc4c2ec94",
+      "attempt": "w4-mixed_lengths-1/1",
+      "relative_receive_s": 372.019961082995,
+      "post_measurement": true,
+      "requested_fixture_units": 173,
+      "live_rpm": 16,
+      "live_tpm_fixture_units": 4233,
+      "mock_limits": {
+        "rpm": 16,
+        "tpm": 6000
+      },
+      "nearest_expirations": [
+        {
+          "id": "w3-mixed_lengths-2/1",
+          "fixture_units": 806,
+          "after_ms": 3.7339170012273826
+        },
+        {
+          "id": "w3-mixed_lengths-1/1",
+          "fixture_units": 173,
+          "after_ms": 3.965834002883639
+        },
+        {
+          "id": "w3-mixed_lengths-3/1",
+          "fixture_units": 173,
+          "after_ms": 24.97525000217138
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Recomputed from mock receive timestamps and accepted attempt records; this is not gateway admission telemetry",
+    "Gateway per-attempt reservation timestamps were not recorded, so no exact causal attribution",
+    "No mid-measurement change and no new product request",
+    "All rejected outcomes remain in the primary denominator"
+  ]
+}

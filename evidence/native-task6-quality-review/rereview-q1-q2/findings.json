@@ -1,0 +1,15 @@
+{
+  "verdict": "PASS",
+  "remaining_findings": [],
+  "resolved": [
+    {
+      "id": "Q1",
+      "resolution": "product/scripts/package_native.py:79 hashes the captured archive member bytes; the original deterministic interleaving now reports the member hash rather than the later replacement-path hash."
+    },
+    {
+      "id": "Q2",
+      "resolution": "product/packaging/install.ps1:103-105 only records the original replacement error and reports target, backup, and candidate while preserveRecovery remains true; it performs no automatic target, backup, or candidate mutation."
+    }
+  ],
+  "adjacent_regressions_found": 0
+}

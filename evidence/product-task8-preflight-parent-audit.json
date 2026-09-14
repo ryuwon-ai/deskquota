@@ -1,0 +1,175 @@
+{
+  "checked_at": "2026-09-12T09:28:22.614753+00:00",
+  "scope": "Parent read-only audit of second functional smoke and one-seed no-wait preflight. No parent product execution. Neither is final current-source or full-matrix acceptance.",
+  "passed": true,
+  "records": [
+    {
+      "manifest": "product/artifacts/task8-smoke2.json",
+      "status": "completed_smoke",
+      "runs": [
+        {
+          "arm": "direct",
+          "phase": "smoke",
+          "ingress": 20,
+          "outcomes": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "attempts": 20,
+          "warmup_ingress": 0,
+          "warmup_attempts": 0,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        },
+        {
+          "arm": "production_rr",
+          "phase": "smoke",
+          "ingress": 20,
+          "outcomes": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "attempts": 20,
+          "warmup_ingress": 0,
+          "warmup_attempts": 0,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        },
+        {
+          "arm": "benchmark_fifo",
+          "phase": "smoke",
+          "ingress": 20,
+          "outcomes": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "attempts": 20,
+          "warmup_ingress": 0,
+          "warmup_attempts": 0,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        },
+        {
+          "arm": "benchmark_rr",
+          "phase": "smoke",
+          "ingress": 20,
+          "outcomes": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "attempts": 19,
+          "warmup_ingress": 0,
+          "warmup_attempts": 0,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        }
+      ]
+    },
+    {
+      "manifest": "product/artifacts/task8-no-wait-preflight.json",
+      "status": "completed_no_wait_only",
+      "runs": [
+        {
+          "arm": "direct",
+          "phase": "no_wait",
+          "ingress": 100,
+          "outcomes": {
+            "completed": 100
+          },
+          "attempts": 100,
+          "warmup_ingress": 5,
+          "warmup_attempts": 5,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        },
+        {
+          "arm": "production_rr",
+          "phase": "no_wait",
+          "ingress": 100,
+          "outcomes": {
+            "completed": 100
+          },
+          "attempts": 100,
+          "warmup_ingress": 5,
+          "warmup_attempts": 5,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        },
+        {
+          "arm": "benchmark_fifo",
+          "phase": "no_wait",
+          "ingress": 100,
+          "outcomes": {
+            "completed": 100
+          },
+          "attempts": 100,
+          "warmup_ingress": 5,
+          "warmup_attempts": 5,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        },
+        {
+          "arm": "benchmark_rr",
+          "phase": "no_wait",
+          "ingress": 100,
+          "outcomes": {
+            "completed": 100
+          },
+          "attempts": 100,
+          "warmup_ingress": 5,
+          "warmup_attempts": 5,
+          "checks": {
+            "artifact_hash": true,
+            "same_unique_terminal_ids": true,
+            "unique_known_attempts": true,
+            "terminal_attempts": true,
+            "payload_evidence": true,
+            "owned_cleanup_reported": true
+          }
+        }
+      ]
+    }
+  ]
+}

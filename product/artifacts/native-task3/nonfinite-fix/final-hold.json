@@ -1,0 +1,139 @@
+{
+  "phase": "FINAL_HOLD",
+  "fix": "native-task3 QUALITY Q3 owned TOML nonfinite values",
+  "execution_finished": true,
+  "writer_runtime_ownership_released": true,
+  "source_stable_after_capture": true,
+  "source_drift": [],
+  "source_files": 79,
+  "changed_files_from_task2": 12,
+  "changed_files_from_quality_fix": 2,
+  "source_manifest_sha256": "68535b446b76c5f5f5fdf726f86232eb831b250340f3f5c5a9ccc58ac7e4c391",
+  "changed_files_manifest_sha256": "13ffd00a6fe35a83c646ed5df15aa56f31eabe5a50b06469be0bed1fd734fe9c",
+  "nonfinite_fix_changed_files_manifest_sha256": "a2dac402dfaa4445a221224d285adb26ed17fa5f92fc787fe49c16b280a31610",
+  "source_archive_sha256": "7fceb9632164aa4709791b98ecd114a0cf9ce624fb38ef784c6ca7354d98146a",
+  "source_archive_bytes": 240568,
+  "binaries": {
+    "release": {
+      "path": "target/native-task3-nonfinite-fix/release/llmgw",
+      "bytes": 9315184,
+      "sha256": "8b6fde7b380d00568b3ce6fbcc2ea21b577cfdc50d730a01955355d8ca16b233"
+    },
+    "debug": {
+      "path": "target/native-task3-nonfinite-fix/debug/llmgw",
+      "bytes": 28152520,
+      "sha256": "861d143a9ec4f94f497bf1f611b9e00ab5134a8b40358d16dbbd40520309bece"
+    },
+    "debug_rlib": {
+      "path": "target/native-task3-nonfinite-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+      "bytes": 47394232,
+      "sha256": "7adb91e195f05aa349401d7ee1d36b3a984af664e0fb012ee5245880f01616f2"
+    }
+  },
+  "probe": {
+    "source": {
+      "path": "artifacts/native-task3/nonfinite-fix/quality_probe.rs",
+      "bytes": 8342,
+      "sha256": "4717b9c308f28e514575d29e342d5815f343e77c887de04e96c0cfa130e4b314"
+    },
+    "binary": {
+      "path": "artifacts/native-task3/nonfinite-fix/quality-probe-tests-attempt-2",
+      "bytes": 6132288,
+      "sha256": "e76b174d53a9caa8668bdc720698df50361ce5e0b7495dcf0965805236df73ef"
+    },
+    "stdout": {
+      "path": "artifacts/native-task3/nonfinite-fix/quality-probe-final.stdout",
+      "bytes": 662,
+      "sha256": "d314d207c70c6b7b5703a01334e45cf488c89463461a7701e8e411be0659a968"
+    },
+    "all_cases_passed": true
+  },
+  "lockfile": {
+    "path": "Cargo.lock",
+    "bytes": 52711,
+    "sha256": "c82e9357a135eb84f0d1be70d0a5f16d2a6c0f7a520cc140562306418a0d3e1c"
+  },
+  "toolchain_file": {
+    "path": "rust-toolchain.toml",
+    "bytes": 52,
+    "sha256": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b"
+  },
+  "verification": {
+    "full_debug": {
+      "passed": 313,
+      "failed": 0,
+      "rows": [
+        11,
+        0,
+        3,
+        19,
+        22,
+        26,
+        49,
+        12,
+        7,
+        19,
+        42,
+        32,
+        27,
+        44,
+        0
+      ]
+    },
+    "patch_debug": {
+      "passed": 49,
+      "failed": 0
+    },
+    "patch_release": {
+      "passed": 49,
+      "failed": 0
+    },
+    "adapted_quality_probe": {
+      "passed": 8,
+      "failed": 0
+    },
+    "static": {
+      "rustfmt": "passed",
+      "check_all_targets": "passed",
+      "clippy_all_targets_deny_warnings": "passed",
+      "debug_build": "passed",
+      "release_build": "passed"
+    }
+  },
+  "red_green": {
+    "red": "patch-contract-nonfinite-red.log: 47 passed, 2 failed",
+    "green_attempt_1": "49 passed after the AST fix; subsequent error wording retained the established datetime phrase",
+    "probe_attempt_1": "6 passed, 2 failed because the sanitized wording no longer contained the established phrase native date or time",
+    "green": "patch-contract-final.log: 49 passed, 0 failed against final formatted source",
+    "probe_green": "quality-probe-final.stdout: 8 passed, 0 failed",
+    "release_green": "patch-contract-release-final.log: 49 passed, 0 failed"
+  },
+  "finding_resolution": {
+    "Q3": "preview inspects each owned TOML AST value or subtree and refuses nonfinite Float values before backup, journal, or client writes; unrelated nonfinite values and owned finite floats remain supported"
+  },
+  "platform_evidence": {
+    "macos_runtime": "focused and full tests cover scalar and nested nan/+inf/-inf refusal, unrelated nonfinite and owned finite round-trip, Q1/Q2, ownership, privacy, ACL, crash, and alias contracts",
+    "windows": "static cfg only; no Windows runtime claim",
+    "linux": "static cfg only; no Linux runtime claim"
+  },
+  "protected": {
+    "accepted_task2": 426,
+    "task3_extra": 283,
+    "benchmark_raws": 40,
+    "accounting_raws": 10,
+    "drift": []
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)\nbinary: rustc\ncommit-hash: 6b00bc3880198600130e1cf62b8f8a93494488cc\ncommit-date: 2025-06-23\nhost: aarch64-apple-darwin\nrelease: 1.88.0\nLLVM version: 20.1.5",
+  "cargo": "cargo 1.88.0 (873a06493 2025-05-10)\nrelease: 1.88.0\ncommit-hash: 873a0649350c486caf67be772828a4f36bb4734c\ncommit-date: 2025-05-10\nhost: aarch64-apple-darwin\nlibgit2: 1.9.0 (sys:0.20.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.80+curl-8.12.1 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.4.1 11 Feb 2025\nos: Mac OS 26.5.1 [64-bit]",
+  "commands": "artifacts/native-task3/nonfinite-fix/build-execution.json",
+  "cleanup": "artifacts/native-task3/nonfinite-fix/cleanup-final.json",
+  "limits": [
+    "all prior Task3 holds, failed probes, held binaries, and reviewer evidence remain immutable",
+    "preexisting failed-phase journals were preserved as evidence and no migration was added",
+    "external-editor final-check to rename filesystem CAS is not claimed",
+    "Windows and Linux runtime remain unverified",
+    "native TOML date/time and nonfinite float ownership is explicitly unsupported and refused before write",
+    "Task4 adapters and CLI wiring remain out of scope"
+  ]
+}

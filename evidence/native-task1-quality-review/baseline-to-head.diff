@@ -1,0 +1,3882 @@
+--- baseline/product/Cargo.lock
++++ head/product/Cargo.lock
+@@ -350,6 +350,18 @@
+ ]
+ 
+ [[package]]
++name = "exacl"
++version = "0.13.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "8de9e551ced9d700a31dacb8b168129640240fcd7a279a3fa4d59608b84ebcae"
++dependencies = [
++ "bitflags",
++ "log",
++ "scopeguard",
++ "uuid",
++]
++
++[[package]]
+ name = "find-msvc-tools"
+ version = "0.1.12"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -368,6 +380,16 @@
+ checksum = "cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf"
+ dependencies = [
+  "percent-encoding",
++]
++
++[[package]]
++name = "fs4"
++version = "1.1.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7e72ed92b67c146290f88e9c89d60ca163ea417a446f61ffd7b72df3e7f1dfd5"
++dependencies = [
++ "rustix",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -818,6 +840,12 @@
+ checksum = "b5b646652bf6661599e1da8901b3b9522896f01e736bad5f723fe7a3a27f899d"
+ 
+ [[package]]
++name = "linux-raw-sys"
++version = "0.12.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
++
++[[package]]
+ name = "litemap"
+ version = "0.8.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -830,6 +858,8 @@
+  "axum",
+  "bytes",
+  "clap",
++ "exacl",
++ "fs4",
+  "futures-util",
+  "http-body-util",
+  "httpdate",
+@@ -838,6 +868,7 @@
+  "libc",
+  "rand",
+  "reqwest",
++ "rustix",
+  "serde",
+  "serde_json",
+  "sha2",
+@@ -845,6 +876,7 @@
+  "tokio",
+  "toml_edit",
+  "url",
++ "windows-sys 0.61.2",
+ ]
+ 
+ [[package]]
+@@ -1115,6 +1147,19 @@
+ ]
+ 
+ [[package]]
++name = "rustix"
++version = "1.1.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
++dependencies = [
++ "bitflags",
++ "errno",
++ "libc",
++ "linux-raw-sys",
++ "windows-sys 0.61.2",
++]
++
++[[package]]
+ name = "rustls"
+ version = "0.23.44"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1214,6 +1259,12 @@
+ ]
+ 
+ [[package]]
++name = "scopeguard"
++version = "1.2.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
++
++[[package]]
+ name = "security-framework"
+ version = "3.7.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1667,6 +1718,16 @@
+ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
+ 
+ [[package]]
++name = "uuid"
++version = "1.26.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2ef6dac1e96601b4fb3acccccff2139741fcb757cb9a36089bf5be91cfb285ce"
++dependencies = [
++ "js-sys",
++ "wasm-bindgen",
++]
++
++[[package]]
+ name = "walkdir"
+ version = "2.5.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+--- baseline/product/Cargo.toml
++++ head/product/Cargo.toml
+@@ -17,6 +17,7 @@
+ axum = { version = "=0.8.9", default-features = false, features = ["http1"] }
+ bytes = "=1.11.1"
+ clap = { version = "=4.6.6", features = ["derive"] }
++fs4 = { version = "=1.1.0", default-features = false, features = ["sync"] }
+ futures-util = { version = "=0.3.32", default-features = false, features = ["std"] }
+ httpdate = "=1.0.3"
+ http-body-util = "=0.1.3"
+@@ -33,11 +34,20 @@
+ toml_edit = { version = "=0.25.15", features = ["serde"] }
+ url = "=2.5.8"
+ 
++[target.'cfg(unix)'.dependencies]
++rustix = { version = "=1.1.4", features = ["process"] }
++
++[target.'cfg(target_os = "macos")'.dependencies]
++exacl = { version = "=0.13.0", default-features = false }
++
++[target.'cfg(windows)'.dependencies]
++windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Threading"] }
++
+ [dev-dependencies]
+ tokio = { version = "=1.49.0", features = ["test-util"] }
+ 
+ [lints.rust]
+-unsafe_code = "forbid"
++unsafe_code = "deny"
+ 
+ [lints.clippy]
+ dbg_macro = "deny"
+--- baseline/product/docs/runtime-contract.md
++++ head/product/docs/runtime-contract.md
+@@ -1,10 +1,82 @@
+-# `llmgw` task 7 runtime contract
+-
+-This package implements typed configuration, the offline
+-`llmgw doctor --config PATH` check, and a foreground
+-`llmgw run --config PATH` loopback HTTP gateway with bounded streaming and
+-worker-owned upstream lifetimes. This task did not call an actual LLM, edit a
+-persistent user client configuration, start a model, or install an OS service.
++# `llmgw` runtime contract
++
++This package implements typed configuration and a native loopback HTTP gateway
++with bounded streaming and worker-owned upstream lifetimes. Core behavior is
++unchanged except that authenticated control remains available during shutdown.
++Native Task 1 adds the following lifecycle boundary; setup, client adapters,
++autostart and installers remain separate work.
++
++## Native lifecycle (Task 1)
++
++An explicit global `--config PATH` is required, before or after the subcommand.
++`on`, `off`, `restart`, `status [--json]`, `run`, and offline `doctor [--json]`
++are supported. Bare-command defaults and setup are not implemented. Doctor JSON
++reports `state_directory` as the machine-readable fixture boundary and creates
++no runtime state. Its current check validates configuration; network/inference
++and client diagnostics are not implemented.
++
++The canonical config path's SHA256 selects a sibling `.llmgw-<64 hex hash>`
++directory. Config content SHA256 separately identifies the immutable running
++configuration. There is no old `.llmgw` fallback or migration. Off/status resolve
++the canonical path without parsing TOML, so an invalid edit or changed listen
++port does not hide a worker. Deleted configs and broken symlinks fail explicitly.
++Restart validates config and credentials before stopping the existing worker.
++
++The worker retains the same `worker.lock` file object for its entire lifetime;
++lock paths are never unlinked. A separate operation lock serializes on/off/restart
++with a bounded 17-second busy wait. On confirms readiness within five seconds
++of spawn through authenticated health, checking path hash, immutable fingerprint,
++nonce, bound address and start timestamp. Readiness is independent of the
++60-second known-quota startup hold and shared cooldown, both reported even with
++an empty queue. Changed bytes set `pending_restart`; on checks the authenticated
++running identity before parsing saved edits and returns exit 1 with
++`restart_required`, including for malformed TOML. New/stopped configuration is
++validated before token creation. Off uses the recorded address, validates the identity, and
++sends a nonce-conditional stop. Failed identity checks never signal a PID.
++
++Off allows ten seconds for drain and up to two seconds for confirmation, then
++reports a failed/unknown outcome rather than killing a process. Authenticated
++control remains queryable while draining; new data ingress gets 503 and does
++not reach upstream. Drain control connections share the existing 128-connection
++budget, close after one response, and cannot extend the drain deadline. Existing
++request/upstream/body cleanup remains required before the lifetime lock releases.
++Ctrl-C and Unix SIGTERM use the same shutdown path. Stopped status is exit 0;
++failed inspection is exit 1, with `state=failed` in JSON. Stale records are
++reported separately from whether a worker lock is held.
++
++On launches the same executable with argv and disconnected stdio. Unix calls
++setsid before creating Tokio threads; Windows uses DETACHED_PROCESS and
++CREATE_NEW_PROCESS_GROUP. There is no watchdog, periodic worker, shell command,
++automatic model start, or OS registration. `worker.log` holds one fixed bounded
++sanitized diagnostic event, not request or provider data. Startup outcomes come
++from the new child's exit status, never a possibly stale log. An internal hidden
++worker exit code distinguishes a bind conflict; public command failures remain 1.
++Tokens never appear in argv,
++runtime JSON or output. Autostart/client fields say `not_implemented`; off
++preserves external client URLs/login settings whose current state is unknown.
++
++State protection is checked before token writes and existing permissions are
++never automatically modified. Unix requires current UID, private mode bits,
++regular non-symlink files, and no-follow/nonblocking opens. macOS additionally
++uses exacl 0.13.0's no-follow ACL API and rejects all extended ACLs, including
++inherited entries. Its path lookup is checked against the opened object's
++dev/inode; this is not an atomic defense against a hostile same-user editor
++changing ACLs/paths between checks. Linux POSIX ACL masks correspond to group
++mode bits; mode 0600/0700 also restricts inherited ACLs. Other filesystem ACL
++semantics and Linux runtime are not verified. exacl is macOS-only and introduces
++no Linux libacl runtime requirement.
++
++Windows uses windows-sys 0.61.2 to create a protected current-user-only DACL,
++then verifies the opened object's SID, ACL and disk/non-reparse type before
++returning a writable file. Null/unsupported ACLs and any non-owner grants are
++rejected. The only unsafe exception is the small Windows protection module;
++all other product source retains deny. Its isolated Windows API type/clippy
++check is not runtime proof. Full Windows cargo check on this Mac is blocked by
++aws-lc-sys requiring Windows C/SDK headers; no Windows SDK was installed.
++
++No actual LLM, persistent client configuration, model start, login registration
++or release was exercised. See `artifacts/native-task1/` for exact checks and
++remaining native OS acceptance limits.
+ 
+ ## Local quota admission
+ 
+--- baseline/product/scripts/benchmark.py
++++ head/product/scripts/benchmark.py
+@@ -176,7 +176,18 @@
+         config += f'\n[[roots]]\nid = "r{n}"\nendpoints = ["chat/completions", "models"]\nmodels = ["synthetic"]\n'
+     config_path = Path(temp)/"gateway.toml"
+     config_path.write_text(config)
+-    state = Path(temp)/".llmgw"; state.mkdir()
++    paths_process = await asyncio.create_subprocess_exec(str(binary), "doctor", "--config", str(config_path), "--json", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
++    try:
++        paths_output, _ = await asyncio.wait_for(paths_process.communicate(), timeout=10)
++    finally:
++        cleanup = asyncio.create_task(abort_startup(paths_process))
++        while not cleanup.done():
++            try: await asyncio.shield(cleanup)
++            except asyncio.CancelledError: continue
++        cleanup.result()
++    if paths_process.returncode != 0:
++        raise RuntimeError("gateway state path lookup failed")
++    state = Path(json.loads(paths_output)["state_directory"]); state.mkdir(mode=0o700)
+     for name in ("data", "control"):
+         path = state/(name+"-token")
+         path.write_text("synthetic-benchmark-"+name)
+--- baseline/product/scripts/probe_pi.py
++++ head/product/scripts/probe_pi.py
+@@ -524,7 +524,7 @@
+         cwd = temp / "empty-work"
+         fixture_dir = temp / "fixture"
+         config_dir = temp / "gateway"
+-        for directory in (agent_dir, cwd, fixture_dir, config_dir / ".llmgw"):
++        for directory in (agent_dir, cwd, fixture_dir, config_dir):
+             directory.mkdir(parents=True)
+         tool_path = fixture_dir / "synthetic-read.txt"
+         write_private(tool_path, TOOL_FILE_CONTENT)
+@@ -536,8 +536,10 @@
+         gateway_port = reserve_loopback_port()
+         try:
+             write_private(config_dir / "config.toml", gateway_config(gateway_port, fixture.server_port))
+-            write_private(config_dir / ".llmgw" / "data-token", data_token)
+-            write_private(config_dir / ".llmgw" / "control-token", control_token)
++            state_dir = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config_dir / "config.toml"), "--json"], timeout=10))["state_directory"])
++            state_dir.mkdir(mode=0o700)
++            write_private(state_dir / "data-token", data_token)
++            write_private(state_dir / "control-token", control_token)
+             write_private(
+                 agent_dir / "models.json",
+                 render_models(f"http://127.0.0.1:{gateway_port}{LOCAL_PREFIX}", data_token),
+--- baseline/product/src/admission/mod.rs
++++ head/product/src/admission/mod.rs
+@@ -21,6 +21,8 @@
+ 
+ #[derive(serde::Serialize)]
+ pub(crate) struct AdmissionStatus {
++    startup_hold_ms: u64,
++    shared_cooldown_ms: u64,
+     queue_length: usize,
+     active: usize,
+     retained: usize,
+@@ -264,6 +266,16 @@
+             })
+             .collect();
+         AdmissionStatus {
++            startup_hold_ms: queue
++                .ledger
++                .startup_hold(now)
++                .as_millis()
++                .min(u128::from(u64::MAX)) as u64,
++            shared_cooldown_ms: queue
++                .cooldown_until
++                .saturating_sub(now)
++                .as_millis()
++                .min(u128::from(u64::MAX)) as u64,
+             queue_length: queue.len(),
+             active: snapshot.active,
+             retained: snapshot.retained,
+--- baseline/product/src/admission/quota.rs
++++ head/product/src/admission/quota.rs
+@@ -135,6 +135,9 @@
+         }
+         s
+     }
++    pub(crate) fn startup_hold(&self, now: Duration) -> Duration {
++        self.ready_at.saturating_sub(now.max(self.now))
++    }
+     pub(crate) fn total_fits(&self, cost: RequestCost) -> bool {
+         known(&self.quota.tpm).is_none_or(|limit| cost.tokens() <= limit)
+     }
+--- baseline/product/src/cli.rs
++++ head/product/src/cli.rs
+@@ -1,55 +1,132 @@
+-use std::path::PathBuf;
+-
++use crate::config::LoadedConfig;
+ use clap::{Parser, Subcommand};
+-
+-use crate::config::LoadedConfig;
+-
++use std::{path::PathBuf, process::ExitCode};
+ #[derive(Debug, Parser)]
+ #[command(
+     name = "llmgw",
+     version,
+-    about = "Run or validate a local quota gateway"
++    about = "Run and control a local quota gateway"
+ )]
+ pub struct Cli {
++    #[arg(long, global = true, value_name = "PATH")]
++    config: Option<PathBuf>,
+     #[command(subcommand)]
+     command: Command,
+ }
+-
+ #[derive(Debug, Subcommand)]
+ enum Command {
+-    /// Run the gateway in the foreground until Ctrl-C or a local control stop.
+-    Run {
+-        /// Explicit path to the gateway TOML configuration.
+-        #[arg(long, value_name = "PATH")]
+-        config: PathBuf,
++    /// Run in the foreground until Ctrl-C or authenticated stop.
++    Run,
++    /// Start one background worker and confirm authenticated readiness.
++    On,
++    /// Stop this worker; preserve client URLs and login settings.
++    Off,
++    /// Drain the current worker and apply the current configuration.
++    Restart,
++    /// Inspect this configuration's worker without calling its upstream.
++    Status {
++        #[arg(long)]
++        json: bool,
+     },
+-    /// Validate a configuration without network access or starting a gateway.
++    /// Validate without external connections. JSON includes computed state paths.
+     Doctor {
+-        /// Explicit path to the gateway TOML configuration.
+-        #[arg(long, value_name = "PATH")]
+-        config: PathBuf,
++        #[arg(long)]
++        json: bool,
++    },
++    #[command(hide = true)]
++    Worker {
++        #[arg(long)]
++        fingerprint: String,
+     },
+ }
+-
+-pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
++pub fn run() -> Result<ExitCode, crate::lifecycle::Error> {
+     let cli = Cli::parse();
+-    match cli.command {
+-        Command::Run { config } => {
+-            let loaded = LoadedConfig::load(config)?;
+-            let credentials = crate::server::RuntimeCredentials::load(&loaded)?;
+-            crate::server::spawn(loaded.config, credentials)
+-                .await?
+-                .run_foreground()
+-                .await?;
+-        }
+-        Command::Doctor { config } => {
+-            let loaded = LoadedConfig::load(config)?;
++    let config = cli
++        .config
++        .ok_or_else(|| {
++            clap::Error::raw(
++                clap::error::ErrorKind::MissingRequiredArgument,
++                "--config <PATH> is required",
++            )
++        })
++        .unwrap_or_else(|e| e.exit());
++    if let Command::Doctor { json } = cli.command {
++        let loaded = LoadedConfig::load(&config)?;
++        if json {
++            println!(
++                "{}",
++                serde_json::json!({"configuration":"valid", "source_path":loaded.source_path, "fingerprint":loaded.fingerprint.as_str(), "state_directory":loaded.state_paths.directory})
++            );
++        } else {
+             println!(
+                 "configuration valid: {} ({})",
+                 loaded.source_path.display(),
+                 loaded.fingerprint.as_str()
+             );
+         }
++        return Ok(ExitCode::SUCCESS);
+     }
+-    Ok(())
++    if matches!(cli.command, Command::Worker { .. }) {
++        crate::lifecycle::prepare_worker()?;
++    }
++    let runtime = tokio::runtime::Builder::new_multi_thread()
++        .enable_all()
++        .build()?;
++    runtime.block_on(async move {
++        let json = matches!(cli.command, Command::Status { json: true });
++        let off = matches!(cli.command, Command::Off);
++        let result = match cli.command {
++            Command::Run => return crate::lifecycle::worker(&config, None).await.map(|()| ExitCode::SUCCESS),
++            Command::Worker { fingerprint } => {
++                return match crate::lifecycle::worker(&config, Some(&fingerprint)).await {
++                    Err(error) if matches!(error.downcast_ref::<crate::server::StartError>(), Some(crate::server::StartError::Bind(e)) if e.kind() == std::io::ErrorKind::AddrInUse) => Ok(ExitCode::from(crate::lifecycle::WORKER_PORT_IN_USE_EXIT)),
++                    result => result.map(|()| ExitCode::SUCCESS),
++                };
++            }
++            Command::On => crate::lifecycle::on(&config).await,
++            Command::Off => crate::lifecycle::off(&config).await,
++            Command::Restart => {
++                println!("Restart cancels queued requests and drains active requests for up to 10 seconds before applying the saved configuration.");
++                crate::lifecycle::restart(&config).await
++            }
++            Command::Status { .. } => crate::lifecycle::status(&config).await,
++            Command::Doctor { .. } => unreachable!(),
++        };
++        let value = match result {
++            Ok(value) => value,
++            Err(error) => {
++                if json { println!("{}", serde_json::json!({"state":"failed", "error":error.to_string(), "autostart":"not_implemented", "clients":"not_implemented"})); }
++                return Err(error);
++            }
++        };
++        if json { println!("{value}"); } else { display(&value, off); }
++        Ok(ExitCode::SUCCESS)
++    })
+ }
++
++fn display(value: &serde_json::Value, off: bool) {
++    println!("gateway: {}", value["state"].as_str().unwrap_or("unknown"));
++    if let Some(identity) = value.get("identity") {
++        println!(
++            "address: {}; fingerprint: {}",
++            identity["address"], identity["fingerprint"]
++        );
++    }
++    if value["pending_restart"] == true {
++        println!("pending_restart=true: run restart to apply the saved configuration");
++    }
++    if let Some(admission) = value.pointer("/runtime/admission") {
++        println!(
++            "quota startup hold: {} ms; shared cooldown: {} ms; queued: {}; active: {}",
++            admission["startup_hold_ms"],
++            admission["shared_cooldown_ms"],
++            admission["queue_length"],
++            admission["active"]
++        );
++    }
++    if off {
++        println!(
++            "Client URLs and next-login settings are preserved; use on to reconnect. Autostart and client adapters: not implemented; existing external settings: unknown."
++        );
++    }
++}
+--- baseline/product/src/config.rs
++++ head/product/src/config.rs
+@@ -133,11 +133,16 @@
+ }
+ 
+ impl StatePaths {
+-    fn from_config_path(config_path: &Path) -> Result<Self, ConfigError> {
++    /// The caller must provide the canonical path, independently of current TOML validity.
++    pub fn path_hash(canonical_path: &Path) -> String {
++        ConfigFingerprint::from_bytes(canonical_path.as_os_str().as_encoded_bytes()).0
++    }
++
++    pub fn from_config_path(config_path: &Path) -> Result<Self, ConfigError> {
+         let parent = config_path.parent().ok_or_else(|| {
+             ConfigError::Validation("config path must have a parent directory".to_owned())
+         })?;
+-        let directory = parent.join(".llmgw");
++        let directory = parent.join(format!(".llmgw-{}", Self::path_hash(config_path)));
+         Ok(Self {
+             data_token: directory.join("data-token"),
+             control_token: directory.join("control-token"),
+@@ -151,7 +156,7 @@
+ pub struct ConfigFingerprint(String);
+ 
+ impl ConfigFingerprint {
+-    fn from_bytes(bytes: &[u8]) -> Self {
++    pub fn from_bytes(bytes: &[u8]) -> Self {
+         let digest = Sha256::digest(bytes);
+         let mut encoded = String::with_capacity(digest.len() * 2);
+         for byte in digest {
+--- baseline/product/src/control.rs
++++ head/product/src/control.rs
+@@ -11,6 +11,7 @@
+     path: &str,
+     headers: &HeaderMap,
+     authenticated: bool,
++    instance_nonce: Option<&str>,
+     status_json: impl FnOnce() -> Vec<u8>,
+     stop: &watch::Sender<bool>,
+ ) -> Response<Body> {
+@@ -20,8 +21,21 @@
+     if !authenticated {
+         return protocol::error(StatusCode::UNAUTHORIZED, "invalid_control_token");
+     }
++    // An owned CLI's conditional stop cannot cross a worker restart between
++    // health and stop. Token-only manual control remains a deliberate API.
++    if path == "/_llmgw/stop" && headers.contains_key("x-llmgw-instance-nonce") {
++        let mut nonces = headers.get_all("x-llmgw-instance-nonce").iter();
++        if !instance_nonce.is_some_and(|expected| {
++            nonces
++                .next()
++                .is_some_and(|value| value.as_bytes() == expected.as_bytes())
++        }) || nonces.next().is_some()
++        {
++            return protocol::error(StatusCode::CONFLICT, "instance_changed");
++        }
++    }
+     match (method, path) {
+-        (&Method::GET, "/_llmgw/health") => json(StatusCode::OK, br#"{"status":"ok"}"#.to_vec()),
++        (&Method::GET, "/_llmgw/health") => json(StatusCode::OK, status_json()),
+         (&Method::GET, "/_llmgw/status") => json(StatusCode::OK, status_json()),
+         (&Method::POST, "/_llmgw/stop") => {
+             let _ = stop.send(true);
+--- baseline/product/src/lib.rs
++++ head/product/src/lib.rs
+@@ -2,6 +2,7 @@
+ pub mod cli;
+ pub mod config;
+ mod control;
++pub mod lifecycle;
+ mod metrics;
+ mod protocol;
+ pub mod server;
+--- baseline/product/src/lifecycle/identity.rs
++++ head/product/src/lifecycle/identity.rs
+@@ -0,0 +1,111 @@
++use super::platform;
++use crate::config::StatePaths;
++use serde::{Deserialize, Serialize};
++use std::{
++    fs,
++    io::{self, Read, Write},
++    net::SocketAddr,
++    path::{Path, PathBuf},
++    time::{SystemTime, UNIX_EPOCH},
++};
++#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
++#[serde(deny_unknown_fields)]
++pub struct Identity {
++    pub path_hash: String,
++    pub fingerprint: String,
++    pub nonce: String,
++    pub started_unix_ms: u64,
++    pub address: SocketAddr,
++    pub pid: u32,
++}
++impl Identity {
++    pub fn new(path: &Path, fingerprint: String, address: SocketAddr) -> Self {
++        Self {
++            path_hash: StatePaths::path_hash(path),
++            fingerprint,
++            nonce: random_token(),
++            started_unix_ms: SystemTime::now()
++                .duration_since(UNIX_EPOCH)
++                .unwrap_or_default()
++                .as_millis()
++                .min(u128::from(u64::MAX)) as u64,
++            address,
++            pid: std::process::id(),
++        }
++    }
++    pub fn valid_for(&self, path: &Path) -> bool {
++        self.path_hash == StatePaths::path_hash(path)
++            && self.address.ip().is_loopback()
++            && self.address.port() != 0
++            && self.nonce.len() == 64
++            && self.fingerprint.len() == 64
++    }
++}
++#[derive(Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++pub struct Record {
++    pub identity: Identity,
++    pub state: String,
++}
++pub fn canonical(path: &Path) -> io::Result<(PathBuf, StatePaths)> {
++    let path = fs::canonicalize(path)?;
++    let paths = StatePaths::from_config_path(&path).map_err(io::Error::other)?;
++    Ok((path, paths))
++}
++pub fn random_token() -> String {
++    use std::fmt::Write;
++    let mut s = String::with_capacity(64);
++    for byte in rand::random::<[u8; 32]>() {
++        write!(s, "{byte:02x}").expect("String");
++    }
++    s
++}
++pub fn provision_tokens(paths: &StatePaths) -> io::Result<()> {
++    for path in [&paths.data_token, &paths.control_token] {
++        match platform::open(path, false, true) {
++            Ok(mut file) => {
++                file.write_all(random_token().as_bytes())?;
++                file.sync_all()?;
++            }
++            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => {
++                platform::read(path)?;
++            }
++            Err(e) => return Err(e),
++        }
++    }
++    Ok(())
++}
++pub fn read_record(paths: &StatePaths) -> io::Result<Record> {
++    let mut bytes = Vec::new();
++    platform::open(&paths.runtime_state, false, false)?
++        .take(8193)
++        .read_to_end(&mut bytes)?;
++    if bytes.len() > 8192 {
++        return Err(io::Error::other("runtime record too large"));
++    }
++    serde_json::from_slice(&bytes).map_err(|_| io::Error::other("invalid runtime record"))
++}
++pub fn write_record(paths: &StatePaths, record: &Record) -> io::Result<()> {
++    // Existing state is never silently replaced to repair its permissions.
++    match std::fs::symlink_metadata(&paths.runtime_state) {
++        Ok(_) => {
++            platform::read(&paths.runtime_state)?;
++        }
++        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
++        Err(error) => return Err(error),
++    }
++    // One worker owns writes under its lifetime lock; a fresh file avoids partial-reader JSON.
++    let temp = paths
++        .directory
++        .join(format!("runtime-{}.tmp", record.identity.nonce));
++    let result = (|| {
++        let mut file = platform::open(&temp, false, true)?;
++        serde_json::to_writer(&mut file, record)?;
++        file.sync_all()?;
++        fs::rename(&temp, &paths.runtime_state)
++    })(); // destination is never read or followed
++    if result.is_err() {
++        let _ = fs::remove_file(temp);
++    }
++    result
++}
+--- baseline/product/src/lifecycle/mod.rs
++++ head/product/src/lifecycle/mod.rs
+@@ -0,0 +1,267 @@
++//! Native one-shot commands and one owned server. No PID-based signal or watchdog.
++pub mod identity;
++pub(crate) mod platform;
++mod process;
++use crate::{
++    config::{ConfigFingerprint, LoadedConfig, StatePaths},
++    server::{self, RuntimeCredentials},
++};
++use identity::{Identity, Record};
++use process::Lock;
++use serde_json::{Value, json};
++use std::{
++    io::{self, Write},
++    path::Path,
++    time::Duration,
++};
++pub type Error = Box<dyn std::error::Error>;
++// Internal child outcome only; public commands continue to report failure as 1.
++pub(crate) const WORKER_PORT_IN_USE_EXIT: u8 = 10;
++const READY: Duration = Duration::from_secs(5);
++const STOP: Duration = Duration::from_secs(12);
++fn failure(reason: &'static str) -> Error {
++    io::Error::other(reason).into()
++}
++fn client() -> Result<reqwest::Client, Error> {
++    Ok(reqwest::Client::builder()
++        .no_proxy()
++        .redirect(reqwest::redirect::Policy::none())
++        .retry(reqwest::retry::never())
++        .connect_timeout(Duration::from_millis(300))
++        .timeout(Duration::from_millis(500))
++        .build()?)
++}
++async fn handshake(paths: &StatePaths, id: &Identity, stop: bool) -> Result<Value, Error> {
++    let token = server::read_secret_file(&paths.control_token)?;
++    let client = client()?;
++    let endpoint = if stop { "stop" } else { "health" };
++    let request = if stop {
++        client.post(format!("http://{}/_llmgw/{endpoint}", id.address))
++    } else {
++        client.get(format!("http://{}/_llmgw/{endpoint}", id.address))
++    };
++    let request = if stop {
++        request.header("x-llmgw-instance-nonce", &id.nonce)
++    } else {
++        request
++    };
++    let mut response = request
++        .header(crate::control::CONTROL_TOKEN_HEADER, token)
++        .send()
++        .await
++        .map_err(|_| failure("control_unreachable"))?;
++    if !response.status().is_success() {
++        return Err(failure("control_authentication_failed"));
++    }
++    let mut bytes = Vec::new();
++    while let Some(chunk) = response
++        .chunk()
++        .await
++        .map_err(|_| failure("control_read_failed"))?
++    {
++        if bytes.len() + chunk.len() > 65536 {
++            return Err(failure("control_response_too_large"));
++        }
++        bytes.extend_from_slice(&chunk);
++    }
++    let value: Value =
++        serde_json::from_slice(&bytes).map_err(|_| failure("invalid_control_response"))?;
++    if !stop {
++        let received: Identity = serde_json::from_value(value["identity"].clone())
++            .map_err(|_| failure("identity_unknown"))?;
++        if &received != id {
++            return Err(failure("identity_mismatch"));
++        }
++    }
++    Ok(value)
++}
++fn stopped(paths: &StatePaths) -> Value {
++    let record = identity::read_record(paths).ok();
++    let stale = paths.runtime_state.exists()
++        && record
++            .as_ref()
++            .is_none_or(|record| record.state != "stopped");
++    json!({"state":"stopped","pending_restart":false,"stale_runtime":stale,"last_worker_state":record.map(|record|record.state),"state_directory":paths.directory,"autostart":"not_implemented","clients":"not_implemented"})
++}
++pub async fn status(path: &Path) -> Result<Value, Error> {
++    let (path, paths) = identity::canonical(path)?;
++    if !paths.directory.try_exists()? {
++        return Ok(stopped(&paths));
++    }
++    platform::directory(&paths.directory)?;
++    if Lock::attempt(&paths, "worker.lock")?.is_some() {
++        return Ok(stopped(&paths));
++    }
++    let record = identity::read_record(&paths)
++        .map_err(|_| failure("failed: worker lock held; identity unknown"))?;
++    if !record.identity.valid_for(&path) {
++        return Err(failure("failed: worker identity invalid"));
++    }
++    let runtime = handshake(&paths, &record.identity, false).await?;
++    let current = std::fs::read(&path)
++        .ok()
++        .map(|b| ConfigFingerprint::from_bytes(&b));
++    Ok(
++        json!({"state":runtime["state"],"identity":record.identity,"pending_restart":current.as_ref().is_none_or(|fp|fp.as_str()!=record.identity.fingerprint),"runtime":runtime,"state_directory":paths.directory,"autostart":"not_implemented","clients":"not_implemented"}),
++    )
++}
++pub async fn on(path: &Path) -> Result<Value, Error> {
++    let (path, paths) = identity::canonical(path)?;
++    platform::directory(&paths.directory)?;
++    let _operation = Lock::operation(&paths).await?;
++    // A running worker owns its immutable config even if the saved edit cannot parse.
++    let current = status(&path).await?;
++    if current["state"] != "stopped" {
++        if current["pending_restart"] == true {
++            return Err(failure("restart_required"));
++        }
++        return Ok(current);
++    }
++    start(LoadedConfig::load(&path)?).await
++}
++async fn start(loaded: LoadedConfig) -> Result<Value, Error> {
++    let paths = &loaded.state_paths;
++    if Lock::attempt(paths, "worker.lock")?.is_none() {
++        let status = status(&loaded.source_path).await?;
++        if status["pending_restart"] == true {
++            return Err(failure("restart_required"));
++        }
++        return Ok(status);
++    }
++    // Validate credentials before launch and before restart can disrupt a healthy worker.
++    identity::provision_tokens(paths)?;
++    RuntimeCredentials::load(&loaded)?;
++    let mut child = process::spawn(&loaded.source_path, loaded.fingerprint.as_str())?;
++    let deadline = tokio::time::Instant::now() + READY;
++    loop {
++        if let Some(exit) = child.try_wait()? {
++            if !exit.success() {
++                return Err(failure(
++                    if exit.code() == Some(i32::from(WORKER_PORT_IN_USE_EXIT)) {
++                        "port_in_use"
++                    } else {
++                        "worker_start_failed"
++                    },
++                ));
++            }
++        }
++        if let Ok(Ok(status)) = tokio::time::timeout_at(deadline, status(&loaded.source_path)).await
++        {
++            if status["state"] == "running" {
++                if status["identity"]["fingerprint"] != loaded.fingerprint.as_str() {
++                    return Err(failure("restart_required"));
++                }
++                return Ok(status);
++            }
++        }
++        if tokio::time::Instant::now() >= deadline {
++            return Err(failure(
++                "readiness_timeout: state unknown; no process was killed",
++            ));
++        }
++        tokio::time::sleep(Duration::from_millis(25)).await;
++    }
++}
++pub async fn off(path: &Path) -> Result<Value, Error> {
++    let (path, paths) = identity::canonical(path)?;
++    if !paths.directory.try_exists()? {
++        return Ok(stopped(&paths));
++    }
++    platform::directory(&paths.directory)?;
++    let _operation = Lock::operation(&paths).await?;
++    stop(&path, &paths).await
++}
++async fn stop(path: &Path, paths: &StatePaths) -> Result<Value, Error> {
++    if Lock::attempt(paths, "worker.lock")?.is_some() {
++        return Ok(stopped(paths));
++    }
++    let record = identity::read_record(paths)
++        .map_err(|_| failure("failed: worker lock held; identity unknown"))?;
++    if !record.identity.valid_for(path) {
++        return Err(failure("failed: worker identity invalid"));
++    }
++    let deadline = tokio::time::Instant::now() + STOP;
++    handshake(paths, &record.identity, false).await?;
++    handshake(paths, &record.identity, true).await?;
++    loop {
++        if let Some(_lock) = Lock::attempt(paths, "worker.lock")? {
++            return Ok(stopped(paths));
++        }
++        if tokio::time::Instant::now() >= deadline {
++            return Err(failure(
++                "stop_timeout: state unknown; no process was killed",
++            ));
++        }
++        tokio::time::sleep(Duration::from_millis(25)).await;
++    }
++}
++pub async fn restart(path: &Path) -> Result<Value, Error> {
++    let loaded = LoadedConfig::load(path)?;
++    platform::directory(&loaded.state_paths.directory)?;
++    let _operation = Lock::operation(&loaded.state_paths).await?;
++    identity::provision_tokens(&loaded.state_paths)?;
++    RuntimeCredentials::load(&loaded)?;
++    stop(&loaded.source_path, &loaded.state_paths).await?;
++    start(loaded).await
++}
++pub fn prepare_worker() -> Result<(), Error> {
++    Ok(platform::detach_session()?)
++}
++pub async fn worker(path: &Path, expected: Option<&str>) -> Result<(), Error> {
++    let loaded = LoadedConfig::load(path)?;
++    if expected.is_some_and(|fp| fp != loaded.fingerprint.as_str()) {
++        return Err(failure("configuration_changed_before_worker_start"));
++    }
++    let paths = loaded.state_paths.clone();
++    platform::directory(&paths.directory)?;
++    let _lock =
++        Lock::attempt(&paths, "worker.lock")?.ok_or_else(|| failure("worker_already_running"))?;
++    let mut log = platform::open(&paths.directory.join("worker.log"), true, false)?;
++    log.set_len(0)?;
++    log.write_all(b"starting\n")?;
++    let result = async {
++        identity::provision_tokens(&paths)?;
++        let mut credentials = RuntimeCredentials::load(&loaded)?;
++        credentials.identity = Some(Identity::new(
++            &loaded.source_path,
++            loaded.fingerprint.as_str().to_owned(),
++            loaded.config.listen,
++        ));
++        let gateway = server::spawn(loaded.config, credentials).await?;
++        let identity = gateway.identity().expect("owned identity").clone();
++        if let Err(error) = identity::write_record(
++            &paths,
++            &Record {
++                identity: identity.clone(),
++                state: "running".into(),
++            },
++        ) {
++            gateway.shutdown().await?;
++            return Err(Error::from(error));
++        }
++        let result = gateway.run_foreground().await;
++        identity::write_record(
++            &paths,
++            &Record {
++                identity,
++                state: if result.is_ok() { "stopped" } else { "failed" }.into(),
++            },
++        )?;
++        result.map_err(Error::from)
++    }
++    .await;
++    // One bounded sanitized event, never upstream errors, URLs or payloads.
++    use std::io::{Seek, SeekFrom};
++    log.set_len(0)?;
++    log.seek(SeekFrom::Start(0))?;
++    let message: &[u8] = match &result {
++        Ok(()) => b"stopped\n",
++        Err(error) if matches!(error.downcast_ref::<server::StartError>(), Some(server::StartError::Bind(e)) if e.kind() == io::ErrorKind::AddrInUse) => {
++            b"port_in_use\n"
++        }
++        Err(_) => b"worker_start_failed\n",
++    };
++    log.write_all(message)?;
++    log.sync_all()?;
++    result
++}
+--- baseline/product/src/lifecycle/platform/mod.rs
++++ head/product/src/lifecycle/platform/mod.rs
+@@ -0,0 +1,9 @@
++//! OS preparation and protected local storage. Unsupported protection fails closed.
++#[cfg(unix)]
++mod unix;
++#[cfg(unix)]
++pub use unix::*;
++#[cfg(not(unix))]
++mod windows;
++#[cfg(not(unix))]
++pub use windows::*;
+--- baseline/product/src/lifecycle/platform/unix.rs
++++ head/product/src/lifecycle/platform/unix.rs
+@@ -0,0 +1,85 @@
++use std::{
++    fs::{self, File, OpenOptions},
++    io,
++    os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt},
++    path::Path,
++    process::Command,
++};
++pub fn detach_session() -> io::Result<()> {
++    rustix::process::setsid().map(|_| ()).map_err(Into::into)
++}
++pub fn configure_detached(_command: &mut Command) {}
++fn validate(metadata: &fs::Metadata, directory: bool) -> io::Result<()> {
++    if metadata.uid() != rustix::process::geteuid().as_raw()
++        || metadata.mode() & 0o077 != 0
++        || (if directory {
++            !metadata.is_dir()
++        } else {
++            !metadata.is_file()
++        })
++    {
++        return Err(io::Error::new(
++            io::ErrorKind::PermissionDenied,
++            "state must be owned by this user, private, and not a link",
++        ));
++    }
++    Ok(())
++}
++pub fn directory(path: &Path) -> io::Result<()> {
++    match fs::DirBuilder::new().mode(0o700).create(path) {
++        Ok(()) => {}
++        Err(e) if e.kind() == io::ErrorKind::AlreadyExists => {}
++        Err(e) => return Err(e),
++    }
++    let metadata = fs::symlink_metadata(path)?;
++    validate(&metadata, true)?;
++    validate_acl(path, &metadata)
++}
++pub fn open(path: &Path, create: bool, exclusive: bool) -> io::Result<File> {
++    open_mode(path, create, exclusive, true)
++}
++pub fn read(path: &Path) -> io::Result<File> {
++    open_mode(path, false, false, false)
++}
++fn open_mode(path: &Path, create: bool, exclusive: bool, write: bool) -> io::Result<File> {
++    let mut options = OpenOptions::new();
++    options
++        .read(true)
++        .write(write)
++        .mode(0o600)
++        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK);
++    if exclusive {
++        options.create_new(true);
++    } else {
++        options.create(create);
++    }
++    let file = options.open(path)?;
++    let metadata = file.metadata()?;
++    validate(&metadata, false)?;
++    validate_acl(path, &metadata)?;
++    Ok(file)
++}
++
++fn validate_acl(path: &Path, opened: &fs::Metadata) -> io::Result<()> {
++    #[cfg(target_os = "macos")]
++    {
++        // macOS extended ACL grants are independent of mode bits. Reject the
++        // whole extended ACL (including inherited entries), never modify it.
++        // exacl uses acl_get_link_np here and cannot follow a substituted link.
++        let acl = exacl::getfacl(path, exacl::AclOption::SYMLINK_ACL).map_err(|_| {
++            io::Error::new(io::ErrorKind::PermissionDenied, "cannot validate state ACL")
++        })?;
++        let current = fs::symlink_metadata(path)?;
++        if !acl.is_empty() || current.dev() != opened.dev() || current.ino() != opened.ino() {
++            return Err(io::Error::new(
++                io::ErrorKind::PermissionDenied,
++                "state extended ACL or concurrent path change is not allowed",
++            ));
++        }
++    }
++    // Linux POSIX ACL group bits represent ACL_MASK: 0o077 == 0 denies all
++    // named users/groups and other access. Creation mode also masks defaults.
++    #[cfg(not(target_os = "macos"))]
++    let _ = (path, opened);
++    Ok(())
++}
+--- baseline/product/src/lifecycle/platform/windows.rs
++++ head/product/src/lifecycle/platform/windows.rs
+@@ -0,0 +1,366 @@
++//! The only unsafe module: Win32 has no complete maintained safe creation +
++//! handle ACL verification wrapper in our dependency set. Every returned File
++//! has been checked before any caller can write token bytes. Never edit an
++//! existing ACL. Runtime Windows acceptance is required beyond cross-checking.
++#![allow(unsafe_code)]
++use std::{
++    fs::File,
++    io,
++    mem::{size_of, zeroed},
++    os::windows::{
++        ffi::OsStrExt,
++        io::{AsRawHandle, FromRawHandle, OwnedHandle},
++    },
++    path::Path,
++    process::Command,
++    ptr::{null, null_mut},
++};
++use windows_sys::Win32::{
++    Foundation::*,
++    Security::{Authorization::*, *},
++    Storage::FileSystem::*,
++    System::Threading::*,
++};
++pub fn detach_session() -> io::Result<()> {
++    Ok(())
++}
++pub fn configure_detached(command: &mut Command) {
++    use std::os::windows::process::CommandExt;
++    command.creation_flags(0x8 | 0x200);
++}
++fn denied() -> io::Error {
++    io::Error::new(
++        io::ErrorKind::PermissionDenied,
++        "state must have a current-user-only ACL, owner, and no reparse points",
++    )
++}
++fn check(ok: i32) -> io::Result<()> {
++    if ok == 0 {
++        Err(io::Error::last_os_error())
++    } else {
++        Ok(())
++    }
++}
++fn wide(path: &Path) -> io::Result<Vec<u16>> {
++    let mut s: Vec<u16> = path.as_os_str().encode_wide().collect();
++    if s.contains(&0) {
++        return Err(io::Error::new(
++            io::ErrorKind::InvalidInput,
++            "NUL in state path",
++        ));
++    }
++    s.push(0);
++    Ok(s)
++}
++struct User {
++    buffer: Vec<usize>,
++}
++impl User {
++    fn current() -> io::Result<Self> {
++        let mut raw = null_mut();
++        // SAFETY: valid pseudo process handle, one initialized out-pointer. OwnedHandle
++        // takes the successfully returned token exactly once and closes on every exit.
++        unsafe {
++            check(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut raw))?;
++        }
++        let token = unsafe { OwnedHandle::from_raw_handle(raw) };
++        let mut needed = 0;
++        // SAFETY: the documented null-buffer sizing call writes only needed.
++        unsafe {
++            GetTokenInformation(token.as_raw_handle(), TokenUser, null_mut(), 0, &mut needed);
++        }
++        if !(size_of::<TOKEN_USER>() as u32..=65536).contains(&needed) {
++            return Err(denied());
++        }
++        let mut user = Self {
++            buffer: vec![0usize; (needed as usize).div_ceil(size_of::<usize>())],
++        };
++        let capacity = (user.buffer.len() * size_of::<usize>()) as u32;
++        // SAFETY: aligned owned allocation has capacity bytes, remains alive with the
++        // TOKEN_USER and its inline SID. The API returns a bounded length we recheck.
++        unsafe {
++            check(GetTokenInformation(
++                token.as_raw_handle(),
++                TokenUser,
++                user.buffer.as_mut_ptr().cast(),
++                capacity,
++                &mut needed,
++            ))?;
++        }
++        if needed > capacity || needed < (size_of::<TOKEN_USER>() as u32) {
++            return Err(denied());
++        }
++        let sid = user.sid();
++        let start = user.buffer.as_ptr() as usize;
++        let end = start + needed as usize;
++        if (sid as usize) < start || !sid_fits(sid, end) {
++            return Err(denied());
++        }
++        Ok(user)
++    }
++    fn sid(&self) -> PSID {
++        // SAFETY: construction initialized at least TOKEN_USER bytes in an aligned
++        // allocation; the returned pointer is borrowed only while self lives.
++        unsafe { (*(self.buffer.as_ptr().cast::<TOKEN_USER>())).User.Sid }
++    }
++}
++fn sid_fits(sid: PSID, end: usize) -> bool {
++    let start = sid as usize;
++    if sid.is_null() || start.checked_add(8).is_none_or(|n| n > end) {
++        return false;
++    }
++    // SAFETY: caller supplies an OS-returned pointer inside a live allocation;
++    // eight bytes fit. Check subauthority size before invoking SID validation.
++    unsafe {
++        let count = *(sid.cast::<u8>().add(1)) as usize;
++        count <= 15
++            && start.checked_add(8 + 4 * count).is_some_and(|n| n <= end)
++            && IsValidSid(sid) != 0
++    }
++}
++struct Descriptor(PSECURITY_DESCRIPTOR);
++impl Drop for Descriptor {
++    fn drop(&mut self) {
++        // SAFETY: GetSecurityInfo allocates this buffer with LocalAlloc; this owner
++        // alone frees it, after all borrowed owner/DACL/ACE pointers have been used.
++        unsafe {
++            LocalFree(self.0);
++        }
++    }
++}
++fn validate(file: &File, directory: bool, user: &User) -> io::Result<()> {
++    let handle = file.as_raw_handle();
++    // SAFETY: valid open handle, initialized output with its exact Win32 layout.
++    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { zeroed() };
++    unsafe {
++        check(GetFileInformationByHandle(handle, &mut info))?;
++    }
++    if info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT != 0
++        || (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0) != directory
++    {
++        return Err(denied());
++    }
++    // SAFETY: querying a live handle does not transfer ownership. Reject pipes,
++    // consoles and all non-disk objects before treating the object as state.
++    if unsafe { GetFileType(handle) } != FILE_TYPE_DISK {
++        return Err(denied());
++    }
++    let mut owner = null_mut();
++    let mut acl = null_mut();
++    let mut sd = null_mut();
++    // SAFETY: all out-pointers are initialized. The returned descriptor owns the
++    // owner and ACL pointers and is immediately placed under RAII on success.
++    let result = unsafe {
++        GetSecurityInfo(
++            handle,
++            SE_FILE_OBJECT,
++            OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION,
++            &mut owner,
++            null_mut(),
++            &mut acl,
++            null_mut(),
++            &mut sd,
++        )
++    };
++    if result != ERROR_SUCCESS {
++        return Err(io::Error::from_raw_os_error(result as i32));
++    }
++    let _descriptor = Descriptor(sd);
++    if sd.is_null() || owner.is_null() || acl.is_null() {
++        return Err(denied());
++    }
++    // SAFETY: Win32 returned these descriptor-owned pointers for this handle.
++    unsafe {
++        if IsValidSecurityDescriptor(sd) == 0
++            || IsValidSid(owner) == 0
++            || EqualSid(owner, user.sid()) == 0
++            || IsValidAcl(acl) == 0
++        {
++            return Err(denied());
++        }
++    }
++    let mut control = 0;
++    let mut revision = 0;
++    unsafe {
++        check(GetSecurityDescriptorControl(
++            sd,
++            &mut control,
++            &mut revision,
++        ))?;
++    }
++    // Protected DACLs cannot acquire additional inherited grants later.
++    if control & SE_DACL_PROTECTED == 0 {
++        return Err(denied());
++    }
++    let mut information: ACL_SIZE_INFORMATION = unsafe { zeroed() };
++    // SAFETY: live, validated ACL and correctly sized output storage.
++    unsafe {
++        check(GetAclInformation(
++            acl,
++            (&mut information as *mut ACL_SIZE_INFORMATION).cast(),
++            size_of::<ACL_SIZE_INFORMATION>() as u32,
++            AclSizeInformation,
++        ))?;
++    }
++    if information.AceCount == 0 || information.AclBytesInUse < size_of::<ACL>() as u32 {
++        return Err(denied());
++    }
++    let end = (acl as usize)
++        .checked_add(information.AclBytesInUse as usize)
++        .ok_or_else(denied)?;
++    for index in 0..information.AceCount {
++        let mut raw = null_mut();
++        // SAFETY: index is bounded by the validated ACL's reported entry count.
++        unsafe {
++            check(GetAce(acl, index, &mut raw))?;
++        }
++        let start = raw as usize;
++        if start < (acl as usize) + size_of::<ACL>()
++            || start
++                .checked_add(size_of::<ACCESS_ALLOWED_ACE>())
++                .is_none_or(|n| n > end)
++        {
++            return Err(denied());
++        }
++        // SAFETY: the ACE prefix fits inside the validated ACL. We accept only an
++        // ordinary allow ACE; extended/object/callback ACE forms fail closed.
++        let ace = unsafe { &*raw.cast::<ACCESS_ALLOWED_ACE>() };
++        let ace_end = start
++            .checked_add(ace.Header.AceSize as usize)
++            .ok_or_else(denied)?;
++        if ace.Header.AceType != 0 || ace_end > end || ace.Header.AceSize < 16 {
++            return Err(denied());
++        }
++        let sid = (&ace.SidStart as *const u32).cast_mut().cast();
++        if !sid_fits(sid, ace_end) {
++            return Err(denied());
++        }
++        // SAFETY: both SIDs passed size/validity checks and remain borrowed from their
++        // respective owned allocations. Any grant to a different SID is rejected.
++        if unsafe { EqualSid(sid, user.sid()) } == 0 {
++            return Err(denied());
++        }
++    }
++    Ok(())
++}
++fn with_attributes<T>(
++    user: &User,
++    f: impl FnOnce(&SECURITY_ATTRIBUTES) -> io::Result<T>,
++) -> io::Result<T> {
++    // Fixed 256-byte ACL storage is aligned for ACL/u32. A single maximum-length
++    // Windows SID and ordinary ACE fit; AddAccessAllowedAce also checks capacity.
++    let mut acl_storage = [0u32; 64];
++    let acl = acl_storage.as_mut_ptr().cast::<ACL>();
++    let mut sd: SECURITY_DESCRIPTOR = unsafe { zeroed() };
++    // SAFETY: stack allocations have correct layouts, alignment and lifetimes.
++    // The descriptor borrows ACL and SID only until f returns. No inheritable
++    // handle or inheritable ACE is created, and no caller retains these pointers.
++    unsafe {
++        check(InitializeAcl(
++            acl,
++            size_of_val(&acl_storage) as u32,
++            ACL_REVISION,
++        ))?;
++        check(AddAccessAllowedAce(
++            acl,
++            ACL_REVISION,
++            FILE_ALL_ACCESS,
++            user.sid(),
++        ))?;
++        check(InitializeSecurityDescriptor(
++            (&mut sd as *mut SECURITY_DESCRIPTOR).cast(),
++            1,
++        ))?;
++        check(SetSecurityDescriptorOwner(
++            (&mut sd as *mut SECURITY_DESCRIPTOR).cast(),
++            user.sid(),
++            0,
++        ))?;
++        check(SetSecurityDescriptorDacl(
++            (&mut sd as *mut SECURITY_DESCRIPTOR).cast(),
++            1,
++            acl,
++            0,
++        ))?;
++        check(SetSecurityDescriptorControl(
++            (&mut sd as *mut SECURITY_DESCRIPTOR).cast(),
++            SE_DACL_PROTECTED,
++            SE_DACL_PROTECTED,
++        ))?;
++    }
++    let attributes = SECURITY_ATTRIBUTES {
++        nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
++        lpSecurityDescriptor: (&mut sd as *mut SECURITY_DESCRIPTOR).cast(),
++        bInheritHandle: 0,
++    };
++    f(&attributes)
++}
++fn open_handle(
++    path: &[u16],
++    attributes: Option<&SECURITY_ATTRIBUTES>,
++    disposition: u32,
++    directory: bool,
++    write: bool,
++) -> io::Result<File> {
++    // SAFETY: NUL-terminated borrowed UTF-16, optional descriptor lives throughout
++    // call, no template handle. On success File receives sole handle ownership.
++    let handle = unsafe {
++        CreateFileW(
++            path.as_ptr(),
++            if directory {
++                READ_CONTROL | FILE_READ_ATTRIBUTES
++            } else {
++                GENERIC_READ | (if write { GENERIC_WRITE } else { 0 }) | READ_CONTROL
++            },
++            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
++            attributes.map_or(null(), |a| a),
++            disposition,
++            FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS,
++            null_mut(),
++        )
++    };
++    if handle == INVALID_HANDLE_VALUE {
++        return Err(io::Error::last_os_error());
++    }
++    Ok(unsafe { File::from_raw_handle(handle) })
++}
++pub fn directory(path: &Path) -> io::Result<()> {
++    let path = wide(path)?;
++    let user = User::current()?;
++    with_attributes(&user, |attributes| {
++        // SAFETY: path and creation descriptor remain valid through the call. ACL is
++        // applied at creation, then independently checked BEFORE any token is stored.
++        if unsafe { CreateDirectoryW(path.as_ptr(), attributes) } == 0 {
++            let error = io::Error::last_os_error();
++            if error.raw_os_error() != Some(ERROR_ALREADY_EXISTS as i32) {
++                return Err(error);
++            }
++        }
++        let file = open_handle(&path, None, OPEN_EXISTING, true, false)?;
++        validate(&file, true, &user)
++    })
++}
++pub fn open(path: &Path, create: bool, exclusive: bool) -> io::Result<File> {
++    let path = wide(path)?;
++    let user = User::current()?;
++    with_attributes(&user, |attributes| {
++        let disposition = if exclusive {
++            CREATE_NEW
++        } else if create {
++            OPEN_ALWAYS
++        } else {
++            OPEN_EXISTING
++        };
++        let file = open_handle(&path, Some(attributes), disposition, false, true)?;
++        validate(&file, false, &user)?;
++        Ok(file)
++    })
++}
++
++pub fn read(path: &Path) -> io::Result<File> {
++    let path = wide(path)?;
++    let user = User::current()?;
++    let file = open_handle(&path, None, OPEN_EXISTING, false, false)?;
++    validate(&file, false, &user)?;
++    Ok(file)
++}
+--- baseline/product/src/lifecycle/process.rs
++++ head/product/src/lifecycle/process.rs
+@@ -0,0 +1,50 @@
++use super::platform;
++use crate::config::StatePaths;
++use fs4::FileExt;
++use std::{
++    fs::File,
++    io,
++    path::Path,
++    process::{Child, Command, Stdio},
++    time::Duration,
++};
++/// Stable file object: never unlink a lock path, including on normal shutdown.
++pub struct Lock {
++    _file: File,
++}
++impl Lock {
++    pub fn attempt(paths: &StatePaths, name: &str) -> io::Result<Option<Self>> {
++        let file = platform::open(&paths.directory.join(name), true, false)?;
++        match FileExt::try_lock(&file) {
++            Ok(()) => Ok(Some(Self { _file: file })),
++            Err(fs4::TryLockError::WouldBlock) => Ok(None),
++            Err(fs4::TryLockError::Error(e)) => Err(e),
++        }
++    }
++    pub async fn operation(paths: &StatePaths) -> io::Result<Self> {
++        let deadline = tokio::time::Instant::now() + Duration::from_secs(17);
++        loop {
++            if let Some(lock) = Self::attempt(paths, "operation.lock")? {
++                return Ok(lock);
++            }
++            if tokio::time::Instant::now() >= deadline {
++                return Err(io::Error::other("lifecycle_busy"));
++            }
++            tokio::time::sleep(Duration::from_millis(25)).await;
++        }
++    }
++}
++pub fn spawn(config: &Path, fingerprint: &str) -> io::Result<Child> {
++    let mut command = Command::new(std::env::current_exe()?);
++    command
++        .arg("--config")
++        .arg(config)
++        .arg("worker")
++        .arg("--fingerprint")
++        .arg(fingerprint)
++        .stdin(Stdio::null())
++        .stdout(Stdio::null())
++        .stderr(Stdio::null());
++    platform::configure_detached(&mut command);
++    command.spawn()
++}
+--- baseline/product/src/main.rs
++++ head/product/src/main.rs
+@@ -1,9 +1,7 @@
+ use std::process::ExitCode;
+-
+-#[tokio::main]
+-async fn main() -> ExitCode {
+-    match llmgw::cli::run().await {
+-        Ok(()) => ExitCode::SUCCESS,
++fn main() -> ExitCode {
++    match llmgw::cli::run() {
++        Ok(code) => code,
+         Err(error) => {
+             eprintln!("error: {error}");
+             ExitCode::FAILURE
+--- baseline/product/src/server.rs
++++ head/product/src/server.rs
+@@ -1,6 +1,6 @@
+ use std::convert::Infallible;
+ use std::fmt;
+-use std::fs::{self, File, OpenOptions};
++use std::fs::{self, File};
+ use std::future::Future;
+ use std::io::{self, Read};
+ use std::net::SocketAddr;
+@@ -89,6 +89,7 @@
+     data_token: Secret,
+     control_token: Secret,
+     upstream_token: Option<Secret>,
++    pub(crate) identity: Option<crate::lifecycle::identity::Identity>,
+ }
+ 
+ impl RuntimeCredentials {
+@@ -109,6 +110,7 @@
+             data_token,
+             control_token,
+             upstream_token,
++            identity: None,
+         })
+     }
+ 
+@@ -141,6 +143,7 @@
+ }
+ 
+ pub struct GatewayHandle {
++    identity: Option<crate::lifecycle::identity::Identity>,
+     address: SocketAddr,
+     stop: watch::Sender<bool>,
+     task: Option<JoinHandle<Result<(), StartError>>>,
+@@ -149,6 +152,10 @@
+ }
+ 
+ impl GatewayHandle {
++    pub(crate) fn identity(&self) -> Option<&crate::lifecycle::identity::Identity> {
++        self.identity.as_ref()
++    }
++
+     pub fn address(&self) -> SocketAddr {
+         self.address
+     }
+@@ -165,7 +172,7 @@
+                 self.task = None;
+                 flatten_join(joined)
+             }
+-            signal = tokio::signal::ctrl_c() => {
++            signal = shutdown_signal() => {
+                 signal.map_err(StartError::Signal)?;
+                 let _ = self.stop.send(true);
+                 self.join().await
+@@ -327,6 +334,11 @@
+         .await
+         .map_err(StartError::Bind)?;
+     let address = listener.local_addr().map_err(StartError::Bind)?;
++    let mut credentials = credentials;
++    if let Some(identity) = &mut credentials.identity {
++        identity.address = address;
++    }
++    let handle_identity = credentials.identity.clone();
+     let upstream = UpstreamClient::new(limits.request).map_err(StartError::HttpClient)?;
+     let (stop, stop_rx) = watch::channel(false);
+     let (worker_sender, worker_receiver) = mpsc::channel(16);
+@@ -367,6 +379,7 @@
+         force_workers,
+     ));
+     Ok(GatewayHandle {
++        identity: handle_identity,
+         address,
+         stop,
+         task: Some(task),
+@@ -497,17 +510,50 @@
+             }
+         }
+     }
++    // Keep authenticated control available during the bounded drain. New data
++    // requests are rejected by handle_request; these short connections do not
++    // extend the drain deadline or hold application worker resources.
++    let mut controls = JoinSet::new();
++    let mut supervisor_done = false;
++    let drained = tokio::time::timeout(state.limits.shutdown, async {
++        loop {
++            if tasks.is_empty() && supervisor_done { break; }
++            tokio::select! {
++                _ = tasks.join_next(), if !tasks.is_empty() => {},
++                _ = &mut worker_supervisor, if !supervisor_done => { supervisor_done = true; },
++                _ = controls.join_next(), if !controls.is_empty() => {},
++                accepted = listener.accept() => {
++                    let Ok((socket, _)) = accepted else { break; };
++                    let Ok(permit) = connections.clone().try_acquire_owned() else { continue; };
++                    let state = state.clone();
++                    controls.spawn(async move {
++                        let _permit = permit;
++                        let (_disconnect, disconnect_rx) = watch::channel(false);
++                        let service = service_fn(move |request| handle(request, state.clone(), disconnect_rx.clone()));
++                        let mut builder = http1::Builder::new();
++                        builder
++                            .keep_alive(false)
++                            .half_close(true)
++                            .timer(TokioTimer::new())
++                            .header_read_timeout(HEADER_TIMEOUT)
++                            .max_buf_size(HEADER_BYTES)
++                            .max_headers(128);
++                        let _ = builder.serve_connection(TokioIo::new(socket), service).await;
++                    });
++                }
++            }
++        }
++    }).await;
+     drop(listener);
+-    let drained = tokio::time::timeout(state.limits.shutdown, async {
+-        while tasks.join_next().await.is_some() {}
+-        let _ = (&mut worker_supervisor).await;
+-    })
+-    .await;
++    controls.abort_all();
++    while controls.join_next().await.is_some() {}
+     if drained.is_err() {
+         tasks.abort_all();
+         while tasks.join_next().await.is_some() {}
+         let _ = force_workers.send(());
+-        let _ = worker_supervisor.await;
++        if !supervisor_done {
++            let _ = worker_supervisor.await;
++        }
+     }
+     Ok(())
+ }
+@@ -598,9 +644,6 @@
+     state: &AppState,
+     mut downstream_disconnect: watch::Receiver<bool>,
+ ) -> Response<Body> {
+-    if *state.stop.borrow() {
+-        return protocol::error(StatusCode::SERVICE_UNAVAILABLE, "gateway_stopping");
+-    }
+     if headers::stored_size(request.headers()) > HEADER_BYTES {
+         return protocol::error(
+             StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE,
+@@ -617,13 +660,31 @@
+                 .credentials
+                 .control_token
+                 .matches_header(request.headers(), control::CONTROL_TOKEN_HEADER),
++            state
++                .credentials
++                .identity
++                .as_ref()
++                .map(|identity| identity.nonce.as_str()),
+             || {
+-                state
++                let mut bytes = state
+                     .metrics
+-                    .status_with_admission(&state.admission, state.bodies.stored_bytes())
++                    .status_with_admission(&state.admission, state.bodies.stored_bytes());
++                bytes.pop();
++                bytes.extend_from_slice(if *state.stop.borrow() {
++                    b",\"status\":\"ok\",\"state\":\"draining\",\"identity\":"
++                } else {
++                    b",\"status\":\"ok\",\"state\":\"running\",\"identity\":"
++                });
++                serde_json::to_writer(&mut bytes, &state.credentials.identity)
++                    .expect("bounded identity JSON");
++                bytes.push(b'}');
++                bytes
+             },
+             &state.stop,
+         );
++    }
++    if *state.stop.borrow() {
++        return protocol::error(StatusCode::SERVICE_UNAVAILABLE, "gateway_stopping");
+     }
+     let route = match protocol::route(&state.config, request.method(), path) {
+         Ok(route) => route,
+@@ -838,13 +899,26 @@
+     difference == 0
+ }
+ 
++async fn shutdown_signal() -> io::Result<()> {
++    #[cfg(unix)]
++    {
++        let mut terminate =
++            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
++        tokio::select! { signal = tokio::signal::ctrl_c() => signal, _ = terminate.recv() => Ok(()) }
++    }
++    #[cfg(not(unix))]
++    {
++        tokio::signal::ctrl_c().await
++    }
++}
++
+ fn flatten_join(
+     joined: Result<Result<(), StartError>, tokio::task::JoinError>,
+ ) -> Result<(), StartError> {
+     joined.map_err(|_| StartError::ServerTask)?
+ }
+ 
+-fn read_secret_file(path: &Path) -> Result<Vec<u8>, StartError> {
++pub(crate) fn read_secret_file(path: &Path) -> Result<Vec<u8>, StartError> {
+     let metadata = fs::symlink_metadata(path).map_err(|_| StartError::SecretFile {
+         path: path.to_owned(),
+         reason: "file is missing or unreadable",
+@@ -855,7 +929,6 @@
+             reason: "path must be a regular file and not a symbolic link",
+         });
+     }
+-    validate_unix_permissions(path, &metadata)?;
+     let mut file = open_secret(path)?;
+     let opened = file.metadata().map_err(|_| StartError::SecretFile {
+         path: path.to_owned(),
+@@ -867,7 +940,6 @@
+             reason: "opened path is not a regular file",
+         });
+     }
+-    validate_unix_permissions(path, &opened)?;
+     let mut value = Vec::new();
+     file.by_ref()
+         .take(MAX_SECRET_BYTES + 1)
+@@ -891,43 +963,9 @@
+     Ok(value)
+ }
+ 
+-#[cfg(unix)]
+ fn open_secret(path: &Path) -> Result<File, StartError> {
+-    use std::os::unix::fs::OpenOptionsExt;
+-    OpenOptions::new()
+-        .read(true)
+-        .custom_flags(libc::O_CLOEXEC | libc::O_NOFOLLOW)
+-        .open(path)
+-        .map_err(|_| StartError::SecretFile {
+-            path: path.to_owned(),
+-            reason: "cannot open file without following links",
+-        })
+-}
+-
+-#[cfg(not(unix))]
+-fn open_secret(path: &Path) -> Result<File, StartError> {
+-    OpenOptions::new()
+-        .read(true)
+-        .open(path)
+-        .map_err(|_| StartError::SecretFile {
+-            path: path.to_owned(),
+-            reason: "cannot open file",
+-        })
+-}
+-
+-#[cfg(unix)]
+-fn validate_unix_permissions(path: &Path, metadata: &fs::Metadata) -> Result<(), StartError> {
+-    use std::os::unix::fs::PermissionsExt;
+-    if metadata.permissions().mode() & 0o077 != 0 {
+-        return Err(StartError::SecretFile {
+-            path: path.to_owned(),
+-            reason: "Unix permissions must deny group and other access",
+-        });
+-    }
+-    Ok(())
+-}
+-
+-#[cfg(not(unix))]
+-fn validate_unix_permissions(_path: &Path, _metadata: &fs::Metadata) -> Result<(), StartError> {
+-    Ok(())
+-}
++    crate::lifecycle::platform::read(path).map_err(|_| StartError::SecretFile {
++        path: path.to_owned(),
++        reason: "cannot open a private, owned regular file without links",
++    })
++}
+--- baseline/product/tests/config_contract.rs
++++ head/product/tests/config_contract.rs
+@@ -370,7 +370,10 @@
+     let expected_state_dir = expected_path
+         .parent()
+         .expect("test config parent")
+-        .join(".llmgw");
++        .join(format!(
++            ".llmgw-{}",
++            llmgw::config::StatePaths::path_hash(&expected_path)
++        ));
+ 
+     assert_eq!(first.source_path, expected_path);
+     assert_eq!(first.state_paths.directory, expected_state_dir);
+@@ -397,6 +400,13 @@
+     fixture.rewrite(&format!("{VALID_CONFIG}\n# byte-level change\n"));
+     let second = LoadedConfig::load(fixture.path()).expect("second load");
+     assert_ne!(first.fingerprint, second.fingerprint);
++    assert_eq!(first.state_paths, second.state_paths);
++    let other = fixture.directory.join("other.toml");
++    fs::write(&other, VALID_CONFIG).unwrap();
++    assert_ne!(
++        first.state_paths,
++        LoadedConfig::load(other).unwrap().state_paths
++    );
+ }
+ 
+ #[test]
+--- baseline/product/tests/lifecycle_contract.rs
++++ head/product/tests/lifecycle_contract.rs
+@@ -0,0 +1,640 @@
++//! Native CLI contract: only synthetic loopback configs and owned children.
++use serde_json::Value;
++use std::{
++    fs,
++    net::TcpListener,
++    path::PathBuf,
++    process::{Command, Output},
++    sync::atomic::{AtomicU64, Ordering},
++};
++static NEXT: AtomicU64 = AtomicU64::new(0);
++struct Fixture {
++    dir: PathBuf,
++    config: PathBuf,
++    original: String,
++}
++impl Fixture {
++    fn new(port: u16) -> Self {
++        let dir = std::env::temp_dir().join(format!(
++            "llmgw-native-{}-{} 한글",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        fs::create_dir_all(&dir).unwrap();
++        let config = dir.join("gateway config.toml");
++        let original = format!(
++            r#"listen = "127.0.0.1:{port}"
++[upstream]
++api_base = "http://127.0.0.1:9/v1"
++[upstream.auth]
++mode = "none"
++[quota.rpm]
++kind = "unlimited"
++[quota.tpm]
++kind = "unknown"
++[[models]]
++id = "fixture"
++max_output_tokens = 32
++[[roots]]
++id = "fixture"
++endpoints = ["models", "chat/completions"]
++models = ["fixture"]
++"#
++        );
++        fs::write(&config, &original).unwrap();
++        Self {
++            dir,
++            config,
++            original,
++        }
++    }
++    fn command(&self, op: &str) -> Command {
++        let mut c = Command::new(env!("CARGO_BIN_EXE_llmgw"));
++        c.args([op, "--config"]).arg(&self.config);
++        c
++    }
++    fn call(&self, op: &str) -> Output {
++        self.command(op).output().unwrap()
++    }
++    fn ok(&self, op: &str) -> Value {
++        let out = self.command(op).arg("--json").output().unwrap();
++        assert!(
++            out.status.success(),
++            "{op} failed: {}",
++            String::from_utf8_lossy(&out.stderr)
++        );
++        serde_json::from_slice(&out.stdout).expect("machine status")
++    }
++}
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        let _ = fs::write(&self.config, &self.original);
++        let _ = self.call("off");
++        let _ = fs::remove_dir_all(&self.dir);
++    }
++}
++#[test]
++fn stopped_is_success_and_off_is_idempotent() {
++    let f = Fixture::new(0);
++    assert_eq!(f.ok("status")["state"], "stopped");
++    assert!(f.call("off").status.success());
++    assert!(f.call("off").status.success());
++}
++#[test]
++fn concurrent_on_has_one_identity() {
++    let f = Fixture::new(0);
++    let mut a = f
++        .command("on")
++        .stdout(std::process::Stdio::null())
++        .spawn()
++        .unwrap();
++    let mut b = f
++        .command("on")
++        .stdout(std::process::Stdio::null())
++        .spawn()
++        .unwrap();
++    let a = a.wait().unwrap();
++    let b = b.wait().unwrap();
++    assert!(a.success() && b.success(), "both on must succeed");
++    let first = f.ok("status");
++    assert_eq!(first["state"], "running");
++    assert!(f.call("on").status.success());
++    assert_eq!(
++        first["identity"]["nonce"],
++        f.ok("status")["identity"]["nonce"]
++    );
++    assert!(f.call("off").status.success());
++    assert_eq!(f.ok("status")["state"], "stopped");
++}
++#[test]
++fn occupied_port_does_not_stop_unrelated_listener() {
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    let f = Fixture::new(listener.local_addr().unwrap().port());
++    let out = f.call("on");
++    assert_eq!(out.status.code(), Some(1));
++    assert!(String::from_utf8_lossy(&out.stderr).contains("port_in_use"));
++    assert!(std::net::TcpStream::connect(listener.local_addr().unwrap()).is_ok());
++}
++#[test]
++fn changed_config_requires_restart_and_invalid_edit_can_stop_old_port() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let old = f.ok("status");
++    fs::write(&f.config, format!("{}\n# changed", f.original)).unwrap();
++    let out = f.call("on");
++    assert_eq!(out.status.code(), Some(1));
++    assert!(String::from_utf8_lossy(&out.stderr).contains("restart_required"));
++    assert_eq!(f.ok("status")["pending_restart"], true);
++    assert!(f.call("restart").status.success());
++    assert_ne!(
++        old["identity"]["nonce"],
++        f.ok("status")["identity"]["nonce"]
++    );
++    fs::write(&f.config, "invalid = [").unwrap();
++    assert!(!f.call("restart").status.success());
++    assert!(f.call("off").status.success());
++    assert_eq!(f.ok("status")["state"], "stopped");
++}
++#[test]
++fn malformed_running_config_requires_restart_without_replacing_worker() {
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    listener.set_nonblocking(true).unwrap();
++    let f = Fixture::new(0);
++    fs::write(
++        &f.config,
++        f.original
++            .replace("127.0.0.1:9", &listener.local_addr().unwrap().to_string()),
++    )
++    .unwrap();
++    assert!(f.call("on").status.success());
++    let old = f.ok("status");
++    fs::write(&f.config, "invalid = [").unwrap();
++    let result = f.call("on");
++    assert_eq!(result.status.code(), Some(1));
++    assert!(String::from_utf8_lossy(&result.stderr).contains("restart_required"));
++    assert!(!f.call("restart").status.success());
++    let current = f.ok("status");
++    assert_eq!(current["state"], "running");
++    assert_eq!(current["pending_restart"], true);
++    assert_eq!(current["identity"], old["identity"]);
++    assert_eq!(
++        listener.accept().unwrap_err().kind(),
++        std::io::ErrorKind::WouldBlock
++    );
++    assert!(f.call("off").status.success());
++}
++#[test]
++fn malformed_stopped_config_never_provisions_tokens() {
++    let f = Fixture::new(0);
++    let paths = llmgw::config::LoadedConfig::load(&f.config)
++        .unwrap()
++        .state_paths;
++    fs::write(&f.config, "invalid = [").unwrap();
++    for _ in 0..2 {
++        assert_eq!(f.call("on").status.code(), Some(1));
++        assert!(!paths.data_token.exists());
++        assert!(!paths.control_token.exists());
++        assert_eq!(f.ok("status")["state"], "stopped");
++    }
++}
++#[test]
++fn stale_pid_never_kills_an_unrelated_process() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let status = f.ok("status");
++    assert!(f.call("off").status.success());
++    let dir = PathBuf::from(status["state_directory"].as_str().unwrap());
++    // Rewrite the existing protected file; std::fs creation would inherit a
++    // Windows DACL and fail protection checks before reaching stale-PID behavior.
++    let runtime = dir.join("runtime.json");
++    let mut record: Value = serde_json::from_slice(&fs::read(&runtime).unwrap()).unwrap();
++    record["identity"]["pid"] = std::process::id().into();
++    record["state"] = "running".into();
++    fs::write(runtime, serde_json::to_vec(&record).unwrap()).unwrap();
++    assert!(f.call("off").status.success());
++    let stopped = f.ok("status");
++    assert_eq!(stopped["state"], "stopped");
++    assert_eq!(stopped["stale_runtime"], true);
++    assert!(f.call("on").status.success());
++}
++#[test]
++fn known_quota_is_ready_with_empty_queue_startup_hold() {
++    let f = Fixture::new(0);
++    fs::write(
++        &f.config,
++        f.original
++            .replace("kind = \"unlimited\"", "kind = \"known\"\nvalue = 60"),
++    )
++    .unwrap();
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    assert_eq!(s["state"], "running");
++    assert_eq!(s["runtime"]["admission"]["queue_length"], 0);
++    assert!(
++        s["runtime"]["admission"]["startup_hold_ms"]
++            .as_u64()
++            .unwrap()
++            > 0
++    );
++    assert_eq!(s["autostart"], "not_implemented");
++}
++#[test]
++fn same_directory_configs_have_independent_workers() {
++    let f = Fixture::new(0);
++    let other = f.dir.join("second.toml");
++    fs::write(&other, &f.original).unwrap();
++    assert!(f.call("on").status.success());
++    let mut command = Command::new(env!("CARGO_BIN_EXE_llmgw"));
++    let started = command
++        .args(["--config"])
++        .arg(&other)
++        .arg("on")
++        .output()
++        .unwrap();
++    let status = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .arg("--config")
++        .arg(&other)
++        .args(["status", "--json"])
++        .output()
++        .unwrap();
++    let stopped = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .arg("--config")
++        .arg(&other)
++        .arg("off")
++        .output()
++        .unwrap();
++    assert!(started.status.success() && status.status.success() && stopped.status.success());
++    let second: Value = serde_json::from_slice(&status.stdout).unwrap();
++    assert_ne!(
++        f.ok("status")["identity"]["path_hash"],
++        second["identity"]["path_hash"]
++    );
++    assert_eq!(f.ok("status")["state"], "running");
++}
++#[test]
++fn control_stop_rejects_a_previous_instance_nonce() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    let dir = PathBuf::from(s["state_directory"].as_str().unwrap());
++    let token = fs::read_to_string(dir.join("control-token")).unwrap();
++    let rt = tokio::runtime::Runtime::new().unwrap();
++    let code = rt.block_on(async {
++        reqwest::Client::builder()
++            .no_proxy()
++            .build()
++            .unwrap()
++            .post(format!(
++                "http://{}/_llmgw/stop",
++                s["identity"]["address"].as_str().unwrap()
++            ))
++            .header("x-llmgw-control-token", token)
++            .header("x-llmgw-instance-nonce", "previous-instance")
++            .send()
++            .await
++            .unwrap()
++            .status()
++    });
++    assert_eq!(code, 409);
++    assert_eq!(f.ok("status")["state"], "running");
++}
++#[test]
++fn edited_listen_port_off_reaches_recorded_address() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let old = f.ok("status")["identity"]["address"]
++        .as_str()
++        .unwrap()
++        .to_owned();
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    fs::write(
++        &f.config,
++        f.original
++            .replace("127.0.0.1:0", &listener.local_addr().unwrap().to_string()),
++    )
++    .unwrap();
++    assert!(f.call("off").status.success());
++    assert!(std::net::TcpStream::connect(old).is_err());
++    assert!(std::net::TcpStream::connect(listener.local_addr().unwrap()).is_ok());
++}
++#[test]
++fn loopback_control_ignores_proxy_environment() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let out = f
++        .command("status")
++        .env("ALL_PROXY", "http://127.0.0.1:9")
++        .env("HTTP_PROXY", "http://127.0.0.1:9")
++        .env("NO_PROXY", "")
++        .arg("--json")
++        .output()
++        .unwrap();
++    assert!(out.status.success());
++}
++#[cfg(unix)]
++#[test]
++fn weak_existing_state_permissions_are_rejected_without_chmod() {
++    use std::os::unix::fs::PermissionsExt;
++    let f = Fixture::new(0);
++    let loaded = llmgw::config::LoadedConfig::load(&f.config).unwrap();
++    fs::create_dir(&loaded.state_paths.directory).unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.directory,
++        fs::Permissions::from_mode(0o755),
++    )
++    .unwrap();
++    assert!(!f.call("on").status.success());
++    assert_eq!(
++        fs::metadata(&loaded.state_paths.directory)
++            .unwrap()
++            .permissions()
++            .mode()
++            & 0o777,
++        0o755
++    );
++}
++#[test]
++fn off_drains_a_live_request_closes_sockets_and_exposes_draining() {
++    use std::io::{Read, Write};
++    use std::time::{Duration, Instant};
++    let upstream = TcpListener::bind("127.0.0.1:0").unwrap();
++    upstream.set_nonblocking(true).unwrap();
++    let f = Fixture::new(0);
++    fs::write(
++        &f.config,
++        f.original
++            .replace("127.0.0.1:9", &upstream.local_addr().unwrap().to_string()),
++    )
++    .unwrap();
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    let dir = PathBuf::from(s["state_directory"].as_str().unwrap());
++    let token = fs::read_to_string(dir.join("data-token")).unwrap();
++    let mut downstream =
++        std::net::TcpStream::connect(s["identity"]["address"].as_str().unwrap()).unwrap();
++    downstream
++        .set_read_timeout(Some(Duration::from_secs(13)))
++        .unwrap();
++    write!(
++        downstream,
++        "GET /r/fixture/v1/models HTTP/1.1\r\nHost: localhost\r\nx-llmgw-token: {token}\r\n\r\n"
++    )
++    .unwrap();
++    let deadline = Instant::now() + Duration::from_secs(3);
++    let mut accepted = loop {
++        match upstream.accept() {
++            Ok((s, _)) => break s,
++            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
++                assert!(Instant::now() < deadline);
++                std::thread::sleep(Duration::from_millis(20));
++            }
++            Err(e) => panic!("{e}"),
++        }
++    };
++    accepted
++        .set_read_timeout(Some(Duration::from_secs(13)))
++        .unwrap();
++    let mut bytes = [0; 4096];
++    assert!(accepted.read(&mut bytes).unwrap() > 0);
++    accepted.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 10000\r\nContent-Type: application/json\r\n\r\nabc").unwrap();
++    assert!(downstream.read(&mut bytes).unwrap() > 0);
++    let before = Instant::now();
++    let mut off = f
++        .command("off")
++        .stdout(std::process::Stdio::null())
++        .spawn()
++        .unwrap();
++    std::thread::sleep(Duration::from_millis(300));
++    let during = f.command("status").arg("--json").output().unwrap();
++    let exit = off.wait().unwrap();
++    let elapsed = before.elapsed();
++    let upstream_closed = accepted.read(&mut bytes).map_or(true, |n| n == 0);
++    let downstream_closed = downstream.read(&mut bytes).map_or(true, |n| n == 0);
++    assert!(exit.success());
++    assert!(elapsed >= Duration::from_secs(9) && elapsed < Duration::from_secs(13));
++    assert!(upstream_closed && downstream_closed);
++    assert!(
++        during.status.success(),
++        "draining status must remain queryable: {}",
++        String::from_utf8_lossy(&during.stderr)
++    );
++    let status: Value = serde_json::from_slice(&during.stdout).unwrap();
++    assert_eq!(status["state"], "draining");
++    assert_eq!(f.ok("status")["state"], "stopped");
++    assert!(TcpListener::bind(s["identity"]["address"].as_str().unwrap()).is_ok());
++}
++#[test]
++fn held_lock_with_unknown_identity_is_failed_json_and_never_killed() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    let runtime = PathBuf::from(s["state_directory"].as_str().unwrap()).join("runtime.json");
++    let original = fs::read(&runtime).unwrap();
++    let mut record: Value = serde_json::from_slice(&original).unwrap();
++    record["identity"]["nonce"] = "0".repeat(64).into();
++    fs::write(&runtime, serde_json::to_vec(&record).unwrap()).unwrap();
++    let stop = f.call("off");
++    let status = f.command("status").arg("--json").output().unwrap();
++    fs::write(&runtime, original).unwrap();
++    assert_eq!(stop.status.code(), Some(1));
++    assert_eq!(f.ok("status")["identity"]["nonce"], s["identity"]["nonce"]);
++    assert_eq!(status.status.code(), Some(1));
++    let result: Value = serde_json::from_slice(&status.stdout).expect("failed status JSON");
++    assert_eq!(result["state"], "failed");
++}
++#[cfg(unix)]
++#[test]
++fn stale_record_of_owned_unrelated_child_preserves_child_and_lock_file() {
++    use std::os::unix::fs::MetadataExt;
++    struct ChildGuard(std::process::Child);
++    impl Drop for ChildGuard {
++        fn drop(&mut self) {
++            let _ = self.0.kill();
++            let _ = self.0.wait();
++        }
++    }
++    let mut child = ChildGuard(Command::new("/bin/sleep").arg("60").spawn().unwrap());
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    let dir = PathBuf::from(s["state_directory"].as_str().unwrap());
++    assert!(f.call("off").status.success());
++    let inode = fs::metadata(dir.join("worker.lock")).unwrap().ino();
++    fs::write(
++        dir.join("runtime.json"),
++        format!(r#"{{"pid":{},"state":"running"}}"#, child.0.id()),
++    )
++    .unwrap();
++    assert!(f.call("off").status.success());
++    assert!(child.0.try_wait().unwrap().is_none());
++    assert!(f.call("on").status.success());
++    assert_eq!(fs::metadata(dir.join("worker.lock")).unwrap().ino(), inode);
++    assert!(child.0.try_wait().unwrap().is_none());
++}
++#[test]
++fn empty_queue_reports_shared_cooldown_without_a_new_request() {
++    use std::io::{Read, Write};
++    use std::time::Duration;
++    let upstream = TcpListener::bind("127.0.0.1:0").unwrap();
++    let address = upstream.local_addr().unwrap();
++    let f = Fixture::new(0);
++    fs::write(
++        &f.config,
++        f.original.replace("127.0.0.1:9", &address.to_string()),
++    )
++    .unwrap();
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    let token = fs::read_to_string(
++        PathBuf::from(s["state_directory"].as_str().unwrap()).join("data-token"),
++    )
++    .unwrap();
++    let handle = std::thread::spawn(move || {
++        upstream.set_nonblocking(true).unwrap();
++        let deadline = std::time::Instant::now() + Duration::from_secs(3);
++        let mut socket = loop {
++            match upstream.accept() {
++                Ok((s, _)) => break s,
++                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
++                    assert!(std::time::Instant::now() < deadline);
++                    std::thread::sleep(Duration::from_millis(10));
++                }
++                Err(e) => panic!("{e}"),
++            }
++        };
++        socket
++            .set_read_timeout(Some(Duration::from_secs(3)))
++            .unwrap();
++        assert!(socket.read(&mut [0; 4096]).unwrap() > 0);
++        socket.write_all(b"HTTP/1.1 429 Too Many Requests\r\nRetry-After: 120\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}").unwrap();
++    });
++    let rt = tokio::runtime::Runtime::new().unwrap();
++    let code = rt.block_on(async {
++        let response = reqwest::Client::builder()
++            .no_proxy()
++            .build()
++            .unwrap()
++            .get(format!(
++                "http://{}/r/fixture/v1/models",
++                s["identity"]["address"].as_str().unwrap()
++            ))
++            .header("x-llmgw-token", token)
++            .timeout(Duration::from_secs(3))
++            .send()
++            .await
++            .unwrap();
++        let code = response.status();
++        response.bytes().await.unwrap();
++        code
++    });
++    handle.join().unwrap();
++    assert_eq!(code, 429);
++    let status = f.ok("status");
++    assert_eq!(status["runtime"]["admission"]["queue_length"], 0);
++    assert!(
++        status["runtime"]["admission"]["shared_cooldown_ms"]
++            .as_u64()
++            .unwrap()
++            > 110000
++    );
++}
++#[cfg(target_os = "macos")]
++#[test]
++fn mac_extended_acl_is_rejected_before_token_write() {
++    use std::os::unix::fs::PermissionsExt;
++    let f = Fixture::new(0);
++    let paths = llmgw::config::LoadedConfig::load(&f.config)
++        .unwrap()
++        .state_paths;
++    fs::create_dir(&paths.directory).unwrap();
++    fs::set_permissions(&paths.directory, fs::Permissions::from_mode(0o700)).unwrap();
++    assert!(
++        Command::new("/bin/chmod")
++            .args([
++                "+a",
++                "everyone allow read,write,file_inherit,directory_inherit"
++            ])
++            .arg(&paths.directory)
++            .status()
++            .unwrap()
++            .success()
++    );
++    let result = f.call("on");
++    assert!(
++        !result.status.success(),
++        "extended ACL must not be accepted as private"
++    );
++    assert!(
++        !paths.data_token.exists(),
++        "reject unsafe directory before writing a token"
++    );
++}
++#[cfg(target_os = "macos")]
++#[test]
++fn mac_existing_token_acl_is_rejected_and_preserved() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    assert!(f.call("off").status.success());
++    let token = PathBuf::from(s["state_directory"].as_str().unwrap()).join("data-token");
++    assert!(
++        Command::new("/bin/chmod")
++            .args(["+a", "everyone allow read"])
++            .arg(&token)
++            .status()
++            .unwrap()
++            .success()
++    );
++    let before = exacl::getfacl(&token, None).unwrap();
++    assert!(!f.call("on").status.success());
++    assert_eq!(exacl::getfacl(&token, None).unwrap(), before);
++}
++#[test]
++fn deleted_config_never_guesses_a_state_identity() {
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    fs::remove_file(&f.config).unwrap();
++    let out = f.call("off");
++    fs::write(&f.config, &f.original).unwrap();
++    assert!(!out.status.success());
++    assert_eq!(f.ok("status")["identity"]["nonce"], s["identity"]["nonce"]);
++}
++#[cfg(unix)]
++#[test]
++fn existing_read_only_private_tokens_need_no_permission_changes() {
++    use std::os::unix::fs::PermissionsExt;
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let s = f.ok("status");
++    assert!(f.call("off").status.success());
++    let token = PathBuf::from(s["state_directory"].as_str().unwrap()).join("data-token");
++    fs::set_permissions(&token, fs::Permissions::from_mode(0o400)).unwrap();
++    let result = f.call("on");
++    assert_eq!(
++        fs::metadata(&token).unwrap().permissions().mode() & 0o777,
++        0o400
++    );
++    assert!(
++        result.status.success(),
++        "existing private token should only be read"
++    );
++}
++#[test]
++fn stale_port_log_cannot_classify_a_new_config_failure() {
++    use fs4::FileExt;
++    let f = Fixture::new(0);
++    assert!(f.call("on").status.success());
++    let status = f.ok("status");
++    assert!(f.call("off").status.success());
++    let dir = PathBuf::from(status["state_directory"].as_str().unwrap());
++    fs::write(dir.join("worker.log"), b"port_in_use\n").unwrap();
++    let lock = fs::OpenOptions::new()
++        .read(true)
++        .write(true)
++        .open(dir.join("operation.lock"))
++        .unwrap();
++    FileExt::lock(&lock).unwrap();
++    let child = f
++        .command("on")
++        .stdout(std::process::Stdio::piped())
++        .stderr(std::process::Stdio::piped())
++        .spawn()
++        .unwrap();
++    // On now resolves the existing identity under the operation lock before
++    // parsing a stopped instance. This edit must fail validation, never reuse
++    // the previous worker's port-conflict diagnostic.
++    std::thread::sleep(std::time::Duration::from_millis(300));
++    fs::write(&f.config, "invalid = [").unwrap();
++    drop(lock);
++    let result = child.wait_with_output().unwrap();
++    fs::write(&f.config, &f.original).unwrap();
++    let error = String::from_utf8_lossy(&result.stderr);
++    assert_eq!(result.status.code(), Some(1));
++    assert!(
++        error.contains("invalid configuration"),
++        "expected new config validation failure, got {error}"
++    );
++    assert!(!error.contains("port_in_use"));
++    assert_eq!(f.ok("status")["state"], "stopped");
++}
+--- baseline/product/tests/stream_lifetime.rs
++++ head/product/tests/stream_lifetime.rs
+@@ -954,10 +954,16 @@
+         !shutdown.is_finished(),
+         "shutdown waits for the active worker"
+     );
+-    assert!(
+-        tokio::net::TcpStream::connect(address).await.is_err(),
+-        "listener closes before worker drain"
+-    );
++    let rejected = send_raw(
++        address,
++        &post("/r/pi-work/v1/chat/completions", CHAT_REQUEST),
++    )
++    .await;
++    assert_eq!(status(&rejected), 503, "draining rejects new data ingress");
++    let control = send_raw(address, b"GET /_llmgw/status HTTP/1.1\r\nHost: localhost\r\nx-llmgw-control-token: synthetic-control-token\r\nConnection: close\r\n\r\n").await;
++    assert_eq!(status(&control), 200);
++    let control: Value = serde_json::from_slice(response_body(&control)).unwrap();
++    assert_eq!(control["state"], "draining");
+     let _ = downstream
+         .write_all(&post("/r/pi-work/v1/chat/completions", CHAT_REQUEST))
+         .await;
+--- baseline/scripts/probe-product-cli.py
++++ head/scripts/probe-product-cli.py
+@@ -0,0 +1,157 @@
++#!/usr/bin/env python3
++"""Exercise the foreground product binary with temporary state and loopback only."""
++
++import argparse
++import hashlib
++import http.client
++import http.server
++import json
++from pathlib import Path
++import platform
++import secrets
++import socket
++import subprocess
++import tempfile
++import threading
++import time
++from datetime import datetime, timezone
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--binary", type=Path, required=True)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    binary = args.binary.resolve(strict=True)
++    root = Path(__file__).resolve().parents[1]
++    body = b'{ "model": "example-model", "messages": [], "opaque": {"preserve": true} }'
++    captured = []
++
++    class Fixture(http.server.BaseHTTPRequestHandler):
++        def do_POST(self):
++            received = self.rfile.read(int(self.headers["Content-Length"]))
++            captured.append({
++                "path": self.path,
++                "body_preserved": received == body,
++                "local_headers_absent": all(
++                    name not in self.headers
++                    for name in ("X-LLMGW-Token", "X-LLMGW-Control-Token")
++                ),
++                "none_auth_absent": all(
++                    name not in self.headers for name in ("Authorization", "x-api-key")
++                ),
++            })
++            response = b'{"fixture":"complete"}'
++            self.send_response(200)
++            self.send_header("Content-Type", "application/json")
++            self.send_header("Content-Length", str(len(response)))
++            self.end_headers()
++            self.wfile.write(response)
++
++        def log_message(self, *_args):
++            pass
++
++    upstream = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Fixture)
++    thread = threading.Thread(target=upstream.serve_forever, daemon=True)
++    thread.start()
++    process = None
++    try:
++        with tempfile.TemporaryDirectory(prefix="llmgw-cli-probe-") as temporary:
++            base = Path(temporary)
++            with socket.socket() as reservation:
++                reservation.bind(("127.0.0.1", 0))
++                port = reservation.getsockname()[1]
++            # run has no port-reporting interface yet; reserve then release a
++            # candidate port and fail the probe if the spawned process cannot bind.
++            template = (root / "product/examples/fixture.toml").read_text()
++            # This probe isolates transport from the known-quota restart hold.
++            quota_example = '[quota.rpm]\nkind = "known"\nvalue = 60'
++            assert template.count(quota_example) == 1, "fixture RPM section changed"
++            assert '[quota.tpm]\nkind = "unknown"' in template, "fixture TPM section changed"
++            template = template.replace(quota_example, '[quota.rpm]\nkind = "unlimited"')
++            template = template.replace("127.0.0.1:4141", f"127.0.0.1:{port}")
++            template = template.replace("127.0.0.1:18080", f"127.0.0.1:{upstream.server_port}")
++            config = base / "fixture.toml"
++            config.write_text(template)
++            command = [str(binary), "run", "--config", str(config)]
++            state = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
++            state.mkdir(mode=0o700)
++            data_token, control_token = secrets.token_hex(32), secrets.token_hex(32)
++            for name, value in (("data-token", data_token), ("control-token", control_token)):
++                target = state / name
++                target.write_text(value)
++                target.chmod(0o600)
++            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++
++            def request(method, path, token, payload=None, extra=None):
++                connection = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
++                try:
++                    header = "X-LLMGW-Control-Token" if path.startswith("/_llmgw/") else "X-LLMGW-Token"
++                    headers = {header: token, "Connection": "close", **(extra or {})}
++                    connection.request(method, path, payload, headers)
++                    response = connection.getresponse()
++                    return response.status, response.read()
++                finally:
++                    connection.close()
++
++            deadline = time.monotonic() + 10
++            while True:
++                assert process.poll() is None, "foreground process exited before health"
++                try:
++                    status, response = request("GET", "/_llmgw/health", control_token)
++                    assert status == 200 and json.loads(response)["status"] == "ok"
++                    break
++                except ConnectionRefusedError:
++                    assert time.monotonic() < deadline, "startup deadline exceeded"
++                    time.sleep(0.02)
++            status, _ = request("GET", "/_llmgw/status", data_token)
++            assert status == 401, "data credential authorized control"
++            status, response = request(
++                "POST", "/r/pi-work/v1/chat/completions?request-key=a%2Bb", data_token, body,
++                {"Content-Type": "application/json", "Authorization": "synthetic-old",
++                 "x-api-key": "synthetic-old", "X-LLMGW-Control-Token": control_token},
++            )
++            assert status == 200 and json.loads(response) == {"fixture": "complete"}
++            assert captured == [{
++                "path": "/team/v1/chat/completions?api-version=fixture&request-key=a%2Bb",
++                "body_preserved": True, "local_headers_absent": True, "none_auth_absent": True,
++            }], "upstream wire contract mismatch"
++            status, response = request("POST", "/_llmgw/stop", control_token)
++            assert status == 200 and json.loads(response)["status"] == "stopping"
++            stdout, stderr = process.communicate(timeout=15)
++            assert process.returncode == 0, "control stop did not exit cleanly"
++            for value in (data_token.encode(), control_token.encode(), body):
++                assert value not in stdout + stderr, "sensitive fixture material reached output"
++            result = {
++                "check": "actual_foreground_binary_loopback_only",
++                "timestamp": datetime.now(timezone.utc).isoformat(),
++                "binary": str(binary.relative_to(root)),
++                "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
++                "os": platform.platform(), "python": platform.python_version(),
++                "passed": True, "upstream_attempts": len(captured),
++                "quota_fixture": {"rpm": "unlimited", "tpm": "unknown"},
++                "checks": ["config_specific_state_path", "protected_temp_state_loaded", "health",
++                           "data_cannot_control", "prefix_query_body_auth", "control_stop_exit_zero",
++                           "no_fixture_credentials_or_body_in_process_output"],
++                "limitations": ["Synthetic HTTP fixture only; no LLM or agent task",
++                                "No SSE lifecycle, quota, native setup, other OS or performance claim",
++                                "Port selection uses a checked candidate, not socket activation"],
++            }
++            args.output.parent.mkdir(parents=True, exist_ok=True)
++            args.output.write_text(json.dumps(result, indent=2) + "\n")
++            print(json.dumps({"passed": True, "upstream_attempts": len(captured)}))
++    finally:
++        if process is not None and process.poll() is None:
++            process.terminate()
++            try:
++                process.wait(timeout=5)
++            except subprocess.TimeoutExpired:
++                process.kill()
++                process.wait(timeout=5)
++        upstream.shutdown()
++        upstream.server_close()
++        thread.join(timeout=5)
++
++
++if __name__ == "__main__":
++    main()
+--- baseline/scripts/probe-product-stream.py
++++ head/scripts/probe-product-stream.py
+@@ -0,0 +1,304 @@
++#!/usr/bin/env python3
++"""Check foreground stream lifetime using synthetic, gated loopback HTTP only."""
++
++import argparse
++from concurrent.futures import ThreadPoolExecutor
++from datetime import datetime, timezone
++import hashlib
++import http.client
++import http.server
++import json
++from pathlib import Path
++import platform
++import re
++import secrets
++import select
++import socket
++import struct
++import subprocess
++import tempfile
++import threading
++import time
++
++
++BODY = b'{"model":"example-model","messages":[],"stream":true}'
++EVENTS = (
++    b'data: {"choices":[{"delta":{"content":"fixture"}}]}\n\n'
++    b'data: {"choices":[],"usage":{"prompt_tokens":4,"completion_tokens":1,"total_tokens":5}}\n\n'
++    b'data: [DONE]\n\n'
++)
++
++
++def require(condition, message):
++    if not condition:
++        raise AssertionError(message)
++
++
++def wait_until(predicate, seconds=3):
++    deadline = time.monotonic() + seconds
++    while not predicate():
++        require(time.monotonic() < deadline, "condition deadline exceeded")
++        time.sleep(0.01)
++
++
++class GatedUpstream(http.server.ThreadingHTTPServer):
++    daemon_threads = False
++    block_on_close = True
++
++    def __init__(self, pre_headers, gate_timeout=8):
++        super().__init__(("127.0.0.1", 0), UpstreamHandler)
++        self.pre_headers = pre_headers
++        self.gate_timeout = gate_timeout
++        self.lock = threading.Lock()
++        self.attempts = 0
++        self.first_started = threading.Event()
++        self.first_disconnected = threading.Event()
++        self.release = threading.Event()
++        self.finished = threading.Event()
++        self.fixture_errors = []
++
++    def count(self):
++        with self.lock:
++            return self.attempts
++
++
++class UpstreamHandler(http.server.BaseHTTPRequestHandler):
++    protocol_version = "HTTP/1.1"
++
++    def log_message(self, *_args):
++        pass
++
++    def do_POST(self):
++        self.connection.settimeout(4)
++        try:
++            received = self.rfile.read(int(self.headers["Content-Length"]))
++            require(received == BODY, "fixture received changed body")
++            with self.server.lock:
++                self.server.attempts += 1
++                number = self.server.attempts
++            if number == 1:
++                self.server.first_started.set()
++            if number == 1 and self.server.pre_headers:
++                if not self.gate():
++                    return
++            self.send_response(200)
++            self.send_header("Content-Type", "text/event-stream")
++            self.send_header("Transfer-Encoding", "chunked")
++            self.send_header("Connection", "close")
++            self.end_headers()
++            self.wfile.write(f"{len(EVENTS):x}\r\n".encode() + EVENTS + b"\r\n")
++            self.wfile.flush()
++            if number == 1 and not self.server.pre_headers:
++                if not self.gate():
++                    return
++            self.wfile.write(b"0\r\n\r\n")
++            self.wfile.flush()
++            if number == 1:
++                self.server.finished.set()
++        except (BrokenPipeError, ConnectionResetError):
++            self.server.first_disconnected.set()
++        except Exception as error:
++            # Store a safe class only; no headers, URL, request or token output.
++            with self.server.lock:
++                self.server.fixture_errors.append(type(error).__name__)
++        finally:
++            self.close_connection = True
++
++    def gate(self):
++        deadline = time.monotonic() + self.server.gate_timeout
++        while not self.server.release.is_set():
++            require(time.monotonic() < deadline, "fixture gate deadline exceeded")
++            readable, _, _ = select.select([self.connection], [], [], 0.02)
++            if readable:
++                try:
++                    if self.connection.recv(1, socket.MSG_PEEK) == b"":
++                        self.server.first_disconnected.set()
++                        return False
++                except (ConnectionResetError, BrokenPipeError):
++                    self.server.first_disconnected.set()
++                    return False
++        return True
++
++
++def run_case(binary, fixture_template, policy, pre_headers, force_shutdown=False):
++    upstream = GatedUpstream(pre_headers, gate_timeout=30 if force_shutdown else 8)
++    upstream_thread = threading.Thread(target=upstream.serve_forever)
++    upstream_thread.start()
++    process = first = None
++    pool = ThreadPoolExecutor(max_workers=1)
++    try:
++        with tempfile.TemporaryDirectory(prefix="llmgw-stream-probe-") as directory:
++            base = Path(directory)
++            with socket.socket() as candidate:
++                candidate.bind(("127.0.0.1", 0))
++                port = candidate.getsockname()[1]
++            config = base / "fixture.toml"
++            text = fixture_template.replace("127.0.0.1:4141", f"127.0.0.1:{port}")
++            text = text.replace("127.0.0.1:18080", f"127.0.0.1:{upstream.server_port}")
++            text = re.sub(r"(?m)^cancel_policy\s*=.*\n", "", text, count=1)
++            # The default drain is tested without setting cancel_policy explicitly.
++            if policy == "close":
++                text = 'cancel_policy = "close"\n' + text
++            config.write_text(text)
++            state = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
++            state.mkdir(mode=0o700)
++            data_token, control_token = secrets.token_hex(32), secrets.token_hex(32)
++            for name, value in (("data-token", data_token), ("control-token", control_token)):
++                file = state / name
++                file.write_text(value)
++                file.chmod(0o600)
++            process = subprocess.Popen(
++                [str(binary), "run", "--config", str(config)],
++                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
++            )
++
++            def request(control_path=None):
++                connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
++                try:
++                    if control_path:
++                        method = "POST" if control_path == "stop" else "GET"
++                        connection.request(method, f"/_llmgw/{control_path}", headers={
++                            "X-LLMGW-Control-Token": control_token, "Connection": "close"})
++                    else:
++                        connection.request("POST", "/r/pi-work/v1/chat/completions", BODY, {
++                            "X-LLMGW-Token": data_token, "Content-Type": "application/json",
++                            "Connection": "close"})
++                    response = connection.getresponse()
++                    return response.status, response.read()
++                finally:
++                    connection.close()
++
++            def healthy():
++                require(process.poll() is None, "gateway exited before health")
++                try:
++                    return request("health")[0] == 200
++                except ConnectionRefusedError:
++                    return False
++
++            wait_until(healthy, 10)
++            first = socket.create_connection(("127.0.0.1", port), timeout=3)
++            request_head = (
++                f"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\n"
++                f"X-LLMGW-Token: {data_token}\r\nContent-Type: application/json\r\n"
++                f"Content-Length: {len(BODY)}\r\nConnection: close\r\n\r\n"
++            ).encode()
++            first.sendall(request_head + BODY)
++            require(upstream.first_started.wait(3), "first request did not reach upstream")
++            if not pre_headers:
++                received = bytearray()
++                while b"data: [DONE]\n\n" not in received:
++                    part = first.recv(4096)
++                    require(part, "downstream ended before terminal marker")
++                    received.extend(part)
++                    require(len(received) <= 32768, "unexpected fixture response size")
++                require(not upstream.release.is_set(), "EOF gate unexpectedly released")
++            # A full RST is distinct from a valid HTTP request write-half-close.
++            first.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
++            first.close()
++            first = None
++            if force_shutdown:
++                stopping_at = time.monotonic()
++                require(request("stop")[0] == 200, "control stop failed")
++                time.sleep(0.2)
++                require(process.poll() is None, "process exited without draining active worker")
++                require(not upstream.first_disconnected.is_set(), "drain closed HTTP before shutdown deadline")
++                stdout, stderr = process.communicate(timeout=15)
++                elapsed = time.monotonic() - stopping_at
++                require(process.returncode == 0, "forced stop did not exit zero")
++                require(9 <= elapsed <= 16, "forced stop outside configured 10s grace observation window")
++                require(upstream.first_disconnected.wait(3), "forced stop left upstream HTTP open")
++                require(upstream.count() == 1 and not upstream.finished.is_set(), "forced stop fixture completed unexpectedly")
++                require(not upstream.fixture_errors, "fixture failed internally")
++                require(all(value not in stdout + stderr for value in
++                            (data_token.encode(), control_token.encode(), BODY)), "fixture data reached output")
++                return {"policy": policy, "disconnect_phase": "after_terminal_marker",
++                        "force_shutdown": True, "passed": True, "upstream_attempts": 1,
++                        "upstream_close_observed": True, "body_eof_gate_completed": False,
++                        "control_stop_exit_zero": True, "observed_stop_seconds": round(elapsed, 3)}
++            second = pool.submit(request)
++            if policy == "drain":
++                # This is a bounded ordering observation, not a latency benchmark.
++                time.sleep(0.2)
++                require(upstream.count() == 1, "capacity released before first response body EOF")
++                require(not second.done(), "second request completed while first body pending")
++                require(not upstream.first_disconnected.is_set(), "default drain closed upstream")
++                upstream.release.set()
++                require(upstream.finished.wait(3), "first upstream did not reach body EOF")
++            else:
++                require(upstream.first_disconnected.wait(3), "close policy did not close upstream HTTP")
++            status, response = second.result(timeout=5)
++            require(status == 200 and response == EVENTS, "second response mismatch")
++            require(upstream.count() == 2, "unexpected upstream attempt count")
++            require(not upstream.fixture_errors, "fixture failed internally")
++            require(request("stop")[0] == 200, "control stop failed")
++            stdout, stderr = process.communicate(timeout=15)
++            require(process.returncode == 0, "gateway stop did not exit zero")
++            require(all(value not in stdout + stderr for value in
++                        (data_token.encode(), control_token.encode(), BODY)), "fixture data reached output")
++            return {"policy": policy, "disconnect_phase": "before_headers" if pre_headers else "after_terminal_marker",
++                    "passed": True, "upstream_attempts": 2,
++                    "upstream_close_observed": upstream.first_disconnected.is_set(),
++                    "body_eof_gate_completed": upstream.finished.is_set(), "control_stop_exit_zero": True}
++    finally:
++        upstream.release.set()
++        if first is not None:
++            first.close()
++        if process is not None and process.poll() is None:
++            process.terminate()
++            try:
++                process.wait(timeout=12)
++            except subprocess.TimeoutExpired:
++                process.kill()
++                process.wait(timeout=3)
++        pool.shutdown(wait=True, cancel_futures=True)
++        upstream.shutdown()
++        upstream.server_close()
++        upstream_thread.join(timeout=3)
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--binary", type=Path, required=True)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    root = Path(__file__).resolve().parents[1]
++    binary = args.binary.resolve(strict=True)
++    binary_hash = hashlib.sha256(binary.read_bytes()).hexdigest()
++    template = (root / "product/examples/fixture.toml").read_text()
++    # Lifecycle checks have no quota wait; quota behavior has its own suite.
++    quota_example = '[quota.rpm]\nkind = "known"\nvalue = 60'
++    require(template.count(quota_example) == 1, "fixture RPM section changed")
++    require('[quota.tpm]\nkind = "unknown"' in template, "fixture TPM section changed")
++    template = template.replace(quota_example, '[quota.rpm]\nkind = "unlimited"')
++    rows = []
++    for policy, pre_headers, force_shutdown in (
++        ("drain", False, False), ("close", False, False),
++        ("drain", True, False), ("drain", False, True),
++    ):
++        try:
++            rows.append(run_case(binary, template, policy, pre_headers, force_shutdown))
++        except Exception as error:
++            rows.append({"policy": policy, "disconnect_phase": "before_headers" if pre_headers else "after_terminal_marker",
++                         "force_shutdown": force_shutdown,
++                         "passed": False, "error_class": type(error).__name__,
++                         "error": str(error) if isinstance(error, AssertionError) else "probe or transport failure"})
++    unchanged = hashlib.sha256(binary.read_bytes()).hexdigest() == binary_hash
++    result = {"check": "foreground_stream_lifetime_loopback_only",
++              "timestamp": datetime.now(timezone.utc).isoformat(), "os": platform.platform(),
++              "binary_sha256": binary_hash, "binary_unchanged_during_probe": unchanged,
++              "passed": unchanged and all(row["passed"] for row in rows), "cases": rows,
++              "quota_fixture": {"rpm": "unlimited", "tpm": "unknown"},
++              "limitations": ["Synthetic HTTP, no actual LLM or agent task",
++                              "RST cancellation; does not replace half-close, graceful-close or slow-reader tests",
++                              "HTTP body/connection observations do not prove engine abort or quota refund",
++                              "Forced process exit does not independently prove library child-task join ordering",
++                              "No performance or cross-platform acceptance claim",
++                              "Candidate port is released before process bind; startup is checked"]}
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    args.output.write_text(json.dumps(result, indent=2) + "\n")
++    print(json.dumps({"passed": result["passed"], "cases": rows}))
++    return 0 if result["passed"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- baseline/scripts/probe-product-fairness.py
++++ head/scripts/probe-product-fairness.py
+@@ -0,0 +1,448 @@
++#!/usr/bin/env python3
++"""Check native gateway root ordering, queued cancellation and overflow on loopback."""
++
++import argparse
++from contextlib import contextmanager
++from datetime import datetime, timezone
++import hashlib
++import http.client
++import http.server
++import json
++from pathlib import Path
++import platform
++import secrets
++import select
++import socket
++import struct
++import subprocess
++import tempfile
++import threading
++import time
++
++
++ROOT = Path(__file__).resolve().parents[1]
++BODY = b'{"model":"example-model","messages":[]}'
++REPLY = b'{"fixture":"complete"}'
++
++
++class CheckFailed(Exception):
++    """Only fixed, safe check identifiers may be stored in this exception."""
++
++
++def require(condition, reason):
++    if not condition:
++        raise CheckFailed(reason)
++
++
++def wait_until(predicate, seconds=5):
++    deadline = time.monotonic() + seconds
++    while not predicate():
++        require(time.monotonic() < deadline, "condition_deadline")
++        time.sleep(0.005)
++
++
++class Upstream(http.server.ThreadingHTTPServer):
++    daemon_threads = True
++
++    def __init__(self):
++        super().__init__(("127.0.0.1", 0), Handler)
++        self.gate = threading.Event()
++        self.started = threading.Event()
++        self.lock = threading.Lock()
++        self.trace = []
++        self.last_attempt_at = None
++        self.errors = []
++
++    def recorded(self):
++        with self.lock:
++            return list(self.trace)
++
++
++class Handler(http.server.BaseHTTPRequestHandler):
++    protocol_version = "HTTP/1.1"
++
++    def log_message(self, *_args):
++        pass
++
++    def do_GET(self):
++        self.handle_fixture()
++
++    def do_POST(self):
++        self.handle_fixture()
++
++    def handle_fixture(self):
++        try:
++            label = self.headers.get("X-Fixture-Request", "")
++            require(label and len(label) <= 16 and label.isalnum(), "fixture_label")
++            payload = self.rfile.read(int(self.headers.get("Content-Length", "0")))
++            require(payload == (b"" if self.command == "GET" else BODY), "body_changed")
++            require(all(name not in self.headers for name in (
++                "X-LLMGW-Token", "X-LLMGW-Control-Token", "Authorization", "x-api-key")),
++                "local_or_none_auth_forwarded")
++            expected = {
++                "chat": "/team/v1/chat/completions?api-version=fixture",
++                "models": "/team/v1/models?api-version=fixture",
++                "count": "/team/v1/messages/count_tokens?api-version=fixture",
++            }
++            require(self.path == expected[self.headers["X-Fixture-Endpoint"]], "upstream_path")
++            with self.server.lock:
++                self.server.trace.append(label)
++                self.server.last_attempt_at = time.monotonic()
++            if label == "A0":
++                self.server.started.set()
++                require(self.server.gate.wait(30), "upstream_gate_deadline")
++            self.send_response(200)
++            self.send_header("Content-Type", "application/json")
++            self.send_header("Content-Length", str(len(REPLY)))
++            self.send_header("Connection", "close")
++            self.end_headers()
++            self.wfile.write(REPLY)
++        except Exception as error:
++            with self.server.lock:
++                self.server.errors.append(
++                    str(error) if isinstance(error, CheckFailed) else type(error).__name__)
++        finally:
++            self.close_connection = True
++
++
++def receive(sock, deadline):
++    response = None
++    try:
++        sock.settimeout(max(0.001, deadline - time.monotonic()))
++        response = http.client.HTTPResponse(sock)
++        response.begin()
++        body = response.read(65537)
++        require(len(body) <= 65536, "response_bound")
++        return response.status, body
++    finally:
++        if response is not None:
++            response.close()
++        sock.close()
++
++
++def check_attempts(trace, expected_labels):
++    require(len(trace) == len(expected_labels) and set(trace) == set(expected_labels),
++            "lost_duplicate_or_unexpected_attempt")
++
++
++class Runner:
++    def __init__(self, binary):
++        self.binary = binary
++        self.temp = self.upstream = self.thread = self.process = None
++        self.sockets = {}
++        self.control_stopped = False
++
++    def setup(self):
++        self.temp = tempfile.TemporaryDirectory(prefix="llmgw-fairness-probe-")
++        base = Path(self.temp.name)
++        self.upstream = Upstream()
++        self.thread = threading.Thread(target=self.upstream.serve_forever, daemon=True)
++        self.thread.start()
++        with socket.socket() as candidate:
++            candidate.bind(("127.0.0.1", 0))
++            self.port = candidate.getsockname()[1]
++        text = (ROOT / "product/examples/fixture.toml").read_text()
++        quota = '[quota.rpm]\nkind = "known"\nvalue = 60'
++        require(text.count(quota) == 1 and '[quota.tpm]\nkind = "unknown"' in text,
++                "example_quota_shape_changed")
++        require(text.count("[[roots]]") == 1, "example_root_shape_changed")
++        text = text.replace(quota, '[quota.rpm]\nkind = "unlimited"')
++        text = text.split("[[roots]]", 1)[0]
++        for root in ("fifo-a", "fifo-b"):
++            text += (f'\n[[roots]]\nid = "{root}"\n'
++                     'endpoints = ["chat/completions", "models", "messages/count_tokens"]\n'
++                     'models = ["example-model"]\n')
++        text = text.replace("127.0.0.1:4141", f"127.0.0.1:{self.port}")
++        text = text.replace("127.0.0.1:18080", f"127.0.0.1:{self.upstream.server_port}")
++        config = base / "fixture.toml"
++        config.write_text(text)
++        state = Path(json.loads(subprocess.check_output([str(self.binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
++        state.mkdir(mode=0o700)
++        self.data_token, self.control_token = secrets.token_hex(32), secrets.token_hex(32)
++        for name, value in (("data-token", self.data_token), ("control-token", self.control_token)):
++            path = state / name
++            path.write_text(value)
++            path.chmod(0o600)
++        self.process = subprocess.Popen([str(self.binary), "run", "--config", str(config)],
++                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++
++        def healthy():
++            require(self.process.poll() is None, "gateway_exited_before_health")
++            try:
++                return self.control("health")[0] == 200
++            except ConnectionRefusedError:
++                return False
++
++        wait_until(healthy, 10)
++
++    def control(self, path):
++        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=2)
++        try:
++            connection.request("POST" if path == "stop" else "GET", f"/_llmgw/{path}",
++                               headers={"X-LLMGW-Control-Token": self.control_token,
++                                        "Connection": "close"})
++            response = connection.getresponse()
++            return response.status, json.loads(response.read())
++        finally:
++            connection.close()
++
++    def queued(self, count):
++        def matched():
++            status, data = self.control("status")
++            require(status == 200, "status_http")
++            admission = data.get("admission")
++            require(isinstance(admission, dict), "admission_status_missing")
++            roots = admission.get("roots", [])
++            require([root["id"] for root in roots] == ["fifo-a", "fifo-b"], "root_set_changed")
++            require(sum(root["queue_length"] for root in roots) == admission["queue_length"],
++                    "root_queue_sum")
++            require(admission["active"] == 1, "gate_did_not_retain_active_slot")
++            return admission["queue_length"] == count
++        wait_until(matched)
++
++    def send(self, label, root, endpoint="chat"):
++        path, method = {
++            "chat": ("chat/completions", "POST"),
++            "models": ("models", "GET"),
++            "count": ("messages/count_tokens", "POST"),
++        }[endpoint]
++        body = b"" if method == "GET" else BODY
++        sock = socket.create_connection(("127.0.0.1", self.port), timeout=3)
++        self.sockets[label] = sock
++        head = (f"{method} /r/{root}/v1/{path} HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n"
++                f"X-LLMGW-Token: {self.data_token}\r\nX-Fixture-Request: {label}\r\n"
++                f"X-Fixture-Endpoint: {endpoint}\r\nX-Session-Id: child-{label}\r\n"
++                f"Content-Type: application/json\r\nContent-Length: {len(body)}\r\n"
++                "Connection: close\r\n\r\n").encode()
++        sock.sendall(head + body)
++
++    def reset(self, label):
++        sock = self.sockets.pop(label)
++        sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
++        sock.close()
++
++    def first(self):
++        self.send("A0", "fifo-a")
++        require(self.upstream.started.wait(3), "first_upstream_missing")
++        self.queued(0)
++
++    def finish(self, expected_labels):
++        require(self.upstream.recorded() == ["A0"], "queued_request_started_before_gate")
++        self.upstream.gate.set()
++        deadline = time.monotonic() + 12
++        for label in expected_labels:
++            status, body = receive(self.sockets.pop(label), deadline)
++            require(status == 200 and body == REPLY, "completed_response_mismatch")
++        trace = self.upstream.recorded()
++        check_attempts(trace, expected_labels)
++        require(not self.upstream.errors, "upstream_fixture_error")
++        require(not self.sockets, "unaccounted_client_socket")
++        require(self.control("stop")[0] == 200, "control_stop_rejected")
++        stdout, stderr = self.process.communicate(timeout=15)
++        require(self.process.returncode == 0, "control_stop_exit")
++        require(all(value not in stdout + stderr for value in
++                    (self.data_token.encode(), self.control_token.encode(), BODY)),
++                "fixture_material_in_output")
++        self.control_stopped = True
++        return trace
++
++    def close(self):
++        if self.upstream is not None:
++            self.upstream.gate.set()
++        for sock in self.sockets.values():
++            sock.close()
++        if self.process is not None and self.process.poll() is None:
++            self.process.terminate()
++            try:
++                self.process.communicate(timeout=12)
++            except subprocess.TimeoutExpired:
++                self.process.kill()
++                self.process.communicate(timeout=5)
++        if self.process is not None:
++            for pipe in (self.process.stdout, self.process.stderr):
++                if pipe is not None:
++                    pipe.close()
++        if self.upstream is not None:
++            self.upstream.shutdown()
++            self.upstream.server_close()
++        if self.thread is not None:
++            self.thread.join(timeout=3)
++        if self.temp is not None:
++            self.temp.cleanup()
++
++
++@contextmanager
++def gateway(binary):
++    runner = Runner(binary)
++    try:
++        runner.setup()
++        yield runner
++    except Exception as error:
++        # Preserve a bounded failure observation, never raw requests or output.
++        safe = error if isinstance(error, CheckFailed) else CheckFailed(type(error).__name__)
++        safe.observation = {"upstream_trace_before_cleanup": runner.upstream.recorded()
++                            if runner.upstream is not None else [],
++                            "owned_client_sockets_before_cleanup": len(runner.sockets),
++                            "control_stopped_before_cleanup": runner.control_stopped}
++        raise safe from None
++    finally:
++        runner.close()
++
++
++def round_robin(binary):
++    with gateway(binary) as runner:
++        runner.first()
++        started = time.monotonic()
++        pending = [("A1", "fifo-a", "chat"), ("A2", "fifo-a", "chat"),
++                   ("B1", "fifo-b", "models"), ("A3", "fifo-a", "chat"),
++                   ("B2", "fifo-b", "count")]
++        for count, request in enumerate(pending, 1):
++            runner.send(*request)
++            runner.queued(count)
++        require(time.monotonic() - started < 4, "fixture_crossed_aging_threshold")
++        trace = runner.finish(["A0"] + [item[0] for item in pending])
++        require(runner.upstream.last_attempt_at - started < 4,
++                "fixture_crossed_aging_threshold")
++        require(trace == ["A0", "B1", "A1", "B2", "A2", "A3"], "root_rr_or_fifo_order")
++        return {"case": "root_rr_fifo_and_metadata", "passed": True,
++                "ingress": 6, "upstream_attempts": len(trace), "trace": trace}
++
++
++def queued_cancel(binary):
++    with gateway(binary) as runner:
++        runner.first()
++        started = time.monotonic()
++        for count, (label, root) in enumerate((("A1", "fifo-a"), ("A2", "fifo-a"),
++                                                ("B1", "fifo-b")), 1):
++            runner.send(label, root)
++            runner.queued(count)
++        runner.reset("A1")
++        runner.queued(2)
++        require(time.monotonic() - started < 4, "fixture_crossed_aging_threshold")
++        trace = runner.finish(["A0", "A2", "B1"])
++        require(runner.upstream.last_attempt_at - started < 4,
++                "fixture_crossed_aging_threshold")
++        require(trace == ["A0", "B1", "A2"], "canceled_head_or_root_order")
++        return {"case": "queued_rst", "passed": True, "ingress": 4,
++                "canceled_before_upstream": 1, "upstream_attempts": len(trace), "trace": trace}
++
++
++def overflow(binary):
++    with gateway(binary) as runner:
++        runner.first()
++        labels = []
++        for index in range(1, 33):
++            for prefix, root in (("A", "fifo-a"), ("B", "fifo-b")):
++                label = f"{prefix}{index}"
++                runner.send(label, root)
++                labels.append(label)
++                # FIFO begins at enqueue, not client send; serialize observation.
++                runner.queued(len(labels))
++        runner.queued(64)
++        runner.send("Overflow", "fifo-b")
++        status, body = receive(runner.sockets.pop("Overflow"), time.monotonic() + 3)
++        require(status == 429, "queue_overflow_not_rejected")
++        require(json.loads(body).get("error", {}).get("code") == "gateway_queue_full",
++                "queue_overflow_error_code")
++        runner.queued(64)
++        canceled = labels[:16]
++        for label in canceled:
++            runner.reset(label)
++        runner.queued(48)
++        runner.send("B33", "fifo-b")
++        runner.queued(49)
++        trace = runner.finish(["A0"] + labels[16:] + ["B33"])
++        require([label for label in trace if label.startswith("A")] ==
++                ["A0"] + [f"A{i}" for i in range(9, 33)], "overflow_root_a_fifo")
++        require([label for label in trace if label.startswith("B")] ==
++                [f"B{i}" for i in range(9, 34)], "overflow_root_b_fifo")
++        return {"case": "shared_queue64_cancel_and_refill", "passed": True, "ingress": 67,
++                "rejected": 1, "canceled_before_upstream": 16,
++                "upstream_attempts": len(trace), "all_outcomes_accounted": len(trace) + 17 == 67}
++
++
++def self_check(output=None):
++    expected = ["A0", "B1", "A1"]
++    check_attempts(expected, expected)
++    rejected = 0
++    for malformed in (["A0", "A1"], ["A0", "B1", "B1"], ["A0", "B1", "A1", "Extra"]):
++        try:
++            check_attempts(malformed, expected)
++        except CheckFailed:
++            rejected += 1
++    require(rejected == 3, "harness_did_not_reject_bad_attempt_sets")
++    upstream = Upstream()
++    thread = threading.Thread(target=upstream.serve_forever, daemon=True)
++    thread.start()
++    sock = None
++    try:
++        sock = socket.create_connection(("127.0.0.1", upstream.server_port), timeout=3)
++        sock.sendall((f"POST /team/v1/chat/completions?api-version=fixture HTTP/1.1\r\n"
++                      f"Host: 127.0.0.1:{upstream.server_port}\r\nX-Fixture-Request: A0\r\n"
++                      f"X-Fixture-Endpoint: chat\r\nContent-Length: {len(BODY)}\r\n"
++                      "Connection: close\r\n\r\n").encode() + BODY)
++        require(upstream.started.wait(3), "self_check_request_not_observed")
++        require(not select.select([sock], [], [], 0.02)[0], "self_check_gate_did_not_hold")
++        upstream.gate.set()
++        status, body = receive(sock, time.monotonic() + 3)
++        sock = None
++        require(status == 200 and body == REPLY, "self_check_response")
++        require(upstream.recorded() == ["A0"] and not upstream.errors, "self_check_fixture")
++    finally:
++        upstream.gate.set()
++        if sock is not None:
++            sock.close()
++        upstream.shutdown()
++        upstream.server_close()
++        thread.join(timeout=3)
++    result = {"passed": True, "scope": "fixture_and_attempt_validation_only",
++              "malformed_attempt_sets_rejected": rejected, "gate_held_until_released": True,
++              "gateway_executed": False, "timestamp": datetime.now(timezone.utc).isoformat(),
++              "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
++    if output is not None:
++        output.parent.mkdir(parents=True, exist_ok=True)
++        output.write_text(json.dumps(result, indent=2) + "\n")
++    print(json.dumps(result))
++    return 0
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--binary", type=Path)
++    parser.add_argument("--output", type=Path)
++    parser.add_argument("--self-check", action="store_true")
++    args = parser.parse_args()
++    if args.self_check:
++        return self_check(args.output)
++    if args.binary is None or args.output is None:
++        parser.error("--binary and --output are required for a product probe")
++    binary = args.binary.resolve(strict=True)
++    digest = hashlib.sha256(binary.read_bytes()).hexdigest()
++    results = []
++    for check in (round_robin, queued_cancel, overflow):
++        try:
++            results.append(check(binary))
++        except Exception as error:
++            results.append({"case": check.__name__, "passed": False,
++                            "failure": str(error) if isinstance(error, CheckFailed)
++                            else type(error).__name__,
++                            "observation": getattr(error, "observation", None)})
++    unchanged = hashlib.sha256(binary.read_bytes()).hexdigest() == digest
++    passed = unchanged and all(item["passed"] for item in results)
++    result = {"check": "foreground_fair_admission_loopback_only", "passed": passed,
++              "timestamp": datetime.now(timezone.utc).isoformat(), "binary": str(binary),
++              "binary_sha256": digest, "binary_unchanged": unchanged, "os": platform.platform(),
++              "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++              "quota_fixture": {"rpm": "unlimited", "tpm": "unknown"}, "cases": results,
++              "limitations": ["Synthetic native HTTP, no real agent or model",
++                              "No token-budget, bypass-barrier, latency, RSS or Windows proof",
++                              "RR setup and all attempt starts must precede the5-second aging threshold",
++                              "Candidate port is released before spawn; bind failure fails the probe"]}
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    args.output.write_text(json.dumps(result, indent=2) + "\n")
++    print(json.dumps({"passed": passed, "cases": results}))
++    return 0 if passed else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- baseline/scripts/probe-product-retry.py
++++ head/scripts/probe-product-retry.py
+@@ -0,0 +1,504 @@
++#!/usr/bin/env python3
++"""Observe retry attempts and shared cooldown in an owned native process on loopback."""
++
++import argparse
++from collections import Counter
++from contextlib import contextmanager
++from datetime import datetime, timezone
++import gzip
++import hashlib
++import http.client
++import http.server
++import json
++from pathlib import Path
++import platform
++import secrets
++import socket
++import subprocess
++import tempfile
++import threading
++import time
++
++ROOT = Path(__file__).resolve().parents[1]
++BODY = b'{ "model": "example-model", "messages": [], "opaque": "retry-probe-sentinel" }'
++SUCCESS = b'{"fixture":"complete"}'
++TRANSIENT = b'{"error":{"type":"rate_limit_error","code":"slow_down"}}'
++RATE = b'{"error":{"type":"tokens","code":"rate_limit_exceeded"}}'
++
++
++class CheckFailed(Exception):
++    """Only fixed check identifiers, never raw input or process output."""
++
++
++def require(condition, identifier):
++    if not condition:
++        raise CheckFailed(identifier)
++
++
++def wait_until(predicate, seconds=5):
++    deadline = time.monotonic() + seconds
++    while not predicate():
++        require(time.monotonic() < deadline, "condition_deadline")
++        time.sleep(0.005)
++
++
++def reply(status=200, body=SUCCESS, headers=()):
++    return status, body, list(headers)
++
++
++class Upstream(http.server.ThreadingHTTPServer):
++    daemon_threads = True
++
++    def __init__(self, plans):
++        super().__init__(("127.0.0.1", 0), Handler)
++        self.plans = plans
++        self.lock = threading.Lock()
++        self.trace = []
++        self.errors = []
++
++    def recorded(self):
++        with self.lock:
++            return list(self.trace)
++
++
++class Handler(http.server.BaseHTTPRequestHandler):
++    protocol_version = "HTTP/1.1"
++
++    def log_message(self, *_args):
++        pass
++
++    def do_GET(self):
++        self.handle_fixture()
++
++    def do_POST(self):
++        self.handle_fixture()
++
++    def handle_fixture(self):
++        try:
++            label = self.headers.get("X-Fixture-Request", "")
++            require(label in self.server.plans, "unexpected_request_label")
++            received = self.rfile.read(int(self.headers.get("Content-Length", "0")))
++            require(received == (b"" if self.command == "GET" else BODY), "body_changed")
++            require(all(name not in self.headers for name in (
++                "X-LLMGW-Token", "X-LLMGW-Control-Token", "Authorization", "x-api-key")),
++                "local_or_none_auth_forwarded")
++            endpoint = self.headers.get("X-Fixture-Endpoint")
++            require(endpoint in ("chat/completions", "models", "messages/count_tokens"),
++                    "fixture_endpoint")
++            require(self.path == f"/team/v1/{endpoint}?api-version=fixture", "path_changed")
++            with self.server.lock:
++                index = sum(row["label"] == label for row in self.server.trace)
++                self.server.trace.append({"label": label, "at": time.monotonic(),
++                                          "endpoint": endpoint, "body_preserved": True})
++                plan = self.server.plans[label]
++                require(index < len(plan), "unexpected_extra_attempt")
++                status, body, headers = plan[index]
++            self.send_response(status)
++            self.send_header("Content-Type", "application/json")
++            declared_lengths = [value for name, value in headers
++                                if name.lower() == "content-length"]
++            require(len(declared_lengths) <= 1, "duplicate_fixture_content_length")
++            if not declared_lengths:
++                self.send_header("Content-Length", str(len(body)))
++            self.send_header("Connection", "close")
++            for name, value in headers:
++                self.send_header(name, value)
++            self.end_headers()
++            self.wfile.write(body)
++        except Exception as error:
++            with self.server.lock:
++                self.server.errors.append(str(error) if isinstance(error, CheckFailed)
++                                          else type(error).__name__)
++        finally:
++            self.close_connection = True
++
++
++def check_trace(trace, expected):
++    require(Counter(row["label"] for row in trace) == Counter(expected),
++            "missing_duplicate_or_extra_attempt")
++
++
++class Runner:
++    def __init__(self, binary, plans, opt_in):
++        self.binary, self.plans, self.opt_in = binary, plans, opt_in
++        self.temp = self.upstream = self.thread = self.process = None
++        self.sockets = {}
++        self.submitted = []
++        self.received = []
++        self.outcomes = []
++        self.stopped = False
++
++    def setup(self):
++        self.temp = tempfile.TemporaryDirectory(prefix="llmgw-retry-probe-")
++        base = Path(self.temp.name)
++        self.upstream = Upstream(self.plans)
++        self.thread = threading.Thread(target=self.upstream.serve_forever, daemon=True)
++        self.thread.start()
++        with socket.socket() as candidate:
++            candidate.bind(("127.0.0.1", 0))
++            self.port = candidate.getsockname()[1]
++        text = (ROOT / "product/examples/fixture.toml").read_text()
++        quota = '[quota.rpm]\nkind = "known"\nvalue = 60'
++        require(text.count(quota) == 1 and '[quota.tpm]\nkind = "unknown"' in text,
++                "example_quota_shape_changed")
++        require(text.count("[[roots]]") == 1, "example_root_shape_changed")
++        text = text.replace(quota, '[quota.rpm]\nkind = "unlimited"')
++        # Omit the retry setting for the default-off case; explicitly set it only
++        # for opt-in. Remove an example default if the product starts showing it.
++        lines = text.splitlines()
++        retry_lines = [line for line in lines if line.startswith("retry_transient_429 =")]
++        require(len(retry_lines) <= 1, "example_retry_shape_changed")
++        text = "\n".join(line for line in lines if line not in retry_lines) + "\n"
++        if self.opt_in:
++            text = "retry_transient_429 = true\n" + text
++        text = text.split("[[roots]]", 1)[0]
++        for root in ("retry-a", "retry-b"):
++            text += (f'\n[[roots]]\nid = "{root}"\n'
++                     'endpoints = ["chat/completions", "models", "messages/count_tokens"]\n'
++                     'models = ["example-model"]\n')
++        text = text.replace("127.0.0.1:4141", f"127.0.0.1:{self.port}")
++        text = text.replace("127.0.0.1:18080", f"127.0.0.1:{self.upstream.server_port}")
++        config = base / "fixture.toml"
++        config.write_text(text)
++        state = Path(json.loads(subprocess.check_output([str(self.binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
++        state.mkdir(mode=0o700)
++        self.data_token, self.control_token = secrets.token_hex(32), secrets.token_hex(32)
++        for name, value in (("data-token", self.data_token), ("control-token", self.control_token)):
++            path = state / name
++            path.write_text(value)
++            path.chmod(0o600)
++        self.process = subprocess.Popen([str(self.binary), "run", "--config", str(config)],
++                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++
++        def healthy():
++            require(self.process.poll() is None, "gateway_exited_before_health")
++            try:
++                return self.control("health")[0] == 200
++            except ConnectionRefusedError:
++                return False
++
++        wait_until(healthy, 10)
++
++    def control(self, path):
++        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=2)
++        try:
++            connection.request("POST" if path == "stop" else "GET", f"/_llmgw/{path}",
++                               headers={"X-LLMGW-Control-Token": self.control_token,
++                                        "Connection": "close"})
++            response = connection.getresponse()
++            body = response.read(65537)
++            require(len(body) <= 65536, "control_response_bound")
++            return response.status, json.loads(body)
++        finally:
++            connection.close()
++
++    def queued_without_slot(self, count):
++        def observed():
++            status, body = self.control("status")
++            require(status == 200, "control_status")
++            admission = body.get("admission", {})
++            return admission.get("active") == 0 and admission.get("queue_length") == count
++        wait_until(observed, 0.5)
++
++    def send(self, label, root="retry-a", endpoint="chat/completions"):
++        require(label not in self.sockets and label not in self.received, "duplicate_ingress_label")
++        method = "GET" if endpoint == "models" else "POST"
++        body = b"" if method == "GET" else BODY
++        sock = socket.create_connection(("127.0.0.1", self.port), timeout=3)
++        self.sockets[label] = sock
++        self.submitted.append(label)
++        head = (f"{method} /r/{root}/v1/{endpoint} HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n"
++                f"X-LLMGW-Token: {self.data_token}\r\nX-Fixture-Request: {label}\r\n"
++                f"X-Fixture-Endpoint: {endpoint}\r\nX-Session-Id: child-{label}\r\n"
++                f"Content-Type: application/json\r\nContent-Length: {len(body)}\r\n"
++                "Connection: close\r\n\r\n").encode()
++        sock.sendall(head + body)
++
++    def receive(self, label, expected, *, gateway_generated=False):
++        sock = self.sockets.pop(label)
++        response = None
++        try:
++            sock.settimeout(5)
++            response = http.client.HTTPResponse(sock)
++            response.begin()
++            body = response.read(131073)
++            status, payload, headers = expected
++            require(len(body) <= 131072, "data_response_bound")
++            require(response.status == status and body == payload, "raw_response_mismatch")
++            for name, value in headers:
++                require((name.lower(), value) in [(k.lower(), v) for k, v in response.getheaders()],
++                        "response_header_changed")
++            self.received.append(label)
++            self.outcomes.append({"label": label, "http_status": response.status,
++                                  "body_matches_expected": True,
++                                  "body_origin": "gateway_error" if gateway_generated else "upstream"})
++        finally:
++            if response is not None:
++                response.close()
++            sock.close()
++
++    def finish(self, expected_attempts):
++        require(not self.sockets, "unaccounted_ingress_socket")
++        require(self.control("stop")[0] == 200, "control_stop_rejected")
++        stdout, stderr = self.process.communicate(timeout=12)
++        require(self.process.returncode == 0, "control_stop_exit")
++        self.stopped = True
++        require(not self.upstream.errors, "upstream_fixture_error")
++        trace = self.upstream.recorded()
++        check_trace(trace, expected_attempts)
++        require(all(value not in stdout + stderr for value in
++                    (self.data_token.encode(), self.control_token.encode(), BODY,
++                     b"retry-probe-sentinel")), "fixture_material_in_output")
++        origin = trace[0]["at"]
++        return {"ingress": len(self.received), "upstream_attempts": len(trace),
++                "opt_in": self.opt_in, "control_stop_exit_zero": True,
++                "no_fixture_material_in_output": True,
++                "outcomes": self.outcomes,
++                "trace": [{**row, "at": round(row["at"] - origin, 6)} for row in trace]}
++
++    def close(self):
++        for sock in self.sockets.values():
++            sock.close()
++        if self.process is not None and self.process.poll() is None:
++            self.process.terminate()
++            try:
++                self.process.communicate(timeout=12)
++            except subprocess.TimeoutExpired:
++                self.process.kill()
++                self.process.communicate(timeout=5)
++        if self.process is not None:
++            for pipe in (self.process.stdout, self.process.stderr):
++                if pipe is not None:
++                    pipe.close()
++        if self.upstream is not None:
++            self.upstream.shutdown()
++            self.upstream.server_close()
++        if self.thread is not None:
++            self.thread.join(timeout=3)
++        if self.temp is not None:
++            self.temp.cleanup()
++
++
++@contextmanager
++def gateway(binary, plans, opt_in):
++    runner = Runner(binary, plans, opt_in)
++    try:
++        runner.setup()
++        yield runner
++    except Exception as error:
++        safe = error if isinstance(error, CheckFailed) else CheckFailed(type(error).__name__)
++        safe.observation = {"upstream_attempt_labels":
++                            [row["label"] for row in runner.upstream.recorded()]
++                            if runner.upstream is not None else [],
++                            "submitted_ingress": list(runner.submitted),
++                            "completed_ingress": list(runner.received),
++                            "unreceived_ingress": [label for label in runner.submitted
++                                                   if label not in runner.received]}
++        raise safe from None
++    finally:
++        runner.close()
++
++
++def default_off(binary):
++    rejection = reply(429, TRANSIENT, [("Retry-After", "1")])
++    with gateway(binary, {"A1": [rejection], "B1": [reply()], "A2": [reply()]}, False) as run:
++        run.send("A1")
++        run.receive("A1", rejection)
++        run.send("B1", "retry-b", "models")
++        run.send("A2", "retry-a", "messages/count_tokens")
++        run.queued_without_slot(2)
++        require(len(run.upstream.recorded()) == 1, "cooldown_bypassed_by_new_client")
++        run.receive("B1", reply())
++        run.receive("A2", reply())
++        trace = run.upstream.recorded()
++        require(all(row["at"] - trace[0]["at"] >= 0.99 for row in trace[1:]),
++                "standard_seconds_wait_shortened")
++        return run.finish(["A1", "B1", "A2"])
++
++
++def opt_in_shared_ms(binary):
++    rejection = reply(429, RATE, [("retry-after-ms", "800")])
++    with gateway(binary, {"A1": [rejection, reply()], "B1": [reply()]}, True) as run:
++        run.send("A1")
++        wait_until(lambda: len(run.upstream.recorded()) == 1)
++        run.queued_without_slot(1)
++        run.send("B1", "retry-b", "models")
++        run.queued_without_slot(2)
++        run.receive("A1", reply())
++        run.receive("B1", reply())
++        trace = run.upstream.recorded()
++        require(all(row["at"] - trace[0]["at"] >= 0.79 for row in trace[1:]),
++                "millisecond_wait_shortened")
++        return run.finish(["A1", "A1", "B1"])
++
++
++def maximum_wait(binary):
++    headers = [("Retry-After", "0"), ("Retry-After", "1"), ("retry-after-ms", "50")]
++    with gateway(binary, {"A1": [reply(429, TRANSIENT, headers), reply()]}, True) as run:
++        run.send("A1")
++        run.receive("A1", reply())
++        trace = run.upstream.recorded()
++        require(len(trace) == 2 and trace[1]["at"] - trace[0]["at"] >= 0.99,
++                "maximum_valid_header_wait_shortened")
++        return run.finish(["A1", "A1"])
++
++
++def no_replay(binary):
++    cases = {
++        "permanent": reply(429, b'{"error":{"type":"rate_limit_error","code":"insufficient_quota"}}',
++                           [("Retry-After", "0")]),
++        "spenddetail": reply(429, b'{"error":{"code":"slow_down","details":{"error_code":"enforced_spend_limit_reached"}}}'),
++        "duplicate": reply(429, b'{"error":{"code":"insufficient_quota","code":"slow_down"}}'),
++        "unknown": reply(429, b'{"error":{"type":"rate_limit_error"}}'),
++        "malformed": reply(429, b'{"error":{"code":"slow_down"}'),
++        "invalidutf8": reply(429, b'{"error":{"code":"slow_down"},"padding":"\xff"}'),
++        "surrogate": reply(429, b'{"error":{"code":"slow_down"},"padding":"\\ud800"}'),
++        "encoded": reply(429, gzip.compress(TRANSIENT, mtime=0), [("Content-Encoding", "gzip")]),
++        "oversized": reply(429, b'{"error":{"code":"slow_down"},"padding":"' + b'x' * 65536 + b'"}'),
++        "unavailable": reply(503, TRANSIENT),
++    }
++    with gateway(binary, {key: [value] for key, value in cases.items()}, True) as run:
++        for label, expected in cases.items():
++            run.send(label)
++            run.receive(label, expected)
++        return run.finish(list(cases))
++
++
++def at_most_one(binary):
++    rejection = reply(429, TRANSIENT)
++    with gateway(binary, {"A1": [rejection, rejection]}, True) as run:
++        run.send("A1")
++        run.receive("A1", rejection)
++        trace = run.upstream.recorded()
++        require(len(trace) == 2 and trace[1]["at"] - trace[0]["at"] >= 0.99,
++                "fallback_wait_or_attempt_bound")
++        return run.finish(["A1", "A1"])
++
++
++def prehead_transport_failure(binary):
++    variants = []
++    for opt_in in (False, True):
++        # An incomplete HTTP body is a transport error, even though the bytes
++        # received so far form valid retryable JSON. Its timing header still
++        # applies to the other root. No downstream head has been sent yet.
++        truncated = reply(429, TRANSIENT, [("Retry-After", "1"),
++                                            ("Content-Length", "1000")])
++        error = reply(502, b'{"error":{"code":"upstream_transport_error"}}')
++        with gateway(binary, {"A1": [truncated], "B1": [reply()]}, opt_in) as run:
++            run.send("A1")
++            run.receive("A1", error, gateway_generated=True)
++            run.send("B1", "retry-b", "models")
++            run.queued_without_slot(1)
++            require(len(run.upstream.recorded()) == 1, "truncated_429_retried_or_cooldown_lost")
++            run.receive("B1", reply())
++            trace = run.upstream.recorded()
++            require(trace[1]["at"] - trace[0]["at"] >= 0.99,
++                    "truncated_429_cooldown_shortened")
++            status, body = run.control("status")
++            require(status == 200 and body["admission"]["active"] == 0
++                    and body["admission"]["queue_length"] == 0,
++                    "truncated_429_resources_not_released")
++            variants.append(run.finish(["A1", "B1"]))
++    return {"ingress": sum(row["ingress"] for row in variants),
++            "upstream_attempts": sum(row["upstream_attempts"] for row in variants),
++            "variants": variants}
++
++
++def self_check():
++    upstream = Upstream({"A1": [reply(429, TRANSIENT), reply()],
++                         "T1": [reply(429, TRANSIENT, [("Content-Length", "1000")])]})
++    thread = threading.Thread(target=upstream.serve_forever, daemon=True)
++    thread.start()
++    try:
++        for expected in (reply(429, TRANSIENT), reply()):
++            connection = http.client.HTTPConnection("127.0.0.1", upstream.server_port, timeout=2)
++            try:
++                connection.request("POST", "/team/v1/chat/completions?api-version=fixture", BODY,
++                                   {"X-Fixture-Request": "A1", "X-Fixture-Endpoint": "chat/completions"})
++                response = connection.getresponse()
++                require((response.status, response.read()) == expected[:2], "fixture_sequence")
++            finally:
++                connection.close()
++        check_trace(upstream.recorded(), ["A1", "A1"])
++        rejected = 0
++        for bad in ([], [{"label": "A1"}], [{"label": "A1"}] * 3,
++                    [{"label": "A1"}, {"label": "B1"}]):
++            try:
++                check_trace(bad, ["A1", "A1"])
++            except CheckFailed:
++                rejected += 1
++        require(rejected == 4 and not upstream.errors, "fixture_negative_detection")
++        connection = http.client.HTTPConnection("127.0.0.1", upstream.server_port, timeout=2)
++        try:
++            connection.request("POST", "/team/v1/chat/completions?api-version=fixture", BODY,
++                               {"X-Fixture-Request": "T1", "X-Fixture-Endpoint": "chat/completions"})
++            response = connection.getresponse()
++            require(response.status == 429, "truncated_fixture_status")
++            try:
++                response.read()
++            except http.client.IncompleteRead as error:
++                require(error.partial == TRANSIENT, "truncated_fixture_partial_body")
++            else:
++                raise CheckFailed("truncated_fixture_did_not_truncate")
++        finally:
++            connection.close()
++        check_trace(upstream.recorded(), ["A1", "A1", "T1"])
++        require(not upstream.errors, "truncated_fixture_error")
++        return {"passed": True, "gateway_executed": False, "fixture_attempts": 3,
++                "checks": ["scripted_429_then_200", "body_and_path_validation",
++                           "missing_duplicate_extra_or_wrong_label_rejected",
++                           "truncated_body_is_not_complete_json_transport"]}
++    finally:
++        upstream.shutdown()
++        upstream.server_close()
++        thread.join(timeout=3)
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--binary", type=Path)
++    parser.add_argument("--output", type=Path, required=True)
++    parser.add_argument("--self-check", action="store_true")
++    args = parser.parse_args()
++    require(args.self_check or args.binary is not None, "binary_required")
++    require(not args.output.exists(), "output_already_exists")
++    result = {"check": "retry_fixture_self_check" if args.self_check else "native_retry_loopback",
++              "timestamp": datetime.now(timezone.utc).isoformat(),
++              "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++              "os": platform.platform(), "python": platform.python_version(), "passed": False}
++    try:
++        if args.self_check:
++            result.update(self_check())
++        else:
++            binary = args.binary.resolve(strict=True)
++            before = hashlib.sha256(binary.read_bytes()).hexdigest()
++            result.update(binary=str(binary), binary_sha256=before, gateway_executed=True,
++                          quota_fixture={"rpm": "unlimited", "tpm": "unknown"}, cases=[])
++            for case in (default_off, opt_in_shared_ms, maximum_wait, no_replay, at_most_one,
++                         prehead_transport_failure):
++                row = {"case": case.__name__, "passed": False}
++                result["cases"].append(row)
++                row.update(case(binary), passed=True)
++            require(before == hashlib.sha256(binary.read_bytes()).hexdigest(), "binary_changed")
++            result["passed"] = True
++            result["limitations"] = [
++                "Synthetic HTTP fixture; no actual provider, agent or LLM task",
++                "Unlimited RPM isolates transport; no known-quota accounting assertion",
++                "Observed minimum waits are correctness checks, not latency or throughput benchmarks",
++                "No HTTP-date, cancel/stop race, resource-bound or cross-OS coverage in this probe",
++                "Candidate port is checked by child startup, not socket activation",
++            ]
++    except Exception as error:
++        result["error"] = str(error) if isinstance(error, CheckFailed) else type(error).__name__
++        if hasattr(error, "observation"):
++            result["failure_observation"] = error.observation
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    with args.output.open("x") as output:
++        output.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
++    print(json.dumps({"passed": result["passed"], "output": str(args.output),
++                      "error": result.get("error")}))
++    return 0 if result["passed"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/task8-quality-review/rereview/lifecycle_regression.py", line 63, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 205, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/task8-quality-review/rereview/lifecycle_regression.py", line 59, in main
+    for name in ['original_cancel','exception','repeated_cancel_kill','nonzero','normal']:await case(name)
+                                                                                          ^^^^^^^^^^^^^^^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/task8-quality-review/rereview/lifecycle_regression.py", line 46, in case
+    if mode=='repeated_cancel_kill':assert owned[0].returncode==-signal.SIGKILL
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

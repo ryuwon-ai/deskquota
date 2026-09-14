@@ -1,0 +1,302 @@
+warning: variants `Macos` and `Windows` are never constructed
+  --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:20:5
+   |
+19 | pub enum Platform {
+   |          -------- variants in this enum
+20 |     Macos,
+   |     ^^^^^
+21 |     Linux,
+22 |     Windows,
+   |     ^^^^^^^
+   |
+   = note: `Platform` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: variants `Available`, `ConfiguredButUnavailable`, and `Unknown` are never constructed
+  --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:27:5
+   |
+26 | pub enum LoginAuthAvailability {
+   |          --------------------- variants in this enum
+27 |     Available,
+   |     ^^^^^^^^^
+28 |     ConfiguredButUnavailable,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+29 |     Unknown,
+   |     ^^^^^^^
+   |
+   = note: `LoginAuthAvailability` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: variants `On` and `Off` are never constructed
+  --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:34:5
+   |
+33 | pub enum Action {
+   |          ------ variants in this enum
+34 |     On,
+   |     ^^
+35 |     Off,
+   |     ^^^
+   |
+   = note: `Action` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `login_auth_availability` is never used
+  --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:78:8
+   |
+78 | pub fn login_auth_availability(auth: &Auth) -> LoginAuthAvailability {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variant `Present` is never constructed
+  --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:98:5
+   |
+96 | enum Snapshot {
+   |      -------- variant in this enum
+97 |     Missing,
+98 |     Present {
+   |     ^^^^^^^
+   |
+   = note: `Snapshot` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: struct `RegistrationPlan` is never constructed
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:106:12
+    |
+106 | pub struct RegistrationPlan {
+    |            ^^^^^^^^^^^^^^^^
+    |
+    = note: `RegistrationPlan` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: multiple associated items are never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:117:12
+    |
+116 | impl RegistrationPlan {
+    | --------------------- associated items in this implementation
+117 |     pub fn prepare(
+    |            ^^^^^^^
+...
+132 |     pub fn prepare_for_windows_user(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+147 |     fn prepare_target(
+    |        ^^^^^^^^^^^^^^
+...
+169 |     pub fn state(&self) -> RegistrationState {
+    |            ^^^^^
+...
+173 |     pub fn registration_absent(&self) -> bool {
+    |            ^^^^^^^^^^^^^^^^^^^
+...
+178 |     pub fn target_path(&self) -> &Path {
+    |            ^^^^^^^^^^^
+...
+182 |     pub fn preview_hash(&self) -> &str {
+    |            ^^^^^^^^^^^^
+...
+186 |     pub fn registered_executable(&self) -> Option<&Path> {
+    |            ^^^^^^^^^^^^^^^^^^^^^
+...
+196 |     pub fn spec(&self) -> &RegistrationSpec {
+    |            ^^^^
+...
+200 |     pub fn action(&self) -> Action {
+    |            ^^^^^^
+...
+204 |     pub fn manager_commands(&self) -> Vec<String> {
+    |            ^^^^^^^^^^^^^^^^
+...
+235 |     pub fn preview(&self) -> String {
+    |            ^^^^^^^
+...
+257 |     pub fn apply(&self) -> Result<(), Error> {
+    |            ^^^^^
+...
+276 |     fn install(&self) -> Result<(), Error> {
+    |        ^^^^^^^
+...
+325 |     fn remove(&self) -> Result<(), Error> {
+    |        ^^^^^^
+
+warning: multiple associated items are never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:342:12
+    |
+341 | impl RegistrationSpec {
+    | --------------------- associated items in this implementation
+342 |     pub fn new(platform: Platform, executable: &Path, config: &Path) -> Result<Self, Error> {
+    |            ^^^
+...
+351 |     pub fn new_for_windows_user(
+    |            ^^^^^^^^^^^^^^^^^^^^
+...
+362 |     fn new_with_user(
+    |        ^^^^^^^^^^^^^
+...
+403 |     pub fn platform(&self) -> Platform {
+    |            ^^^^^^^^
+...
+407 |     pub fn label(&self) -> &str {
+    |            ^^^^^
+...
+411 |     pub fn definition(&self) -> &str {
+    |            ^^^^^^^^^^
+...
+415 |     pub fn user_identity(&self) -> Option<&str> {
+    |            ^^^^^^^^^^^^^
+...
+419 |     pub fn executable(&self) -> &Path {
+    |            ^^^^^^^^^^
+...
+423 |     pub fn config(&self) -> &Path {
+    |            ^^^^^^
+...
+427 |     pub fn argv(&self) -> [&Path; 4] {
+    |            ^^^^
+
+warning: function `target_path` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:460:4
+    |
+460 | fn target_path(platform: Platform, user_home: &Path, label: &str) -> PathBuf {
+    |    ^^^^^^^^^^^
+
+warning: function `quoted_display` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:474:4
+    |
+474 | fn quoted_display(path: &Path) -> String {
+    |    ^^^^^^^^^^^^^^
+
+warning: function `snapshot` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:488:4
+    |
+488 | fn snapshot(path: &Path, label: &str, platform: Platform) -> Result<Snapshot, Error> {
+    |    ^^^^^^^^
+
+warning: function `observe_manager` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:543:4
+    |
+543 | fn observe_manager(spec: &RegistrationSpec, target: &Path, local: &Snapshot) -> ManagerSnapshot {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `observe_linux_manager` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:564:4
+    |
+564 | fn observe_linux_manager(target: &Path, local: &Snapshot, label: &str) -> ManagerSnapshot {
+    |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `observe_windows_manager` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:663:4
+    |
+663 | fn observe_windows_manager(target: &Path, spec: &RegistrationSpec) -> ManagerSnapshot {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `digest_bytes` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:703:4
+    |
+703 | fn digest_bytes(bytes: &[u8]) -> String {
+    |    ^^^^^^^^^^^^
+
+warning: function `preview_hash` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:943:4
+    |
+943 | fn preview_hash(
+    |    ^^^^^^^^^^^^
+
+warning: function `current_platform` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:965:8
+    |
+965 | pub fn current_platform() -> Platform {
+    |        ^^^^^^^^^^^^^^^^
+
+warning: function `current_home` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:974:4
+    |
+974 | fn current_home() -> Result<PathBuf, Error> {
+    |    ^^^^^^^^^^^^
+
+warning: function `prepare_current` is never used
+   --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:990:8
+    |
+990 | pub fn prepare_current(config: &Path, action: Action) -> Result<RegistrationPlan, Error> {
+    |        ^^^^^^^^^^^^^^^
+
+warning: function `query_current` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1019:8
+     |
+1019 | pub fn query_current(config: &Path, auth: &Auth) -> Value {
+     |        ^^^^^^^^^^^^^
+
+warning: function `manager_registration` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1065:4
+     |
+1065 | fn manager_registration(plan: &RegistrationPlan) -> (String, String, String, Option<String>) {
+     |    ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `manager_reason` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1121:4
+     |
+1121 | fn manager_reason(output: &std::process::Output, fallback: &str) -> String {
+     |    ^^^^^^^^^^^^^^
+
+warning: function `linux_linger` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1128:4
+     |
+1128 | fn linux_linger() -> Value {
+     |    ^^^^^^^^^^^^
+
+warning: function `run_manager` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1141:4
+     |
+1141 | fn run_manager(mut command: Command, purpose: &str) -> Result<(), Error> {
+     |    ^^^^^^^^^^^
+
+warning: function `windows_task_query` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1154:4
+     |
+1154 | fn windows_task_query(label: &str) -> Result<std::process::Output, Error> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `install_manager` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1164:4
+     |
+1164 | fn install_manager(plan: &RegistrationPlan) -> Result<(), Error> {
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `remove_manager` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1210:4
+     |
+1210 | fn remove_manager(plan: &RegistrationPlan) -> Result<(), Error> {
+     |    ^^^^^^^^^^^^^^
+
+warning: function `absolute_for` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1253:4
+     |
+1253 | fn absolute_for(platform: Platform, path: &Path) -> bool {
+     |    ^^^^^^^^^^^^
+
+warning: function `valid_windows_sid` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1267:4
+     |
+1267 | fn valid_windows_sid(identity: &str) -> bool {
+     |    ^^^^^^^^^^^^^^^^^
+
+warning: function `xml` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1274:4
+     |
+1274 | fn xml(value: &str) -> String {
+     |    ^^^
+
+warning: function `macos_definition` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1289:4
+     |
+1289 | fn macos_definition(label: &str, executable: &Path, config: &Path) -> String {
+     |    ^^^^^^^^^^^^^^^^
+
+warning: function `windows_argument` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1346:4
+     |
+1346 | fn windows_argument(path: &Path) -> String {
+     |    ^^^^^^^^^^^^^^^^
+
+warning: function `windows_definition` is never used
+    --> /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1369:4
+     |
+1369 | fn windows_definition(
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: 33 warnings emitted
+

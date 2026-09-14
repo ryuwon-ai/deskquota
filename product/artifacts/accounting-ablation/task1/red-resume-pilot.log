@@ -1,0 +1,103 @@
+test_forged_accounting_or_snapshot_rejects_before_next_spawn (test_benchmark_accounting.AccountingCliBoundaryTests.test_forged_accounting_or_snapshot_rejects_before_next_spawn) ... ERROR
+test_invalid_mode_combinations_reject_before_output_creation (test_benchmark_accounting.AccountingCliBoundaryTests.test_invalid_mode_combinations_reject_before_output_creation) ... ok
+test_pilot_records_full_schedule_then_resume_reuses_pair (test_benchmark_accounting.AccountingCliBoundaryTests.test_pilot_records_full_schedule_then_resume_reuses_pair) ... ERROR
+test_second_arm_failure_never_marks_pilot_complete (test_benchmark_accounting.AccountingCliBoundaryTests.test_second_arm_failure_never_marks_pilot_complete) ... ERROR
+test_accounting_identity_has_no_benchmark_binary (test_benchmark_accounting.AccountingRulesTests.test_accounting_identity_has_no_benchmark_binary) ... ok
+test_actual_config_uses_one_accounting_value_in_toml_and_metadata (test_benchmark_accounting.AccountingRulesTests.test_actual_config_uses_one_accounting_value_in_toml_and_metadata) ... ok
+test_arm_profiles_and_alternating_pair_schedule (test_benchmark_accounting.AccountingRulesTests.test_arm_profiles_and_alternating_pair_schedule) ... ok
+test_normalized_pair_config_may_differ_only_in_accounting (test_benchmark_accounting.AccountingRulesTests.test_normalized_pair_config_may_differ_only_in_accounting) ... ok
+test_completed_generation_usage_is_linked_to_submitted_and_attempt (test_benchmark_accounting.AccountingRunValidationTests.test_completed_generation_usage_is_linked_to_submitted_and_attempt) ... ok
+test_cutoff_is_recomputed_and_exact_boundary_is_included (test_benchmark_accounting.AccountingRunValidationTests.test_cutoff_is_recomputed_and_exact_boundary_is_included) ... ok
+test_metadata_and_noncompleted_outcomes_need_no_usage (test_benchmark_accounting.AccountingRunValidationTests.test_metadata_and_noncompleted_outcomes_need_no_usage) ... ok
+test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) ... ok
+test_one_numeric_usage_before_done_is_observed (test_benchmark_accounting.UsageObservationTests.test_one_numeric_usage_before_done_is_observed) ... ok
+test_usage_failure_does_not_hide_completed_payload (test_benchmark_accounting.UsageObservationTests.test_usage_failure_does_not_hide_completed_payload) ... ok
+
+======================================================================
+ERROR: test_forged_accounting_or_snapshot_rejects_before_next_spawn (test_benchmark_accounting.AccountingCliBoundaryTests.test_forged_accounting_or_snapshot_rejects_before_next_spawn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 491, in test_forged_accounting_or_snapshot_rejects_before_next_spawn
+    await benchmark.main(args)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 422, in main
+    identity = identities(binary, reference)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 374, in identities
+    benchmark_identity = ({"path": str(reference), "sha256": digest(reference), "features": ["bench-harness"]}
+                                                             ~~~~~~^^^^^^^^^^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 71, in digest
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                          ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 777, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/accounting-forgery-lhzdbisp/unused-reference'
+
+======================================================================
+ERROR: test_pilot_records_full_schedule_then_resume_reuses_pair (test_benchmark_accounting.AccountingCliBoundaryTests.test_pilot_records_full_schedule_then_resume_reuses_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 447, in test_pilot_records_full_schedule_then_resume_reuses_pair
+    await benchmark.main(args)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 422, in main
+    identity = identities(binary, reference)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 374, in identities
+    benchmark_identity = ({"path": str(reference), "sha256": digest(reference), "features": ["bench-harness"]}
+                                                             ~~~~~~^^^^^^^^^^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 71, in digest
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                          ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 777, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/accounting-pilot-9yh62om_/unused-reference'
+
+======================================================================
+ERROR: test_second_arm_failure_never_marks_pilot_complete (test_benchmark_accounting.AccountingCliBoundaryTests.test_second_arm_failure_never_marks_pilot_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 538, in test_second_arm_failure_never_marks_pilot_complete
+    await benchmark.main(args)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 422, in main
+    identity = identities(binary, reference)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 374, in identities
+    benchmark_identity = ({"path": str(reference), "sha256": digest(reference), "features": ["bench-harness"]}
+                                                             ~~~~~~^^^^^^^^^^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 71, in digest
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                          ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 777, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/accounting-partial-7gfnnr31/unused-reference'
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.044s
+
+FAILED (errors=3)

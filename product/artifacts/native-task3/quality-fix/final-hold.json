@@ -1,0 +1,139 @@
+{
+  "phase": "FINAL_HOLD",
+  "fix": "native-task3 QUALITY Q1 missing-alias locks and Q2 TOML native values",
+  "execution_finished": true,
+  "writer_runtime_ownership_released": true,
+  "source_stable_after_capture": true,
+  "source_drift": [],
+  "source_files": 79,
+  "changed_files_from_task2": 12,
+  "changed_files_from_unowned_fix": 3,
+  "source_manifest_sha256": "375024c646828619b8ddf5d40955db78f416fef69cc14be3b720c727fe2d4e41",
+  "changed_files_manifest_sha256": "21fa1afa2f0e94b851e256df9434163ee171ac8bbf1121c1a28782147fee84fa",
+  "quality_fix_changed_files_manifest_sha256": "0a23a92f8422719a9b86da94780c54c32c78f7e10166ec9a3f6d61aa4bc3a68e",
+  "source_archive_sha256": "32c628f0fceb06d3b731985d45137b27f6cd76b34a838e8a39611dc28131b135",
+  "source_archive_bytes": 240116,
+  "binaries": {
+    "release": {
+      "path": "target/native-task3-quality-fix/release/llmgw",
+      "bytes": 9315184,
+      "sha256": "8b6fde7b380d00568b3ce6fbcc2ea21b577cfdc50d730a01955355d8ca16b233"
+    },
+    "debug": {
+      "path": "target/native-task3-quality-fix/debug/llmgw",
+      "bytes": 28150984,
+      "sha256": "15eac52098867407b4f06ed3c39e3fc87b69ecd67c063979da2852fac3682e65"
+    },
+    "debug_rlib": {
+      "path": "target/native-task3-quality-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+      "bytes": 47457624,
+      "sha256": "2dfb2de4ff95d0d4909dce3d342bf9ebd54422c2b4ad25c39eb46cf9c94d31a7"
+    }
+  },
+  "probe": {
+    "source": {
+      "path": "artifacts/native-task3/quality-fix/quality_probe.rs",
+      "bytes": 4504,
+      "sha256": "fa235c4916ec2f0de624f012608bf7ead323bef771f162a33429dc23b5406748"
+    },
+    "binary": {
+      "path": "artifacts/native-task3/quality-fix/quality-probe-tests",
+      "bytes": 6071696,
+      "sha256": "8811dd82ae986434585fbc15618603542826c74a0088a5cda481c31c2c616c19"
+    },
+    "stdout": {
+      "path": "artifacts/native-task3/quality-fix/quality-probe.stdout",
+      "bytes": 385,
+      "sha256": "373da8d54c81d28a8315cf5fcd26ae2695701033421b6fdc2854519849a5f561"
+    },
+    "all_cases_passed": true
+  },
+  "lockfile": {
+    "path": "Cargo.lock",
+    "bytes": 52711,
+    "sha256": "c82e9357a135eb84f0d1be70d0a5f16d2a6c0f7a520cc140562306418a0d3e1c"
+  },
+  "toolchain_file": {
+    "path": "rust-toolchain.toml",
+    "bytes": 52,
+    "sha256": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b"
+  },
+  "verification": {
+    "full_debug": {
+      "passed": 310,
+      "failed": 0,
+      "rows": [
+        11,
+        0,
+        3,
+        19,
+        22,
+        26,
+        46,
+        12,
+        7,
+        19,
+        42,
+        32,
+        27,
+        44,
+        0
+      ]
+    },
+    "patch_debug": {
+      "passed": 46,
+      "failed": 0
+    },
+    "patch_release": {
+      "passed": 46,
+      "failed": 0
+    },
+    "adapted_quality_probe": {
+      "passed": 4,
+      "failed": 0
+    },
+    "static": {
+      "rustfmt": "passed",
+      "check_all_targets": "passed",
+      "clippy_all_targets_deny_warnings": "passed",
+      "debug_build": "passed",
+      "release_build": "passed"
+    }
+  },
+  "red_green": {
+    "red": "patch-contract-quality-red.log: 41 passed, 4 failed",
+    "green_attempt_1": "45 passed before final lock-name contract",
+    "green_attempt_2": "45 passed after the initial rustfmt correction",
+    "green_attempt_3": "46 passed while rustfmt requested layout for the added lock-name assertion",
+    "green": "patch-contract-final.log: 46 passed, 0 failed against final formatted source",
+    "release_green": "patch-contract-release-final.log: 46 passed, 0 failed"
+  },
+  "finding_resolution": {
+    "Q1": "resource locks use the normalized physical parent plus the target filename and a fixed suffix, letting the filesystem itself equate case and Unicode aliases without lowercasing distinct names",
+    "Q2": "preview inspects only each owned TOML AST value or subtree and refuses native date/time values before writing; unrelated temporal fields and ordinary marker-shaped tables remain supported"
+  },
+  "platform_evidence": {
+    "macos_runtime": "actual case-insensitive and Unicode-normalizing missing aliases contended on one fs4 lock; focused/full tests include ACL, privacy, partial/crash, S1-S5 and TOML boundaries",
+    "windows": "static cfg only; no Windows runtime claim",
+    "linux": "static cfg only; no Linux runtime claim"
+  },
+  "protected": {
+    "accepted_task2": 426,
+    "task3_extra": 226,
+    "benchmark_raws": 40,
+    "accounting_raws": 10,
+    "drift": []
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)\nbinary: rustc\ncommit-hash: 6b00bc3880198600130e1cf62b8f8a93494488cc\ncommit-date: 2025-06-23\nhost: aarch64-apple-darwin\nrelease: 1.88.0\nLLVM version: 20.1.5",
+  "cargo": "cargo 1.88.0 (873a06493 2025-05-10)\nrelease: 1.88.0\ncommit-hash: 873a0649350c486caf67be772828a4f36bb4734c\ncommit-date: 2025-05-10\nhost: aarch64-apple-darwin\nlibgit2: 1.9.0 (sys:0.20.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.80+curl-8.12.1 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.4.1 11 Feb 2025\nos: Mac OS 26.5.1 [64-bit]",
+  "cleanup": "artifacts/native-task3/quality-fix/cleanup-final.json",
+  "limits": [
+    "all prior Task3 holds, failed probes, held binaries and reviewer evidence remain immutable",
+    "the earlier unavailable pre-redaction capture remains unavailable and was not reconstructed",
+    "external-editor final-check to rename filesystem CAS is not claimed",
+    "Windows and Linux runtime remain unverified",
+    "native TOML date/time ownership is explicitly unsupported and refused before write",
+    "Task4 adapters and CLI wiring remain out of scope"
+  ]
+}

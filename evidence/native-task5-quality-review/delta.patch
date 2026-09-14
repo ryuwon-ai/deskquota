@@ -1,0 +1,647 @@
+--- Task4/product/Cargo.lock
++++ Task5/product/Cargo.lock
+@@ -905,6 +905,7 @@
+  "hyper-util",
+  "jsonc-parser",
+  "libc",
++ "quick-xml",
+  "rand",
+  "reqwest",
+  "rustix",
+@@ -1019,6 +1020,15 @@
+ checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+ dependencies = [
+  "unicode-ident",
++]
++
++[[package]]
++name = "quick-xml"
++version = "0.42.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "41b1177fdf999d2321d3fb46ff47159d9c1fb9ad66a4879f8c50a0b504615e9b"
++dependencies = [
++ "memchr",
+ ]
+ 
+ [[package]]
+--- Task4/product/Cargo.toml
++++ Task5/product/Cargo.toml
+@@ -26,6 +26,7 @@
+ hyper-util = { version = "=0.1.20", features = ["server", "tokio"] }
+ jsonc-parser = { version = "=0.33.1", default-features = false, features = ["cst", "serde_json"] }
+ libc = "=0.2.183"
++quick-xml = { version = "=0.42.0", default-features = false }
+ rand = { version = "=0.10.2", default-features = false, features = ["thread_rng"] }
+ reqwest = { version = "=0.13.5", default-features = false, features = ["rustls", "stream", "http2"] }
+ serde = { version = "=1.0.228", features = ["derive"] }
+--- Task4/product/docs/runtime-contract.md
++++ Task5/product/docs/runtime-contract.md
+@@ -3,11 +3,12 @@
+ This package implements typed configuration and a native loopback HTTP gateway
+ with bounded streaming and worker-owned upstream lifetimes. Core behavior is
+ unchanged except that authenticated control remains available during shutdown.
+-Native Tasks 1 and 2 add lifecycle control, first-run setup, explicit upstream
+-transport settings, and bounded doctor network checks. Client adapters,
+-autostart registration, installers, and model management remain separate work.
+-
+-## Native lifecycle and setup (Tasks 1–2)
++Native Tasks 1–5 add lifecycle control, first-run setup, explicit upstream
++transport settings, bounded doctor network checks, reversible client profiles,
++and user-login autostart registration. Installers and model management remain
++separate work.
++
++## Native lifecycle and setup (Tasks 1–5)
+ 
+ The global `--config PATH` is accepted before or after every subcommand. A
+ relative path is resolved once from the invocation directory. With no explicit
+@@ -42,8 +43,11 @@
+ header value from a named environment variable, or send no auth. The environment
+ mode neither displays the value nor invents a `Bearer` prefix. Availability in
+ the current shell and availability after the next login are separate facts.
+-Setup only records a login request as pending; it never copies a secret into a
+-login registration. Forward mode cannot be exercised by doctor because doctor
++Setup records login intent in its pending metadata. After the core config is
++saved, it separately previews the exact OS target, executable, config, argv,
++prior registration state, manager command, and preview hash. Registration needs
++its own confirmation and never copies a secret or auth environment value.
++Forward mode cannot be exercised by doctor because doctor
+ has no incoming client credential.
+ 
+ Corporate setup may add an explicit HTTP(S) proxy without embedded credentials
+@@ -77,17 +81,17 @@
+ summary keeps listing verification and capability verification separate and
+ leaves unknown capabilities unverified.
+ 
+-Setup listens on loopback port 4141 by default. Pi, Claude Code, Codex, and manual
+-client choices are pending intents only: Task 2 never edits their files or
+-claims they are connected. Login registration is likewise pending. Setup stores
+-only these client names, the login request, and the shared/separate quota answers
++Setup listens on loopback port 4141 by default. Setup stores the selected client
++names, login request, and shared/separate quota answers
+ in a private `.<config-name>.setup-pending.json` sidecar so a rerun preserves
+ them. The sidecar contains no credential value or client before-image and does
+ not affect the worker config fingerprint. The final
+ preview shows absolute config/state paths, old and normalized new upstream bases,
+ explicit proxy/CA behavior, route URLs, protocol/model visibility, estimated
+ quota facts, the auth environment name without its value, fingerprint impact,
+-and pending client/login work. Root IDs use only ASCII letters, digits, `-`, and
++and pending client/login intent. Core config, each client profile, and OS
++registration remain separately previewed and applied resources; failure or
++cancellation of one does not imply another succeeded. Root IDs use only ASCII letters, digits, `-`, and
+ `_`; for example `pi-work` is valid and a root containing a space is rejected.
+ OpenAI-style clients use `http://127.0.0.1:4141/r/pi-work/v1`. A Messages client
+ uses `http://127.0.0.1:4141/r/pi-work` and appends `/v1/messages` exactly once.
+@@ -144,6 +148,63 @@
+ size failures remain distinct operational failures. Outputs name environment
+ references but never print their values.
+ 
++Plain doctor and one-shot CLI status query autostart registration outside the
++lifecycle readiness loop. They report registration, current authenticated
++runtime, and next-login auth availability as separate fields. A missing user
++manager or policy failure is unknown or unavailable with its reason, never
++silently treated as disabled or healthy. The current shell environment is never
++evidence that an environment credential will exist at the next login. Doctor
++also reports a missing or moved executable recorded in an owned registration.
++
++### User-login autostart boundary
++
++`llmgw autostart on` and `off` first print an exact config-scoped plan. A
++noninteractive apply requires `--apply-hash` from that fresh plan; an interactive
++terminal can confirm it directly. The hash includes the absolute executable and
++canonical config paths, rendered definition, target, action, and inspected prior
++registration. A target changed after preview or an unowned same-label target is
++refused. Neither action starts, stops, restarts, or otherwise probes the worker.
++
++macOS installs or removes only
++`~/Library/LaunchAgents/io.llmgw.gateway.<config-hash>.plist`. The plist uses
++literal `ProgramArguments` for `llmgw --config ABS run`, `RunAtLoad=true`, and
++`KeepAlive=false`; llmgw never calls launchctl bootstrap or bootout. Linux uses
++the matching user systemd unit with a literal absolute `ExecStart`,
++`Restart=no`, and `WantedBy=default.target`; it runs `systemctl --user
++enable/disable` without `--now` and only discloses existing linger state. Windows
++uses a current-user LogonTrigger task with `InteractiveToken`, `LeastPrivilege`,
++`IgnoreNew`, unlimited execution time, continuous-service battery/idle/network
++conditions, no restart policy, and the executable plus quoted argv. Registration
++never calls Task Scheduler Run, and removal never calls End.
++
++Linux registration status comes from one `systemctl --user show --all` query
++bound into the reviewed plan. The local fragment is accepted only when
++`FragmentPath` is exact, `DropInPaths` is empty, and `NeedDaemonReload=no`;
++otherwise the registration is foreign or unknown and mutation is refused. The
++reported executable is derived from that checked local fragment. Removal
++disables without `--now`, unlinks the owned fragment, runs `daemon-reload`, and
++re-observes once. A surviving global or foreign unit is reported and left
++untouched; none of these steps stops the current worker.
++
++The OS manager directly owns foreground `run`; there is no shell wrapper,
++watcher, alternate supervisor, privilege escalation, Windows Startup/VBS
++fallback, or Linux linger change. Environment-auth configs report next-login
++availability as `unknown` until that login environment is observed. The
++empty-login fixture separately reports `configured_but_unavailable` only after
++its run fails for the missing environment reference. No token or shell
++environment is copied into registration.
++
++`scripts/verify_native.py --templates-only` performs render contracts only on
++Linux and Windows and never dispatches `systemctl` or `schtasks`. On macOS it
++also installs and removes a plist under an owned temporary home and runs the
++read-only `plutil` validator; it never calls `launchctl`. These fixtures do not
++prove an actual login. Windows executable or config paths containing `%` are
++refused before planning or mutation until literal Task Scheduler delivery is
++verified on Windows. The staged `--exercise-user-service` path prints exact
++resources before requiring explicit execution in a temporary OS account and
++requires a human login timestamp plus explicit login attestation for login
++evidence.
++
+ Doctor JSON reports `state_directory` as the machine-readable fixture boundary
+ and creates no runtime state. No mandatory Python, Node.js, Redis, Docker, or WSL
+ runtime is introduced. The owned PTY and network fixture drivers use Python only
+@@ -184,16 +245,15 @@
+ failed inspection is exit 1, with `state=failed` in JSON. Stale records are
+ reported separately from whether a worker lock is held.
+ 
+-On launches the same executable with argv and disconnected stdio. Unix calls
++Manual `on` launches the same executable with argv and disconnected stdio. Unix calls
+ setsid before creating Tokio threads; Windows uses DETACHED_PROCESS and
+ CREATE_NEW_PROCESS_GROUP. There is no watchdog, periodic worker, shell command,
+-automatic model start, or OS registration. `worker.log` holds one fixed bounded
++or automatic model start. `worker.log` holds one fixed bounded
+ sanitized diagnostic event, not request or provider data. Startup outcomes come
+ from the new child's exit status, never a possibly stale log. An internal hidden
+ worker exit code distinguishes a bind conflict; public command failures remain 1.
+-Tokens never appear in argv,
+-runtime JSON or output. Autostart/client fields say `not_implemented`; off
+-preserves external client URLs/login settings whose current state is unknown.
++Tokens never appear in argv, runtime JSON, OS registration, or output. Manual
++off preserves client URLs and autostart registration.
+ 
+ State protection is checked before token writes and existing permissions are
+ never automatically modified. Unix requires current UID, private mode bits,
+@@ -214,9 +274,11 @@
+ check is not runtime proof. Full Windows cargo check on this Mac is blocked by
+ aws-lc-sys requiring Windows C/SDK headers; no Windows SDK was installed.
+ 
+-No actual LLM, persistent client configuration, model start, login registration
+-or release was exercised. See `artifacts/native-task1/` for exact checks and
+-remaining native OS acceptance limits.
++No actual LLM, current-account login registration, human login cycle, or release
++was exercised by Native Task 5. Owned temporary-home macOS registration fixtures
++and plist validation are distinct from actual login evidence. Windows and Linux
++runtime registration remain unverified. See `artifacts/native-task5/` for exact
++checks and remaining native OS acceptance limits.
+ 
+ ## Local quota admission
+ 
+--- Task4/product/src/cli.rs
++++ Task5/product/src/cli.rs
+@@ -30,6 +30,11 @@
+     Off,
+     /// Drain the current worker and apply the current configuration.
+     Restart,
++    /// Register or unregister start at the next user login without changing the worker.
++    Autostart {
++        #[command(subcommand)]
++        action: AutostartCommand,
++    },
+     /// Inspect this configuration's worker without calling its upstream.
+     Status {
+         #[arg(long)]
+@@ -96,6 +101,20 @@
+         fingerprint: String,
+     },
+ }
++
++#[derive(Debug, Subcommand)]
++enum AutostartCommand {
++    /// Register the exact foreground run command after preview review.
++    On {
++        #[arg(long)]
++        apply_hash: Option<String>,
++    },
++    /// Unregister this config after preview review.
++    Off {
++        #[arg(long)]
++        apply_hash: Option<String>,
++    },
++}
+ pub fn run() -> Result<ExitCode, crate::lifecycle::Error> {
+     let cli = Cli::parse();
+     let config = resolve_config(cli.config.as_deref())?;
+@@ -132,6 +151,7 @@
+                     "gateway config stage: applied ({:?}); runtime: {}; authenticated readiness: {}",
+                     result.mode, result.runtime_state, result.authenticated_readiness
+                 );
++                setup_autostart(&config, draft.login_requested())?;
+                 if !result.authenticated_readiness {
+                     for client in selected_clients {
+                         if !matches!(client, crate::setup::ClientIntent::Manual) {
+@@ -225,6 +245,9 @@
+     if let Command::Disconnect { client, journal } = command {
+         return disconnect(&config, &client, journal.as_deref());
+     }
++    if let Command::Autostart { action } = command {
++        return autostart(&config, action);
++    }
+     if matches!(command, Command::Worker { .. }) {
+         crate::lifecycle::prepare_worker()?;
+     }
+@@ -261,6 +284,7 @@
+                 println!("Restart cancels queued requests and drains active requests for up to 10 seconds before applying the saved configuration.");
+                 crate::lifecycle::restart(&config).await
+             }
++            Command::Autostart { .. } => unreachable!(),
+             Command::Status { .. } => crate::lifecycle::status(&config).await,
+             Command::Doctor { .. } => unreachable!(),
+             Command::Connect { .. } | Command::Disconnect { .. } => unreachable!(),
+@@ -268,7 +292,25 @@
+         let mut value = match result {
+             Ok(value) => value,
+             Err(error) => {
+-                if json { println!("{}", serde_json::json!({"state":"failed", "error":error.to_string(), "autostart":"not_implemented", "clients":"not_implemented"})); }
++                if json {
++                    let autostart = LoadedConfig::load(&config).map_or_else(
++                        |_| serde_json::json!({
++                            "registration":"unknown",
++                            "reason":"configuration unavailable for registration query",
++                            "current_shell_auth_is_login_proof":false,
++                        }),
++                        |loaded| {
++                            crate::autostart::query_current(
++                                &loaded.source_path,
++                                &loaded.config.upstream.auth,
++                            )
++                        },
++                    );
++                    println!(
++                        "{}",
++                        serde_json::json!({"state":"failed", "error":error.to_string(), "autostart":autostart, "clients":"not_inspected"})
++                    );
++                }
+                 if error
+                     .downcast_ref::<crate::config::ConfigError>()
+                     .is_some_and(invalid_config)
+@@ -283,10 +325,100 @@
+             if let Ok(clients) = client_statuses(&config) {
+                 value["clients"] = clients;
+             }
++            if let Ok(loaded) = LoadedConfig::load(&config) {
++                value["autostart"] = crate::autostart::query_current(
++                    &loaded.source_path,
++                    &loaded.config.upstream.auth,
++                );
++            }
+         }
+         if json { println!("{value}"); } else { display(&value, off); }
+         Ok(ExitCode::SUCCESS)
+     })
++}
++
++fn autostart(
++    config: &Path,
++    command: AutostartCommand,
++) -> Result<ExitCode, crate::lifecycle::Error> {
++    let (action, apply_hash) = match command {
++        AutostartCommand::On { apply_hash } => (crate::autostart::Action::On, apply_hash),
++        AutostartCommand::Off { apply_hash } => (crate::autostart::Action::Off, apply_hash),
++    };
++    let loaded = LoadedConfig::load(config)?;
++    let plan = crate::autostart::prepare_current(&loaded.source_path, action)?;
++    println!("{}", plan.preview());
++    println!("current runtime: unchanged; this command never starts or stops the worker");
++    let reviewed = if let Some(hash) = apply_hash {
++        if hash != plan.preview_hash() {
++            eprintln!("error: apply hash does not match this fresh autostart preview");
++            return Ok(ExitCode::from(2));
++        }
++        true
++    } else if std::io::stdin().is_terminal() && std::io::stderr().is_terminal() {
++        dialoguer::Confirm::new()
++            .with_prompt("Apply this exact user-login registration change?")
++            .default(false)
++            .interact()?
++    } else {
++        false
++    };
++    if !reviewed {
++        eprintln!(
++            "autostart preview only: rerun with --apply-hash {} or confirm in a terminal",
++            plan.preview_hash()
++        );
++        return Ok(ExitCode::from(2));
++    }
++    plan.apply()?;
++    println!("autostart registration stage: {action:?}; current runtime: unchanged");
++    Ok(ExitCode::SUCCESS)
++}
++
++fn setup_autostart(config: &Path, requested: bool) -> Result<(), crate::lifecycle::Error> {
++    let loaded = LoadedConfig::load(config)?;
++    let action = if requested {
++        crate::autostart::Action::On
++    } else {
++        crate::autostart::Action::Off
++    };
++    let plan = match crate::autostart::prepare_current(&loaded.source_path, action) {
++        Ok(plan) => plan,
++        Err(error) => {
++            println!(
++                "autostart registration stage: blocked ({error}); core config and manual on/off remain available"
++            );
++            return Ok(());
++        }
++    };
++    if !requested && plan.registration_absent() {
++        println!("autostart registration stage: disabled; no OS resource change required");
++        return Ok(());
++    }
++    println!("{}", plan.preview());
++    println!(
++        "login auth availability: {} (current terminal environment is not proof for next login; no token is copied into registration)",
++        crate::autostart::login_auth_availability(&loaded.config.upstream.auth),
++    );
++    let confirmed = dialoguer::Confirm::new()
++        .with_prompt("Apply this exact user-login registration change as a separate resource?")
++        .default(false)
++        .interact()?;
++    if !confirmed {
++        println!(
++            "autostart registration stage: pending; core config and manual on/off remain available"
++        );
++        return Ok(());
++    }
++    match plan.apply() {
++        Ok(()) => println!(
++            "autostart registration stage: applied ({action:?}); current worker was not started or stopped"
++        ),
++        Err(error) => println!(
++            "autostart registration stage: blocked ({error}); core config and manual on/off remain available"
++        ),
++    }
++    Ok(())
+ }
+ 
+ struct ConnectArgs {
+@@ -770,6 +902,8 @@
+     model: Option<&str>,
+     max_output_tokens: Option<u64>,
+ ) -> Result<ExitCode, crate::lifecycle::Error> {
++    let autostart =
++        crate::autostart::query_current(&loaded.source_path, &loaded.config.upstream.auth);
+     let auth = match &loaded.config.upstream.auth {
+         crate::config::Auth::None => "not required".to_owned(),
+         crate::config::Auth::Forward => {
+@@ -819,7 +953,7 @@
+                     "fingerprint":loaded.fingerprint.as_str(), "state_directory":loaded.state_paths.directory,
+                     "network":"not_requested", "inference":"not_requested", "auth_availability":auth,
+                     "tls":ca, "proxy":loaded.config.upstream.proxy.as_ref().map_or("disabled", |_| "explicit"),
+-                    "port_availability":port, "worker_readiness":"not_checked"
++                    "port_availability":port, "worker_readiness":"not_checked", "autostart":autostart
+                 })
+             );
+         } else {
+@@ -832,6 +966,25 @@
+             println!("auth availability: {auth}");
+             println!("port availability: {port}");
+             println!("worker readiness: not checked");
++            println!(
++                "autostart registration: {}; manager: {}; scope: {}; ownership: {}{}",
++                autostart["registration"].as_str().unwrap_or("unknown"),
++                autostart["manager"].as_str().unwrap_or("unknown"),
++                autostart["manager_scope"].as_str().unwrap_or("unknown"),
++                autostart["manager_ownership"].as_str().unwrap_or("unknown"),
++                autostart["reason"]
++                    .as_str()
++                    .map_or(String::new(), |reason| format!("; reason: {reason}")),
++            );
++            println!(
++                "login auth availability: {} (current shell is not proof for next login)",
++                autostart["login_auth_availability"]
++                    .as_str()
++                    .unwrap_or("unknown")
++            );
++            if autostart["registered_binary_available"] == false {
++                println!("autostart registered binary: unavailable or moved");
++            }
+             println!("network: not requested");
+             println!("inference: not requested");
+         }
+@@ -853,7 +1006,7 @@
+                 if json {
+                     println!(
+                         "{}",
+-                        serde_json::json!({"configuration":"valid","network":"models_get_succeeded","models":models,"inference":"not_requested","auth_availability":auth,"tls":ca,"worker_readiness":"not_checked"})
++                        serde_json::json!({"configuration":"valid","network":"models_get_succeeded","models":models,"inference":"not_requested","auth_availability":auth,"tls":ca,"worker_readiness":"not_checked","autostart":autostart})
+                     );
+                 } else {
+                     println!(
+@@ -867,7 +1020,7 @@
+                 if json {
+                     println!(
+                         "{}",
+-                        serde_json::json!({"configuration":"valid","network":"models_get_failed","status":status,"error":reason,"inference":"not_requested"})
++                        serde_json::json!({"configuration":"valid","network":"models_get_failed","status":status,"error":reason,"inference":"not_requested","autostart":autostart})
+                     );
+                 }
+                 return Err(std::io::Error::other(reason).into());
+@@ -882,7 +1035,7 @@
+     if json {
+         println!(
+             "{}",
+-            serde_json::json!({"configuration":"valid","network":"not_requested","inference":"succeeded","inference_calls":1,"model":model,"output_bound":output,"http_status":result.status,"worker_readiness":"not_checked"})
++            serde_json::json!({"configuration":"valid","network":"not_requested","inference":"succeeded","inference_calls":1,"model":model,"output_bound":output,"http_status":result.status,"worker_readiness":"not_checked","autostart":autostart})
+         );
+     } else {
+         println!(
+@@ -949,6 +1102,41 @@
+                 state["state"].as_str().unwrap_or("unknown")
+             );
+         }
++    }
++    if let Some(autostart) = value
++        .get("autostart")
++        .and_then(serde_json::Value::as_object)
++    {
++        println!(
++            "autostart registration: {}; manager: {}; scope: {}; ownership: {}{}",
++            autostart
++                .get("registration")
++                .and_then(serde_json::Value::as_str)
++                .unwrap_or("unknown"),
++            autostart
++                .get("manager")
++                .and_then(serde_json::Value::as_str)
++                .unwrap_or("unknown"),
++            autostart
++                .get("manager_scope")
++                .and_then(serde_json::Value::as_str)
++                .unwrap_or("unknown"),
++            autostart
++                .get("manager_ownership")
++                .and_then(serde_json::Value::as_str)
++                .unwrap_or("unknown"),
++            autostart
++                .get("reason")
++                .and_then(serde_json::Value::as_str)
++                .map_or(String::new(), |reason| format!("; reason: {reason}")),
++        );
++        println!(
++            "login auth availability: {} (current shell is not proof for next login)",
++            autostart
++                .get("login_auth_availability")
++                .and_then(serde_json::Value::as_str)
++                .unwrap_or("unknown")
++        );
+     }
+     if off {
+         println!(
+--- Task4/product/src/lib.rs
++++ Task5/product/src/lib.rs
+@@ -1,4 +1,5 @@
+ pub mod admission;
++pub mod autostart;
+ pub mod cli;
+ pub mod clients;
+ pub mod config;
+--- Task4/product/src/lifecycle/platform/unix.rs
++++ Task5/product/src/lifecycle/platform/unix.rs
+@@ -9,6 +9,12 @@
+     rustix::process::setsid().map(|_| ()).map_err(Into::into)
+ }
+ pub fn configure_detached(_command: &mut Command) {}
++pub fn current_user_identity() -> io::Result<String> {
++    Err(io::Error::new(
++        io::ErrorKind::Unsupported,
++        "Windows current-user identity is unavailable on this platform",
++    ))
++}
+ fn validate(metadata: &fs::Metadata, directory: bool) -> io::Result<()> {
+     if metadata.uid() != rustix::process::geteuid().as_raw()
+         || metadata.mode() & 0o077 != 0
+--- Task4/product/src/lifecycle/platform/windows.rs
++++ Task5/product/src/lifecycle/platform/windows.rs
+@@ -102,6 +102,40 @@
+         // SAFETY: construction initialized at least TOKEN_USER bytes in an aligned
+         // allocation; the returned pointer is borrowed only while self lives.
+         unsafe { (*(self.buffer.as_ptr().cast::<TOKEN_USER>())).User.Sid }
++    }
++}
++struct LocalString(windows_sys::core::PWSTR);
++impl Drop for LocalString {
++    fn drop(&mut self) {
++        // SAFETY: ConvertSidToStringSidW allocates this buffer with LocalAlloc.
++        unsafe {
++            LocalFree(self.0.cast());
++        }
++    }
++}
++pub fn current_user_identity() -> io::Result<String> {
++    let user = User::current()?;
++    let mut raw = null_mut();
++    // SAFETY: user owns a validated current-process token SID for this call;
++    // the returned LocalAlloc buffer is immediately placed under RAII.
++    unsafe {
++        check(ConvertSidToStringSidW(user.sid(), &mut raw))?;
++    }
++    if raw.is_null() {
++        return Err(denied());
++    }
++    let identity = LocalString(raw);
++    let mut length = 0usize;
++    // SAFETY: SID strings are NUL-terminated by ConvertSidToStringSidW. The
++    // documented maximum SID string is far below this defensive 256-unit cap.
++    unsafe {
++        while length < 256 && *identity.0.add(length) != 0 {
++            length += 1;
++        }
++        if length == 256 {
++            return Err(denied());
++        }
++        String::from_utf16(std::slice::from_raw_parts(identity.0, length)).map_err(|_| denied())
+     }
+ }
+ fn sid_fits(sid: PSID, end: usize) -> bool {
+--- Task4/product/src/setup/prompts.rs
++++ Task5/product/src/setup/prompts.rs
+@@ -413,7 +413,7 @@
+                         .write_line("Invalid value: listen port must be between 1 and 65535")
+                         .map_err(|e| Error::message(e.to_string()))?;
+                 };
+-                let login_requested = Confirm::with_theme(&self.theme).with_prompt("Request start at next login? (recorded pending; registration is a later task)").default(draft.login_requested).interact_on_opt(&self.term).map_err(|e| Error::message(e.to_string()))?.ok_or_else(|| Error::message("cancel"))?;
++                let login_requested = Confirm::with_theme(&self.theme).with_prompt("Start at next user login? After the config is saved, the exact OS registration target and argv will be previewed for separate confirmation").default(draft.login_requested).interact_on_opt(&self.term).map_err(|e| Error::message(e.to_string()))?.ok_or_else(|| Error::message("cancel"))?;
+                 Ok(Flow::SetRun(RunAnswers {
+                     port,
+                     login_requested,
+--- Task4/product/src/setup/summary.rs
++++ Task5/product/src/setup/summary.rs
+@@ -140,7 +140,7 @@
+             )),
+     );
+     Ok(format!(
+-        "config: {}\nstate: {}\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness\nlogin requested: {}; pending, registration not applied\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
++        "config: {}\nstate: {}\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness\nlogin requested: {}; pending, registration not applied; after config save, exact OS target preview and separate confirmation\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
+         config_path.display(),
+         state.directory.display(),
+         pending.display(),
+--- Task4/product/tests/lifecycle_contract.rs
++++ Task5/product/tests/lifecycle_contract.rs
+@@ -278,7 +278,11 @@
+             .unwrap()
+             > 0
+     );
+-    assert_eq!(s["autostart"], "not_implemented");
++    assert!(matches!(
++        s["autostart"]["registration"].as_str(),
++        Some("disabled" | "registered" | "unknown" | "blocked")
++    ));
++    assert_eq!(s["autostart"]["current_shell_auth_is_login_proof"], false);
+ }
+ #[test]
+ fn same_directory_configs_have_independent_workers() {
+@@ -483,6 +487,11 @@
+     assert_eq!(status.status.code(), Some(1));
+     let result: Value = serde_json::from_slice(&status.stdout).expect("failed status JSON");
+     assert_eq!(result["state"], "failed");
++    assert!(result["autostart"]["registration"].as_str().is_some());
++    assert_eq!(
++        result["autostart"]["current_shell_auth_is_login_proof"],
++        false
++    );
+ }
+ #[cfg(unix)]
+ #[test]
+--- Task4/product/tests/setup_contract.rs
++++ Task5/product/tests/setup_contract.rs
+@@ -982,6 +982,9 @@
+     assert!(summary.contains("pending, client files not changed"));
+     assert!(summary.contains("quota: estimated"));
+     assert!(summary.contains("login requested: no"));
++    assert!(
++        summary.contains("after config save, exact OS target preview and separate confirmation")
++    );
+     assert!(summary.contains("capabilities: unverified"));
+     assert!(summary.contains("user-supplied accounting fallback"));
+     assert!(summary.contains("not a verified provider limit"));
+@@ -1132,10 +1135,12 @@
+     assert!(text.contains("auth availability: not required"));
+     assert!(text.contains("port availability:"));
+     assert!(text.contains("worker readiness: not checked"));
+-}
+-
+-#[test]
+-fn doctor_missing_env_is_an_offline_operational_failure_without_value_disclosure() {
++    assert!(text.contains("autostart registration:"));
++    assert!(text.contains("login auth availability: available"));
++}
++
++#[test]
++fn doctor_missing_terminal_env_keeps_unobserved_login_auth_unknown() {
+     let temp = Temp::new("doctor-missing-env");
+     let name = format!("LLMGW_SETUP_DOCTOR_MISSING_{}", std::process::id());
+     let configured = draft(4141).connection(ConnectionAnswers {
+@@ -1158,6 +1163,7 @@
+     let stdout = String::from_utf8_lossy(&output.stdout);
+     assert!(stdout.contains(&format!("environment reference {name} unavailable")));
+     assert!(stdout.contains("network: not requested"));
++    assert!(stdout.contains("login auth availability: unknown"));
+     assert!(!stdout.contains("Bearer"));
+ }
+ 

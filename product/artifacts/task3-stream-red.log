@@ -1,0 +1,136 @@
+warning: fields `target`, `headers`, and `body` are never read
+  --> tests/support/fixture.rs:42:9
+   |
+41 | pub struct CapturedRequest {
+   |            --------------- fields in this struct
+42 |     pub target: String,
+   |         ^^^^^^
+43 |     pub headers: Vec<(String, Vec<u8>)>,
+   |         ^^^^^^^
+44 |     pub body: Vec<u8>,
+   |         ^^^^
+   |
+   = note: `CapturedRequest` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `header` is never used
+  --> tests/support/fixture.rs:48:12
+   |
+47 | impl CapturedRequest {
+   | -------------------- method in this implementation
+48 |     pub fn header(&self, name: &str) -> Option<&[u8]> {
+   |            ^^^^^^
+
+warning: fields `address`, `attempts`, `captures`, and `notify` are never read
+  --> tests/support/fixture.rs:57:5
+   |
+56 | pub struct UpstreamFixture {
+   |            --------------- fields in this struct
+57 |     address: SocketAddr,
+   |     ^^^^^^^
+58 |     attempts: Arc<AtomicUsize>,
+   |     ^^^^^^^^
+59 |     captures: Arc<Mutex<Vec<CapturedRequest>>>,
+   |     ^^^^^^^^
+60 |     notify: Arc<Notify>,
+   |     ^^^^^^
+
+warning: associated items `start`, `address`, `attempts`, and `capture` are never used
+   --> tests/support/fixture.rs:65:18
+    |
+64  | impl UpstreamFixture {
+    | -------------------- associated items in this implementation
+65  |     pub async fn start(response: Vec<u8>) -> Self {
+    |                  ^^^^^
+...
+111 |     pub fn address(&self) -> SocketAddr {
+    |            ^^^^^^^
+...
+115 |     pub fn attempts(&self) -> usize {
+    |            ^^^^^^^^
+...
+119 |     pub async fn capture(&self) -> CapturedRequest {
+    |                  ^^^^^^^
+
+warning: function `response_header` is never used
+   --> tests/support/fixture.rs:469:8
+    |
+469 | pub fn response_header<'a>(response: &'a [u8], name: &str) -> Option<&'a [u8]> {
+    |        ^^^^^^^^^^^^^^^
+
+warning: `llmgw` (test "stream_lifetime") generated 5 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running tests/stream_lifetime.rs (target/debug/deps/stream_lifetime-eb238ff51108ad95)
+
+running 9 tests
+test close_policy_terminates_socket ... FAILED
+test disconnect_drains_without_releasing_slot ... FAILED
+test first_event_arrives_before_eof ... ok
+test huge_event_marks_usage_unknown ... FAILED
+test queued_disconnect_never_starts_upstream ... FAILED
+test slow_reader_has_a_bounded_application_queue ... FAILED
+test split_utf8_and_sse_bytes_preserved ... FAILED
+test stop_drains_active_worker_before_returning ... FAILED
+test terminal_cleanup_happens_once ... FAILED
+
+failures:
+
+---- close_policy_terminates_socket stdout ----
+
+thread 'close_policy_terminates_socket' panicked at tests/support/fixture.rs:318:10:
+gateway closes upstream socket within timeout: Elapsed(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- disconnect_drains_without_releasing_slot stdout ----
+
+thread 'disconnect_drains_without_releasing_slot' panicked at tests/stream_lifetime.rs:189:5:
+assertion `left == right` failed: draining request owns the only slot
+  left: 2
+ right: 1
+
+---- huge_event_marks_usage_unknown stdout ----
+
+thread 'huge_event_marks_usage_unknown' panicked at tests/support/fixture.rs:421:56:
+connect gateway: Os { code: 49, kind: AddrNotAvailable, message: "Can't assign requested address" }
+
+---- queued_disconnect_never_starts_upstream stdout ----
+
+thread 'queued_disconnect_never_starts_upstream' panicked at tests/support/fixture.rs:448:13:
+assertion `left != right` failed: gateway response ended before expected bytes
+  left: 0
+ right: 0
+
+---- slow_reader_has_a_bounded_application_queue stdout ----
+
+thread 'slow_reader_has_a_bounded_application_queue' panicked at tests/support/fixture.rs:433:56:
+connect gateway: Os { code: 49, kind: AddrNotAvailable, message: "Can't assign requested address" }
+
+---- split_utf8_and_sse_bytes_preserved stdout ----
+
+thread 'split_utf8_and_sse_bytes_preserved' panicked at tests/support/fixture.rs:433:56:
+connect gateway: Os { code: 49, kind: AddrNotAvailable, message: "Can't assign requested address" }
+
+---- stop_drains_active_worker_before_returning stdout ----
+
+thread 'stop_drains_active_worker_before_returning' panicked at tests/support/fixture.rs:433:56:
+connect gateway: Os { code: 49, kind: AddrNotAvailable, message: "Can't assign requested address" }
+
+---- terminal_cleanup_happens_once stdout ----
+
+thread 'terminal_cleanup_happens_once' panicked at tests/support/fixture.rs:433:56:
+connect gateway: Os { code: 49, kind: AddrNotAvailable, message: "Can't assign requested address" }
+
+
+failures:
+    close_policy_terminates_socket
+    disconnect_drains_without_releasing_slot
+    huge_event_marks_usage_unknown
+    queued_disconnect_never_starts_upstream
+    slow_reader_has_a_bounded_application_queue
+    split_utf8_and_sse_bytes_preserved
+    stop_drains_active_worker_before_returning
+    terminal_cleanup_happens_once
+
+test result: FAILED. 1 passed; 8 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.53s
+
+error: test failed, to rerun pass `--test stream_lifetime`

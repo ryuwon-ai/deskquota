@@ -1,0 +1,27 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0382]: borrow of moved value: `args.root`
+   --> src/cli.rs:421:13
+    |
+389 |         root: args.root,
+    |               --------- value moved here
+...
+421 |             args.root,
+    |             ^^^^^^^^^ value borrowed here after move
+    |
+    = note: move occurs because `args.root` has type `std::string::String`, which does not implement the `Copy` trait
+    = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0382]: borrow of moved value: `args.model`
+   --> src/cli.rs:422:13
+    |
+390 |         model: args.model,
+    |                ---------- value moved here
+...
+422 |             args.model,
+    |             ^^^^^^^^^^ value borrowed here after move
+    |
+    = note: move occurs because `args.model` has type `std::string::String`, which does not implement the `Copy` trait
+    = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `llmgw` (lib) due to 2 previous errors

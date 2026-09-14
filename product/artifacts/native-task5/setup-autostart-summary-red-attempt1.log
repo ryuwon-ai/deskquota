@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.92s
+     Running tests/setup_contract.rs (target/native-task5/debug/deps/setup_contract-b8fe89e85e019584)
+
+running 1 test
+test summary_resolves_paths_and_joins_prefix_and_v1_exactly_once ... FAILED
+
+failures:
+
+---- summary_resolves_paths_and_joins_prefix_and_v1_exactly_once stdout ----
+
+thread 'summary_resolves_paths_and_joins_prefix_and_v1_exactly_once' panicked at tests/setup_contract.rs:985:5:
+assertion failed: summary.contains("after config save, exact OS target preview and separate confirmation")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    summary_resolves_paths_and_joins_prefix_and_v1_exactly_once
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test setup_contract`

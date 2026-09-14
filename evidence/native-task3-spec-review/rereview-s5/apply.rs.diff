@@ -1,0 +1,21 @@
+--- spec-fix/product/src/config_patch/apply.rs
++++ unowned-fix/product/src/config_patch/apply.rs
+@@ -258,6 +258,18 @@
+         None
+     };
+ 
++    if let Some(index) = resource_index
++        && !journal.resources[index].has_owned_state()
++    {
++        let resource = &mut journal.resources[index];
++        resource.original_hash = snapshot_hash(prepared.before.as_deref());
++        resource.created = prepared.before.is_none();
++        resource.created_hash = None;
++        resource.pending_created_hash = None;
++        resource.requires_user_private = prepared.contains_local_data_token;
++        resource.stage = ResourceStage::Unstarted;
++    }
++
+     let index = match resource_index {
+         Some(index) => index,
+         None => {

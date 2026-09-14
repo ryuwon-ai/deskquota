@@ -1,0 +1,91 @@
+{
+  "status": "DONE_WITH_CONCERNS / HOLD for fresh SPEC then fresh QUALITY review",
+  "changed_product_files": [
+    "product/docs/benchmark-method.md",
+    "product/scripts/benchmark.py",
+    "product/scripts/benchmark_http.py"
+  ],
+  "added_product_files": [
+    "product/scripts/benchmark_accounting.py",
+    "product/tests/test_benchmark_accounting.py"
+  ],
+  "removed_product_files": [],
+  "rust_or_cargo_changes": [],
+  "new_dependencies": [],
+  "verification": {
+    "unit": {
+      "command": "python3 -m unittest discover -s tests -p test_benchmark_accounting.py -v",
+      "passed": 19,
+      "failed": 0,
+      "log": "unit-final.log"
+    },
+    "self_check": {
+      "command": "python3 scripts/benchmark.py --self-check",
+      "passed": true,
+      "log": "self-check-final.log"
+    },
+    "smoke": {
+      "command": "python3 scripts/benchmark.py --mode accounting --smoke --binary target/native/release/llmgw --seeds 1 --output artifacts/accounting-ablation/task1/smoke-final.json",
+      "artifact": "smoke-final.json",
+      "sha256": "42ba371c14d42ef940d5468504f5cd273e8b45e98f441e86f114c50546296b69",
+      "status": "completed_smoke",
+      "planned_pairs": 1,
+      "completed_pairs": 1,
+      "matrix_complete": true,
+      "interpretation_scope": "smoke_validation_only_no_efficiency_conclusion",
+      "identity_matches_final_source": true,
+      "runs": [
+        {
+          "arm": "production_rr",
+          "accounting": "reserved",
+          "submitted": 20,
+          "completed": 17,
+          "cancelled": 3,
+          "mock_attempts": 19,
+          "usage_observed_generation": 15,
+          "usage_not_applicable_metadata": 2,
+          "usage_not_observed_cancelled": 3,
+          "run_sha256": "311b39759910b20c6f6571aaa0fb0d45367fa4a5f7eb55ccc3460e409494e0e7"
+        },
+        {
+          "arm": "production_actual",
+          "accounting": "actual",
+          "submitted": 20,
+          "completed": 17,
+          "cancelled": 3,
+          "mock_attempts": 20,
+          "usage_observed_generation": 15,
+          "usage_not_applicable_metadata": 2,
+          "usage_not_observed_cancelled": 3,
+          "run_sha256": "b412b04fe2091926cc2d6f82d3f0737db5f674c280aefa8fc3de5e64846ff262"
+        }
+      ]
+    }
+  },
+  "source_hold": {
+    "source_files": 59,
+    "manifest": "source-manifest.json",
+    "manifest_sha256": "eb30edc170d8bc3f933c3f95962ef6103f948f8a6a65c1e981a1464963af69cc",
+    "archive": "source-hold.tar.gz",
+    "archive_bytes": 171423,
+    "archive_sha256": "20a03d866f66a24bd2ff1335172f8c6ff44c5bb594037b25d17786d8cd2f96b3",
+    "binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+  },
+  "preserved_originals": {
+    "product/artifacts/native-task1/quality-fix/source-manifest.json": "4f89a05514a8a662409c89d2945394c19a0c318fd24076e0741de521cd7780a2",
+    "product/artifacts/native-task1/quality-fix/source-hold.tar.gz": "d84f5b1ee94fc2a57a697b92007e2b2715168735a97ef33c2209f4e01f6d5c33",
+    "product/artifacts/pilot.json": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6",
+    "evidence/product-task8-quality-fixed-source.tar.gz": "c4bb57f143bc03e1c23fb51fee5bedba4d89ca01106f5f09106ec318a383cb29"
+  },
+  "cleanup": {
+    "remaining_owned_processes": [],
+    "remaining_owned_temp_directories": []
+  },
+  "limits": [
+    "No Rust build or Rust suite was run because Rust and Cargo inputs are unchanged.",
+    "No five-seed 300-second accounting pilot or Task 2 independent audit was run.",
+    "No efficiency conclusion follows from the three-second smoke.",
+    "Client-observed usage is not direct proof of gateway internal refund.",
+    "No real provider/model, user client settings, OS registration, Git operation, or external message."
+  ]
+}

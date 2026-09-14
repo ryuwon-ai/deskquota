@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-09-12T09:18:46.435319+00:00",
+  "scope": "Native distribution metadata only, not binary download/install/execution or OS support proof",
+  "source": {
+    "url": "https://raw.githubusercontent.com/maximhq/bifrost/c193745d2a713e9f58f021d43e138df5eb7e038a/npx/bifrost/bin.js",
+    "git_sha": "c193745d2a713e9f58f021d43e138df5eb7e038a",
+    "file_sha256": "f51469dce27428752a9bfd0d2e89e347765256c529f27f6b8bae3f0e62440300",
+    "download_rule_confirmed": true
+  },
+  "candidates": [
+    {
+      "platform": "darwin",
+      "arch": "arm64",
+      "url": "https://downloads.getmaxim.ai/bifrost/v2.1.1/darwin/arm64/bifrost-http",
+      "method": "HEAD",
+      "error": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "platform": "windows",
+      "arch": "amd64",
+      "url": "https://downloads.getmaxim.ai/bifrost/v2.1.1/windows/amd64/bifrost-http.exe",
+      "method": "HEAD",
+      "error": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    },
+    {
+      "platform": "linux",
+      "arch": "amd64",
+      "url": "https://downloads.getmaxim.ai/bifrost/v2.1.1/linux/amd64/bifrost-http",
+      "method": "HEAD",
+      "error": "HTTPError",
+      "detail": "HTTP Error 403: Forbidden"
+    }
+  ],
+  "limitations": [
+    "HEAD existence and content length do not establish executable version, binary checksum, performance or OS compatibility",
+    "ETag is recorded as HTTP metadata, not a verified SHA256",
+    "No installer, wrapper or gateway was executed"
+  ]
+}

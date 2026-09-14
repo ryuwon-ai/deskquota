@@ -1,0 +1,84 @@
+   Compiling bitflags v2.13.2
+   Compiling rustix v1.1.4
+   Compiling security-framework v3.7.0
+   Compiling tower-http v0.6.11
+   Compiling rustls-platform-verifier v0.7.0
+   Compiling reqwest v0.13.5
+   Compiling fs4 v1.1.0
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.98s
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-86a6ed386b85f0cb)
+
+running 6 tests
+
+thread 'main' panicked at /Users/ryuwon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/clap_builder-4.6.6/src/builder/debug_asserts.rs:268:9:
+Command llmgw: Global arguments cannot be required.
+
+	'config' is marked as both global and required
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'main' panicked at /Users/ryuwon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/clap_builder-4.6.6/src/builder/debug_asserts.rs:268:9:
+Command llmgw: Global arguments cannot be required.
+
+	'config' is marked as both global and required
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test known_quota_is_ready_with_empty_queue_startup_hold ... FAILED
+test stopped_is_success_and_off_is_idempotent ... FAILED
+test stale_pid_never_kills_an_unrelated_process ... FAILED
+test concurrent_on_has_one_identity ... FAILED
+test changed_config_requires_restart_and_invalid_edit_can_stop_old_port ... FAILED
+test occupied_port_does_not_stop_unrelated_listener ... FAILED
+
+failures:
+
+---- known_quota_is_ready_with_empty_queue_startup_hold stdout ----
+
+thread 'known_quota_is_ready_with_empty_queue_startup_hold' panicked at tests/lifecycle_contract.rs:38:191:
+assertion failed: f.call("on").status.success()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- stopped_is_success_and_off_is_idempotent stdout ----
+
+thread 'stopped_is_success_and_off_is_idempotent' panicked at tests/lifecycle_contract.rs:30:91:
+status failed: 
+thread 'main' panicked at /Users/ryuwon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/clap_builder-4.6.6/src/builder/debug_asserts.rs:268:9:
+Command llmgw: Global arguments cannot be required.
+
+	'config' is marked as both global and required
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+---- stale_pid_never_kills_an_unrelated_process stdout ----
+
+thread 'stale_pid_never_kills_an_unrelated_process' panicked at tests/lifecycle_contract.rs:37:141:
+doctor JSON required
+
+---- concurrent_on_has_one_identity stdout ----
+
+thread 'concurrent_on_has_one_identity' panicked at tests/lifecycle_contract.rs:34:273:
+both on must succeed
+
+---- changed_config_requires_restart_and_invalid_edit_can_stop_old_port stdout ----
+
+thread 'changed_config_requires_restart_and_invalid_edit_can_stop_old_port' panicked at tests/lifecycle_contract.rs:36:103:
+assertion failed: f.call("on").status.success()
+
+---- occupied_port_does_not_stop_unrelated_listener stdout ----
+
+thread 'occupied_port_does_not_stop_unrelated_listener' panicked at tests/lifecycle_contract.rs:35:195:
+assertion `left == right` failed
+  left: Some(101)
+ right: Some(1)
+
+
+failures:
+    changed_config_requires_restart_and_invalid_edit_can_stop_old_port
+    concurrent_on_has_one_identity
+    known_quota_is_ready_with_empty_queue_startup_hold
+    occupied_port_does_not_stop_unrelated_listener
+    stale_pid_never_kills_an_unrelated_process
+    stopped_is_success_and_off_is_idempotent
+
+test result: FAILED. 0 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

@@ -1,0 +1,5 @@
+{
+  "error": "AssertionError comparing two recomputed pairs against one stored checkpoint pair",
+  "classification": "partial reader assumption, not product failure",
+  "explanation": "Initial partial-reader assertion incorrectly expected running manifest evaluation to contain both completed pairs. Runner retains previous checkpoint evaluation until the full loop returns; only completed raw rows are updated during the loop. Corrected independent partial reader compares available checkpoint aggregate and explicitly recomputes both raw pairs. No product/data/measurement change."
+}

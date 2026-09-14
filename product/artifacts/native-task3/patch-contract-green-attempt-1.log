@@ -1,0 +1,112 @@
+   Compiling jsonc-parser v0.33.1
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0277]: the trait bound `Array<u8, UInt<UInt<UInt<UInt<..., ...>, ...>, ...>, ...>>: LowerHex` is not satisfied
+  --> src/config_patch/apply.rs:72:31
+   |
+72 |         hash: format!("{:x}", hasher.finalize()),
+   |                        ----   ^^^^^^^^^^^^^^^^^ the trait `LowerHex` is not implemented for `Array<u8, UInt<UInt<UInt<UInt<UInt<..., ...>, ...>, ...>, ...>, ...>>`
+   |                        |
+   |                        required by a bound introduced by this call
+   |
+   = help: the following other types implement trait `LowerHex`:
+             &T
+             &mut T
+             Access
+             AclOption
+             AtFlags
+             BytesMut
+             CloneFlags
+             CopyfileFlags
+           and 71 others
+note: required by a bound in `core::fmt::rt::Argument::<'_>::new_lower_hex`
+  --> /rustc/6b00bc3880198600130e1cf62b8f8a93494488cc/library/core/src/fmt/rt.rs:134:5
+   = note: the full name for the type has been written to '/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3/debug/deps/llmgw-eba4665eb2ddaf45.long-type-11213843047690862682.txt'
+   = note: consider using `--verbose` to print the full type name to the console
+   = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `DocumentMut: TableLike` is not satisfied
+   --> src/config_patch/apply.rs:483:36
+    |
+483 |         changed |= edit_toml_table(&mut document, edit.key().components(), desired.as_ref())?;
+    |                                    ^^^^^^^^^^^^^ the trait `TableLike` is not implemented for `DocumentMut`
+    |
+    = help: the following other types implement trait `TableLike`:
+              toml_edit::InlineTable
+              toml_edit::Table
+    = note: required for the cast from `&mut DocumentMut` to `&mut dyn TableLike`
+
+error[E0277]: the trait bound `Array<u8, UInt<UInt<UInt<UInt<..., ...>, ...>, ...>, ...>>: LowerHex` is not satisfied
+   --> src/config_patch/mod.rs:203:21
+    |
+203 |     format!("{:x}", hasher.finalize())
+    |              ----   ^^^^^^^^^^^^^^^^^ the trait `LowerHex` is not implemented for `Array<u8, UInt<UInt<UInt<UInt<UInt<..., ...>, ...>, ...>, ...>, ...>>`
+    |              |
+    |              required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `LowerHex`:
+              &T
+              &mut T
+              Access
+              AclOption
+              AtFlags
+              BytesMut
+              CloneFlags
+              CopyfileFlags
+            and 71 others
+note: required by a bound in `core::fmt::rt::Argument::<'_>::new_lower_hex`
+   --> /rustc/6b00bc3880198600130e1cf62b8f8a93494488cc/library/core/src/fmt/rt.rs:134:5
+    = note: the full name for the type has been written to '/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3/debug/deps/llmgw-eba4665eb2ddaf45.long-type-11213843047690862682.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `Array<u8, UInt<UInt<UInt<UInt<..., ...>, ...>, ...>, ...>>: LowerHex` is not satisfied
+   --> src/config_patch/mod.rs:215:21
+    |
+215 |     format!("{:x}", hasher.finalize())
+    |              ----   ^^^^^^^^^^^^^^^^^ the trait `LowerHex` is not implemented for `Array<u8, UInt<UInt<UInt<UInt<UInt<..., ...>, ...>, ...>, ...>, ...>>`
+    |              |
+    |              required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `LowerHex`:
+              &T
+              &mut T
+              Access
+              AclOption
+              AtFlags
+              BytesMut
+              CloneFlags
+              CopyfileFlags
+            and 71 others
+note: required by a bound in `core::fmt::rt::Argument::<'_>::new_lower_hex`
+   --> /rustc/6b00bc3880198600130e1cf62b8f8a93494488cc/library/core/src/fmt/rt.rs:134:5
+    = note: the full name for the type has been written to '/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3/debug/deps/llmgw-eba4665eb2ddaf45.long-type-11213843047690862682.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0502]: cannot borrow `*journal` as immutable because it is also borrowed as mutable
+   --> src/config_patch/apply.rs:213:5
+    |
+180 |     let resource = &mut journal.resources[index];
+    |                         ----------------- mutable borrow occurs here
+...
+213 |     journal.save(&transaction.journal_path)?;
+    |     ^^^^^^^ immutable borrow occurs here
+...
+219 |         resource.stage = ResourceStage::Failed;
+    |         -------------------------------------- mutable borrow later used here
+
+error[E0502]: cannot borrow `*journal` as immutable because it is also borrowed as mutable
+   --> src/config_patch/apply.rs:232:5
+    |
+180 |     let resource = &mut journal.resources[index];
+    |                         ----------------- mutable borrow occurs here
+...
+232 |     journal.save(&transaction.journal_path)?;
+    |     ^^^^^^^ immutable borrow occurs here
+...
+236 |         resource.stage = ResourceStage::Failed;
+    |         -------------------------------------- mutable borrow later used here
+
+Some errors have detailed explanations: E0277, E0502.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `llmgw` (lib) due to 6 previous errors

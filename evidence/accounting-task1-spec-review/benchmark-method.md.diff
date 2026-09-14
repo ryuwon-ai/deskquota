@@ -1,0 +1,68 @@
+--- native1/product/docs/benchmark-method.md
++++ product/docs/benchmark-method.md
+@@ -7,6 +7,65 @@
+ smoke and no-wait-only results are explicitly different states. No competitor
+ performance result is implied. The research benchmark specification and pinned
+ reference audit supply the measurement boundaries.
++
++## Accounting ablation mode
++
++The original four-arm baseline above remains a separate experiment. Its no-wait
++phase describes added proxy latency and memory, while its quota phase compares
++direct, ordinary product RR, and two benchmark-only scheduler arms. The
++accounting ablation does not reuse those results as a control and does not launch
++the benchmark-only executable. It runs the same ordinary `llmgw` path, SHA256,
++and empty feature set twice per seed:
++
++- `production_rr` uses `accounting = "reserved"`.
++- `production_actual` uses `accounting = "actual"`.
++
++`--mode accounting` accepts only `--phase quota` or `--smoke`. Quota runs require
++exactly five 60-second windows, so their evaluator cutoff is 300 seconds. Smoke
++uses the same two product profiles with one compressed fixture schedule and a
++three-second cutoff; it validates transport, accounting provenance, usage, and
++cleanup without an efficiency conclusion. `--pilot-only` is valid only for the
++accounting quota phase. It records the complete requested seed schedule but runs
++and validates both arms for the first seed before returning
++`accounting_pilot_completed`. A later identical command without `--pilot-only`
++reuses that verified pair and continues the remaining schedule. A partial pair
++never receives the pilot-completed state.
++
++```sh
++python3 scripts/benchmark.py --mode accounting --smoke \
++  --binary target/native/release/llmgw --seeds 1 \
++  --output artifacts/accounting-ablation/smoke.json
++
++python3 scripts/benchmark.py --mode accounting --phase quota --pilot-only \
++  --binary target/native/release/llmgw --seeds 1,2,3,4,5 --windows 5 \
++  --output artifacts/accounting-ablation/pilot.json
++```
++
++Each product run stores the accounting value together with the launched binary
++identity, SHA256 of the exact generated TOML, and a sanitized snapshot parsed
++from that TOML. The snapshot permits only loopback, auth `none`, retry off,
++close-on-cancel, concurrency two, four registered roots, the fixed model bound,
++and the phase quota. Pair comparison normalizes allocated loopback port numbers
++and generated temporary paths. Scheme, host, upstream path/query, endpoints,
++root/model IDs, model output bound, quota, and every other setting remain exact;
++the normalized snapshots may differ only at `accounting`.
++
++Completed generation responses must contain exactly one valid numerical usage
++object before `[DONE]`. Both token fields must be integers in the unsigned
++64-bit range and must match the linked submitted ratio and actual mock attempt.
++Metadata completion records usage as `not_applicable`; a cancellation, timeout,
++rejection, or disconnect may record `not_observed`. Missing, duplicated,
++post-terminal, or altered usage invalidates accounting evidence without turning
++an otherwise observed completion payload into a more favorable outcome. This
++client observation checks the fixture response. It is not by itself evidence of
++the gateway's internal refund; source-identity-matched Rust contract evidence
++remains a separate basis.
++
++Paired output reports each seed's actual-minus-reserved completions at the fixed
++cutoff, complete terminal denominators, root/length results, mock 429s, observed
++additional attempts, and scheduled cancellation outcomes. Post-cutoff drain
++completions and success-only latency stay separate. A first-pair checkpoint is
++labelled as one-pair evidence and carries no multi-seed conclusion.
+ 
+ ## Arms and build identity
+ 

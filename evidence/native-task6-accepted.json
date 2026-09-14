@@ -1,0 +1,165 @@
+{
+  "accepted_at": "2026-09-13T09:11:11.960810+00:00",
+  "status": "accepted_with_disclosed_platform_and_performance_limits",
+  "scope": "Native Tasks1-6 minimal implementation and macOS arm64 isolated package/client acceptance; actual other OS/signing/login/clean account/low-end acceptance excluded",
+  "source_manifest": "product/artifacts/native-final-integration-fix/source-manifest.json",
+  "source_manifest_sha256": "3f2c38648167168e2d9d22324cdae7850f1a839a791e42d65c4168e45269f8aa",
+  "release_sha256": "16de493ce1ec7f034d0fed31db111bd4ddcf2750c813e37fb12a8b2b74f10fa7",
+  "release_binary_bytes": 10038272,
+  "package": "product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz",
+  "package_sha256": "62327038bf36303a7a242bd7ddc822a62036003f647108dab6df5f69e69d3acb",
+  "package_bytes": 4209368,
+  "checksum_manifest": "product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256",
+  "installation_document": "product/docs/installation.md",
+  "parent_check": "evidence/native-final-packaged-parent-check.json",
+  "source_build_parent_check": "evidence/native-final-integration-fix-parent-check.json",
+  "final_integration_review": "evidence/native-final-integration-review/rereview-i1/README.md",
+  "task6_quality_rereview": "evidence/native-task6-quality-review/rereview-q1-q2/README.md",
+  "task6_spec_confirmation": "evidence/native-task6-spec-review-fallback/final-confirmation/README.md",
+  "rust_tests_passed": 370,
+  "rust_tests_failed": 0,
+  "fresh_clients": {
+    "pi": {
+      "version": "0.84.2",
+      "protocol": "OpenAI Chat Completions SSE",
+      "listing": "verified",
+      "selection": "verified",
+      "tools": "verified",
+      "gateway_off_zero_upstream": true,
+      "disconnect": "verified"
+    },
+    "claude": {
+      "version": "2.1.63",
+      "protocol": "Anthropic Messages SSE",
+      "listing": "not_requested",
+      "selection": "verified",
+      "tools": "verified",
+      "gateway_off_zero_upstream": true,
+      "disconnect": "verified"
+    },
+    "codex": {
+      "version": "0.154.0",
+      "protocol": "OpenAI Responses with WebSocket disabled",
+      "listing": "unverified",
+      "selection": "verified",
+      "tools": "verified",
+      "gateway_off_zero_upstream": true,
+      "disconnect": "verified"
+    }
+  },
+  "native_measurement": {
+    "binary": "/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-final-packaged-2skzbarq/사용자 home with space/.local/bin/llmgw",
+    "binary_sha256": "16de493ce1ec7f034d0fed31db111bd4ddcf2750c813e37fb12a8b2b74f10fa7",
+    "host": {
+      "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "development_host": "Apple M4 32 GiB; not a low-end or clean OS account"
+    },
+    "environment_keys": [
+      "HOME",
+      "LC_ALL",
+      "PATH",
+      "TMPDIR",
+      "USERPROFILE",
+      "XDG_CONFIG_HOME"
+    ],
+    "wizard": {
+      "client_selection": "manual",
+      "client_version_query_children": 0,
+      "invocations": {
+        "direct_pid_sampled": {
+          "completed_save_only": true,
+          "sample_interval_ms": 20,
+          "sample_count": 2,
+          "raw_pid_samples": [
+            {
+              "elapsed_nanoseconds": 0,
+              "pid": 56179,
+              "rss_bytes": 4718592
+            },
+            {
+              "elapsed_nanoseconds": 23766417,
+              "pid": 56179,
+              "rss_bytes": 9502720
+            }
+          ],
+          "sampled_pid_max_rss_bytes": 9502720,
+          "scope": "exact direct llmgw setup PID from the owned PTY process",
+          "limit": "sample maximum; peaks between observations may be missed"
+        },
+        "timed_command_tree": {
+          "completed_save_only": true,
+          "os_command_tree_peak_rss_bytes": 9666560,
+          "raw_peak_line": "             9666560  maximum resident set size",
+          "scope": "macOS wait4 value for the timed command and its descendants"
+        }
+      },
+      "invocation_count": 2,
+      "reason": "one direct invocation permits exact PID sampling; a separate timed invocation records the OS command-tree peak"
+    },
+    "idle_worker": {
+      "sample_interval_ms": 100,
+      "samples_bytes": [
+        10207232,
+        10207232,
+        10207232,
+        10207232,
+        10207232,
+        10207232,
+        10207232,
+        10207232,
+        10207232,
+        10207232
+      ],
+      "sampled_max_rss_bytes": 10207232,
+      "scope": "owned worker PID only"
+    },
+    "lifecycle": {
+      "cycles": 5,
+      "on_raw_nanoseconds": [
+        36399167,
+        44242625,
+        36665250,
+        63140292,
+        37426083
+      ],
+      "off_raw_nanoseconds": [
+        45257125,
+        36686375,
+        36438916,
+        37520000,
+        35646166
+      ],
+      "final_authenticated_state": "stopped"
+    },
+    "network": {
+      "upstream_attempts_observed": "not instrumented",
+      "saved_upstream": {
+        "api_base": "http://127.0.0.1:11434/v1",
+        "auth": "none"
+      },
+      "wizard_model_listing_selected": false,
+      "wizard_inference_selected": false
+    },
+    "cleanup": {
+      "authenticated_off_and_stopped_confirmed": true,
+      "temporary_home_removed": true
+    },
+    "limitations": [
+      "macOS development host observation only",
+      "no clean OS account, low-end PC, Windows, Linux, login, signing, or quarantine proof",
+      "raw samples are descriptive and are not percentiles or superiority evidence"
+    ]
+  },
+  "native_measurement_evidence": "product/artifacts/native-final-integration-package/acceptance/native-measurement.json",
+  "runtime_dependencies": "Rust executable; Docker/WSL/Python/Node/Redis/Rust toolchain not runtime requirements; actual minimal clean OS account unverified",
+  "limitations": [
+    "Actual Windows/PowerShell, Linux, macOSx64, signing/quarantine, clean account, low-end hardware and human-login registration unverified",
+    "Claude model listing not requested; Codex catalog listing unverified",
+    "No current user state mutation or Git/public release",
+    "No comparative efficiency superiority; previous synthetic negative results and accounting subgroup limits retained",
+    "Historical diagnostic/debug-original omissions and prior macOS ACL EINVAL remain unresolved in prior accepted records",
+    "Fresh Rust370; oldPython64 predates packaging fix and laterfocused5 only covers those changed packaging paths; no aggregate current-all-tests claim"
+  ],
+  "next": "V01 bounded utilization hypothesis; V02 actual OS/low-end/human login; U01 user value validation; public VCS/release separately authorized"
+}

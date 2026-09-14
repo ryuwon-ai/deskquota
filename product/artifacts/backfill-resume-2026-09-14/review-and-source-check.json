@@ -1,0 +1,42 @@
+{
+  "checked_utc": "2026-09-13T16:21:20Z",
+  "source_manifest": "product/artifacts/backfill-experiment/source-complete-before-build.json",
+  "matched_files": 102,
+  "changed": [],
+  "reviews": [
+    {
+      "reviewer": "backfill_spec_review",
+      "mode": "read_only",
+      "result": "PASS for static candidate and pilot entry; not performance acceptance"
+    },
+    {
+      "reviewer": "backfill_quality_review",
+      "mode": "read_only",
+      "result": "PASS; no concrete correctness blocker",
+      "follow_up": "identity null is expected for this benchmark example; negative exploratory pilot can be reported with observed quota vs generated config distinction"
+    }
+  ],
+  "fresh_release_tests": {
+    "backfill_trace": 6,
+    "benchmark_trace": 4,
+    "backfill_projection_unit": 4,
+    "failed": 0
+  },
+  "historical_full_tests": {
+    "default": 370,
+    "feature": 381,
+    "failed": 0,
+    "scope": "previous logs on identical source; not rerun this turn"
+  },
+  "build_target_override": {
+    "path": "/Users/ryuwon/Library/Caches/llmgw-cargo",
+    "reason": "Keep new Rust build outputs outside Desktop; no old target cleanup or global Cargo config edits",
+    "incremental": false,
+    "jobs": 2
+  },
+  "preserved_failures": [
+    "offline build lacked bytes registry cache",
+    "first projection test filter matched zero tests, corrected filter then ran four"
+  ],
+  "nvidia_key_environment_available": false
+}

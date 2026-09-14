@@ -1,0 +1,124 @@
+{
+  "acl_einval_investigation": {
+    "failure_boundary": "disconnect protected journal replacement after successful client apply assertions",
+    "followup_evidence": [
+      "exact isolated rerun passed",
+      "20/20 sequential exact repetitions passed",
+      "subsequent focused 9/9 passed twice",
+      "full locked suite passed"
+    ],
+    "precise_lower_level_cause": "unconfirmed because the occurrence did not reproduce",
+    "source_boundary": "exacl 0.13.0 path-prefixed error from existing macOS ConfigPatch ACL preservation",
+    "source_retry_or_masking_added": false,
+    "state_after_error_inspected": false,
+    "state_after_error_limitation": "fixture Drop removed the temporary tree during panic unwind"
+  },
+  "commands": [
+    {
+      "failed": 0,
+      "log": "claude-scope-focused-final4.log",
+      "name": "focused_claude_scope",
+      "passed": 9
+    },
+    {
+      "exit_code": 0,
+      "log": "cargo-fmt-check-final3.log",
+      "name": "cargo_fmt_check"
+    },
+    {
+      "exit_code": 0,
+      "log": "cargo-check-all-targets-final2.log",
+      "name": "cargo_check_locked_all_targets"
+    },
+    {
+      "exit_code": 0,
+      "log": "cargo-clippy-all-targets-final2.log",
+      "name": "cargo_clippy_locked_all_targets_deny_warnings"
+    },
+    {
+      "failed": 0,
+      "log": "cargo-test-full-final.log",
+      "name": "cargo_test_locked_full",
+      "passed": 336,
+      "result_rows": 16
+    },
+    {
+      "failed": 0,
+      "log": "cargo-test-client-profiles-release-final.log",
+      "name": "cargo_test_locked_release_client_profiles",
+      "passed": 21
+    },
+    {
+      "failed": 0,
+      "log": "python-client-driver-tests-final.log",
+      "name": "python_client_driver_tests",
+      "passed": 7
+    },
+    {
+      "failed": 0,
+      "log": "reviewer-blocker-probe-final.log",
+      "name": "reviewer_blocker_probe",
+      "passed": 1
+    },
+    {
+      "failed": 0,
+      "log": "reviewer-private-positive-final.log",
+      "name": "reviewer_private_positive",
+      "passed": 1
+    },
+    {
+      "failed": 0,
+      "log": "reviewer-preactivation-positive-final.log",
+      "name": "reviewer_preactivation_positive",
+      "passed": 1
+    },
+    {
+      "exit_code": 0,
+      "log": "cargo-build-release-final.log",
+      "name": "cargo_build_locked_release"
+    },
+    {
+      "artifact": "claude-installed-wire-final.json",
+      "name": "installed_claude_driver",
+      "passed": true
+    }
+  ],
+  "execution_finished": true,
+  "installed_clients": {
+    "claude": {
+      "gateway_off": "expected failure with upstream 0",
+      "generated_profile_without_driver_auth": true,
+      "inference": "verified",
+      "reload_after_disconnect": "verified",
+      "selection": "verified",
+      "tools": "verified",
+      "version": "2.1.63"
+    },
+    "codex": "not rerun; shared Codex behavior unchanged by SPEC-1 fix",
+    "pi": "not rerun; shared Pi behavior unchanged by SPEC-1 fix"
+  },
+  "ownership": {
+    "product_writer_runtime_test": "released for same SPEC reviewer",
+    "quality_review": "not started"
+  },
+  "phase": "native-task4-spec-fix",
+  "preserved_failed_attempts": [
+    {
+      "log": "native-scope-red.log",
+      "meaning": "new regression RED: prepare unexpectedly returned Ok; it did not apply or observe a write"
+    },
+    {
+      "log": "claude-scope-focused-final2.log",
+      "meaning": "one observed macOS protected-journal ACL-path EINVAL during disconnect; exact lower-level cause unconfirmed"
+    },
+    {
+      "log": "cargo-clippy-all-targets-final.log",
+      "meaning": "private adapter tuple exceeded Clippy type-complexity threshold before private alias correction"
+    },
+    {
+      "artifact": "identities-and-stability-final.json",
+      "meaning": "provisional archive check omitted the helper embedded manifest and therefore reported one expected extra member"
+    }
+  ],
+  "status": "DONE_WITH_CONCERNS"
+}

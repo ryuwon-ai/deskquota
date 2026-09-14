@@ -1,0 +1,18 @@
+F.
+======================================================================
+FAIL: test_child_environment_is_allowlisted_and_excludes_credentials (tests.test_verify_native.VerifyNativeUnitTests.test_child_environment_is_allowlisted_and_excludes_credentials)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 19, in test_child_environment_is_allowlisted_and_excludes_credentials
+    self.assertEqual(env["HOME"], "/tmp/owned-home")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '/private/tmp/owned-home' != '/tmp/owned-home'
+- /private/tmp/owned-home
+? --------
++ /tmp/owned-home
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.015s
+
+FAILED (failures=1)

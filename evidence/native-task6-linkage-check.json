@@ -1,0 +1,30 @@
+{
+  "at": "2026-09-13T07:25:33.572624+00:00",
+  "scope": "read_only_MachO_linkage_inspection_no_product_execution",
+  "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+  "results": [
+    {
+      "command": [
+        "/usr/bin/file",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64: Mach-O 64-bit executable arm64\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/otool",
+        "-L",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64"
+      ],
+      "exit_code": 0,
+      "stdout": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64:\n\t/System/Library/Frameworks/Security.framework/Versions/A/Security (compatibility version 1.0.0, current version 61901.120.67)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5026.5.4)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0)\n",
+      "stderr": ""
+    }
+  ],
+  "limitations": [
+    "Linked library inspection is not clean OS account execution or signing/quarantine proof",
+    "No conclusion about another OS binary"
+  ]
+}

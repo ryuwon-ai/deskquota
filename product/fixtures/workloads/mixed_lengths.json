@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "mixed_lengths",
+  "window_offset_s": 12,
+  "requests": [
+    {
+      "offset_ms": 0,
+      "root": 0,
+      "input_bytes": 3000,
+      "output_reservation": 128,
+      "actual_ratio": 1,
+      "service_ms": 300
+    },
+    {
+      "offset_ms": 50,
+      "root": 1,
+      "input_bytes": 64,
+      "output_reservation": 16,
+      "actual_ratio": 1,
+      "service_ms": 10
+    },
+    {
+      "offset_ms": 100,
+      "root": 0,
+      "input_bytes": 3000,
+      "output_reservation": 128,
+      "actual_ratio": 0.25,
+      "service_ms": 300
+    },
+    {
+      "offset_ms": 150,
+      "root": 1,
+      "input_bytes": 64,
+      "output_reservation": 16,
+      "actual_ratio": 1,
+      "service_ms": 10
+    }
+  ]
+}

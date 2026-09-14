@@ -1,0 +1,47 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.56s
+     Running tests/fairness_contract.rs (target/debug/deps/fairness_contract-01c9cffd49df6b42)
+
+running 18 tests
+test directly_constructed_config_cannot_create_unbounded_or_ambiguous_roots ... ok
+test admitted_but_unpolled_waiter_cancel_releases_hold_once ... ok
+test cap_one_running_long_request_is_nonpreemptible ... ok
+test expired_barrier_removes_head_and_releases_other_root ... ok
+test oldest_valid_barrier_wins_across_roots ... ok
+test five_seconds_independently_protect_heavy ... ok
+test later_fifo_head_keeps_original_age ... ok
+test eight_actual_bypasses_protect_heavy_from_continuous_small_arrivals ... ok
+test root_fifo_heavy_light_heavy_cannot_skip_its_head ... ok
+test root_round_robin_not_global_fifo ... ok
+test queued_cancel_never_starts_and_invalid_head_does_not_block ... ok
+test heavy_heavy_light_in_same_root_finishes_in_fifo_order ... FAILED
+test control_reports_registered_roots_and_estimated_mode ... ok
+test scans_and_time_events_do_not_count_as_bypasses ... ok
+test wire_metadata_across_roots_share_rpm_without_tpm ... ok
+test wire_root_plus_fifteen_children_share_fifo_and_one_rr_turn ... FAILED
+test total_queue_has_64_waiting_metadata_including_all_roots ... ok
+test wire_64_total_waiters_overflow_429_and_rst_never_start ... ok
+
+failures:
+
+---- heavy_heavy_light_in_same_root_finishes_in_fifo_order stdout ----
+
+thread 'heavy_heavy_light_in_same_root_finishes_in_fifo_order' panicked at tests/fairness_contract.rs:65:22:
+called `Result::unwrap()` on an `Err` value: Deadline
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- wire_root_plus_fifteen_children_share_fifo_and_one_rr_turn stdout ----
+
+thread 'wire_root_plus_fifteen_children_share_fifo_and_one_rr_turn' panicked at tests/fairness_contract.rs:435:5:
+assertion `left == right` failed
+  left: ["first", "first", "first", "first", "first"]
+ right: ["first", "b1", "a1", "b2", "a2"]
+
+
+failures:
+    heavy_heavy_light_in_same_root_finishes_in_fifo_order
+    wire_root_plus_fifteen_children_share_fifo_and_one_rr_turn
+
+test result: FAILED. 16 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test fairness_contract`

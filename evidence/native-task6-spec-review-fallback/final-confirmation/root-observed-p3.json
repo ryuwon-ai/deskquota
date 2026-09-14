@@ -1,0 +1,21 @@
+{
+  "observer": "root",
+  "confirmed_by_this_reviewer": true,
+  "severity": "P3",
+  "path": "product/docs/runtime-contract.md:907",
+  "title": "Packaged runtime contract links to a source-only document omitted from the five-member archive",
+  "evidence": {
+    "link": "benchmark-method.md",
+    "resolved_source_path": "product/docs/benchmark-method.md",
+    "package_members": [
+      "llmgw",
+      "README.md",
+      "docs/installation.md",
+      "docs/runtime-contract.md",
+      "docs/client-compatibility.md"
+    ],
+    "target_present_in_package": false
+  },
+  "impact": "The installed runtime document has a broken navigation link. Q1 package identity, Q2 failed-replacement preservation, S1 manual recovery, and binary/runtime behavior are unaffected.",
+  "required_follow_up": "Change the runtime document to explicitly name the benchmark method as source-checkout-only plain text, then rebind and verify the source archive and user package."
+}

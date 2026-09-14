@@ -1,0 +1,46 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.01s
+     Running tests/patch_contract.rs (target/native-task3-unowned-fix/debug/deps/patch_contract-c8928a174386669d)
+
+running 38 tests
+test config_patch_lock_path_child ... ok
+test config_patch_crash_child ... ok
+test config_patch_redaction_child ... ok
+test config_patch_created_reconnect_crash_child ... ok
+test apply_requires_exact_preview_hash_and_rechecks_concurrent_edits ... ok
+test cooperating_editors_share_one_lock_namespace_across_different_journals ... ok
+test case_aliases_share_a_lock_when_the_filesystem_equates_them ... ok
+test comments_only_json_keeps_comment_markers_inside_strings_as_data ... ok
+test apply_and_restore_use_the_same_transaction_lock ... ok
+test adjacent_resource_lock_preserves_an_existing_ordinary_parent_mode ... ok
+test disconnect_preserves_user_owned_key_change_but_restores_other_owned_keys ... ok
+test failed_created_file_reconnect_keeps_last_verified_removal_boundary ... ok
+test json_validation_rejects_non_json_whitespace_and_raw_string_controls ... ok
+test failed_repeated_connect_keeps_the_last_verified_owned_value_recoverable ... ok
+test failed_unowned_existing_target_removed_before_retry_is_owned_as_created ... ok
+test failed_unowned_absent_target_uses_user_file_as_first_preownership_snapshot ... ok
+test created_file_user_field_and_comment_survive_reconnect_and_restore ... ok
+test local_token_requires_existing_user_private_file_without_changing_mode ... ok
+test project_shared_token_and_non_data_credentials_are_refused_before_writing ... ok
+test ordinary_non_token_patch_preserves_existing_mode_and_macos_acl ... ok
+test jsonc_apply_and_restore_preserve_comments_unrelated_keys_and_hide_tokens ... ok
+test partial_two_file_apply_is_explicit_and_recoverable ... ok
+test partial_three_file_apply_records_and_preserves_every_reviewed_target ... ok
+test resource_lock_identity_does_not_depend_on_process_temp_directory ... ok
+test reconnect_rejects_ancestor_then_descendant_ownership_overlap ... ok
+test strict_json_and_comments_only_json_refuse_ambiguous_or_unsupported_grammar ... ok
+test newly_created_file_is_removed_only_while_its_exact_bytes_are_owned ... ok
+test reconnect_rejects_descendant_then_ancestor_ownership_overlap ... ok
+test unresolved_alias_through_a_missing_parent_is_refused_before_writing ... ok
+test partial_two_file_restore_is_explicit_and_recoverable ... ok
+test restore_uses_the_same_resource_identity_as_an_alias_apply ... ok
+test repeated_connect_keeps_first_preownership_value_and_one_resource_record ... ok
+test typed_secret_debug_diff_output_journal_and_summaries_are_redacted ... ok
+test toml_apply_and_restore_preserve_comments_and_unrelated_user_edits ... ok
+test interrupted_created_file_reconnect_keeps_verified_removal_boundary ... ok
+test interrupted_process_leaves_stageful_journal_and_restores_written_resources ... ok
+test later_unstarted_absent_target_uses_user_file_as_first_preownership_snapshot ... ok
+test unchanged_created_file_remains_removable_after_reconnect ... ok
+
+test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.45s
+

@@ -1,0 +1,112 @@
+{
+  "passed": true,
+  "auditor_sha256": "24f5af55558393ba3bafdb840d7cca5be702a1460c5edad6b51040bd3968a234",
+  "probe_sha256": "08b30983eb1252e1f3650957c797c02f945e007f7777eb553aadc4aadf1efe86",
+  "source_manifest_sha256": "cc7704c0209d72b715827eb39091a801dc1afd7e019c4f3050ce9260225d3a56",
+  "scope": "Retained three-second smoke copies; independent audit_run only. Full quota CLI gate is not executed yet.",
+  "cases": [
+    {
+      "name": "unmodified_actual_with_started20_received19",
+      "accepted": true,
+      "expected_accepted": true,
+      "error": null
+    },
+    {
+      "name": "initial_status_accounting",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "initial_status: runtime evidence mismatch"
+    },
+    {
+      "name": "initial_status_fingerprint",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "initial_status: runtime evidence mismatch"
+    },
+    {
+      "name": "final_status_accounting",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "final_status: runtime evidence mismatch"
+    },
+    {
+      "name": "final_status_fingerprint",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "final_status: runtime evidence mismatch"
+    },
+    {
+      "name": "equal_float_usage",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "usage must be u64 integers"
+    },
+    {
+      "name": "missing_completed_usage",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "completed generation usage missing"
+    },
+    {
+      "name": "nonfinite_ended",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "ended_s: finite number required"
+    },
+    {
+      "name": "false_cutoff_flag",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "cutoff flag mismatch"
+    },
+    {
+      "name": "missing_terminal",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "terminal denominator mismatch"
+    },
+    {
+      "name": "unlinked_attempt",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "unlinked attempt"
+    },
+    {
+      "name": "changed_schedule",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "submitted schedule differs from pinned reference"
+    },
+    {
+      "name": "changed_api_path",
+      "accepted": false,
+      "expected_accepted": false,
+      "error": "config snapshot mismatch"
+    }
+  ],
+  "summary_checks": [
+    {
+      "arm": "production_rr",
+      "summary_matches": true,
+      "usage": {
+        "observed": 15,
+        "not_applicable": 2,
+        "not_observed": 3
+      }
+    },
+    {
+      "arm": "production_actual",
+      "summary_matches": true,
+      "usage": {
+        "observed": 15,
+        "not_applicable": 2,
+        "not_observed": 3
+      }
+    }
+  ],
+  "gateway_or_model_executed": false,
+  "development_corrections": [
+    "Initial reader incorrectly named mock disconnection outcome cancelled; actual schema is disconnected. The first positive control rejected it; corrected the auditor, not product.",
+    "Initial reader incorrectly required gateway_started_attempts equal received attempts; retained actual smoke has20started/19received due to cancellation before wire. Corrected to independent bounded counts, not product."
+  ]
+}

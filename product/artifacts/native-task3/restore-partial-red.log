@@ -1,0 +1,9 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0599]: no variant or associated item named `RestorePartial` found for enum `JournalStatus` in the current scope
+   --> tests/patch_contract.rs:641:47
+    |
+641 |     assert_eq!(journal.status, JournalStatus::RestorePartial);
+    |                                               ^^^^^^^^^^^^^^ variant or associated item not found in `JournalStatus`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `llmgw` (test "patch_contract") due to 1 previous error

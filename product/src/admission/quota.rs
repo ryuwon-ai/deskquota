@@ -1,0 +1,497 @@
+//! Single-owner local rolling ledger. Every operation receives monotonic elapsed time.
+use crate::config::{Accounting, Limit, Quota};
+use std::time::Duration;
+
+pub const WINDOW: Duration = Duration::from_secs(60);
+/// A fixed memory ceiling, independent of configured provider quota. When full,
+/// admission waits for expiry; no unexpired debit is discarded.
+pub const MAX_ENTRIES: usize = 8192;
+
+#[derive(Clone, Copy, Debug)]
+pub struct RequestCost(Cost);
+#[derive(Clone, Copy, Debug)]
+enum Cost {
+    Metadata,
+    Estimated {
+        input_bytes: u64,
+        output_tokens: u64,
+    },
+    ExactFixture(u64),
+}
+impl RequestCost {
+    #[allow(non_upper_case_globals)]
+    pub const Metadata: Self = Self(Cost::Metadata);
+    pub fn estimated(input_bytes: u64, output_tokens: u64) -> Self {
+        Self(Cost::Estimated {
+            input_bytes,
+            output_tokens,
+        })
+    }
+    /// Internal fixture seam. HTTP policy never reads fixture costs from headers or bodies.
+    #[doc(hidden)]
+    pub fn exact_fixture(n: u64) -> Self {
+        Self(Cost::ExactFixture(n))
+    }
+    fn tokens(self) -> u128 {
+        match self.0 {
+            Cost::Metadata => 0,
+            Cost::Estimated {
+                input_bytes,
+                output_tokens,
+            } => u128::from(input_bytes) + u128::from(output_tokens),
+            Cost::ExactFixture(n) => u128::from(n),
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ReservationId(u64);
+#[derive(Debug, PartialEq, Eq)]
+pub enum Decision {
+    Admitted(ReservationId),
+    Wait(Option<Duration>),
+    EstimateExceedsBudget,
+}
+#[derive(Default, Debug)]
+pub struct Snapshot {
+    pub rpm_debited: u128,
+    pub tpm_debited: u128,
+    pub tpm_held: u128,
+    pub active: usize,
+    pub retained: usize,
+    pub cleanups: u64,
+    pub starts: u64,
+}
+struct Entry {
+    id: ReservationId,
+    active: bool,
+    started: bool,
+    tokens: u128,
+    rpm_until: Option<Duration>,
+    tpm_until: Option<Duration>,
+}
+pub struct Ledger {
+    quota: Quota,
+    accounting: Accounting,
+    concurrency: usize,
+    ready_at: Duration,
+    now: Duration,
+    next: u64,
+    entries: Vec<Entry>,
+    cleanups: u64,
+    starts: u64,
+}
+fn known(limit: &Limit) -> Option<u128> {
+    if let Limit::Known(n) = limit {
+        Some(u128::from(n.get()))
+    } else {
+        None
+    }
+}
+fn live(until: Option<Duration>, now: Duration) -> bool {
+    until.is_some_and(|until| until > now)
+}
+impl Ledger {
+    pub fn new(quota: Quota, accounting: Accounting, concurrency: u8, now: Duration) -> Self {
+        assert!((1..=16).contains(&concurrency));
+        let has_known = known(&quota.rpm).is_some() || known(&quota.tpm).is_some();
+        Self {
+            quota,
+            accounting,
+            concurrency: usize::from(concurrency),
+            ready_at: if has_known {
+                now.saturating_add(WINDOW)
+            } else {
+                now
+            },
+            now,
+            next: 0,
+            entries: Vec::new(),
+            cleanups: 0,
+            starts: 0,
+        }
+    }
+    fn advance(&mut self, now: Duration) {
+        self.now = self.now.max(now);
+        self.entries
+            .retain(|e| e.active || live(e.rpm_until, self.now) || live(e.tpm_until, self.now));
+    }
+    pub fn snapshot(&mut self, now: Duration) -> Snapshot {
+        self.advance(now);
+        let mut s = Snapshot {
+            retained: self.entries.len(),
+            cleanups: self.cleanups,
+            starts: self.starts,
+            ..Snapshot::default()
+        };
+        for e in &self.entries {
+            s.active += usize::from(e.active);
+            s.rpm_debited += u128::from(live(e.rpm_until, self.now));
+            if live(e.tpm_until, self.now) {
+                s.tpm_debited += e.tokens;
+            }
+            if !e.started {
+                s.tpm_held += e.tokens;
+            }
+        }
+        s
+    }
+    pub(crate) fn startup_hold(&self, now: Duration) -> Duration {
+        self.ready_at.saturating_sub(now.max(self.now))
+    }
+    pub(crate) fn total_fits(&self, cost: RequestCost) -> bool {
+        known(&self.quota.tpm).is_none_or(|limit| cost.tokens() <= limit)
+    }
+    pub(crate) fn check(&mut self, now: Duration, cost: RequestCost) -> Result<(), &'static str> {
+        let s = self.snapshot(now);
+        if !self.total_fits(cost) {
+            return Err("estimate_exceeds_budget");
+        }
+        if self.now < self.ready_at {
+            return Err("startup_hold");
+        }
+        if s.active >= self.concurrency {
+            return Err("concurrency");
+        }
+        let held_rpm = self.entries.iter().filter(|e| !e.started).count() as u128;
+        if known(&self.quota.rpm).is_some_and(|limit| s.rpm_debited + held_rpm >= limit) {
+            return Err("rpm");
+        }
+        if known(&self.quota.tpm)
+            .is_some_and(|limit| s.tpm_debited + s.tpm_held + cost.tokens() > limit)
+        {
+            return Err("tpm");
+        }
+        if self.entries.len() >= MAX_ENTRIES {
+            return Err("ledger_capacity");
+        }
+        if self.next == u64::MAX {
+            return Err("identity_exhausted");
+        }
+        Ok(())
+    }
+    pub(crate) fn next_wake(&self) -> Option<Duration> {
+        if self.now < self.ready_at {
+            return Some(self.ready_at);
+        }
+        self.entries
+            .iter()
+            .flat_map(|e| [e.rpm_until, e.tpm_until])
+            .flatten()
+            .filter(|at| *at > self.now)
+            .min()
+    }
+    /// Keep the protected head's next known quota opportunity and an execution slot.
+    #[cfg(feature = "bench-harness")]
+    pub(crate) fn can_backfill(
+        &mut self,
+        now: Duration,
+        head: RequestCost,
+        deadline: Duration,
+        candidate: RequestCost,
+    ) -> bool {
+        if self.accounting != Accounting::Reserved || self.check(now, candidate).is_err() {
+            return false;
+        }
+        let Some(at) = self.next_wake() else {
+            return false;
+        };
+        if at >= deadline
+            || at >= self.now.saturating_add(WINDOW)
+            || self.entries.iter().filter(|e| e.active).count() + 2 > self.concurrency
+            || self.entries.len() + 2 > MAX_ENTRIES
+            || self.next.checked_add(2).is_none()
+        {
+            return false;
+        }
+        let tpm = known(&self.quota.tpm);
+        // A zero-token start has no TPM expiry and can recharge positive late usage.
+        if tpm.is_some() && candidate.tokens() == 0 {
+            return false;
+        }
+        let (mut rpm_at, mut tpm_at) = (0_u128, 0_u128);
+        // ponytail: one bounded 8192-entry scan, next expiry only; profile before adding an index.
+        for e in &self.entries {
+            if tpm.is_some()
+                && e.active
+                && if e.started {
+                    !live(e.tpm_until, at)
+                } else {
+                    e.tokens == 0
+                }
+            {
+                return false;
+            }
+            rpm_at += u128::from(!e.started || live(e.rpm_until, at));
+            if !e.started || live(e.tpm_until, at) {
+                tpm_at += e.tokens;
+            }
+        }
+        known(&self.quota.rpm).is_none_or(|limit| rpm_at + 2 <= limit)
+            && tpm.is_none_or(|limit| tpm_at + head.tokens() + candidate.tokens() <= limit)
+    }
+    pub fn admit(&mut self, now: Duration, cost: RequestCost) -> Decision {
+        match self.check(now, cost) {
+            Err("estimate_exceeds_budget") => return Decision::EstimateExceedsBudget,
+            Err("concurrency" | "identity_exhausted") => return Decision::Wait(None),
+            Err(_) => return Decision::Wait(self.next_wake()),
+            Ok(()) => {}
+        }
+        let tokens = cost.tokens();
+        // Identity exhaustion never wraps into an old request's ownership.
+        let Some(next) = self.next.checked_add(1) else {
+            return Decision::Wait(None);
+        };
+        self.next = next;
+        let id = ReservationId(next);
+        self.entries.push(Entry {
+            id,
+            active: true,
+            started: false,
+            tokens: if known(&self.quota.tpm).is_some() {
+                tokens
+            } else {
+                0
+            },
+            rpm_until: None,
+            tpm_until: None,
+        });
+        Decision::Admitted(id)
+    }
+    pub fn start(&mut self, now: Duration, id: ReservationId) -> bool {
+        self.advance(now);
+        let Some(e) = self
+            .entries
+            .iter_mut()
+            .find(|e| e.id == id && e.active && !e.started)
+        else {
+            return false;
+        };
+        e.started = true;
+        let until = self.now.saturating_add(WINDOW);
+        e.rpm_until = known(&self.quota.rpm).map(|_| until);
+        e.tpm_until = known(&self.quota.tpm)
+            .filter(|_| e.tokens > 0)
+            .map(|_| until);
+        self.starts = self.starts.saturating_add(1);
+        true
+    }
+    pub fn cancel(&mut self, now: Duration, id: ReservationId) -> bool {
+        self.advance(now);
+        let Some(index) = self
+            .entries
+            .iter()
+            .position(|e| e.id == id && e.active && !e.started)
+        else {
+            return false;
+        };
+        self.entries.swap_remove(index);
+        self.cleanups = self.cleanups.saturating_add(1);
+        true
+    }
+    pub fn finish(&mut self, now: Duration, id: ReservationId, usage: Option<u64>) -> bool {
+        self.advance(now);
+        let Some(e) = self
+            .entries
+            .iter_mut()
+            .find(|e| e.id == id && e.active && e.started)
+        else {
+            return false;
+        };
+        e.active = false;
+        if known(&self.quota.tpm).is_some() {
+            if let Some(usage) = usage {
+                if live(e.tpm_until, self.now) {
+                    if self.accounting == Accounting::Actual {
+                        e.tokens = u128::from(usage);
+                    }
+                } else if usage > 0 {
+                    // Long generation: observed usage is charged now, never credited
+                    // against a fresh window using an expired reservation.
+                    e.tokens = u128::from(usage);
+                    e.tpm_until = Some(self.now.saturating_add(WINDOW));
+                }
+            }
+        }
+        self.cleanups = self.cleanups.saturating_add(1);
+        self.advance(now);
+        true
+    }
+}
+
+#[cfg(all(test, feature = "bench-harness"))]
+mod backfill_tests {
+    use super::*;
+    fn at(seconds: u64) -> Duration {
+        Duration::from_secs(seconds)
+    }
+    fn cost(tokens: u64) -> RequestCost {
+        RequestCost::exact_fixture(tokens)
+    }
+    fn known_limit(n: u64) -> Limit {
+        Limit::Known(n.try_into().unwrap())
+    }
+    fn fresh() -> Ledger {
+        Ledger::new(
+            Quota {
+                rpm: known_limit(u64::MAX),
+                tpm: known_limit(100),
+            },
+            Accounting::Reserved,
+            4,
+            at(0),
+        )
+    }
+    fn reserve(l: &mut Ledger, now: u64, tokens: u64) -> ReservationId {
+        let Decision::Admitted(id) = l.admit(at(now), cost(tokens)) else {
+            panic!("fixture admission")
+        };
+        id
+    }
+    fn seeded() -> Ledger {
+        let mut l = fresh();
+        let id = reserve(&mut l, 60, 70);
+        assert!(l.start(at(60), id));
+        assert!(l.finish(at(60), id, None));
+        l
+    }
+    #[test]
+    fn projection_is_strict_bounded_and_never_advances_to_the_future() {
+        let mut l = fresh();
+        assert!(
+            !l.can_backfill(at(59), cost(80), at(180), cost(20)),
+            "startup hold"
+        );
+        let mut l = seeded();
+        assert!(
+            !l.can_backfill(at(60), cost(80), at(180), cost(20)),
+            "equality at one window is unsafe"
+        );
+        let mut equality = seeded();
+        let candidate = reserve(&mut equality, 60, 20);
+        equality.start(at(60), candidate);
+        equality.finish(at(120), candidate, Some(30));
+        assert!(
+            equality.check(at(120), cost(80)).is_err(),
+            "at exactly one window the candidate can recharge before the head"
+        );
+        assert!(
+            !l.can_backfill(at(65), cost(80), at(120), cost(20)),
+            "deadline equality"
+        );
+        assert!(l.can_backfill(at(65), cost(80), at(180), cost(20)));
+        assert!(
+            l.can_backfill(at(0), cost(80), at(180), cost(20)),
+            "use normalized ledger time"
+        );
+        assert_eq!(l.now, at(65));
+        let s = l.snapshot(at(65));
+        assert_eq!(
+            (s.retained, s.active, s.tpm_debited, s.tpm_held),
+            (1, 0, 70, 0)
+        );
+        let mut empty = fresh();
+        assert!(
+            !empty.can_backfill(at(65), cost(80), at(180), cost(20)),
+            "no expiry to protect"
+        );
+    }
+    #[test]
+    fn absent_expired_and_future_recharge_ambiguity_decline() {
+        let mut l = seeded();
+        assert!(!l.can_backfill(at(65), cost(80), at(180), RequestCost::Metadata));
+        let zero = reserve(&mut l, 65, 0);
+        assert!(
+            !l.can_backfill(at(65), cost(80), at(180), cost(20)),
+            "unstarted zero may recharge after starting"
+        );
+        l.start(at(65), zero);
+        assert!(
+            !l.can_backfill(at(65), cost(80), at(180), cost(20)),
+            "started zero has no expiry"
+        );
+        l.finish(at(66), zero, Some(31));
+        assert!(
+            l.check(at(120), cost(80)).is_err(),
+            "zero cost alone was not a safe bound"
+        );
+
+        let mut l = fresh();
+        let long = reserve(&mut l, 60, 70);
+        l.start(at(60), long);
+        assert!(
+            !l.can_backfill(at(65), cost(80), at(180), cost(20)),
+            "active debit expires exactly at projected opportunity"
+        );
+        let seed = reserve(&mut l, 121, 70);
+        l.start(at(121), seed);
+        l.finish(at(121), seed, None);
+        assert!(
+            !l.can_backfill(at(126), cost(80), at(240), cost(20)),
+            "expired active debit may recharge"
+        );
+        l.finish(at(127), long, Some(31));
+        assert!(l.check(at(181), cost(80)).is_err());
+    }
+    #[test]
+    fn projection_counts_unstarted_tokens_and_surviving_rpm_jointly() {
+        let mut l = seeded();
+        let pending = reserve(&mut l, 65, 21);
+        assert!(!l.can_backfill(at(65), cost(80), at(180), cost(1)));
+        l.cancel(at(65), pending);
+        let pending = reserve(&mut l, 65, 10);
+        assert!(l.can_backfill(at(65), cost(80), at(180), cost(10)));
+        assert_eq!(
+            (l.snapshot(at(65)).retained, l.snapshot(at(65)).tpm_held),
+            (2, 10)
+        );
+        l.start(at(90), pending);
+        assert!(
+            l.can_backfill(at(90), cost(80), at(180), cost(10)),
+            "delayed start stays charged across T"
+        );
+
+        let mut l = fresh();
+        l.quota.rpm = known_limit(3);
+        let delayed = reserve(&mut l, 60, 1);
+        l.start(at(60), delayed);
+        l.finish(at(121), delayed, Some(70));
+        for now in [122, 123] {
+            let metadata = reserve(&mut l, now, 0);
+            l.start(at(now), metadata);
+            l.finish(at(now), metadata, None);
+        }
+        assert!(
+            l.check(at(126), cost(20)).is_ok(),
+            "candidate fits current RPM/TPM"
+        );
+        assert!(
+            !l.can_backfill(at(126), cost(80), at(240), cost(20)),
+            "both surviving RPM debits leave only one future admission"
+        );
+        assert_eq!(l.snapshot(at(126)).retained, 3);
+    }
+    #[test]
+    fn reservation_identity_and_entry_capacity_leave_two_positions() {
+        let mut l = seeded();
+        l.next = u64::MAX - 1;
+        assert!(l.check(at(65), cost(20)).is_ok());
+        assert!(!l.can_backfill(at(65), cost(80), at(180), cost(20)));
+        l.next = u64::MAX - 2;
+        assert!(l.can_backfill(at(65), cost(80), at(180), cost(20)));
+        // Construct the bounded retained-debit boundary without 8192 repeated admission scans.
+        l.entries.extend((2..=MAX_ENTRIES - 1).map(|id| Entry {
+            id: ReservationId(id as u64),
+            active: false,
+            started: true,
+            tokens: 0,
+            rpm_until: Some(at(125)),
+            tpm_until: None,
+        }));
+        assert_eq!(l.snapshot(at(65)).retained, MAX_ENTRIES - 1);
+        assert!(l.check(at(65), cost(20)).is_ok());
+        assert!(!l.can_backfill(at(65), cost(80), at(180), cost(20)));
+        l.entries.pop();
+        assert_eq!(l.snapshot(at(65)).retained, MAX_ENTRIES - 2);
+        assert!(l.can_backfill(at(65), cost(80), at(180), cost(20)));
+    }
+}

@@ -1,0 +1,132 @@
+{
+  "sources_unchanged": true,
+  "held_artifacts_and_prior_review_evidence_unchanged": true,
+  "held_source_count": 59,
+  "preserved_files_count": 91,
+  "retained_historical_raw_run_count": 40,
+  "smokes": [
+    {
+      "manifest": "evidence/accounting-task1-spec-review/rereview/smoke.json",
+      "status": "completed_smoke",
+      "scope": "smoke_validation_only_no_efficiency_conclusion",
+      "runs": [
+        {
+          "arm": "production_rr",
+          "submitted": 20,
+          "terminal_counts": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "within_cutoff_completed": 17,
+          "attempts": 19,
+          "usage_counts": {
+            "observed": 15,
+            "not_applicable": 2,
+            "not_observed": 3
+          },
+          "binary": {
+            "features": [],
+            "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native/release/llmgw",
+            "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+          },
+          "accounting": "reserved",
+          "runtime_fingerprint_matches_raw_toml_sha256": true,
+          "runtime_accounting_matches_snapshot": true,
+          "all_completed_generation_usage_independently_validated": true,
+          "cleanup_recorded": true
+        },
+        {
+          "arm": "production_actual",
+          "submitted": 20,
+          "terminal_counts": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "within_cutoff_completed": 17,
+          "attempts": 19,
+          "usage_counts": {
+            "observed": 15,
+            "not_applicable": 2,
+            "not_observed": 3
+          },
+          "binary": {
+            "features": [],
+            "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native/release/llmgw",
+            "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+          },
+          "accounting": "actual",
+          "runtime_fingerprint_matches_raw_toml_sha256": true,
+          "runtime_accounting_matches_snapshot": true,
+          "all_completed_generation_usage_independently_validated": true,
+          "cleanup_recorded": true
+        }
+      ]
+    },
+    {
+      "manifest": "product/artifacts/accounting-ablation/spec-fix/smoke-final.json",
+      "status": "completed_smoke",
+      "scope": "smoke_validation_only_no_efficiency_conclusion",
+      "runs": [
+        {
+          "arm": "production_rr",
+          "submitted": 20,
+          "terminal_counts": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "within_cutoff_completed": 17,
+          "attempts": 20,
+          "usage_counts": {
+            "observed": 15,
+            "not_applicable": 2,
+            "not_observed": 3
+          },
+          "binary": {
+            "features": [],
+            "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native/release/llmgw",
+            "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+          },
+          "accounting": "reserved",
+          "runtime_fingerprint_matches_raw_toml_sha256": true,
+          "runtime_accounting_matches_snapshot": true,
+          "all_completed_generation_usage_independently_validated": true,
+          "cleanup_recorded": true
+        },
+        {
+          "arm": "production_actual",
+          "submitted": 20,
+          "terminal_counts": {
+            "completed": 17,
+            "cancelled": 3
+          },
+          "within_cutoff_completed": 17,
+          "attempts": 19,
+          "usage_counts": {
+            "observed": 15,
+            "not_applicable": 2,
+            "not_observed": 3
+          },
+          "binary": {
+            "features": [],
+            "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native/release/llmgw",
+            "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+          },
+          "accounting": "actual",
+          "runtime_fingerprint_matches_raw_toml_sha256": true,
+          "runtime_accounting_matches_snapshot": true,
+          "all_completed_generation_usage_independently_validated": true,
+          "cleanup_recorded": true
+        }
+      ]
+    }
+  ],
+  "review_owned_gateway_pids": [
+    25985,
+    26035,
+    26590
+  ],
+  "review_owned_pids_still_live": [],
+  "current_llmgw_processes": [],
+  "matching_owned_temp_paths_remaining": [],
+  "execution_finished": true
+}

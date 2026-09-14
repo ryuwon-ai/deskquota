@@ -1,0 +1,307 @@
+{
+  "checkpoint_sha256": "2d279742a59f4c113535b90b8dcd31170b84963871bbf96b0e62f231ea8f09e4",
+  "observer_sha256": "5a1bb26dc57880d472d9b4d43216a40235ed1da3e2764935338e89c3d8770c72",
+  "source": "Already measured, independently audited first pair; no new runtime or policy change.",
+  "arms": [
+    {
+      "arm": "production_rr",
+      "raw_sha256": "26987747c5e8a87c333e372c04b178c9a8eebed8d3e46ec8cd4b9212a7b89986",
+      "within_cutoff_status_samples": 298,
+      "reported_blocked_reason_samples": {
+        "none": 12,
+        "tpm": 10,
+        "starvation_barrier": 276
+      },
+      "queued_positive_active_zero_samples": 283,
+      "queued_idle_reason_samples": {
+        "tpm": 9,
+        "starvation_barrier": 274
+      },
+      "overestimated_requests": [
+        {
+          "id": "w0-mixed_lengths-2",
+          "submitted_offset_s": 12.108357651039197,
+          "client_outcome": "completed",
+          "within_measurement": true,
+          "attempts": [
+            {
+              "received_offset_s": 72.00394091699854,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        },
+        {
+          "id": "w1-mixed_lengths-2",
+          "submitted_offset_s": 72.10233084450257,
+          "client_outcome": "completed",
+          "within_measurement": true,
+          "attempts": [
+            {
+              "received_offset_s": 192.00818379200064,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        },
+        {
+          "id": "w2-mixed_lengths-2",
+          "submitted_offset_s": 132.10303368510932,
+          "client_outcome": "timeout",
+          "within_measurement": true,
+          "attempts": []
+        },
+        {
+          "id": "w3-mixed_lengths-2",
+          "submitted_offset_s": 192.1048969352046,
+          "client_outcome": "rejected",
+          "within_measurement": false,
+          "attempts": [
+            {
+              "received_offset_s": 312.00888912499795,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "rejected"
+            }
+          ]
+        },
+        {
+          "id": "w4-mixed_lengths-2",
+          "submitted_offset_s": 252.1095711628146,
+          "client_outcome": "completed",
+          "within_measurement": false,
+          "attempts": [
+            {
+              "received_offset_s": 372.00995295900066,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        }
+      ],
+      "metadata_outcomes": [
+        {
+          "id": "w0-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 47007.818958001735
+        },
+        {
+          "id": "w0-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 47012.48074999603
+        },
+        {
+          "id": "w1-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107027.9835409965
+        },
+        {
+          "id": "w1-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107030.22724999755
+        },
+        {
+          "id": "w2-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107119.59816700255
+        },
+        {
+          "id": "w2-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107126.46099999984
+        },
+        {
+          "id": "w3-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107119.64604199602
+        },
+        {
+          "id": "w3-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107112.28529099753
+        },
+        {
+          "id": "w4-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107123.75662499835
+        },
+        {
+          "id": "w4-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107125.90691700461
+        }
+      ]
+    },
+    {
+      "arm": "production_actual",
+      "raw_sha256": "6a67a57da83da6060fc3ac2f2be2efdcb828f0649957fc9b82e0ce829b1bbc8d",
+      "within_cutoff_status_samples": 298,
+      "reported_blocked_reason_samples": {
+        "none": 12,
+        "tpm": 5,
+        "starvation_barrier": 276,
+        "rpm": 5
+      },
+      "queued_positive_active_zero_samples": 283,
+      "queued_idle_reason_samples": {
+        "tpm": 4,
+        "starvation_barrier": 274,
+        "rpm": 5
+      },
+      "overestimated_requests": [
+        {
+          "id": "w0-mixed_lengths-2",
+          "submitted_offset_s": 12.108357651039197,
+          "client_outcome": "completed",
+          "within_measurement": true,
+          "attempts": [
+            {
+              "received_offset_s": 72.00486637499853,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        },
+        {
+          "id": "w1-mixed_lengths-2",
+          "submitted_offset_s": 72.10233084450257,
+          "client_outcome": "completed",
+          "within_measurement": true,
+          "attempts": [
+            {
+              "received_offset_s": 192.02056408300268,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        },
+        {
+          "id": "w2-mixed_lengths-2",
+          "submitted_offset_s": 132.10303368510932,
+          "client_outcome": "completed",
+          "within_measurement": true,
+          "attempts": [
+            {
+              "received_offset_s": 252.02286495800217,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        },
+        {
+          "id": "w3-mixed_lengths-2",
+          "submitted_offset_s": 192.1048969352046,
+          "client_outcome": "completed",
+          "within_measurement": false,
+          "attempts": [
+            {
+              "received_offset_s": 312.03504054099903,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        },
+        {
+          "id": "w4-mixed_lengths-2",
+          "submitted_offset_s": 252.1095711628146,
+          "client_outcome": "completed",
+          "within_measurement": false,
+          "attempts": [
+            {
+              "received_offset_s": 372.0602817500039,
+              "estimated_cost": 3222,
+              "actual_fixture_cost": 806,
+              "mock_outcome": "completed"
+            }
+          ]
+        }
+      ],
+      "metadata_outcomes": [
+        {
+          "id": "w0-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 47008.0815409965
+        },
+        {
+          "id": "w0-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 47013.25308300147
+        },
+        {
+          "id": "w1-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107029.43937499367
+        },
+        {
+          "id": "w1-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107031.71991700219
+        },
+        {
+          "id": "w2-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107048.11270900245
+        },
+        {
+          "id": "w2-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": true,
+          "elapsed_ms": 107054.67379099719
+        },
+        {
+          "id": "w3-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107079.59654199658
+        },
+        {
+          "id": "w3-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107074.09145899874
+        },
+        {
+          "id": "w4-shared_quota-0",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107095.55758300121
+        },
+        {
+          "id": "w4-shared_quota-2",
+          "outcome": "completed",
+          "within_measurement": false,
+          "elapsed_ms": 107318.90308299626
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Status sample counts are not durations or a fraction of time; control status sampling is not continuous.",
+    "The reason is the gateway's reported blocker, not an independently established causal effect size.",
+    "Zero active slots with queued work does not prove that a request could safely bypass RPM/TPM/fairness constraints.",
+    "Refund after a completed response cannot provide the actual cost before that request is admitted.",
+    "One seed does not establish a general scheduler bottleneck or performance improvement; no counterfactual scheduler is simulated."
+  ]
+}

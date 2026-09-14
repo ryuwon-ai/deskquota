@@ -1,0 +1,59 @@
+{
+  "scope": "fresh Native Task6 code quality review after SPEC_PASS",
+  "current_source": {
+    "files": 101,
+    "manifest_sha256": "f228071555f45c1774b7c2f8e059f2adce6eef77c10674191e04713feb0d4c3f",
+    "archive_members": 102,
+    "archive_sha256": "b8b2843f9dfdbeb18ce4368af9609f9a087bc95d171cc9324d4f968ab26d383f",
+    "live_or_archive_drift": 0
+  },
+  "current_package": {
+    "members": 5,
+    "archive_sha256": "ba03203e9416a4eb75ca972fb0b3e5eba8618c46b2c26c7f65e2b7ffff387a22",
+    "binary_bytes": 10011264,
+    "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+    "four_documents_equal_live": true
+  },
+  "accepted_task5_delta": {
+    "added": 9,
+    "changed": 6,
+    "removed": 0,
+    "runtime_rust_changes": [
+      "product/src/cli.rs: first-run non-TTY diagnostic string only"
+    ]
+  },
+  "preservation": {
+    "prior_rows": 1646,
+    "final_v2_rows_including_hold": 44,
+    "final_build_extra_rows": 3,
+    "doc_fix_rows_including_hold": 12,
+    "original_spec_rows_including_hold": 17,
+    "spec_rereview_rows_including_hold": 12,
+    "parent_audit_files": 2,
+    "drift": 0
+  },
+  "fresh_checks": {
+    "targeted_runtime_test_scenarios": 1,
+    "targeted_runtime_result": "package identity race reproduced",
+    "posix_shell_syntax_checks": 1,
+    "posix_shell_syntax_result": "passed",
+    "powershell_runtime_checks": 0,
+    "rust_tests_rerun": 0,
+    "python_suite_tests_rerun": 0,
+    "client_or_native_cycles_rerun": 0
+  },
+  "reused_immutable_evidence_not_rerun": {
+    "rust_tests": 365,
+    "python_tests": 64,
+    "fmt_check_clippy_release_build": "passed in product/artifacts/native-task6/final-v2",
+    "clients": 3,
+    "native_lifecycle_cycles": 5
+  },
+  "limitations": [
+    "PowerShell and Windows were unavailable; Q2 is source-supported and not native runtime proof",
+    "Linux, clean OS accounts, low-end hardware, signing, quarantine, and real login remain unverified",
+    "No full Rust, Python, client, or native matrix was repeated",
+    "Direct wizard sample_count=1 is not a peak; the separate command-tree value is not a direct-PID peak",
+    "Historical Task5 missing diagnostics and overwritten provisional debug objects were not reconstructed or reclassified"
+  ]
+}

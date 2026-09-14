@@ -1,0 +1,32 @@
+{
+  "at": "2026-09-13T07:14:35.191688+00:00",
+  "passed": true,
+  "platform": "macOS arm64 development host",
+  "inputs": {
+    "archive_sha256": "902aa7e58f7292c82ba1777065398060c393d331652709a544919f6410e6e902",
+    "manifest_sha256": "a28df418af2bf719a95cfd99cd5ef756f7b29630fb8ca7e3afda93fe9ff1ca5e",
+    "packaged_binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b"
+  },
+  "install": {
+    "fresh_install": true,
+    "reinstall": true,
+    "installed_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+    "installed_executable": true
+  },
+  "absolute_path_smoke": {
+    "exit_code": 0,
+    "stdout": "llmgw 0.1.0"
+  },
+  "restricted_path_control": {
+    "path": "/usr/bin:/bin",
+    "llmgw_absent": true
+  },
+  "new_child_shell": {
+    "exact_printed_line_executed": true,
+    "command_v_matches_installed": true,
+    "version_stdout": "llmgw 0.1.0"
+  },
+  "profile_mutation": "none; installer only printed the exact PATH line",
+  "fixture_cleanup_pending": false,
+  "fixture_cleanup_verified": true
+}

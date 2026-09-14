@@ -1,0 +1,50 @@
+[
+  {
+    "command": [
+      "/Users/ryuwon/.cargo/bin/rustc",
+      "--edition",
+      "2024",
+      "--test",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/filesystem_probe.rs",
+      "-L",
+      "dependency=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-quality-fix-v2/debug/deps",
+      "--extern",
+      "llmgw=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-quality-fix-v2/debug/deps/libllmgw-1750bcafbc9dfb14.rlib",
+      "-o",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/filesystem_probe"
+    ],
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/filesystem_probe",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "env": {
+      "HOME": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-home",
+      "USERPROFILE": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-home",
+      "XDG_CONFIG_HOME": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-home/xdg",
+      "TMPDIR": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-tmp",
+      "REVIEW_OUT": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3",
+      "LC_ALL": "C"
+    },
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "/opt/homebrew/bin/python3",
+      "-B",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/verifier_probe.py"
+    ],
+    "env": {
+      "HOME": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-home",
+      "USERPROFILE": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-home",
+      "XDG_CONFIG_HOME": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-home/xdg",
+      "TMPDIR": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/rereview-q1-q3/owned-tmp",
+      "LC_ALL": "C"
+    },
+    "exit_code": 0,
+    "execution": "exact script module; all OS, Cargo, worker, manager calls mocked"
+  }
+]

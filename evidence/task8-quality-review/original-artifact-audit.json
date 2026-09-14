@@ -1,0 +1,87 @@
+{
+  "audit_passed": true,
+  "scope": "read-only original artifact arithmetic and hashes; no fresh original HTTP execution",
+  "totals": {
+    "runs": 40,
+    "measured_ingress": 4000,
+    "warmup": 100,
+    "measured_mock_attempts": 3700
+  },
+  "quota": {
+    "direct": {
+      "submitted": 500,
+      "mock_attempts": 500,
+      "gateway_starts": 0,
+      "completed": 328,
+      "within_300": 328,
+      "rejected": 150,
+      "cancelled": 22
+    },
+    "production_rr": {
+      "submitted": 500,
+      "mock_attempts": 400,
+      "gateway_starts": 400,
+      "completed": 399,
+      "within_300": 285,
+      "cancelled": 75,
+      "timeout": 25,
+      "drain_completed": 114,
+      "rejected": 1
+    },
+    "benchmark_fifo": {
+      "submitted": 500,
+      "mock_attempts": 400,
+      "gateway_starts": 400,
+      "completed": 400,
+      "within_300": 285,
+      "cancelled": 75,
+      "timeout": 25,
+      "drain_completed": 115
+    },
+    "benchmark_rr": {
+      "submitted": 500,
+      "mock_attempts": 400,
+      "gateway_starts": 400,
+      "completed": 399,
+      "within_300": 284,
+      "cancelled": 75,
+      "timeout": 25,
+      "rejected": 1,
+      "drain_completed": 115
+    }
+  },
+  "original_pids_checked": [
+    9443,
+    9555,
+    50719,
+    9531,
+    25897,
+    9551,
+    9513,
+    17258,
+    9493,
+    39417,
+    21649,
+    9477,
+    9469,
+    9547,
+    45461,
+    54763,
+    19596,
+    9535,
+    9473,
+    12691,
+    9489,
+    47453,
+    41603,
+    10848,
+    32882,
+    9497,
+    9509,
+    52521,
+    15412,
+    9454,
+    9526
+  ],
+  "original_pids_present": []
+}

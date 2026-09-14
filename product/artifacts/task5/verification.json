@@ -1,0 +1,83 @@
+{
+  "finished_at": "2026-09-12T05:46:59.797013+00:00",
+  "checks": [
+    {
+      "name": "release-build",
+      "log": "artifacts/task5/release-build.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "debug-build",
+      "log": "artifacts/task5/debug-build.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "release-tests",
+      "log": "artifacts/task5/release-tests.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "debug-tests",
+      "log": "artifacts/task5/debug-tests.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "clippy",
+      "log": "artifacts/task5/clippy.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "check",
+      "log": "artifacts/task5/check.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "fmt",
+      "log": "artifacts/task5/fmt.log",
+      "actual_exit": 0
+    },
+    {
+      "name": "pi-positive",
+      "command": [
+        "python3",
+        "scripts/probe_pi.py",
+        "--binary",
+        "target/debug/llmgw",
+        "--output",
+        "artifacts/task5/pi-e2e.json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "pi-gateway-off",
+      "command": [
+        "python3",
+        "scripts/probe_pi.py",
+        "--binary",
+        "target/debug/llmgw",
+        "--gateway-off",
+        "--output",
+        "artifacts/task5/pi-e2e-gateway-off.json"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1
+    }
+  ],
+  "binary_sha256": {
+    "debug": "a5edaa0c559a043272119e4b21493a2e6cd91889045df25e6f9eea816de47b76",
+    "release": "392142c6c5fab00fe3ea3d1299717f03204de8bc5af9717c7a8cb1f60e2d9b80"
+  },
+  "rust_tests_per_profile": {
+    "lib": 4,
+    "config_contract": 19,
+    "quota_contract": 12,
+    "stream_lifetime": 32,
+    "wire_contract": 44,
+    "total": 111
+  },
+  "python_tests": 5,
+  "pi_positive_passed": true,
+  "pi_negative_expected_failure": true,
+  "fixture_correction": "Original Pi fixture RPM known60 correctly triggered production warmup and exceeded Pi timeout; retained failure then changed temporary transport fixture to explicit Unlimited/Unknown."
+}

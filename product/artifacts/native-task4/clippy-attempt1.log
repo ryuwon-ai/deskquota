@@ -1,0 +1,17 @@
+    Checking llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error: variables can be used directly in the `format!` string
+   --> src/cli.rs:135:29
+    |
+135 | / ...                   println!(
+136 | | ...                       "client stage {:?}: pending; save-only never points clients at an unfinished route",
+137 | | ...                       client
+138 | | ...                   );
+    | |_______________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#uninlined_format_args
+    = note: `-D clippy::uninlined-format-args` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::uninlined_format_args)]`
+
+error: could not compile `llmgw` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `llmgw` (lib test) due to 1 previous error

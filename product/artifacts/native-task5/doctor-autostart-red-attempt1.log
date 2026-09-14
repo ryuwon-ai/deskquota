@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.73s
+     Running tests/setup_contract.rs (target/native-task5/debug/deps/setup_contract-b8fe89e85e019584)
+
+running 1 test
+test doctor_default_is_offline_and_reports_static_auth_availability ... FAILED
+
+failures:
+
+---- doctor_default_is_offline_and_reports_static_auth_availability stdout ----
+
+thread 'doctor_default_is_offline_and_reports_static_auth_availability' panicked at tests/setup_contract.rs:1135:5:
+assertion failed: text.contains("autostart registration:")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    doctor_default_is_offline_and_reports_static_auth_availability
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.63s
+
+error: test failed, to rerun pass `--test setup_contract`

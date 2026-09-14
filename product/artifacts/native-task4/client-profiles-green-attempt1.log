@@ -1,0 +1,32 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.89s
+     Running tests/client_profiles.rs (target/native-task4/debug/deps/client_profiles-2f750a8b4307e19e)
+
+running 9 tests
+test claude_project_local_requires_private_and_untracked_confirmation ... ok
+test unsupported_version_or_protocol_is_refused_before_any_write ... ok
+test claude_refuses_higher_priority_environment_and_conflicting_managed_policy ... ok
+test claude_discovery_is_version_gated_and_never_implied ... ok
+test pi_override_home_and_optional_defaults_are_independent_resources ... ok
+test claude_preserves_existing_env_and_headers_in_private_user_settings ... ok
+test codex_uses_a_separate_responses_profile_and_static_native_header ... ok
+test reviewed_hash_is_required_and_reconnect_disconnect_preserves_user_conflicts ... ok
+test pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventing_capabilities ... FAILED
+
+failures:
+
+---- pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventing_capabilities stdout ----
+
+thread 'pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventing_capabilities' panicked at tests/client_profiles.rs:120:5:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventing_capabilities
+
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+
+error: test failed, to rerun pass `--test client_profiles`

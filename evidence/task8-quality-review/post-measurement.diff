@@ -1,0 +1,117 @@
+--- measured/product/docs/benchmark-method.md
++++ final/product/docs/benchmark-method.md
+@@ -150,7 +150,10 @@
+ wait blocks the asyncio loop. Quota sampling/control traffic can still contend
+ with the fixture, so scheduling lag and host load are retained. No-wait loops
+ have no periodic status/resource sampler; pre/post snapshots record root count,
+-queue length and retained entries, including warmup-populated ledger state.
++queue length and retained entries. In this no-wait phase Unlimited quota retains
++zero ledger entries even after warmup: these are explicitly empty-ledger samples.
++Pure forwarding overhead with a populated known-quota ledger remains unmeasured;
++quota samples include deliberate service/queue delays and cannot fill that gap.
+ RSS peaks are sampled maxima, not OS high-water marks or whole-system bounds.
+ CPU delta covers measurement plus drain, excluding startup hold; unused mock
+ budget samples used in summaries cover only the measurement interval. Control
+@@ -180,7 +183,13 @@
+ A validated run becomes its exclusive `.json`, and `pilot.json` is atomically
+ updated after each run. Failures retain `.failed.json` plus pending IDs and the
+ original journal. Re-running the identical command skips verified completed runs
+-only when source/binary/seed/window/schedule identity agrees. An incomplete
++only when source/binary/seed/window/schedule identity agrees and every previously
++recorded artifact still matches its expected path and SHA256. Duplicate or
++unexpected recorded IDs, changed/missing files and redirected paths are rejected
++before another arm starts. This resume preflight and its synthetic-file
++regression were added after the measured matrix; the original first-run
++measurement did not take the existing-output branch. The measured source archive
++and raw artifacts remain unchanged, separate from this final review source. An incomplete
+ journal refuses automatic duplicate execution: first inspect the recorded PID
+ and existing execution session. Live runs are continued through that handle;
+ interrupted work needs an explicitly new phase/output after preserving the failed
+--- measured/product/scripts/benchmark.py
++++ final/product/scripts/benchmark.py
+@@ -358,6 +358,18 @@
+         old = json.loads(args.output.read_text())
+         if old["identity"] != identity or old["seeds"] != seeds or old["windows"] != args.windows or old["schedule"] != [list(row) for row in schedule]:
+             raise ValueError("resume identity differs; use an exclusive new output path")
++        expected_ids = {f"{phase}-seed{seed}-{arm}" for phase, seed, arm in schedule}
++        recorded_ids = set()
++        for entry in old["runs"]:
++            run_id = entry["id"]
++            if run_id not in expected_ids or run_id in recorded_ids:
++                raise ValueError("duplicate or unexpected completed artifact ID")
++            recorded_ids.add(run_id)
++            completed = directory/(run_id+".json")
++            if Path(entry["path"]).resolve() != completed.resolve():
++                raise ValueError("completed artifact path mismatch")
++            if not completed.is_file() or digest(completed) != entry["sha256"]:
++                raise ValueError(f"completed artifact hash mismatch: {run_id}")
+         manifest = old
+     if platform.system()=="Darwin":
+         proc=await asyncio.create_subprocess_exec("sysctl","-n","hw.memsize","machdep.cpu.brand_string",stdout=asyncio.subprocess.PIPE)
+@@ -484,6 +496,59 @@
+     assert summary["synthetic_pair_workflows"]["completed_within_measurement"]==0
+     print("PASS post-window drain successes excluded from fixed-time goodput")
+ 
++async def resume_self_check():
++    """Exercise real main resume logic using synthetic files and forbid any new arm."""
++    global ARMS, run_arm
++    previous_arms, previous_runner = ARMS, run_arm
++    async def forbidden_run(*args, **kwargs):
++        raise AssertionError("resume self-check attempted to launch an arm")
++    ARMS, run_arm = ("direct",), forbidden_run
++    try:
++        with tempfile.TemporaryDirectory(prefix="llmgw-resume-check-") as tmp:
++            root=Path(tmp)
++            binary=root/"not-executable"; binary.write_bytes(b"synthetic identity only"); binary=binary.resolve()
++            output=root/"resume.json"; directory=root/"resume-runs"; directory.mkdir()
++            run_id="no_wait-seed1-direct"; completed=directory/(run_id+".json")
++            synthetic={"id":run_id,"phase":"no_wait","arm":"direct","seed":1,"submitted":[],"outcomes":[],"attempts":[],"summary":{}}
++            write_json(completed,synthetic)
++            args=argparse.Namespace(binary=binary,reference_binary=binary,seeds="1",windows=1,output=output,smoke=False,phase="no_wait")
++            manifest={"schema":1,"status":"in_progress","identity":identities(binary,binary),"seeds":[1],"windows":1,"schedule":[["no_wait",1,"direct"]],"host":{},"runs":[{"id":run_id,"path":str(completed),"sha256":digest(completed),"summary":{}}]}
++            write_json(output,manifest)
++            await main(args)
++            assert len(json.loads(output.read_text())["runs"])==1
++            print("PASS identical completed artifact resumes without launching an arm")
++            recorded=json.loads(output.read_text())
++            alternate=root/"redirected.json"; write_json(alternate,synthetic)
++            redirected=copy.deepcopy(recorded); redirected["runs"][0]["path"]=str(alternate)
++            write_json(output,redirected)
++            try: await main(args)
++            except ValueError as error:
++                assert "artifact path" in str(error)
++                print("REJECTED redirected completed artifact path")
++            else: raise AssertionError("resume accepted redirected artifact path")
++            duplicate=copy.deepcopy(recorded); duplicate["runs"].append(copy.deepcopy(duplicate["runs"][0]))
++            write_json(output,duplicate)
++            try: await main(args)
++            except ValueError as error:
++                assert "artifact ID" in str(error)
++                print("REJECTED duplicate completed artifact ID")
++            else: raise AssertionError("resume accepted duplicate artifact ID")
++            write_json(output,recorded)
++            write_json(completed,dict(synthetic,modified_after_recording=True))
++            try: await main(args)
++            except ValueError as error:
++                assert "artifact" in str(error) and "hash" in str(error)
++                print("REJECTED modified completed artifact on real resume path")
++            else: raise AssertionError("resume accepted modified completed artifact with stale manifest SHA")
++            completed.unlink()
++            try: await main(args)
++            except ValueError as error:
++                assert "artifact" in str(error)
++                print("REJECTED missing previously recorded completed artifact")
++            else: raise AssertionError("resume accepted missing recorded artifact")
++    finally:
++        ARMS, run_arm = previous_arms, previous_runner
++
+ if __name__ == "__main__":
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--self-check", action="store_true")
+@@ -499,5 +564,6 @@
+         self_check()
+         asyncio.run(http_self_check())
+         asyncio.run(boundary_self_check())
++        asyncio.run(resume_self_check())
+         print("self-check PASS")
+     else: asyncio.run(main(args))

@@ -1,0 +1,18 @@
+
+running 2 tests
+test autostart::independent_linux_spec::dropin_change_must_affect_authoritative_snapshot ... FAILED
+test autostart::independent_linux_spec::missing_disk_fragment_must_not_relabel_owned_loaded_manager_as_foreign ... ok
+
+failures:
+
+failures:
+    autostart::independent_linux_spec::dropin_change_must_affect_authoritative_snapshot
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+
+thread 'autostart::independent_linux_spec::dropin_change_must_affect_authoritative_snapshot' panicked at /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/autostart_linux_source_copy.rs:1532:743:
+assertion `left != right` failed: selected show fields hide a changed loaded drop-in; effective manager command/DropInPaths must be observed or explicitly refused
+  left: Present { digest: "eb6c91d9f84c95a833b75e00769c8c0e6dae7fd069eea2b32913a82e16c644b4", owned: true, enabled: true, registered_executable: Some("/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/linux-owned/llmgw"), scope: User }
+ right: Present { digest: "eb6c91d9f84c95a833b75e00769c8c0e6dae7fd069eea2b32913a82e16c644b4", owned: true, enabled: true, registered_executable: Some("/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/linux-owned/llmgw"), scope: User }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

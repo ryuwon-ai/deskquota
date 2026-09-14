@@ -1,0 +1,31 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.91s
+     Running tests/patch_contract.rs (target/native-task3/debug/deps/patch_contract-c8928a174386669d)
+
+running 10 tests
+test strict_json_and_comments_only_json_refuse_ambiguous_or_unsupported_grammar ... FAILED
+test apply_requires_exact_preview_hash_and_rechecks_concurrent_edits ... ok
+test project_shared_token_and_non_data_credentials_are_refused_before_writing ... ok
+test local_token_requires_existing_user_private_file_without_changing_mode ... ok
+test partial_two_file_apply_is_explicit_and_recoverable ... ok
+test jsonc_apply_and_restore_preserve_comments_unrelated_keys_and_hide_tokens ... ok
+test toml_apply_and_restore_preserve_comments_and_unrelated_user_edits ... ok
+test disconnect_preserves_user_owned_key_change_but_restores_other_owned_keys ... ok
+test repeated_connect_keeps_first_preownership_value_and_one_resource_record ... ok
+test newly_created_file_is_removed_only_while_its_exact_bytes_are_owned ... ok
+
+failures:
+
+---- strict_json_and_comments_only_json_refuse_ambiguous_or_unsupported_grammar stdout ----
+
+thread 'strict_json_and_comments_only_json_refuse_ambiguous_or_unsupported_grammar' panicked at tests/patch_contract.rs:259:34:
+called `Result::unwrap_err()` on an `Ok` value: Preview { hash: "ecbeb98e9ed7d776c948bc5d1e5230e50c8d3b5a17aa01d639753a9309114243", summary: "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-patch-json-grammar-71774-8225b93fd1ecb0ec/client/0.json: 1 owned key(s), 1 warning(s)\n  set a = [reviewed value]\n  warning: gateway must be running for this client route\ncooperating llmgw editors are locked; external editor CAS is not guaranteed" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    strict_json_and_comments_only_json_refuse_ambiguous_or_unsupported_grammar
+
+test result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.66s
+
+error: test failed, to rerun pass `--test patch_contract`

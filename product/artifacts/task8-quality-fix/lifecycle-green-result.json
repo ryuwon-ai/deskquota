@@ -1,0 +1,46 @@
+[
+  {
+    "case": "startup_failure",
+    "owned_pids": [
+      69721
+    ],
+    "returncodes": [
+      -15
+    ],
+    "owned_processes_cleaned": true,
+    "fresh_http_ingress": 0,
+    "fresh_upstream": 0,
+    "original_exception_preserved": true,
+    "failure": "RuntimeError: injected readiness failure",
+    "pid_journaled": true
+  },
+  {
+    "case": "repeated_readiness_cancellation",
+    "owned_pids": [
+      69722
+    ],
+    "returncodes": [
+      -15
+    ],
+    "owned_processes_cleaned": true,
+    "fresh_http_ingress": 0,
+    "fresh_upstream": 0,
+    "original_exception_preserved": true,
+    "failure": "CancelledError: original cancellation",
+    "pid_journaled": true
+  },
+  {
+    "case": "normal_transfer",
+    "owned_pids": [
+      69723
+    ],
+    "returncodes": [
+      0
+    ],
+    "owned_processes_cleaned": true,
+    "fresh_http_ingress": 0,
+    "fresh_upstream": 0,
+    "ownership_transferred_alive": true,
+    "normal_exit": 0
+  }
+]

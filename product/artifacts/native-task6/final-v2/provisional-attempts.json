@@ -1,0 +1,105 @@
+{
+  "at": "2026-09-13T07:18:50.148028+00:00",
+  "passed": true,
+  "policy": "No failed output was reconstructed; every existing provisional capture remains in place and hashed below. Raw stderr without a dedicated file remains available only in the task tool transcript.",
+  "attempts": [
+    {
+      "attempt": "measurement-v1",
+      "status": "failed",
+      "output": null,
+      "output_exists": false,
+      "output_sha256": null,
+      "observed_result": "save-only wizard driver still expected an obsolete helper marker; no output file was created"
+    },
+    {
+      "attempt": "measurement-v2",
+      "status": "failed",
+      "output": null,
+      "output_exists": false,
+      "output_sha256": null,
+      "observed_result": "saved config summary used the wrong auth schema key; no output file was created"
+    },
+    {
+      "attempt": "measurement-v3",
+      "status": "provisional_rejected",
+      "output": "artifacts/native-task6/preliminary-measurement-v3.json",
+      "output_exists": true,
+      "output_sha256": "4799b6e8ef83d767ff02fb3c84e7ae4f163f983c8638eb547de15193dc42bb10",
+      "observed_result": "completed but direct PID sample_count was zero"
+    },
+    {
+      "attempt": "measurement-v4",
+      "status": "provisional_superseded",
+      "output": "artifacts/native-task6/preliminary-measurement-v4.json",
+      "output_exists": true,
+      "output_sha256": "4d8ee655f114a1d943b19d9379baa07dec254dfc18cdefc62ce0b0cad1fbb737",
+      "observed_result": "completed using the earlier one-invocation measurement schema"
+    },
+    {
+      "attempt": "measurement-v5",
+      "status": "failed",
+      "output": null,
+      "output_exists": false,
+      "output_sha256": null,
+      "observed_result": "the preserved binary copy had mode 0644 and could not execute; no output file was created; chmod changed mode only"
+    },
+    {
+      "attempt": "measurement-v6",
+      "status": "provisional_preserved",
+      "output": "artifacts/native-task6/preliminary-measurement-v6.json",
+      "output_exists": true,
+      "output_sha256": "8273c713bf9e04cc4256e8a3b9438d4d2db119c835d684bdb519afb39e91a22d",
+      "observed_result": "completed with separate direct-PID and timed-command-tree wizard invocations"
+    },
+    {
+      "attempt": "source-archive-command-v1",
+      "status": "failed",
+      "output": null,
+      "output_exists": false,
+      "output_sha256": null,
+      "observed_result": "invoked ../scripts/archive-product-source.py from research root; path did not exist; corrected command used scripts/archive-product-source.py and preserved source.tar.gz exclusively"
+    }
+  ],
+  "preserved_pre_freeze": [
+    {
+      "path": "artifacts/native-task6/pre-freeze-v1/identity.json",
+      "bytes": 543,
+      "sha256": "a0b1334b97519d57741d8b594c1815201b7c39540e66997f56c7455ee0595931"
+    },
+    {
+      "path": "artifacts/native-task6/pre-freeze-v1/llmgw-macos-arm64",
+      "bytes": 10011264,
+      "sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b"
+    },
+    {
+      "path": "artifacts/native-task6/pre-freeze-v1/source-base.json",
+      "bytes": 17141,
+      "sha256": "f05e5cb6090796364f49c280ebde57b4ea8363e4ad206843ba3db57e1f663fc6"
+    },
+    {
+      "path": "artifacts/native-task6/pre-freeze-v1/source-manifest.json",
+      "bytes": 17613,
+      "sha256": "a5b16db51404460082fcf597e12b57ef9a6ab741ce91bfffbca9f45dc1007059"
+    },
+    {
+      "path": "artifacts/native-task6/pre-freeze-v1/source.tar.gz",
+      "bytes": 324887,
+      "sha256": "9d69d2b9a8b5b3d2f798a87fe1bee49f46229e57f76782f8448b6c3ffc6e60ae"
+    },
+    {
+      "path": "artifacts/native-task6/llmgw-macos-arm64-pre-freeze.tar.gz",
+      "bytes": 4202200,
+      "sha256": "9c763eaa4a18470ffce3ef6a8dbc3899abc80b86b0477716a499e5ca2e17a883"
+    },
+    {
+      "path": "artifacts/native-task6/llmgw-macos-arm64-pre-freeze.tar.gz.sha256",
+      "bytes": 102,
+      "sha256": "2c4686323239ee02344e0d80ff184ab23966b3099336d54f5366a4527ef625a3"
+    },
+    {
+      "path": "artifacts/native-task6/pre-freeze-package-identity.json",
+      "bytes": 730,
+      "sha256": "ef4cd7defa7341408d3912bcb4340f872f9a468a35869477bca3ba054a36281f"
+    }
+  ]
+}

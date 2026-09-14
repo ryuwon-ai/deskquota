@@ -1,0 +1,39 @@
+{
+  "at": "2026-09-13T08:27:35.950598+00:00",
+  "review_result": "with_fixes",
+  "finding": "I1 fresh SaveOnly cannot reach connect preview without local data token",
+  "source": "product/src/cli.rs:503",
+  "direct_evidence_scope": "Reviewer ran heldcf7 with readonlyexampleconfig plus isolatedPi HOME; setup.apply SaveOnly equivalence is source-supported, new regression must exercise actualSaveOnly",
+  "original_hold_size_fields_valid": false,
+  "companion_correction_verified": true,
+  "sha_drift": 0,
+  "preserve_integration_review": [
+    {
+      "path": "evidence/native-final-integration-review/README.md",
+      "bytes": 3062,
+      "sha256": "e816962a2d2c895a345e59a0af84d6e0c754a147fdbd6daf0f3f50b677da4898"
+    },
+    {
+      "path": "evidence/native-final-integration-review/result.json",
+      "bytes": 1669,
+      "sha256": "49017ea5ccd39ae2d73ed7a2e2138a2e7bff1901b025fef90e0305f9e8de8b3c"
+    },
+    {
+      "path": "evidence/native-final-integration-review/source-evidence-checks.json",
+      "bytes": 3289,
+      "sha256": "d185c54ee7bea64579ca81af96e979f54b08508a96d4c156410e3ef5866dbeca"
+    },
+    {
+      "path": "evidence/native-final-integration-review/FINAL_HOLD.json",
+      "bytes": 2751,
+      "sha256": "9e1c4a30220fd447f708989dcf00dec25c1053a2ceb0f70a8cd504aceba053f4"
+    },
+    {
+      "path": "evidence/native-final-integration-review/HOLD-size-correction.json",
+      "bytes": 1343,
+      "sha256": "ae72208fa3c192c97afe2e675ba336ef8fe256fc4a10352030d1fbe384effd52"
+    }
+  ],
+  "approved_fix": "Initialize protected local auth state on final config apply; SaveOnly retains worker0/client0 and immutablepreview hash; preserve preview/cancel zero writes; report partial config/state failure",
+  "no_parent_runtime": true
+}

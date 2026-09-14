@@ -1,0 +1,100 @@
+[
+  {
+    "case": "original_cancel",
+    "pids": [
+      72031
+    ],
+    "returncodes": [
+      -15
+    ],
+    "elapsed_s": 0.004250708996551111,
+    "pid_journaled_before_readiness": true,
+    "real_control_calls": [],
+    "data_ingress": 0,
+    "upstream_attempts": 0,
+    "exception": "CancelledError",
+    "original_arguments_preserved": true
+  },
+  {
+    "case": "exception",
+    "pids": [
+      72032
+    ],
+    "returncodes": [
+      -15
+    ],
+    "elapsed_s": 0.05435566700180061,
+    "pid_journaled_before_readiness": true,
+    "real_control_calls": [],
+    "data_ingress": 0,
+    "upstream_attempts": 0,
+    "exception": "RuntimeError",
+    "original_object_preserved": true
+  },
+  {
+    "case": "repeated_cancel_kill",
+    "pids": [
+      72033
+    ],
+    "returncodes": [
+      -9
+    ],
+    "elapsed_s": 3.0057890829993994,
+    "pid_journaled_before_readiness": true,
+    "real_control_calls": [],
+    "data_ingress": 0,
+    "upstream_attempts": 0,
+    "exception": "CancelledError",
+    "original_arguments_preserved": true
+  },
+  {
+    "case": "nonzero",
+    "pids": [
+      72042
+    ],
+    "returncodes": [
+      2
+    ],
+    "elapsed_s": 0.0353868330057594,
+    "pid_journaled_before_readiness": true,
+    "real_control_calls": [
+      [
+        "health",
+        "GET"
+      ]
+    ],
+    "data_ingress": 0,
+    "upstream_attempts": 0,
+    "exception": "RuntimeError",
+    "startup_failure_reported": true
+  },
+  {
+    "case": "normal",
+    "pids": [
+      72043
+    ],
+    "returncodes": [
+      0
+    ],
+    "elapsed_s": 0.03652591600257438,
+    "pid_journaled_before_readiness": true,
+    "real_control_calls": [
+      [
+        "health",
+        "GET"
+      ],
+      [
+        "health",
+        "GET"
+      ],
+      [
+        "stop",
+        "POST"
+      ]
+    ],
+    "data_ingress": 0,
+    "upstream_attempts": 0,
+    "ownership_transferred_live": true,
+    "normal_stop_exit_zero": true
+  }
+]

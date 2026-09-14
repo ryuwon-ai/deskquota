@@ -1,0 +1,83 @@
+{
+  "phase": "native-task5-quality-fix-v2-final",
+  "commands": [
+    {
+      "command": "cargo fmt -- --check",
+      "exit_code": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/fmt-final.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_bytes": 0
+    },
+    {
+      "command": "cargo check --locked",
+      "exit_code": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/check-final.log",
+      "log_sha256": "56fc6fbd6514495ef52e1a227097375a04f83fb3972a3fdd2de366247667a9dd",
+      "log_bytes": 4446
+    },
+    {
+      "command": "cargo clippy --locked --all-targets -- -D warnings",
+      "exit_code": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/clippy-final.log",
+      "log_sha256": "b695fd0a386ef91bf9ebda7c278afdf2b77e46a9e85d3894452f4df71e67d25d",
+      "log_bytes": 561
+    },
+    {
+      "command": "cargo test --locked --test autostart_templates",
+      "exit_code": 0,
+      "passed": 15,
+      "failed": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/autostart-templates-final.log",
+      "log_sha256": "cf39ae5f04b80393d812a919fa9f2ed506e817b6c1a1bb3d2af0c6a08b698f27",
+      "log_bytes": 1409
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_verify_native",
+      "exit_code": 0,
+      "passed": 13,
+      "failed": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/python-verifier-final.log",
+      "log_sha256": "63b121fccb23a9330346b7a2aadf18897ba2d349aaf078cb1d416e3ec84866de",
+      "log_bytes": 727
+    },
+    {
+      "command": "cargo build --locked --release",
+      "exit_code": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/release-final.log",
+      "log_sha256": "fe9b9a4715795191d10beb3a7692a95db5cd814196ecef4531e55480b8ec5baf",
+      "log_bytes": 5026
+    },
+    {
+      "command": "verify_native.py --templates-only (owned macOS fixture on final release)",
+      "exit_code": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/templates-only-release-final.log",
+      "output": "artifacts/native-task5/quality-fix-v2/templates-only-release-final.json",
+      "log_sha256": "1fb2d0b1ad585c91ef5ed148cb4717f700faa7a124f59829ebe07a83f15cd1b2",
+      "log_bytes": 144
+    }
+  ],
+  "tdd": [
+    {
+      "case": "dangling temporary symlink",
+      "red_exit_code": 101,
+      "red_log": "artifacts/native-task5/quality-fix/rust-q1-red.log",
+      "green_exit_code": 0,
+      "green_log": "artifacts/native-task5/quality-fix/rust-q1-green.log"
+    },
+    {
+      "case": "cleanup and attested observation exits",
+      "corrected_red_exit_code": 1,
+      "red_log": "artifacts/native-task5/quality-fix/python-q2-q3-red-attempt2.log",
+      "green_exit_code": 0,
+      "green_log": "artifacts/native-task5/quality-fix/python-q2-q3-green.log",
+      "test_fixture_error_log": "artifacts/native-task5/quality-fix/python-q2-q3-red.log"
+    },
+    {
+      "case": "dangling backup symlink",
+      "red_exit_code": 101,
+      "red_log": "artifacts/native-task5/quality-fix-v2/rust-backup-collision-red.log",
+      "green_exit_code": 0,
+      "green_log": "artifacts/native-task5/quality-fix-v2/rust-backup-collision-green.log"
+    }
+  ]
+}

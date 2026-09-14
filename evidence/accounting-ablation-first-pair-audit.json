@@ -1,0 +1,165 @@
+{
+  "auditor_sha256": "24f5af55558393ba3bafdb840d7cca5be702a1460c5edad6b51040bd3968a234",
+  "checked_at": "2026-09-12T15:38:38.412852+00:00",
+  "manifest": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/pilot.json",
+  "performance_claim": false,
+  "manifest_sha256": "2d279742a59f4c113535b90b8dcd31170b84963871bbf96b0e62f231ea8f09e4",
+  "passed": true,
+  "completed_pairs": 1,
+  "ingress": 200,
+  "pairs": [
+    {
+      "seed": 1,
+      "arms": {
+        "production_rr": {
+          "submitted": 100,
+          "all_terminal": {
+            "completed": 78,
+            "cancelled": 15,
+            "timeout": 5,
+            "rejected": 2
+          },
+          "within_measurement_terminal": {
+            "completed": 57,
+            "cancelled": 15,
+            "timeout": 1
+          },
+          "within_measurement_completed": 57,
+          "post_measurement_drain_completed": 21,
+          "upstream_attempts": 80,
+          "mock_429_attempts": 2,
+          "additional_attempts_beyond_first": 0,
+          "scheduled_cancellations": 15,
+          "scheduled_cancellation_outcomes": {
+            "cancelled": 15
+          },
+          "completion_ms_success_only": {
+            "n": 78,
+            "p50": 72355.32950000197,
+            "p95": 119971.75933299877,
+            "max": 120302.17633299617
+          },
+          "root_results": {
+            "0": {
+              "submitted": 45,
+              "within_measurement_completed": 28
+            },
+            "1": {
+              "submitted": 25,
+              "within_measurement_completed": 13
+            },
+            "2": {
+              "submitted": 15,
+              "within_measurement_completed": 7
+            },
+            "3": {
+              "submitted": 15,
+              "within_measurement_completed": 9
+            }
+          },
+          "length_results": {
+            "long": {
+              "submitted": 20,
+              "within_measurement_completed": 5
+            },
+            "short": {
+              "submitted": 80,
+              "within_measurement_completed": 52
+            }
+          }
+        },
+        "production_actual": {
+          "submitted": 100,
+          "all_terminal": {
+            "completed": 82,
+            "cancelled": 15,
+            "timeout": 3
+          },
+          "within_measurement_terminal": {
+            "completed": 58,
+            "cancelled": 15,
+            "timeout": 1
+          },
+          "within_measurement_completed": 58,
+          "post_measurement_drain_completed": 24,
+          "upstream_attempts": 82,
+          "mock_429_attempts": 0,
+          "additional_attempts_beyond_first": 0,
+          "scheduled_cancellations": 15,
+          "scheduled_cancellation_outcomes": {
+            "cancelled": 15
+          },
+          "completion_ms_success_only": {
+            "n": 82,
+            "p50": 72369.1133329994,
+            "p95": 119973.85133300122,
+            "max": 120251.24283300102
+          },
+          "root_results": {
+            "0": {
+              "submitted": 45,
+              "within_measurement_completed": 28
+            },
+            "1": {
+              "submitted": 25,
+              "within_measurement_completed": 13
+            },
+            "2": {
+              "submitted": 15,
+              "within_measurement_completed": 7
+            },
+            "3": {
+              "submitted": 15,
+              "within_measurement_completed": 10
+            }
+          },
+          "length_results": {
+            "long": {
+              "submitted": 20,
+              "within_measurement_completed": 5
+            },
+            "short": {
+              "submitted": 80,
+              "within_measurement_completed": 53
+            }
+          }
+        }
+      },
+      "actual_minus_reserved_within_measurement_completed": 1
+    }
+  ],
+  "usage_statuses": {
+    "quota-seed1-production_rr": {
+      "observed": 68,
+      "not_observed": 22,
+      "not_applicable": 10
+    },
+    "quota-seed1-production_actual": {
+      "observed": 72,
+      "not_observed": 18,
+      "not_applicable": 10
+    }
+  },
+  "artifacts": [
+    {
+      "id": "quota-seed1-production_rr",
+      "path": "product/artifacts/accounting-ablation/pilot-runs/quota-seed1-production_rr.json",
+      "sha256": "26987747c5e8a87c333e372c04b178c9a8eebed8d3e46ec8cd4b9212a7b89986",
+      "journal_sha256": "f74aebc6751f971fed8f54d98aaf35efbe65eff7856c400f0a5d3358e0548284",
+      "schedule_reference_sha256": "dc3b75a5d98ba7efc04990ea59960b6c7e2b36d10e300b9b1bcdc18c4e7b17ac",
+      "owned_pid": 35133
+    },
+    {
+      "id": "quota-seed1-production_actual",
+      "path": "product/artifacts/accounting-ablation/pilot-runs/quota-seed1-production_actual.json",
+      "sha256": "6a67a57da83da6060fc3ac2f2be2efdcb828f0649957fc9b82e0ce829b1bbc8d",
+      "journal_sha256": "a15eb02e6c04d6f6ff126db0303d3305d3f09b2e549f78b5392105d9bead1a75",
+      "schedule_reference_sha256": "dc3b75a5d98ba7efc04990ea59960b6c7e2b36d10e300b9b1bcdc18c4e7b17ac",
+      "owned_pid": 37549
+    }
+  ],
+  "source_files_checked": 58,
+  "binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+  "schedule_reference_manifest_sha256": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6",
+  "cleanup_basis": "Recorded cleanup, empty final queue and journal PID linkage; live resource inspection is separate."
+}

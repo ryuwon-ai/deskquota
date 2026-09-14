@@ -1,0 +1,87 @@
+{
+  "at": "2026-09-13T07:29:23.084898+00:00",
+  "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+  "records": [
+    {
+      "name": "pi",
+      "command": [
+        "python3",
+        "scripts/verify_clients.py",
+        "--binary",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64",
+        "--client",
+        "pi",
+        "--output",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task6-spec-review-fallback/runtime-pi.json"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "output": "evidence/native-task6-spec-review-fallback/runtime-pi.json",
+      "output_sha256": "ce5c1aafb3fafc3e8ca9566a3505ce2ad6f9b29906c60147bd3d39c40c636d3d",
+      "reported_passed": true,
+      "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b"
+    },
+    {
+      "name": "claude",
+      "command": [
+        "python3",
+        "scripts/verify_clients.py",
+        "--binary",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64",
+        "--client",
+        "claude",
+        "--output",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task6-spec-review-fallback/runtime-claude.json"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "output": "evidence/native-task6-spec-review-fallback/runtime-claude.json",
+      "output_sha256": "72bc25a71474afe28936d2f3a32b09f58fbdc86df90111696bf96750d8633555",
+      "reported_passed": true,
+      "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b"
+    },
+    {
+      "name": "codex",
+      "command": [
+        "python3",
+        "scripts/verify_clients.py",
+        "--binary",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64",
+        "--client",
+        "codex",
+        "--output",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task6-spec-review-fallback/runtime-codex.json"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "output": "evidence/native-task6-spec-review-fallback/runtime-codex.json",
+      "output_sha256": "a5936758ee31dbda1f33378560c8a676aef76dc711ccd4623222df70eff620d8",
+      "reported_passed": true,
+      "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b"
+    },
+    {
+      "name": "native",
+      "command": [
+        "python3",
+        "scripts/measure_native.py",
+        "--binary",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64",
+        "--cycles",
+        "3",
+        "--output",
+        "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task6-spec-review-fallback/runtime-native.json"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"passed\": true, \"binary_sha256\": \"cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b\", \"output\": \"/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task6-spec-review-fallback/runtime-native.json\"}\n",
+      "stderr": "",
+      "output": "evidence/native-task6-spec-review-fallback/runtime-native.json",
+      "output_sha256": "6ee8c0965e229fc8f9510b078854514b08641d7344dc5baccb0d97324f614c48",
+      "reported_passed": null,
+      "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b"
+    }
+  ],
+  "passed": false
+}

@@ -1,0 +1,96 @@
+{
+  "scope": "Independent read-only audit of implementer smoke1 artifacts, not a parent product execution or performance acceptance",
+  "first_audit_attempt": "Failed before inspection because parent resolved product-relative artifact path from research cwd; corrected to product cwd",
+  "source_version": "Intermediate smoke1 manifest identities; later trailer and measurement-window corrections not represented",
+  "passed": true,
+  "runs": [
+    {
+      "arm": "direct",
+      "checks": {
+        "artifact_hash": true,
+        "same_terminal_ids": true,
+        "unique_attempt_ids": true,
+        "known_attempt_ingress": true,
+        "terminal_attempts": true,
+        "smoke_not_quota": true,
+        "owned_cleanup_reported": true
+      },
+      "ingress": 20,
+      "outcomes": {
+        "completed": 17,
+        "cancelled": 3
+      },
+      "attempts": 20,
+      "attempt_outcomes": {
+        "completed": 17,
+        "disconnected": 3
+      }
+    },
+    {
+      "arm": "production_rr",
+      "checks": {
+        "artifact_hash": true,
+        "same_terminal_ids": true,
+        "unique_attempt_ids": true,
+        "known_attempt_ingress": true,
+        "terminal_attempts": true,
+        "smoke_not_quota": true,
+        "owned_cleanup_reported": true
+      },
+      "ingress": 20,
+      "outcomes": {
+        "completed": 17,
+        "cancelled": 3
+      },
+      "attempts": 19,
+      "attempt_outcomes": {
+        "completed": 18,
+        "disconnected": 1
+      }
+    },
+    {
+      "arm": "benchmark_fifo",
+      "checks": {
+        "artifact_hash": true,
+        "same_terminal_ids": true,
+        "unique_attempt_ids": true,
+        "known_attempt_ingress": true,
+        "terminal_attempts": true,
+        "smoke_not_quota": true,
+        "owned_cleanup_reported": true
+      },
+      "ingress": 20,
+      "outcomes": {
+        "completed": 17,
+        "cancelled": 3
+      },
+      "attempts": 20,
+      "attempt_outcomes": {
+        "completed": 18,
+        "disconnected": 2
+      }
+    },
+    {
+      "arm": "benchmark_rr",
+      "checks": {
+        "artifact_hash": true,
+        "same_terminal_ids": true,
+        "unique_attempt_ids": true,
+        "known_attempt_ingress": true,
+        "terminal_attempts": true,
+        "smoke_not_quota": true,
+        "owned_cleanup_reported": true
+      },
+      "ingress": 20,
+      "outcomes": {
+        "completed": 17,
+        "cancelled": 3
+      },
+      "attempts": 19,
+      "attempt_outcomes": {
+        "completed": 17,
+        "disconnected": 2
+      }
+    }
+  ]
+}

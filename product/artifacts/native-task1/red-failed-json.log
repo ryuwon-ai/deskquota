@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.35s
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-86a6ed386b85f0cb)
+
+running 1 test
+test held_lock_with_unknown_identity_is_failed_json_and_never_killed ... FAILED
+
+failures:
+
+---- held_lock_with_unknown_identity_is_failed_json_and_never_killed stdout ----
+
+thread 'held_lock_with_unknown_identity_is_failed_json_and_never_killed' panicked at tests/lifecycle_contract.rs:368:724:
+failed status JSON: Error("EOF while parsing a value", line: 1, column: 0)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    held_lock_with_unknown_identity_is_failed_json_and_never_killed
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.73s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

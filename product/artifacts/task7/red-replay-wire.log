@@ -1,0 +1,25 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.91s
+     Running tests/retry_contract.rs (target/debug/deps/retry_contract-809867c8ec5664b8)
+
+running 2 tests
+test opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges ... FAILED
+test retry_after_survives_request_deadline_and_new_root_metadata_client ... ok
+
+failures:
+
+---- opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges stdout ----
+
+thread 'opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges' panicked at tests/retry_contract.rs:58:5:
+assertion `left == right` failed: one ingress, exactly two actual wire attempts, never three
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+error: test failed, to rerun pass `--test retry_contract`

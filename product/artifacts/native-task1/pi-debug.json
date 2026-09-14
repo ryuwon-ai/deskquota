@@ -1,0 +1,170 @@
+{
+  "cases": [
+    {
+      "assistant_failure_observed": false,
+      "expected_positive_attempts": 1,
+      "flow": "completion",
+      "gateway_cleanup": "control_stop",
+      "gateway_root_route_exercised": true,
+      "output_marker_observed": true,
+      "passed": true,
+      "pi_cleanup": "normal_exit",
+      "pi_exit_code": 0,
+      "pi_timed_out": false,
+      "stderr_present": false,
+      "stdout_json_valid": true,
+      "tool_events": {
+        "end_count": 0,
+        "exact_read_arguments": false,
+        "exact_read_end_without_error": false,
+        "exact_read_start": false,
+        "result_contains_exact_synthetic_content": false,
+        "start_count": 0
+      },
+      "upstream_attempts": 1,
+      "wire_observations": [
+        {
+          "assistant_tool_call_matches": false,
+          "attempt": 1,
+          "authorization_absent": true,
+          "body_within_cap": true,
+          "custom_header_received": true,
+          "local_control_token_absent": true,
+          "local_data_token_absent": true,
+          "message_roles": [
+            "system",
+            "user"
+          ],
+          "method_matches": true,
+          "model_matches": true,
+          "path_matches": true,
+          "stream_enabled": true,
+          "tool_names": [],
+          "tool_result_matches": false
+        }
+      ]
+    },
+    {
+      "assistant_failure_observed": false,
+      "expected_positive_attempts": 2,
+      "flow": "read_tool",
+      "gateway_cleanup": "control_stop",
+      "gateway_root_route_exercised": true,
+      "output_marker_observed": true,
+      "passed": true,
+      "pi_cleanup": "normal_exit",
+      "pi_exit_code": 0,
+      "pi_timed_out": false,
+      "stderr_present": false,
+      "stdout_json_valid": true,
+      "tool_events": {
+        "end_count": 1,
+        "exact_read_arguments": true,
+        "exact_read_end_without_error": true,
+        "exact_read_start": true,
+        "result_contains_exact_synthetic_content": true,
+        "start_count": 1
+      },
+      "upstream_attempts": 2,
+      "wire_observations": [
+        {
+          "assistant_tool_call_matches": false,
+          "attempt": 1,
+          "authorization_absent": true,
+          "body_within_cap": true,
+          "custom_header_received": true,
+          "local_control_token_absent": true,
+          "local_data_token_absent": true,
+          "message_roles": [
+            "system",
+            "user"
+          ],
+          "method_matches": true,
+          "model_matches": true,
+          "path_matches": true,
+          "stream_enabled": true,
+          "tool_names": [
+            "read"
+          ],
+          "tool_result_matches": false
+        },
+        {
+          "assistant_tool_call_matches": true,
+          "attempt": 2,
+          "authorization_absent": true,
+          "body_within_cap": true,
+          "custom_header_received": true,
+          "local_control_token_absent": true,
+          "local_data_token_absent": true,
+          "message_roles": [
+            "system",
+            "user",
+            "assistant",
+            "tool"
+          ],
+          "method_matches": true,
+          "model_matches": true,
+          "path_matches": true,
+          "stream_enabled": true,
+          "tool_names": [
+            "read"
+          ],
+          "tool_result_matches": true
+        }
+      ]
+    }
+  ],
+  "classification": "agent/mock compatibility; not real LLM quality or performance",
+  "finished_at": "2026-09-12T12:54:08.461407+00:00",
+  "gateway": {
+    "binary": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native/debug/llmgw",
+    "binary_unchanged_after_run": true,
+    "local_route": "/r/pi-work/v1/chat/completions",
+    "sha256_after": "0fdace8b9ce0a7a12715c02f7a3275fb6a2c84a75022e13c71e55da3fa8c9b6c",
+    "sha256_before": "0fdace8b9ce0a7a12715c02f7a3275fb6a2c84a75022e13c71e55da3fa8c9b6c",
+    "upstream_route": "/team/v1/chat/completions"
+  },
+  "harness": {
+    "configured_policy_names": [
+      "pi_agent_retry_disabled",
+      "pi_provider_retry_disabled",
+      "pi_compaction_disabled",
+      "pi_telemetry_disabled",
+      "gateway_auth_none",
+      "gateway_cancel_drain",
+      "gateway_rpm_unlimited",
+      "gateway_tpm_unknown"
+    ],
+    "quota_fixture": {
+      "purpose": "isolated agent/mock transport probe",
+      "rpm": "unlimited",
+      "tpm": "unknown"
+    },
+    "script_sha256": "ce9442337506f8e52d56710df1fc75c65d20cf306c9510460e9f2b341e64ab3d",
+    "template_sha256": "44228610dac6b3dba5d86a5e9b8a04239ca051a4d5f2f840641cfae1ef5138ad"
+  },
+  "mode": "positive",
+  "passed": true,
+  "pi": {
+    "entry_path": "/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js",
+    "executable": "/opt/homebrew/bin/pi",
+    "installed_version": "0.84.2",
+    "package": "@earendil-works/pi-coding-agent",
+    "source_sha256": {
+      "dist/core/tools/read.js": "f9b098792e9da5aa36cb2cdd19873e332a302eb2dfad4c1f93ab8942899edcc7",
+      "node_modules/@earendil-works/pi-ai/dist/api/openai-completions.js": "45fc45d3b761fc97701982f5326e54199f8d8b7e85d6a162ee33a781311c5526",
+      "package.json": "820f4adc6d61f2cefbc29ce17e9dfd9aa482248d54be5d0dfa2a868ca000c7b0"
+    }
+  },
+  "positive_flow_count": 2,
+  "protocol": "OpenAI Chat Completions SSE over HTTP/1.1",
+  "reference_clone": {
+    "commit": "f3c672245d25ef2283ffc0d9cdec8a5482651103",
+    "differs_from_installed": true,
+    "version": "0.85.1"
+  },
+  "schema_version": 1,
+  "scope": "installed Pi -> llmgw -> synthetic loopback OpenAI Chat Completions fixture",
+  "started_at": "2026-09-12T12:54:06.227087+00:00",
+  "system": "macOS-26.5.1-arm64-arm-64bit-Mach-O"
+}

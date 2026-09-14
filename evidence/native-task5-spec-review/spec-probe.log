@@ -1,0 +1,25 @@
+
+running 5 tests
+test linux_template_literal_expansion_disabled ... ok
+test mac_template_literal_and_no_restart ... ok
+test unobserved_login_env_is_unknown ... FAILED
+test windows_logon_trigger_is_scoped_to_current_user ... FAILED
+test windows_template_limits_and_foreground ... ok
+
+failures:
+
+failures:
+    unobserved_login_env_is_unknown
+    windows_logon_trigger_is_scoped_to_current_user
+
+test result: FAILED. 3 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+thread 'unobserved_login_env_is_unknown' panicked at llm-gateway-research/evidence/native-task5-spec-review/spec_probe.rs:12:155:
+assertion `left == right` failed: terminal cannot observe next-login environment; neither presence nor absence is proof
+  left: "configured_but_unavailable"
+ right: "unknown"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'windows_logon_trigger_is_scoped_to_current_user' panicked at llm-gateway-research/evidence/native-task5-spec-review/spec_probe.rs:11:229:
+current-user LogonTrigger must contain its reviewed UserId/SID

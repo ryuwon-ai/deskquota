@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.66s
+     Running tests/setup_contract.rs (target/native-task2-f8-fix/debug/deps/setup_contract-28e564d3618f9730)
+
+running 1 test
+test saved_pending_config_restarts_to_the_desired_fingerprint_after_explicit_preview ... FAILED
+
+failures:
+
+---- saved_pending_config_restarts_to_the_desired_fingerprint_after_explicit_preview stdout ----
+
+thread 'saved_pending_config_restarts_to_the_desired_fingerprint_after_explicit_preview' panicked at tests/setup_contract.rs:539:6:
+called `Result::unwrap()` on an `Err` value: Error("worker_start_failed")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    saved_pending_config_restarts_to_the_desired_fingerprint_after_explicit_preview
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 37 filtered out; finished in 0.84s
+
+error: test failed, to rerun pass `--test setup_contract`

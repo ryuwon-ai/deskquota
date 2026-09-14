@@ -1,0 +1,48 @@
+[
+  {
+    "command": [
+      "rustc",
+      "--edition",
+      "2024",
+      "--test",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/public_probe.rs",
+      "--extern",
+      "llmgw=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps/libllmgw-1750bcafbc9dfb14.rlib",
+      "-L",
+      "dependency=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps",
+      "-o",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/public_probe"
+    ],
+    "cwd": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7",
+    "env_override": {
+      "REVIEW_OUT": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7"
+    },
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "rustc",
+      "--edition",
+      "2024",
+      "--test",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/private_context.rs",
+      "--extern",
+      "llmgw=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps/libllmgw-1750bcafbc9dfb14.rlib",
+      "-L",
+      "dependency=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps",
+      "-o",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/private_probe",
+      "--extern",
+      "quick_xml=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps/libquick_xml-15b2edce4057ee34.rlib",
+      "--extern",
+      "sha2=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps/libsha2-a64a2d364fc7484c.rlib",
+      "--extern",
+      "serde_json=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task5-spec-fix-v2/debug/deps/libserde_json-a21f0692595b2a08.rlib"
+    ],
+    "cwd": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7",
+    "env_override": {
+      "REVIEW_OUT": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7"
+    },
+    "exit_code": 0
+  }
+]

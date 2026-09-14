@@ -1,0 +1,23 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-86a6ed386b85f0cb)
+
+running 1 test
+test off_drains_a_live_request_closes_sockets_and_exposes_draining ... FAILED
+
+failures:
+
+---- off_drains_a_live_request_closes_sockets_and_exposes_draining stdout ----
+
+thread 'off_drains_a_live_request_closes_sockets_and_exposes_draining' panicked at tests/lifecycle_contract.rs:49:558:
+draining status must remain queryable: error: control_unreachable
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    off_drains_a_live_request_closes_sockets_and_exposes_draining
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 10.55s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

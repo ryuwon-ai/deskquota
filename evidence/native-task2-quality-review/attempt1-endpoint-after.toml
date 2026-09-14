@@ -1,0 +1,29 @@
+listen = "127.0.0.1:52914"
+concurrency = 3
+cancel_policy = "close"
+accounting = "actual"
+retry_transient_429 = true
+
+[upstream]
+api_base = "http://127.0.0.1:9/company/v1"
+
+[upstream.auth]
+mode = "none"
+
+[quota.rpm]
+kind = "unlimited"
+
+[quota.tpm]
+kind = "unlimited"
+
+[[models]]
+id = "model-a"
+max_output_tokens = 64
+
+[[roots]]
+id = "pi"
+endpoints = [
+    "responses",
+    "chat/completions",
+]
+models = ["model-a"]

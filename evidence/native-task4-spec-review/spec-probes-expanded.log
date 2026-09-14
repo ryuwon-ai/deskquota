@@ -1,0 +1,30 @@
+
+running 5 tests
+test composite_hash_and_snapshot_checks_precede_activation ... ok
+test owned_provider_reconnect_user_change_and_retired_journal_boundaries ... FAILED
+test project_settings_parent_symlink_must_be_refused ... CONFIRMED: project-local settings written through symlinked .claude directory
+FAILED
+test shared_settings_via_native_directory_must_be_refused ... .claude/settings.json
+CONFIRMED: synthetic local token written into Git-tracked .claude/settings.json through native directory override
+FAILED
+test unrelated_private_claude_settings_are_preserved_and_reversible ... ok
+
+failures:
+
+failures:
+    owned_provider_reconnect_user_change_and_retired_journal_boundaries
+    project_settings_parent_symlink_must_be_refused
+    shared_settings_via_native_directory_must_be_refused
+
+test result: FAILED. 2 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+
+
+thread 'owned_provider_reconnect_user_change_and_retired_journal_boundaries' panicked at evidence/native-task4-spec-review/spec_probes_expanded.rs:18:101:
+assertion failed: !restored.conflicts.is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'project_settings_parent_symlink_must_be_refused' panicked at evidence/native-task4-spec-review/spec_probes_expanded.rs:9:815:
+symlinked project-local settings directory must be refused
+
+thread 'shared_settings_via_native_directory_must_be_refused' panicked at evidence/native-task4-spec-review/spec_probes_expanded.rs:8:814:
+Git-shared Claude settings must be refused even when selected as native config directory

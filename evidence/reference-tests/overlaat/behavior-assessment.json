@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-09-11T11:35:02.999098+00:00",
+  "selected_upstream_tests": {
+    "tests": 57,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "script_exit_is_behavior_pass": false,
+  "tcp": [
+    {
+      "label": "tcp-disconnect",
+      "abort_on_disconnect": true,
+      "observation_script_exit_code": 0,
+      "first_event_before_fixture_release": true,
+      "policy_met_in_this_fixture": true,
+      "request_and_scheduler_cleanup_observed": true,
+      "evidence": "tcp-disconnect.json"
+    },
+    {
+      "label": "tcp-no-abort",
+      "abort_on_disconnect": false,
+      "observation_script_exit_code": 0,
+      "first_event_before_fixture_release": true,
+      "policy_met_in_this_fixture": false,
+      "request_and_scheduler_cleanup_observed": true,
+      "evidence": "tcp-no-abort.json"
+    },
+    {
+      "label": "tcp-no-abort-repeat-2",
+      "abort_on_disconnect": false,
+      "observation_script_exit_code": 0,
+      "first_event_before_fixture_release": true,
+      "policy_met_in_this_fixture": false,
+      "request_and_scheduler_cleanup_observed": true,
+      "evidence": "tcp-no-abort-repeat-2.json"
+    },
+    {
+      "label": "tcp-no-abort-repeat-3",
+      "abort_on_disconnect": false,
+      "observation_script_exit_code": 0,
+      "first_event_before_fixture_release": true,
+      "policy_met_in_this_fixture": false,
+      "request_and_scheduler_cleanup_observed": true,
+      "evidence": "tcp-no-abort-repeat-3.json"
+    }
+  ],
+  "limitations": [
+    "No product implementation or product performance test",
+    "No real model, API, GPU cancellation, startup, persistence, Windows or Linux validation"
+  ]
+}

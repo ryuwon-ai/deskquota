@@ -1,0 +1,42 @@
+[
+  {
+    "case": "unchanged_control",
+    "accepted": true,
+    "delta": 0
+  },
+  {
+    "case": "runtime_accounting_mismatch",
+    "accepted": false,
+    "error": "ValueError: initial_status runtime accounting mismatch"
+  },
+  {
+    "case": "runtime_fingerprint_mismatch",
+    "accepted": false,
+    "error": "ValueError: initial_status runtime config fingerprint mismatch"
+  },
+  {
+    "case": "reserved_run_relabelled_actual",
+    "accepted": false,
+    "error": "ValueError: initial_status runtime config fingerprint mismatch"
+  },
+  {
+    "case": "nonfinite_terminal_nan",
+    "accepted": false,
+    "error": "ValueError: terminal ended_s must be finite"
+  },
+  {
+    "case": "equal_float_usage_control",
+    "accepted": false,
+    "error": "ValueError: completed generation usage must contain u64 integers"
+  },
+  {
+    "case": "false_cutoff_flag_control",
+    "accepted": false,
+    "error": "ValueError: within_measurement flag disagrees with cutoff"
+  }
+]
+{
+  "original_cases_passed": 7,
+  "adjacent_cases_passed": 26,
+  "held_smoke_evaluation_matches": true
+}

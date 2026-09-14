@@ -1,0 +1,14 @@
+E
+======================================================================
+ERROR: test_login_timestamp_without_human_attestation_is_not_login_proof (tests.test_verify_native.VerifyNativeUnitTests.test_login_timestamp_without_human_attestation_is_not_login_proof)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 37, in test_login_timestamp_without_human_attestation_is_not_login_proof
+    self.assertFalse(module.login_on_verified(observed, human_attested=False))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'verify_native' has no attribute 'login_on_verified'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.015s
+
+FAILED (errors=1)

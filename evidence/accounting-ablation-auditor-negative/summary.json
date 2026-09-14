@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "auditor_sha256": "24f5af55558393ba3bafdb840d7cca5be702a1460c5edad6b51040bd3968a234",
+  "original_manifest_sha256": "2d279742a59f4c113535b90b8dcd31170b84963871bbf96b0e62f231ea8f09e4",
+  "cases": [
+    {
+      "name": "float_usage",
+      "exit_code": 1,
+      "passed": false,
+      "error": "ValueError: usage must be u64 integers"
+    },
+    {
+      "name": "runtime_policy",
+      "exit_code": 1,
+      "passed": false,
+      "error": "ValueError: initial_status: runtime evidence mismatch"
+    },
+    {
+      "name": "nonfinite_time",
+      "exit_code": 1,
+      "passed": false,
+      "error": "ValueError: nonfinite JSON value: NaN"
+    },
+    {
+      "name": "changed_schedule",
+      "exit_code": 1,
+      "passed": false,
+      "error": "ValueError: submitted schedule differs from pinned reference"
+    },
+    {
+      "name": "missing_terminal",
+      "exit_code": 1,
+      "passed": false,
+      "error": "ValueError: terminal denominator mismatch"
+    }
+  ],
+  "scope": "Real independent auditor CLI on rehashed copies of the first quota pair, before original pair acceptance. No gateway or product modules executed."
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "S1",
+    "priority": 2,
+    "title": "Windows current-user trigger lacks UserId",
+    "product_file": "src/autostart/mod.rs",
+    "line": 904,
+    "evidence_class": "fresh held rlib plus primary docs"
+  },
+  {
+    "id": "S2",
+    "priority": 2,
+    "title": "Unobserved login auth is asserted unavailable",
+    "product_file": "src/autostart/mod.rs",
+    "line": 49,
+    "evidence_class": "fresh held rlib and release fixture"
+  },
+  {
+    "id": "S3",
+    "priority": 1,
+    "title": "Templates-only dispatches real OS registration",
+    "product_file": "scripts/verify_native.py",
+    "line": 205,
+    "evidence_class": "fresh mock-only driver dispatch plus source"
+  },
+  {
+    "id": "S4",
+    "priority": 2,
+    "title": "Verifier ignores caller build target and rebuilds held target",
+    "product_file": "scripts/verify_native.py",
+    "line": 175,
+    "evidence_class": "fresh mock-only subprocess capture"
+  },
+  {
+    "id": "S5",
+    "priority": 2,
+    "title": "Manual auth stage uses empty-login environment and fails open",
+    "product_file": "scripts/verify_native.py",
+    "line": 359,
+    "evidence_class": "fresh mock-only environment and failed-stage probes"
+  },
+  {
+    "id": "S6",
+    "priority": 2,
+    "title": "Registration status mistakes local sidecar for manager state",
+    "product_file": "src/autostart/mod.rs",
+    "line": 544,
+    "evidence_class": "source-supported; Windows/Linux unexecuted"
+  },
+  {
+    "id": "S7",
+    "priority": 2,
+    "title": "Literal percent paths exposed to Task Scheduler environment expansion",
+    "product_file": "src/autostart/mod.rs",
+    "line": 898,
+    "evidence_class": "source and primary docs; Windows unexecuted"
+  }
+]

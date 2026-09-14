@@ -1,0 +1,66 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0425]: cannot find value `target` in this scope
+    --> src/autostart/mod.rs:1633:65
+     |
+1633 |         let disabled = windows_manager_snapshot_from_xml(label, target, user, &owned);
+     |                                                                 ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `target` in this scope
+    --> src/autostart/mod.rs:1655:13
+     |
+1655 |             target,
+     |             ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `target` in this scope
+    --> src/autostart/mod.rs:1669:54
+     |
+1669 |             windows_manager_snapshot_from_xml(label, target, user, &unscoped),
+     |                                                      ^^^^^^ not found in this scope
+
+error[E0308]: mismatched types
+   --> src/autostart/mod.rs:834:39
+    |
+834 |                 shape.observe(&stack, start.local_name().as_ref());
+    |                       -------         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[u8]`, found `&str`
+    |                       |
+    |                       arguments to this method are incorrect
+    |
+    = note: expected reference `&[u8]`
+               found reference `&str`
+note: method defined here
+   --> src/autostart/mod.rs:961:8
+    |
+961 |     fn observe(&mut self, stack: &[String], element: &[u8]) {
+    |        ^^^^^^^                              --------------
+
+error[E0308]: mismatched types
+   --> src/autostart/mod.rs:850:39
+    |
+850 |                 shape.observe(&stack, empty.local_name().as_ref());
+    |                       -------         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[u8]`, found `&str`
+    |                       |
+    |                       arguments to this method are incorrect
+    |
+    = note: expected reference `&[u8]`
+               found reference `&str`
+note: method defined here
+   --> src/autostart/mod.rs:961:8
+    |
+961 |     fn observe(&mut self, stack: &[String], element: &[u8]) {
+    |        ^^^^^^^                              --------------
+
+warning: unused variable: `target`
+    --> src/autostart/mod.rs:1681:13
+     |
+1681 |         let target = Path::new(r"C:\Users\fixture\task.xml");
+     |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_target`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+For more information about this error, try `rustc --explain E0308`.
+Some errors have detailed explanations: E0308, E0425.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `llmgw` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+warning: `llmgw` (lib test) generated 1 warning
+error: could not compile `llmgw` (lib test) due to 5 previous errors; 1 warning emitted

@@ -1,0 +1,52 @@
+test_invalid_mode_combinations_reject_before_output_creation (test_benchmark_accounting.AccountingCliBoundaryTests.test_invalid_mode_combinations_reject_before_output_creation) ... ERROR
+test_actual_config_uses_one_accounting_value_in_toml_and_metadata (test_benchmark_accounting.AccountingRulesTests.test_actual_config_uses_one_accounting_value_in_toml_and_metadata) ... ERROR
+test_arm_profiles_and_alternating_pair_schedule (test_benchmark_accounting.AccountingRulesTests.test_arm_profiles_and_alternating_pair_schedule) ... ERROR
+
+======================================================================
+ERROR: test_invalid_mode_combinations_reject_before_output_creation (test_benchmark_accounting.AccountingCliBoundaryTests.test_invalid_mode_combinations_reject_before_output_creation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 77, in test_invalid_mode_combinations_reject_before_output_creation
+    await benchmark.main(args)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 411, in main
+    identity = identities(binary, reference)
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 375, in identities
+    "benchmark": {"path": str(reference), "sha256": digest(reference), "features": ["bench-harness"]}, "sources": sources}
+                                                    ~~~~~~^^^^^^^^^^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 71, in digest
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                          ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 777, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/accounting-cli-red-0w7wfj2z/unused-reference'
+
+======================================================================
+ERROR: test_actual_config_uses_one_accounting_value_in_toml_and_metadata (test_benchmark_accounting.AccountingRulesTests.test_actual_config_uses_one_accounting_value_in_toml_and_metadata)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 40, in test_actual_config_uses_one_accounting_value_in_toml_and_metadata
+    from benchmark_accounting import build_gateway_config, validate_config_provenance
+ModuleNotFoundError: No module named 'benchmark_accounting'
+
+======================================================================
+ERROR: test_arm_profiles_and_alternating_pair_schedule (test_benchmark_accounting.AccountingRulesTests.test_arm_profiles_and_alternating_pair_schedule)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 19, in test_arm_profiles_and_alternating_pair_schedule
+    from benchmark_accounting import accounting_for_arm, paired_schedule
+ModuleNotFoundError: No module named 'benchmark_accounting'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.006s
+
+FAILED (errors=3)

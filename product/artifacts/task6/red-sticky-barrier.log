@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running tests/fairness_contract.rs (target/debug/deps/fairness_contract-01c9cffd49df6b42)
+
+running 1 test
+test chosen_barrier_persists_until_its_own_admission_or_removal ... FAILED
+
+failures:
+
+---- chosen_barrier_persists_until_its_own_admission_or_removal stdout ----
+
+thread 'chosen_barrier_persists_until_its_own_admission_or_removal' panicked at tests/fairness_contract.rs:687:5:
+canceling trigger must not clear another chosen barrier
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    chosen_barrier_persists_until_its_own_admission_or_removal
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test fairness_contract`

@@ -1,0 +1,45 @@
+{
+  "verdict": "SPEC CHANGES REQUESTED",
+  "profiles": {
+    "debug": {
+      "tests_passed": 4,
+      "tests_failed": 0,
+      "data_ingress": 4,
+      "upstream_http_attempts": 6,
+      "outcomes": {
+        "200": 3,
+        "429": 1
+      },
+      "manual_trace_starts_not_http": 1
+    },
+    "release": {
+      "tests_passed": 4,
+      "tests_failed": 0,
+      "data_ingress": 4,
+      "upstream_http_attempts": 6,
+      "outcomes": {
+        "200": 3,
+        "429": 1
+      },
+      "manual_trace_starts_not_http": 1
+    }
+  },
+  "source_count": 41,
+  "binary_count": 2,
+  "identity_after_passed": true,
+  "product_changes": false,
+  "quality_review_performed": false,
+  "supersedes": "run-summary-initial-pass.json",
+  "findings": [
+    {
+      "priority": "P1",
+      "file": "product/tests/resource_bounds.rs",
+      "line": 77,
+      "requirement": "64 partial bodies simultaneously demand additional memory",
+      "observed": "Only one victim sends the follow-on byte;63 remain network-input waiters",
+      "requested": "Add a64-writer shared-barrier real-socket pressure test and debug/release evidence; retain single-writer progress regression"
+    }
+  ],
+  "followup_new_http_attempts": 0,
+  "followup_new_test_executions": 0
+}

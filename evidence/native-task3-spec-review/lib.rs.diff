@@ -1,0 +1,12 @@
+--- native2/product/src/lib.rs
++++ native3/product/src/lib.rs
+@@ -1,7 +1,9 @@
+ pub mod admission;
+ pub mod cli;
+ pub mod config;
++pub mod config_patch;
+ mod control;
++mod file_replace;
+ pub mod lifecycle;
+ mod metrics;
+ mod protocol;

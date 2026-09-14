@@ -1,0 +1,68 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.63s
+     Running tests/patch_contract.rs (target/native-task3-lock-fix/debug/deps/patch_contract-c8928a174386669d)
+
+running 23 tests
+test config_patch_crash_child ... ok
+test config_patch_lock_path_child ... ok
+test apply_requires_exact_preview_hash_and_rechecks_concurrent_edits ... ok
+test json_validation_rejects_non_json_whitespace_and_raw_string_controls ... ok
+test case_aliases_share_a_lock_when_the_filesystem_equates_them ... ok
+test cooperating_editors_share_one_lock_namespace_across_different_journals ... ok
+test local_token_requires_existing_user_private_file_without_changing_mode ... ok
+test comments_only_json_keeps_comment_markers_inside_strings_as_data ... ok
+test project_shared_token_and_non_data_credentials_are_refused_before_writing ... ok
+test apply_and_restore_use_the_same_transaction_lock ... ok
+test ordinary_non_token_patch_preserves_existing_mode_and_macos_acl ... ok
+test disconnect_preserves_user_owned_key_change_but_restores_other_owned_keys ... ok
+test jsonc_apply_and_restore_preserve_comments_unrelated_keys_and_hide_tokens ... ok
+
+running 1 test
+test config_patch_lock_path_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.01s
+
+
+running 1 test
+test config_patch_lock_path_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.02s
+
+test partial_two_file_apply_is_explicit_and_recoverable ... FAILED
+test resource_lock_identity_does_not_depend_on_process_temp_directory ... ok
+test strict_json_and_comments_only_json_refuse_ambiguous_or_unsupported_grammar ... ok
+test failed_repeated_connect_keeps_the_last_verified_owned_value_recoverable ... ok
+
+running 1 test
+test newly_created_file_is_removed_only_while_its_exact_bytes_are_owned ... FAILED
+test toml_apply_and_restore_preserve_comments_and_unrelated_user_edits ... ok
+test restore_uses_the_same_resource_identity_as_an_alias_apply ... ok
+test repeated_connect_keeps_first_preownership_value_and_one_resource_record ... ok
+test partial_two_file_restore_is_explicit_and_recoverable ... ok
+test interrupted_process_leaves_stageful_journal_and_restores_written_resources ... ok
+
+failures:
+
+---- partial_two_file_apply_is_explicit_and_recoverable stdout ----
+
+thread 'partial_two_file_apply_is_explicit_and_recoverable' panicked at tests/patch_contract.rs:747:5:
+assertion `left == right` failed
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- newly_created_file_is_removed_only_while_its_exact_bytes_are_owned stdout ----
+
+thread 'newly_created_file_is_removed_only_while_its_exact_bytes_are_owned' panicked at tests/patch_contract.rs:1084:5:
+assertion `left == right` failed
+  left: ["/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-patch-new-changed-95743-0342b4bb71fdcb41/client/new.json"]
+ right: ["/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-patch-new-changed-95743-0342b4bb71fdcb41/client/new.json"]
+
+
+failures:
+    newly_created_file_is_removed_only_while_its_exact_bytes_are_owned
+    partial_two_file_apply_is_explicit_and_recoverable
+
+test result: FAILED. 21 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s
+
+error: test failed, to rerun pass `--test patch_contract`

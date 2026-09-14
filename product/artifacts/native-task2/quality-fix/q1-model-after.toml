@@ -1,0 +1,19 @@
+# preserved user heading
+listen = "127.0.0.1:53753" # port comment
+concurrency = 3
+accounting = "actual"
+cancel_policy = "close"
+retry_transient_429 = true
+[upstream]
+api_base = "http://127.0.0.1:9/company/v1"
+auth = { mode = "none" }
+[quota]
+rpm = { kind = "unlimited" }
+tpm = { kind = "unlimited" }
+[[models]]
+id = "model-next" # model id comment
+max_output_tokens = 96
+[[roots]]
+id = "pi"
+endpoints = ["responses"] # route endpoint comment
+models = ["model-next"]

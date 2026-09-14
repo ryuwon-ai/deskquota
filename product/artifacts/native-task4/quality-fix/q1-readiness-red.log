@@ -1,0 +1,43 @@
+{
+  "binary_sha256": "4414957b603bc04d77cb55275d5ca335477645159c2509735ce84b3cd8013801",
+  "client_config_written": true,
+  "client_existed_before_confirmation": false,
+  "client_journal_state": "applied",
+  "config_sha256_after_result": "1fd90b673319a12f375382dba79f86710159df703423a96b47f4cdbe40ff06c7",
+  "config_sha256_before_confirmation": "1fd90b673319a12f375382dba79f86710159df703423a96b47f4cdbe40ff06c7",
+  "confirmation_observed": true,
+  "desired_fingerprint_ready_before_result": false,
+  "driver_error_message": "client config was written after reviewed readiness became stale",
+  "driver_error_type": "AssertionError",
+  "environment_keys": [
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "NO_COLOR",
+    "PATH",
+    "PI_CODING_AGENT_DIR",
+    "TERM",
+    "TMPDIR",
+    "USERPROFILE",
+    "XDG_CACHE_HOME",
+    "XDG_CONFIG_HOME",
+    "XDG_DATA_HOME"
+  ],
+  "owned_temporary_paths_remaining": [],
+  "reported_client_applied": true,
+  "reviewed_runtime_fingerprint": "1fd90b673319a12f375382dba79f86710159df703423a96b47f4cdbe40ff06c7",
+  "safe_result": false,
+  "setup_exit": 0,
+  "state_after_off_before_yes": "stopped",
+  "synthetic_version_only_client": true,
+  "upstream_inference_requested": false,
+  "worker_state_after_confirmation": "stopped"
+}
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task4/quality-fix/readiness_correctness_probe.py", line 218, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task4/quality-fix/readiness_correctness_probe.py", line 197, in main
+    assert result["safe_result"], "client config was written after reviewed readiness became stale"
+           ~~~~~~^^^^^^^^^^^^^^^
+AssertionError: client config was written after reviewed readiness became stale

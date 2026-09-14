@@ -1,0 +1,123 @@
+test_completed_generation_usage_is_linked_to_submitted_and_attempt (tests.test_benchmark_accounting.AccountingRunValidationTests.test_completed_generation_usage_is_linked_to_submitted_and_attempt) ... ok
+test_paired_summary_separates_fixed_cutoff_drain_and_latency (tests.test_benchmark_accounting.AccountingRunValidationTests.test_paired_summary_separates_fixed_cutoff_drain_and_latency) ... FAIL
+test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair) ... START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+FAIL
+test_rehashed_equal_float_usage_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_equal_float_usage_rejects_before_next_spawn) ... START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+START quota-seed2-production_actual
+END quota-seed2-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed2-production_rr
+END quota-seed2-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+completed_accounting_matrix
+FAIL
+test_builder_toml_metadata_mismatch_rejects_before_spawn (tests.test_benchmark_accounting.StartupCancellationTests.test_builder_toml_metadata_mismatch_rejects_before_spawn) ... FAIL
+test_written_toml_mutation_rejects_before_spawn (tests.test_benchmark_accounting.StartupCancellationTests.test_written_toml_mutation_rejects_before_spawn) ... FAIL
+test_runtime_accounting_mismatch_reaps_owned_child (tests.test_benchmark_accounting.StartupCancellationTests.test_runtime_accounting_mismatch_reaps_owned_child) ... FAIL
+
+======================================================================
+FAIL: test_paired_summary_separates_fixed_cutoff_drain_and_latency (tests.test_benchmark_accounting.AccountingRunValidationTests.test_paired_summary_separates_fixed_cutoff_drain_and_latency)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 404, in test_paired_summary_separates_fixed_cutoff_drain_and_latency
+    with self.assertRaisesRegex(ValueError, "duplicate planned seed"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 637, in test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair
+    self.assertFalse(pilot["matrix_complete"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rehashed_equal_float_usage_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_equal_float_usage_rejects_before_next_spawn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 708, in test_rehashed_equal_float_usage_rejects_before_next_spawn
+    with self.assertRaisesRegex(ValueError, "usage"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_builder_toml_metadata_mismatch_rejects_before_spawn (tests.test_benchmark_accounting.StartupCancellationTests.test_builder_toml_metadata_mismatch_rejects_before_spawn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 815, in test_builder_toml_metadata_mismatch_rejects_before_spawn
+    await benchmark.start_gateway(
+    ...<7 lines>...
+    )
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 188, in start_gateway
+    paths_process = await asyncio.create_subprocess_exec(str(binary), "doctor", "--config", str(config_path), "--json", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 2333, in _execute_mock_call
+    raise effect
+AssertionError: subprocess spawned
+
+======================================================================
+FAIL: test_written_toml_mutation_rejects_before_spawn (tests.test_benchmark_accounting.StartupCancellationTests.test_written_toml_mutation_rejects_before_spawn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 845, in test_written_toml_mutation_rejects_before_spawn
+    await benchmark.start_gateway(
+    ...<7 lines>...
+    )
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark.py", line 188, in start_gateway
+    paths_process = await asyncio.create_subprocess_exec(str(binary), "doctor", "--config", str(config_path), "--json", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 2333, in _execute_mock_call
+    raise effect
+AssertionError: subprocess spawned
+
+======================================================================
+FAIL: test_runtime_accounting_mismatch_reaps_owned_child (tests.test_benchmark_accounting.StartupCancellationTests.test_runtime_accounting_mismatch_reaps_owned_child)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 885, in test_runtime_accounting_mismatch_reaps_owned_child
+    self.fail("runtime accounting mismatch accepted")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: runtime accounting mismatch accepted
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.161s
+
+FAILED (failures=6)

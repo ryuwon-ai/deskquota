@@ -1,0 +1,146 @@
+{
+  "round": "task5-spec-fix",
+  "finished_at": "2026-09-12T06:04:35.154937+00:00",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "check",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--all-targets"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "debug-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--all-targets"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "release-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--release",
+        "--all-targets"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "debug-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "release-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--release"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "pi-python-tests",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_pi_probe.py",
+        "-v"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "pi-positive",
+      "command": [
+        "python3",
+        "scripts/probe_pi.py",
+        "--binary",
+        "target/debug/llmgw",
+        "--output",
+        "artifacts/task5-spec-fix/pi-e2e.json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0
+    },
+    {
+      "name": "pi-gateway-off",
+      "command": [
+        "python3",
+        "scripts/probe_pi.py",
+        "--binary",
+        "target/debug/llmgw",
+        "--gateway-off",
+        "--output",
+        "artifacts/task5-spec-fix/pi-e2e-gateway-off.json"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1
+    }
+  ],
+  "binary_sha256": {
+    "debug": "5fe45aca9910a31fb08e1d4dea4cadf7f1a53ba4a4f7b04410401d02e7b71713",
+    "release": "3cfd0e778e2dab57d96b6fa2aeb0c05ea1ef71616e3ab7383514f98bcd98f562"
+  },
+  "rust_tests_per_profile": {
+    "lib": 4,
+    "config_contract": 19,
+    "quota_contract": 12,
+    "stream_lifetime": 32,
+    "wire_contract": 44,
+    "task5_usage_contract": 21,
+    "total": 132
+  },
+  "python_tests": 5,
+  "pi_positive_passed": true,
+  "pi_negative_expected_failure": true
+}

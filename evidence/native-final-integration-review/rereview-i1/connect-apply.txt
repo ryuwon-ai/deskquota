@@ -1,0 +1,30 @@
+client: pi 0.84.2
+scope: user-private
+native config directory: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/client-home/.pi/agent (--client-home; later client launches must set PI_CODING_AGENT_DIR=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/client-home/.pi/agent)
+public URL: http://127.0.0.1:60379/r/pi-work/v1
+gateway config fingerprint: 6edd367bfec451ac1199464684ad265816ec1ddb2bf0aabd7ac621ee07f0cbb0
+root: pi-work (all clients on this root share one FIFO/fairness share)
+model: example-model
+protocol: openai_completions
+target files:
+  - /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/client-home/.pi/agent/models.json
+  - /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/client-home/.pi/agent/settings.json
+owned keys:
+/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/client-home/.pi/agent/models.json: 1 owned key(s), 1 warning(s)
+  set providers.llmgw = [REDACTED local data token]
+  warning: Pi client defaults 128000/16384 were written because upstream limits are unverified; these are not verified provider capabilities
+/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/client-home/.pi/agent/settings.json: 2 owned key(s), 0 warning(s)
+  set defaultProvider = [reviewed value]
+  set defaultModel = [reviewed value]
+cooperating llmgw editors use one stable adjacent lock per normalized client resource; external editor CAS is not guaranteed
+credential: local data token from /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/gateway/.llmgw-e6ac295e1c685cb445dea358b1a5f79f4ff3504fe4bff2a5842c63f7b8cded5c/data-token [REDACTED]
+preview hash: bb4e0ec67190eea43b4af527a92d747fb9716ca8205c85c145fe31d575dbdf86
+disconnect: llmgw disconnect pi --journal /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/gateway/.llmgw-e6ac295e1c685cb445dea358b1a5f79f4ff3504fe4bff2a5842c63f7b8cded5c/clients/pi.journal.json
+listing: not requested
+selection: configured
+inference: unverified
+tools: unverified
+
+warning: Pi client defaults 128000/16384 were written because upstream limits are unverified; these are not verified provider capabilities
+runtime impact: stopped; activation required before client patch
+client patch: applied; verified 2 client resource(s); journal /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/gateway/.llmgw-e6ac295e1c685cb445dea358b1a5f79f4ff3504fe4bff2a5842c63f7b8cded5c/clients/pi.journal.json; client configuration and gateway state remain separate resources

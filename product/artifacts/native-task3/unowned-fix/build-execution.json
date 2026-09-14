@@ -1,0 +1,50 @@
+{
+  "workdir": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product",
+  "source_editing_finished_before_execution": true,
+  "executions": [
+    {
+      "argv": [
+        "cargo",
+        "build",
+        "--locked"
+      ],
+      "environment": {
+        "CARGO_TARGET_DIR": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-unowned-fix"
+      },
+      "exit_code": 0,
+      "log": {
+        "path": "artifacts/native-task3/unowned-fix/cargo-build-debug-final.log",
+        "bytes": 561,
+        "sha256": "9a77a2fe50d474e5c5dee1be00bfb3edad4fb37d2344e03c1f2ce0f3a7bc9f4a"
+      },
+      "binary": {
+        "path": "target/native-task3-unowned-fix/debug/llmgw",
+        "bytes": 28150952,
+        "sha256": "f1252148b2efc1edd67bf51c7210a7f373ee9c30f035bbcf6448da5beb15acc2"
+      }
+    },
+    {
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "environment": {
+        "CARGO_TARGET_DIR": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-unowned-fix"
+      },
+      "exit_code": 0,
+      "log": {
+        "path": "artifacts/native-task3/unowned-fix/cargo-build-release-final.log",
+        "bytes": 552,
+        "sha256": "4f75f214a798335b51dc4742880fa3bd7b7b8ba9c849e8ba45117aafc3b00e0a"
+      },
+      "binary": {
+        "path": "target/native-task3-unowned-fix/release/llmgw",
+        "bytes": 9313936,
+        "sha256": "c325b5ce341626e6b57585a76f2d8cc026f5db3199b651b7c98cd0f6cc2c29a5"
+      },
+      "note": "The terse Cargo output is byte-identical to the earlier spec-fix release log because both reported the same package and 12.61-second completion; this command executed against the distinct absolute unowned-fix target and produced the pinned unowned-fix binary."
+    }
+  ]
+}

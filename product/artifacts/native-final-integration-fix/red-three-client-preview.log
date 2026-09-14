@@ -1,0 +1,21 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running tests/client_profiles.rs (target/native-final-integration-fix/debug/deps/client_profiles-7c32db6d14749411)
+
+running 1 test
+
+thread 'fresh_setup_save_only_allows_all_client_previews_without_manual_token_seeding' panicked at tests/client_profiles.rs:1502:5:
+pi: status=Some(1), stdout="", stderr="error: cannot use protected credential file /private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-fresh-save-only-pi-40128-33880d585acb987c/gateway/.llmgw-ad31777382dd896e26202b14bda6b7b5ebf2483d2ab21e9a51868b43c5385d65/data-token: file is missing or unreadable\n"
+claude: status=Some(1), stdout="", stderr="error: cannot use protected credential file /private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-fresh-save-only-claude-40128-30714cb5af121207/gateway/.llmgw-353ac4646cbbba784cefab34b88dc9848cf59c1f565bfe65b11c2bb0e315f833/data-token: file is missing or unreadable\n"
+codex: status=Some(1), stdout="", stderr="error: cannot use protected credential file /private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-fresh-save-only-codex-40128-0a99d7cd7f6fd365/gateway/.llmgw-85ea0a93089876beefb935d43ead91e129135b1217fe263dfdec9b7d97e1f8a6/data-token: file is missing or unreadable\n"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test fresh_setup_save_only_allows_all_client_previews_without_manual_token_seeding ... FAILED
+
+failures:
+
+failures:
+    fresh_setup_save_only_allows_all_client_previews_without_manual_token_seeding
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 1.65s
+
+error: test failed, to rerun pass `--test client_profiles`

@@ -1,0 +1,47 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running tests/wire_contract.rs (target/debug/deps/wire_contract-6954f29436a5d8cf)
+
+running 39 tests
+test control_rejects_data_token ... ok
+test duplicate_data_credentials_are_rejected ... ok
+test empty_query_presence_is_rejected_instead_of_silently_dropped ... ok
+test control_rejects_origin ... ok
+test data_token_is_stripped ... ok
+test env_auth_removes_both_old_credentials ... ok
+test invalid_utf8_in_ignored_json_values_is_rejected_before_upstream ... ok
+test gzip_response_status_headers_and_compressed_bytes_are_unchanged ... ok
+test body_is_unchanged ... ok
+test duplicate_top_level_inspected_fields_are_rejected_before_upstream ... ok
+test admitted_prestart_reset_releases_joint_hold_once_without_http_attempt ... ok
+test known_tpm_rejects_missing_output_bound_before_upstream ... ok
+test forward_auth_is_unchanged ... ok
+test hop_by_hop_and_connection_nominated_headers_are_scrubbed_both_directions ... ok
+test lossless_query_rejects_a_request_query_that_url_would_transform ... ok
+test missing_token_is_rejected_before_body_read ... ok
+test local_control_reports_bounded_metrics_and_stops_without_upstream ... ok
+test model_allowlist_and_body_limit_are_enforced_before_upstream ... ok
+test many_small_chunked_frames_preserve_body_bytes ... ok
+test models_metadata_does_not_require_a_generation_body ... ok
+test none_auth_strips_both_known_credentials ... ok
+test actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits ... ok
+test public_spawn_rejects_non_loopback_before_other_startup_work ... ok
+test known_tpm_rejects_multimodal_and_oversized_estimate_without_attempt ... ok
+test reserved_env_auth_header_is_rejected_before_any_http_attempt ... ok
+test model_default_and_explicit_cap_precedence_do_not_rewrite_body ... ok
+test start_validation_rejects_a_constructed_non_loopback_config_before_bind ... ok
+test query_conflict_is_rejected ... ok
+test known_tpm_explicit_caps_and_text_only_inputs_forward_exact_bytes ... ok
+test prefix_is_preserved ... ok
+test oversized_header_is_bounded_by_the_actual_http_receiver ... ok
+test unsupported_background_and_upgrade_never_reach_upstream ... ok
+test supported_encoded_queries_are_forwarded_without_reserialization ... ok
+test unknown_route_never_reaches_upstream ... ok
+test runtime_credentials_require_protected_preprovisioned_state_files ... ok
+test known_quota_production_startup_holds_before_any_http_attempt ... ok
+test library_retry_is_disabled_on_response_failure ... ok
+test no_cross_host_redirect ... ok
+test metadata_endpoints_have_zero_generation_tpm_and_share_rpm_across_roots ... ok
+
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

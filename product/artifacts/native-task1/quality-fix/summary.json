@@ -1,0 +1,92 @@
+{
+  "status": "DONE_WITH_CONCERNS / FINAL HOLD for same QUALITY re-review",
+  "created_utc": "2026-09-12T13:52:57.334344+00:00",
+  "changed_since_spec_hold": [
+    "product/docs/runtime-contract.md",
+    "product/src/lifecycle/mod.rs",
+    "product/tests/lifecycle_contract.rs"
+  ],
+  "new_dependencies": [],
+  "source_files": 57,
+  "manifest_sha256": "4f89a05514a8a662409c89d2945394c19a0c318fd24076e0741de521cd7780a2",
+  "archive": {
+    "path": "artifacts/native-task1/quality-fix/source-hold.tar.gz",
+    "sha256": "d84f5b1ee94fc2a57a697b92007e2b2715168735a97ef33c2209f4e01f6d5c33",
+    "bytes": 171335,
+    "files": 61
+  },
+  "binaries": {
+    "target/native/debug/llmgw": {
+      "sha256": "db3fb408bae4db4bfba1d8c0a055730e383e231caeee9fec168e0ba777b26155",
+      "bytes": 25431752
+    },
+    "target/native/release/llmgw": {
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+      "bytes": 8697040
+    }
+  },
+  "current_tests": {
+    "lifecycle-debug-final.log": 25,
+    "lifecycle-release-final.log": 25
+  },
+  "current_cli": {
+    "artifact": "cli-release.json",
+    "passed": true,
+    "upstream_attempts": 1
+  },
+  "current_checks": [
+    "fmt-final.log",
+    "check-final.log",
+    "clippy-final.log"
+  ],
+  "red_green": [
+    "red-restart-race.log",
+    "green-restart-race.log",
+    "red-restart-path.log",
+    "green-restart-path.log"
+  ],
+  "prior_spec_artifacts": {
+    "product/artifacts/native-task1/spec-fix/README.md": "dfeac78ccdde5c9a782a67ba63f34b0686e188887a7110df0cdab5a0076c9a35",
+    "product/artifacts/native-task1/spec-fix/summary.json": "1ca3706002c96a6cfe840cbe42b308b1efb753a7d25dd7617a1dbb092e49c295",
+    "product/artifacts/native-task1/spec-fix/source-manifest.json": "588a3d41e7b7831eb4502e7297c4953b50bbaf35bd7d014866290bdec011b1cd",
+    "product/artifacts/native-task1/spec-fix/source-hold.tar.gz": "38c1d079f973a43e18bb49bee046a3216619eba96184ad71547053ce5d15a68a",
+    "product/artifacts/native-task1/spec-fix/lifecycle-debug-final.log": "df2fc527e9bfd849a47dd083b5cdb7ec1b5dbaf322ead48455ab867204a598de",
+    "product/artifacts/native-task1/spec-fix/lifecycle-release-final.log": "bdf548ba557b0a0dc227c3969fb73b5b5c47a2930dfee0aa2254a8cf013a353c"
+  },
+  "prior_hold_artifacts_unchanged": true,
+  "reviewer_originals": {
+    "evidence/native-task1-quality-review/probe-restart-race.py": "30b09920ae106da246f1e9678934820b742cd0bac4458c0bb593fbc70fb45ad1",
+    "evidence/native-task1-quality-review/restart-race-results.json": "27be31cbf85748b99da734a6105019663e0583615f0f01dc86ecff5cd4bad54c",
+    "evidence/native-task1-quality-review/README.md": "d0ac7cdde6e9706dfeb7afd5ad8ee1480ff538351f01e09c63401caaea6143fd"
+  },
+  "preserved_originals": {
+    "target/release/llmgw": {
+      "sha256": "410645600d70a69e69d9558420ea1cda61bf127a878497a6b8a0e88b17ba342e",
+      "matches": true
+    },
+    "target/bench/release/examples/bench_gateway": {
+      "sha256": "38b24b2934448716c74bad2dceaa91492e1bbc168b351e1f61460b90572c5faa",
+      "matches": true
+    },
+    "artifacts/pilot.json": {
+      "sha256": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6",
+      "matches": true
+    },
+    "../evidence/product-task8-quality-fixed-source.tar.gz": {
+      "sha256": "c4bb57f143bc03e1c23fb51fee5bedba4d89ca01106f5f09106ec318a383cb29",
+      "matches": true
+    }
+  },
+  "preserved_pilot_run_hashes": 40,
+  "cleanup": {
+    "remaining_native_processes": [],
+    "remaining_native_temp_directories": []
+  },
+  "limits": [
+    "Only lifecycle debug/release (25 each), release CLI, fmt/check/clippy rerun.",
+    "Prior full211 suites, spec22 suites, Pi, external SSE/fairness/retry probes, smoke and footprint remain prior-source evidence.",
+    "No claim of atomic protection against external editor changes during drain/spawn; existing child fingerprint guard retained.",
+    "Path-retarget fixture is Unix-only; no Windows/Linux runtime or new cross-platform compile evidence.",
+    "No next task, new dependencies, Git, user settings, autostart, real provider/model calls or registration."
+  ]
+}

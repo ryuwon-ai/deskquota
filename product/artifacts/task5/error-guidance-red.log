@@ -1,0 +1,23 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.81s
+     Running tests/wire_contract.rs (target/debug/deps/wire_contract-fbfe5999aa2293b0)
+
+running 1 test
+test known_tpm_rejects_missing_output_bound_before_upstream ... FAILED
+
+failures:
+
+---- known_tpm_rejects_missing_output_bound_before_upstream stdout ----
+
+thread 'known_tpm_rejects_missing_output_bound_before_upstream' panicked at tests/wire_contract.rs:916:5:
+assertion failed: error["error"]["message"].as_str().is_some_and(|message|
+        message.contains("request output cap") && message.contains("model"))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    known_tpm_rejects_missing_output_bound_before_upstream
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test wire_contract`

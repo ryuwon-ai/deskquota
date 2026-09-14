@@ -1,0 +1,29 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+warning: unused import: `fs`
+ --> src/cli.rs:5:5
+  |
+5 |     fs,
+  |     ^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: `llmgw` (lib) generated 1 warning (run `cargo fix --lib -p llmgw` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.03s
+     Running tests/client_profiles.rs (target/native-task4/debug/deps/client_profiles-2f750a8b4307e19e)
+
+running 1 test
+
+thread 'cli_failed_activation_keeps_reviewed_client_bytes_unchanged' panicked at tests/client_profiles.rs:341:5:
+error: state must be owned by this user, private, and not a link
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cli_failed_activation_keeps_reviewed_client_bytes_unchanged ... FAILED
+
+failures:
+
+failures:
+    cli_failed_activation_keeps_reviewed_client_bytes_unchanged
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.27s
+
+error: test failed, to rerun pass `--test client_profiles`

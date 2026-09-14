@@ -1,0 +1,31 @@
+    Updating crates.io index
+     Locking 1 package to latest Rust 1.88 compatible version
+      Adding quick-xml v0.42.0
+ Downloading crates ...
+  Downloaded quick-xml v0.42.0
+   Compiling quick-xml v0.42.0
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0603]: enum `XmlVersion` is private
+   --> src/autostart/mod.rs:816:69
+    |
+816 |                     let value = text.xml_content(quick_xml::events::XmlVersion::Implicit1_0);
+    |                                                                     ^^^^^^^^^^ private enum
+    |
+note: the enum `XmlVersion` is defined here
+   --> /Users/ryuwon/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/quick-xml-0.42.0/src/events/mod.rs:48:5
+    |
+48  | use crate::XmlVersion;
+    |     ^^^^^^^^^^^^^^^^^
+help: consider importing this unit variant instead
+    |
+816 -                     let value = text.xml_content(quick_xml::events::XmlVersion::Implicit1_0);
+816 +                     let value = text.xml_content(quick_xml::XmlVersion::Implicit1_0);
+    |
+help: import `XmlVersion` directly
+    |
+816 -                     let value = text.xml_content(quick_xml::events::XmlVersion::Implicit1_0);
+816 +                     let value = text.xml_content(quick_xml::XmlVersion);
+    |
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `llmgw` (lib) due to 1 previous error

@@ -1,0 +1,129 @@
+{
+  "at": "2026-09-13T08:05:28.258202+00:00",
+  "phase": "native-task6-quality-fix",
+  "status": "FINAL_HOLD",
+  "verdict": "QUALITY_FIX_COMPLETE_READY_FOR_SAME_QUALITY_REREVIEW",
+  "passed": true,
+  "do_not_overwrite": true,
+  "findings_fixed": [
+    "Q1 captured member binary identity",
+    "Q2 preserve-and-report failed Windows replacement"
+  ],
+  "changed_paths": [
+    "product/packaging/install.ps1",
+    "product/scripts/package_native.py",
+    "product/tests/test_installers.py",
+    "product/tests/test_package_native.py"
+  ],
+  "source_files": 101,
+  "source_drift": [],
+  "source_manifest_sha256": "d00ff4d106cd374857d4738441c3406a8085e8344d3c52e845f81a82763a88c7",
+  "source_archive_sha256": "0d8897fcd9300f433740f3fbd24edc042f8b7706e18715b50c5fc8a90de3ec2b",
+  "package_members": [
+    "README.md",
+    "docs/client-compatibility.md",
+    "docs/installation.md",
+    "docs/runtime-contract.md",
+    "llmgw"
+  ],
+  "package_sha256": "ba03203e9416a4eb75ca972fb0b3e5eba8618c46b2c26c7f65e2b7ffff387a22",
+  "package_byte_identical_to_spec_doc_fix": true,
+  "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+  "binary_unchanged": true,
+  "focused_tests": {
+    "red_failures": 2,
+    "authoritative_green_passes": 5,
+    "full_suites_rerun": false
+  },
+  "retained_prior_rows": 1680,
+  "retained_prior_drift": 0,
+  "cargo_or_runtime_reruns": 0,
+  "powershell_windows_verified": false,
+  "quality_rereview_requested": "same reviewer",
+  "spec_final_confirmation_after_quality": "same SPEC reviewer",
+  "execution_finished": true,
+  "runtime_ownership_released": true,
+  "owned_workers_remaining": 0,
+  "files": [
+    {
+      "path": "artifacts/native-task6/quality-fix/README.md",
+      "bytes": 3116,
+      "sha256": "d690e4bc6fc9b9d490b86e1556d0d494054676f07f20b91e26a87829cd05522d"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/identity.json",
+      "bytes": 1153,
+      "sha256": "872142ac2223ec4cf8a0f371c88e0f9122208faf4b8c3d237c3ded8715a10902"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/llmgw-macos-arm64.tar.gz",
+      "bytes": 4202653,
+      "sha256": "ba03203e9416a4eb75ca972fb0b3e5eba8618c46b2c26c7f65e2b7ffff387a22"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/llmgw-macos-arm64.tar.gz.sha256",
+      "bytes": 91,
+      "sha256": "c9ca619d26d310d7dbe06431c7a3d959541bc3c6c134899322d7e3c8b4d3ac91"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/package-identity.json",
+      "bytes": 732,
+      "sha256": "bf2b84cfcbc58804bb160cbc5779e5c70ca417539b273179c267f7b81e04b08d"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/preservation-before.json",
+      "bytes": 334399,
+      "sha256": "f2793ef377c66fa3307b62d7644270fdb73237dd09a1a09809481c561fc75a06"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/preservation-final.json",
+      "bytes": 334379,
+      "sha256": "771ef236d900285d9f7c2f269f4b9202ff5741a125a329587e1a57989d6ed503"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/source-base.json",
+      "bytes": 17155,
+      "sha256": "82272b0d12cd8800d0a6ff68a59e8e0f0d21a1f931cd9c039ea16c0e1140b66e"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/source-manifest.json",
+      "bytes": 18450,
+      "sha256": "d00ff4d106cd374857d4738441c3406a8085e8344d3c52e845f81a82763a88c7"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/source.tar.gz",
+      "bytes": 326556,
+      "sha256": "0d8897fcd9300f433740f3fbd24edc042f8b7706e18715b50c5fc8a90de3ec2b"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/targeted-final-green-v2.log",
+      "bytes": 986,
+      "sha256": "be3faa61d019405793be8c41f4be65e322f7d0c210f5654ad5cea4c5b89f7289"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/targeted-final-green.log",
+      "bytes": 986,
+      "sha256": "b985ab4a4f314fedb1cf25e86cdc86008df04a8d713f470cc4661d97cc97eac1"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/targeted-green.log",
+      "bytes": 462,
+      "sha256": "ccade577fc5a7028049e4b5e53a52242ae538fdf23862e3a98e985c3cfa253ce"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/targeted-red.log",
+      "bytes": 10705,
+      "sha256": "933b2275854f68b82df486e0ef72df55ad94410542681204bf4a67393bd5f03d"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/test-accounting.json",
+      "bytes": 1306,
+      "sha256": "703bc9c61b6448b5b010340824905b057b1c71be6dbb20b0cca54f2483557ff3"
+    },
+    {
+      "path": "artifacts/native-task6/quality-fix/verification.json",
+      "bytes": 2324,
+      "sha256": "4e8f3aa34f4dd640cb3f95bf20c439a824bb4866b6e99a65723b20ee984808b8"
+    }
+  ]
+}

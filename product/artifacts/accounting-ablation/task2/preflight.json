@@ -1,0 +1,56 @@
+{
+  "captured_utc": "2026-09-12T15:21:02Z",
+  "classification": "direct_read_only_identity_and_runtime_preflight",
+  "working_directory": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product",
+  "source_hold": {
+    "manifest": "artifacts/accounting-ablation/quality-fix/source-manifest.json",
+    "manifest_sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304",
+    "manifest_bytes": 10418,
+    "declared_source_files": 59,
+    "source_files_hash_and_size_verified": 59,
+    "stable_during_original_capture": true,
+    "archive": "artifacts/accounting-ablation/quality-fix/source-hold.tar.gz",
+    "archive_sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4",
+    "archive_bytes": 174816,
+    "archive_members": 60
+  },
+  "ordinary_binary": {
+    "path": "target/native/release/llmgw",
+    "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "bytes": 8697040
+  },
+  "usage_source_basis": {
+    "path": "../evidence/accounting-usage-source-basis.json",
+    "classification": "retained_source_identity_and_log_audit_not_new_test_execution",
+    "declared_files": 8,
+    "current_hashes_verified": 8,
+    "passed": true,
+    "limits": [
+      "Retained 211-test evidence belongs to older native source, not this new suite or binary attestation.",
+      "Client numerical usage observations do not alone prove internal gateway refunds."
+    ]
+  },
+  "exclusive_output": {
+    "pilot_json_absent": true,
+    "pilot_runs_absent": true,
+    "old_artifacts_preserved": true
+  },
+  "runtime": {
+    "llmgw_processes": 0,
+    "cargo_processes": 0,
+    "rustc_processes": 0,
+    "benchmark_or_pi_python_processes": 0,
+    "llmgw_listeners": 0,
+    "matching_temp_directories": 0
+  },
+  "host": {
+    "architecture": "arm64",
+    "cpu": "Apple M4",
+    "memory_bytes": 34359738368
+  },
+  "passed": true,
+  "notes": [
+    "No build, test, Pi, real API, model, user configuration, OS registration, or Git action was performed.",
+    "A first shell-only hash loop failed before checking files because the zsh reserved variable path replaced PATH; the corrected read-only loop verified all 59 source files and all 8 usage-basis files."
+  ]
+}

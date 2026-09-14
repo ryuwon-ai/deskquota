@@ -1,0 +1,14 @@
+
+running 5 tests
+test claude_journal_write_failure_before_restore_preserves_and_retries ... initial_journal_publication_failed=true client_unchanged=true journal_unchanged=true retry_restored=true
+ok
+test claude_resource_failure_records_partial_and_retry_preserves_unowned ... resource_publication_failed=true restore_partial_recorded=true client_unchanged=true retry_restored=true
+ok
+test codex_retired_journal_after_preview_refuses_recreated_value ... fresh_prepare_refused=true stale_snapshot_accepted=false stale_apply_accepted=false user_bytes_changed=false
+ok
+test normal_owned_reconnect_and_disconnect_controls ... ok
+test pi_retired_journal_after_preview_refuses_recreated_value ... fresh_prepare_refused=true stale_snapshot_accepted=false stale_apply_accepted=false user_bytes_changed=false
+ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.18s
+

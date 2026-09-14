@@ -1,0 +1,13 @@
+warning: field `metrics` is never read
+   --> src/server.rs:142:5
+    |
+138 | pub struct GatewayHandle {
+    |            ------------- field in this struct
+...
+142 |     metrics: Metrics,
+    |     ^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `llmgw` (lib) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.17s

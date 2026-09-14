@@ -1,0 +1,59 @@
+--- unowned-fix/product/src/config_patch/document.rs
++++ quality-fix/product/src/config_patch/document.rs
+@@ -241,6 +241,13 @@
+         .map_err(|_| Error::message("client config TOML value conversion failed"))?;
+     let mut changed = false;
+     for edit in edits {
++        if toml_item_at(document.as_table(), edit.key().components())
++            .is_some_and(toml_item_contains_datetime)
++        {
++            return Err(Error::message(
++                "TOML owned value contains a native date or time that cannot be safely restored; this edit is unsupported",
++            ));
++        }
+         let desired = edit_value(edit);
+         if get_value(&semantic, edit.key()).cloned() == desired {
+             continue;
+@@ -257,6 +264,42 @@
+     let rendered = document.to_string().into_bytes();
+     parse_document(Format::Toml, &rendered)?;
+     Ok(rendered)
++}
++
++fn toml_item_at<'a>(table: &'a dyn TableLike, path: &[String]) -> Option<&'a Item> {
++    let (head, tail) = path.split_first()?;
++    let item = table.get(head)?;
++    if tail.is_empty() {
++        Some(item)
++    } else {
++        toml_item_at(item.as_table_like()?, tail)
++    }
++}
++
++fn toml_item_contains_datetime(item: &Item) -> bool {
++    match item {
++        Item::None => false,
++        Item::Value(value) => toml_value_contains_datetime(value),
++        Item::Table(table) => table
++            .iter()
++            .any(|(_, item)| toml_item_contains_datetime(item)),
++        Item::ArrayOfTables(tables) => tables.iter().any(|table| {
++            table
++                .iter()
++                .any(|(_, item)| toml_item_contains_datetime(item))
++        }),
++    }
++}
++
++fn toml_value_contains_datetime(value: &Value) -> bool {
++    match value {
++        Value::Datetime(_) => true,
++        Value::Array(array) => array.iter().any(toml_value_contains_datetime),
++        Value::InlineTable(table) => table
++            .iter()
++            .any(|(_, value)| toml_value_contains_datetime(value)),
++        Value::String(_) | Value::Integer(_) | Value::Float(_) | Value::Boolean(_) => false,
++    }
+ }
+ 
+ fn edit_toml_table(

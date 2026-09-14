@@ -1,0 +1,124 @@
+{
+  "created_utc": "2026-09-12T10:01:06.468062+00:00",
+  "status": "partial_matrix_seed1_independent_artifact_audit_only",
+  "runs": [
+    {
+      "run": "quota-seed1-direct",
+      "artifact": "product/artifacts/pilot-runs/quota-seed1-direct.json",
+      "sha256": "6b204d86b512fe97c374d1c99e21d369766b2f5ffdeb5990bafcc3e452497f76",
+      "submitted": 100,
+      "outcomes": {
+        "completed": 68,
+        "rejected": 29,
+        "cancelled": 3
+      },
+      "within_300_seconds": {
+        "completed": 68,
+        "rejected": 29,
+        "cancelled": 3
+      },
+      "post_measurement_drain": {},
+      "elapsed_seconds_including_drain": 300.0035639159978,
+      "mock_attempts": 100,
+      "gateway_started_attempts": null,
+      "long_within_300_completed": 6,
+      "all_id_payload_timing_hash_cleanup_checks": "PASS"
+    },
+    {
+      "run": "quota-seed1-production_rr",
+      "artifact": "product/artifacts/pilot-runs/quota-seed1-production_rr.json",
+      "sha256": "dc3b75a5d98ba7efc04990ea59960b6c7e2b36d10e300b9b1bcdc18c4e7b17ac",
+      "submitted": 100,
+      "outcomes": {
+        "completed": 80,
+        "cancelled": 15,
+        "timeout": 5
+      },
+      "within_300_seconds": {
+        "completed": 57,
+        "cancelled": 15,
+        "timeout": 1
+      },
+      "post_measurement_drain": {
+        "completed": 23,
+        "timeout": 4
+      },
+      "elapsed_seconds_including_drain": 372.83691716700196,
+      "mock_attempts": 80,
+      "gateway_started_attempts": 80,
+      "long_within_300_completed": 5,
+      "all_id_payload_timing_hash_cleanup_checks": "PASS"
+    },
+    {
+      "run": "quota-seed1-benchmark_fifo",
+      "artifact": "product/artifacts/pilot-runs/quota-seed1-benchmark_fifo.json",
+      "sha256": "189d4e5f322685412378aa53770dd30da359860fe380d3309ceac717cc2ca859",
+      "submitted": 100,
+      "outcomes": {
+        "completed": 80,
+        "cancelled": 15,
+        "timeout": 5
+      },
+      "within_300_seconds": {
+        "completed": 57,
+        "cancelled": 15,
+        "timeout": 1
+      },
+      "post_measurement_drain": {
+        "completed": 23,
+        "timeout": 4
+      },
+      "elapsed_seconds_including_drain": 372.82245766599954,
+      "mock_attempts": 80,
+      "gateway_started_attempts": 80,
+      "long_within_300_completed": 5,
+      "all_id_payload_timing_hash_cleanup_checks": "PASS"
+    },
+    {
+      "run": "quota-seed1-benchmark_rr",
+      "artifact": "product/artifacts/pilot-runs/quota-seed1-benchmark_rr.json",
+      "sha256": "46f3b7c772496a0934a471efd0481defc1a08c1d4e548913e5742e85c6849a56",
+      "submitted": 100,
+      "outcomes": {
+        "completed": 79,
+        "cancelled": 15,
+        "timeout": 5,
+        "rejected": 1
+      },
+      "within_300_seconds": {
+        "completed": 56,
+        "cancelled": 15,
+        "timeout": 1,
+        "rejected": 1
+      },
+      "post_measurement_drain": {
+        "completed": 23,
+        "timeout": 4
+      },
+      "elapsed_seconds_including_drain": 372.8217671249986,
+      "mock_attempts": 80,
+      "gateway_started_attempts": 80,
+      "long_within_300_completed": 5,
+      "all_id_payload_timing_hash_cleanup_checks": "PASS"
+    }
+  ],
+  "boundary_observation": {
+    "run": "quota-seed1-benchmark_rr",
+    "attempt": "w3-burst-4/1",
+    "mock_rpm_used_at_receive_recomputed": 15,
+    "mock_tpm_used_at_receive_recomputed": 5843,
+    "incoming_cost_fixture_units": 221,
+    "mock_tpm_capacity": 6000,
+    "candidate_expiring_attempt": "w2-burst-4/1",
+    "candidate_expiry_after_rejection_microseconds": 30.667000828543678,
+    "direct_evidence": "The matching-cost request reached the mock while 5843 units remained charged; adding 221 exceeds 6000. A previous 221-unit entry expires about 30.7 microseconds later.",
+    "inference": "Gateway reservation time versus mock receive time and scheduling variation are a plausible rolling-window-boundary explanation. No per-attempt gateway timestamp exists here, so causality is not proven."
+  },
+  "interpretation": [
+    "First seed: production RR and FIFO each complete 57 within 300 seconds, direct 68, benchmark RR 56. Drain completions are excluded from fixed-time goodput.",
+    "No scheduling superiority or population-level significance is established by one seed.",
+    "A benchmark RR upstream rejection remains visible; no mid-run policy or timing changes were made.",
+    "Synthetic units and cancellation races are not a provider contract or real coding-task outcome."
+  ],
+  "product_execution_or_mutation": false
+}

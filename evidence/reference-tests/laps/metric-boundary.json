@@ -1,0 +1,22 @@
+{
+  "check": "original_laps_send_request_measurement_boundary",
+  "source_sha": "aa29962d501236ecd2a0c7a8470c5977df3fe057",
+  "source_path": "references/LAPS/bench_laps_prefill_throughput/bench_prefill_only.py",
+  "python": "3.14.6",
+  "aiohttp": "3.14.3",
+  "network": "one synthetic loopback HTTP request",
+  "inference_calls": 0,
+  "pending_before_final_json_byte": true,
+  "success": true,
+  "server_first_body_write_ms": 1.092,
+  "server_final_body_write_ms": 102.386,
+  "function_return_ms": 103.155,
+  "function_reported_ttft_ms": 102.854,
+  "passed": true,
+  "limitations": [
+    "Server write times are not measured client first-token arrival",
+    "Verifies full JSON completion boundary in this function only",
+    "Does not reproduce LAPS paper, engine or gateway performance",
+    "Probe aiohttp version is separate from paper runtime"
+  ]
+}

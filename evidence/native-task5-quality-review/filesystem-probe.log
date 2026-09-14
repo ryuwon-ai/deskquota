@@ -1,0 +1,18 @@
+
+running 3 tests
+test changed_preview_preserves_foreign_target ... ok
+test dangling_temporary_symlink_must_be_refused ... dangling temporary: apply=Ok(()), unrelated_file_created=true, target_is_symlink=true
+FAILED
+test regular_temporary_collision_is_preserved ... ok
+
+failures:
+
+failures:
+    dangling_temporary_symlink_must_be_refused
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+thread 'dangling_temporary_symlink_must_be_refused' panicked at /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-quality-review/filesystem_probe.rs:30:5:
+registration followed a dangling temporary symlink and wrote outside the reviewed target
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

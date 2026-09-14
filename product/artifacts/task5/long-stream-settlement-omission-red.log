@@ -1,0 +1,27 @@
+Purpose: regression sensitivity with required behavior omitted.
+Command: cargo test --locked --test stream_lifetime known_tpm
+Original source SHA256: 73c8ddddfbfce6e5e23d230c86aa725134470cac074d97a4704472c24bd91fc4
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s
+     Running tests/stream_lifetime.rs (target/debug/deps/stream_lifetime-475ac28d07d80511)
+
+running 1 test
+test known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt ... FAILED
+
+failures:
+
+---- known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt stdout ----
+
+thread 'known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt' panicked at tests/stream_lifetime.rs:992:2:
+assertion `left == right` failed
+  left: 49
+ right: 150
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test stream_lifetime`

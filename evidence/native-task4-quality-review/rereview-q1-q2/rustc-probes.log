@@ -1,0 +1,13 @@
+warning: a method with this name may be added to the standard library in the future
+  --> evidence/native-task4-quality-review/rereview-q1-q2/quality_probes.rs:23:89
+   |
+23 |    let held=fs::OpenOptions::new().read(true).write(true).open(lock_path).unwrap();held.try_lock().unwrap();assert!(clients::apply_review...
+   |                                                                                         ^^^^^^^^
+   |
+   = warning: once this associated item is added to the standard library, the ambiguity may cause an error or change in behavior!
+   = note: for more information, see issue #48919 <https://github.com/rust-lang/rust/issues/48919>
+   = help: call with fully qualified syntax `fs4::FileExt::try_lock(...)` to keep using the current method
+   = note: `#[warn(unstable_name_collisions)]` on by default
+
+warning: 1 warning emitted
+

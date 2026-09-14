@@ -1,0 +1,27 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.23s
+     Running tests/autostart_templates.rs (target/native-task5/debug/deps/autostart_templates-9e0874afca7bc2cf)
+
+running 6 tests
+test login_auth_availability_never_uses_current_shell_as_login_proof ... ok
+test registration_rejects_relative_binary_or_config_paths ... ok
+test linux_user_unit_uses_foreground_run_literal_argv_and_no_restart ... ok
+test windows_current_user_task_is_interactive_least_privilege_and_continuous ... ok
+test macos_launch_agent_has_literal_program_arguments_and_never_restarts ... FAILED
+test every_registration_identity_is_config_scoped_and_contains_only_argv ... ok
+
+failures:
+
+---- macos_launch_agent_has_literal_program_arguments_and_never_restarts stdout ----
+
+thread 'macos_launch_agent_has_literal_program_arguments_and_never_restarts' panicked at tests/autostart_templates.rs:23:5:
+assertion failed: xml.contains("<string>/Users/테스트 계정/설정 $100% \\\"&lt;&amp;&gt;/gateway 설정.toml</string>")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    macos_launch_agent_has_literal_program_arguments_and_never_restarts
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test autostart_templates`

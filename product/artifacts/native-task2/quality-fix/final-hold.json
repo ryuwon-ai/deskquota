@@ -1,0 +1,223 @@
+{
+  "phase": "FINAL_HOLD",
+  "execution_finished": true,
+  "source_stable_after_capture": true,
+  "source_drift": [],
+  "protected_files_checked": 317,
+  "protected_drift": [],
+  "source_files": 71,
+  "changed_files": 6,
+  "source_manifest_sha256": "3495daf57907d5e4472513aaef5131cd6bf418fa58d369041b2d0484454ca603",
+  "changed_files_manifest_sha256": "3678da5d4b080ff634712f2b3cc1ea06835734675b4246d3cd2b5979a187420a",
+  "source_archive_sha256": "b221562a379edbd6cfe1e6faad77a1176ac0622774936a479d7734a190a6cd99",
+  "source_archive_bytes": 215107,
+  "quality_findings": {
+    "Q1": {
+      "result": "fixed",
+      "behavior": "existing validated TOML is edited by changed field using toml_edit; unchanged document fields, route arrays, comments, inline tables, and no-op bytes are retained",
+      "pty_endpoint": {
+        "exit": 0,
+        "heading_preserved": true,
+        "port_comment_preserved": true,
+        "second_endpoint_note_preserved": true,
+        "second_models_note_preserved": true,
+        "responses_kept": true,
+        "completions_added": true,
+        "before_sha256": "944a25393263c52c7509dc17f0ba7a00f616d908e221f131fc864701b2a28237",
+        "after_sha256": "c7056a41f9abec4d95d6d36cfd5d597354d576d34de67eaf3569681f21b63e27"
+      },
+      "pty_model": {
+        "exit": 0,
+        "heading_preserved": true,
+        "port_comment_preserved": true,
+        "model_comment_preserved": true,
+        "route_comment_preserved": true,
+        "model_changed": true,
+        "cap_changed": true,
+        "route_model_changed": true,
+        "before_sha256": "b73a0b6b1a5d2f6a67625ea902cbce7909e2dc6eba5b9b2ad44a3464befb8d66",
+        "after_sha256": "1bd0ba6e779226061ed0878d3a26a44ce1d839f371655d4d0f92ba6930c30ef7"
+      }
+    },
+    "Q2": {
+      "result": "fixed",
+      "behavior": "restart builds the configured proxy/TLS client under the operation lock before authenticated stop; local failures retain the old worker and expose sanitized BuildError text",
+      "missing_ca": {
+        "exit": 1,
+        "before_state": "running",
+        "after_state": "running",
+        "identity_preserved": true,
+        "pending_restart": true,
+        "actionable_error": true,
+        "generic_child_error_absent": true,
+        "upstream_attempts": 0,
+        "saved_ca_path": true
+      },
+      "malformed_ca": {
+        "exit": 1,
+        "before_state": "running",
+        "after_state": "running",
+        "identity_preserved": true,
+        "pending_restart": true,
+        "actionable_error": true,
+        "generic_child_error_absent": true,
+        "upstream_attempts": 0,
+        "saved_ca_path": true
+      },
+      "valid_ca_startup": {
+        "exit": 0,
+        "state": "running",
+        "authenticated_fingerprint": "02f7a81583368e47f230086a00eb945d11e9d0d5a0e1baf2cbe4fdb5191f60a9",
+        "desired_fingerprint": "02f7a81583368e47f230086a00eb945d11e9d0d5a0e1baf2cbe4fdb5191f60a9",
+        "pending_restart": false,
+        "upstream_attempts": 0,
+        "saved_ca_path": true
+      }
+    }
+  },
+  "regressions": {
+    "F8_saved_pending": {
+      "save_only_exit": 0,
+      "save_only_identity_preserved": true,
+      "save_only_pending_restart": true,
+      "save_and_start_exit": 0,
+      "desired_fingerprint": "d6122808c6bf64c3c50978b82cb80fc0bed3f752c884bbe5941f62d052f83ca1",
+      "applied_fingerprint": "d6122808c6bf64c3c50978b82cb80fc0bed3f752c884bbe5941f62d052f83ca1",
+      "pending_restart_after": false,
+      "identity_changed_on_apply": true,
+      "restart_disclosed": true
+    },
+    "F6_running_noop": {
+      "exit": 0,
+      "same_config_bytes": true,
+      "same_identity": true,
+      "pending_restart": false,
+      "idempotent_disclosed": true,
+      "restart_side_effect_absent": true
+    }
+  },
+  "binaries": {
+    "current_release": {
+      "path": "target/native-task2-quality-fix/release/llmgw",
+      "bytes": 9335616,
+      "sha256": "aa4015d5b34426b5d8e502d8cfbb2f4af2757e16a7cd2094b43e219c974cb3a6"
+    },
+    "current_debug": {
+      "path": "target/native-task2-quality-fix/debug/llmgw",
+      "bytes": 28267032,
+      "sha256": "606b268ce4c0822263ffe2960f0075b61fec125eb3b02ac944bc8fb61b6aab4d"
+    },
+    "f8_release": {
+      "path": "target/native-task2-f8-fix/release/llmgw",
+      "bytes": 9316432,
+      "sha256": "c890b6a498095bdba572d19b921b1865e48927af6807b767156f2e2f3a9ef1ba"
+    },
+    "preserved_native_release": {
+      "path": "target/native/release/llmgw",
+      "bytes": 8697040,
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    },
+    "preserved_held_release": {
+      "path": "artifacts/accounting-ablation/task2/held-llmgw",
+      "bytes": 8697040,
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    }
+  },
+  "preserved": {
+    "f8_source_manifest_sha256": "2107b93a752ebcbefbd9f2214c1688f6c527883ba6e061cbc1fbaa80781b11cb",
+    "f8_source_archive_sha256": "682f1dde419f2fa35ea4adadf1816b889e9c2b927ce6820282733b10cbec0b89",
+    "f8_final_hold_sha256": "f19162307fc7ae90351f1024b4dc950e13b802c84baaf331c7e4a327c3991a85",
+    "quality_review_readme_sha256": "55265cf113515d96cf280d6cbeb96840f2fcc7e8edd60eceee30b7624177e549",
+    "quality_review_final_hold_sha256": "f349fce910c9f4a1f20fc6a25473c1cab93721afa5450e3bb5de4f86d64bd7c0",
+    "accounting_baseline_manifest_sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304",
+    "accounting_baseline_archive_sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4",
+    "accounting_pilot_sha256": "bfe367592eae5953edf0f1bb64dc808c7864f78ce41b48137f47d9dc9901c41c"
+  },
+  "verification": {
+    "all_targets": {
+      "passed": 264,
+      "failed": 0,
+      "rows": [
+        11,
+        0,
+        3,
+        19,
+        22,
+        26,
+        12,
+        7,
+        19,
+        42,
+        32,
+        27,
+        44
+      ],
+      "test_binaries": 13,
+      "log": "artifacts/native-task2/quality-fix/full-tests-final.log"
+    },
+    "focused": {
+      "setup": {
+        "passed": 42,
+        "failed": 0
+      },
+      "lifecycle": {
+        "passed": 26,
+        "failed": 0
+      }
+    },
+    "static": {
+      "rustfmt_direct_check": "passed",
+      "check_all_targets": "passed",
+      "clippy_all_targets_deny_warnings": "passed",
+      "release_build": "passed"
+    },
+    "pty": {
+      "sessions": 8,
+      "release_binary": {
+        "path": "target/native-task2-quality-fix/release/llmgw",
+        "bytes": 9335616,
+        "sha256": "aa4015d5b34426b5d8e502d8cfbb2f4af2757e16a7cd2094b43e219c974cb3a6"
+      },
+      "results": "artifacts/native-task2/quality-fix/pty-final-results.json",
+      "cleanup": "artifacts/native-task2/quality-fix/pty-final-cleanup.json"
+    },
+    "red": {
+      "held_f8_release": "artifacts/native-task2/quality-fix/probe-results.json",
+      "contracts": {
+        "q1_exit": 101,
+        "q2_exit": 101
+      }
+    }
+  },
+  "drivers": {
+    "support_red.py": {
+      "path": "artifacts/native-task2/quality-fix/support_red.py",
+      "bytes": 4355,
+      "sha256": "faac6b259aa58036d8ecb64930711643cef0800bb5122877bed1325f2f8392d6"
+    },
+    "probe_quality_red.py": {
+      "path": "artifacts/native-task2/quality-fix/probe_quality_red.py",
+      "bytes": 3093,
+      "sha256": "85c7662305e8f9b0e072013884bacc1e683b5a51d0bb31dff72cf62998321f6a"
+    },
+    "support_green.py": {
+      "path": "artifacts/native-task2/quality-fix/support_green.py",
+      "bytes": 4360,
+      "sha256": "58cfd28e72f8f12a61b62face88e4cab6f9d41bac5d91ce44dc7006af4f3419a"
+    },
+    "probe_quality_green.py": {
+      "path": "artifacts/native-task2/quality-fix/probe_quality_green.py",
+      "bytes": 15788,
+      "sha256": "a825181e18b37dfe421dcfba0b519a1bb8107456cc7477b272c6797f1466e98c"
+    }
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+  "cleanup": "artifacts/native-task2/quality-fix/cleanup-final.json",
+  "limits": [
+    "macOS owned PTY and loopback lifecycle runtime only",
+    "Linux and Windows setup runtime remain unverified",
+    "no real or paid API, inference call, model download/start, current-user client file, login registration, OS integration, Git action, benchmark, or accounting rerun",
+    "Q2 preflight proves deterministic local client construction only; it does not probe upstream availability"
+  ]
+}

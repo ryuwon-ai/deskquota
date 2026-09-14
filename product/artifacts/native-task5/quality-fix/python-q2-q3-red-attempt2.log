@@ -1,0 +1,63 @@
+FFFF
+======================================================================
+FAIL: test_failed_attested_login_observations_return_nonzero (tests.test_verify_native.VerifyNativeUnitTests.test_failed_attested_login_observations_return_nonzero) (stage='observe-login-on', state='stopped')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 155, in test_failed_attested_login_observations_return_nonzero
+    self.assertEqual(code, expected_code)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_failed_attested_login_observations_return_nonzero (tests.test_verify_native.VerifyNativeUnitTests.test_failed_attested_login_observations_return_nonzero) (stage='observe-login-off', state='running')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 155, in test_failed_attested_login_observations_return_nonzero
+    self.assertEqual(code, expected_code)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_post_start_failure_attempts_authenticated_cleanup_before_deleting_home (tests.test_verify_native.VerifyNativeUnitTests.test_post_start_failure_attempts_authenticated_cleanup_before_deleting_home)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 204, in test_post_start_failure_attempts_authenticated_cleanup_before_deleting_home
+    self.assertIn("cli off", events)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'cli off' not found in ['autostart on', 'cli on']
+
+======================================================================
+FAIL: test_failed_authenticated_cleanup_retains_recovery_home (tests.test_verify_native.VerifyNativeUnitTests.test_failed_authenticated_cleanup_retains_recovery_home)
+----------------------------------------------------------------------
+RuntimeError: injected original failure
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 252, in test_failed_authenticated_cleanup_retains_recovery_home
+    with self.assertRaisesRegex(
+         ~~~~~~~~~~~~~~~~~~~~~~^
+        RuntimeError,
+        ^^^^^^^^^^^^^
+        "original failure.*authenticated cleanup failed.*recovery files retained",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as raised:
+    ^
+AssertionError: "original failure.*authenticated cleanup failed.*recovery files retained" does not match "injected original failure"
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.014s
+
+FAILED (failures=4)
+generated/removed label: unknown
+generated/removed path: unknown
+foreground argv: /tmp/llmgw --config /tmp/config.toml run
+generated/removed label: unknown
+generated/removed path: unknown
+foreground argv: /tmp/llmgw --config /tmp/config.toml run
+generated/removed label: unknown
+generated/removed path: unknown
+foreground argv: /tmp/llmgw --config /tmp/config.toml run
+generated/removed label: unknown
+generated/removed path: unknown
+foreground argv: /tmp/llmgw --config /tmp/config.toml run

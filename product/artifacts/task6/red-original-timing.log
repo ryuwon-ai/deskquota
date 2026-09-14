@@ -1,0 +1,24 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.15s
+     Running tests/fairness_contract.rs (target/debug/deps/fairness_contract-01c9cffd49df6b42)
+
+running 1 test
+test admitted_owner_retains_original_wait_start_and_queue_deadline ... FAILED
+
+failures:
+
+---- admitted_owner_retains_original_wait_start_and_queue_deadline stdout ----
+
+thread 'admitted_owner_retains_original_wait_start_and_queue_deadline' panicked at tests/fairness_contract.rs:705:5:
+assertion `left == right` failed
+  left: 120s
+ right: 60s
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    admitted_owner_retains_original_wait_start_and_queue_deadline
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test fairness_contract`

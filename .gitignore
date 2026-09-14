@@ -1,0 +1,19 @@
+# Local dependencies and third-party checkouts are recorded by their manifests.
+/references/
+/.venvs/
+**/target/
+**/__pycache__/
+*.py[cod]
+.DS_Store
+
+# Research outputs are curated explicitly when creating a snapshot.
+# Existing tracked evidence remains versioned; new runs require deliberate staging.
+/evidence/
+/product/artifacts/
+/papers/*
+!/papers/manifest.json
+
+# Credentials and local environment files never belong in a snapshot.
+.env
+.env.*
+!.env.example

@@ -1,0 +1,75 @@
+{
+  "review": "Core Task8 independent QUALITY rereview",
+  "created_utc": "2026-09-12T12:27:18.723253+00:00",
+  "verdict": "PASS",
+  "ready_for_native_task1": true,
+  "critical": [],
+  "important": [],
+  "minor": [],
+  "resolved": [
+    "Q8-1 unregistered result reuse and whole-state preflight",
+    "Q8-2 readiness ownership and cancellation cleanup"
+  ],
+  "fresh_execution": {
+    "exact_original_resume_counterexample": "rejected before manifest/dispatch",
+    "independent_resume_cases": 16,
+    "lifecycle_final_cases": 5,
+    "lifecycle_initial_setup_failure": true,
+    "gateway_child_processes_total": 8,
+    "data_gateway_ingress": 0,
+    "gateway_mock_upstream_attempts": 0,
+    "self_check_loopback_http": 5,
+    "real_control_helper_calls": 4,
+    "control_wire_count_instrumented": false,
+    "full_rust_suite_rerun": false,
+    "full_matrix_rerun": false,
+    "new_benchmark_arms": 0
+  },
+  "identity": {
+    "source_file_count": 50,
+    "source_hold_sha256": "f9e9a2d68e0fa4bdd5266bd932a44d69b74ccc414b03e4c2cb47d2ab511cb1e7",
+    "before_after_equal": true,
+    "raw_files_unchanged": 40,
+    "original_pilot_sha256": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6",
+    "binary_sha256": {
+      "production": "410645600d70a69e69d9558420ea1cda61bf127a878497a6b8a0e88b17ba342e",
+      "benchmark": "38b24b2934448716c74bad2dceaa91492e1bbc168b351e1f61460b90572c5faa"
+    },
+    "original_archives": {
+      "product-task8-measured-source.tar.gz": "622225adc3c885d4a7a6ed659ca5b9e32604b1318fb5606354dd36b4ebdce075",
+      "product-task8-final-review-source.tar.gz": "b2a1813489d6f146b7b550994bfc57331622dca3cf379baf701e2ef71bc60f23"
+    },
+    "fixed_archive_sha256": "c4bb57f143bc03e1c23fb51fee5bedba4d89ca01106f5f09106ec318a383cb29",
+    "fixed_archive_members_match_source_hold": true,
+    "changed_paths": [
+      "docs/benchmark-method.md",
+      "scripts/benchmark.py"
+    ]
+  },
+  "cleanup": {
+    "owned_pids": [
+      71955,
+      71956,
+      71957,
+      72031,
+      72032,
+      72033,
+      72042,
+      72043
+    ],
+    "all_absent": true,
+    "all_reaped_in_probe": true,
+    "temporary_directories_removed": true,
+    "before_after_identity_equal": true,
+    "fixed_parent_archive_sha256": "c4bb57f143bc03e1c23fb51fee5bedba4d89ca01106f5f09106ec318a383cb29"
+  },
+  "hold": true,
+  "execution_finished": true,
+  "limits": [
+    "No corrected-source performance measurement",
+    "No new full matrix or unchanged Rust suite/build",
+    "No real API/model/client/native installation or other OS proof",
+    "Terminate-to-kill escalation forced through explicit reviewer fault injection",
+    "One initial reviewer escalation-setup assumption failed; evidence retained, children reaped"
+  ]
+}

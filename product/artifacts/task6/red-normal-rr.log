@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
+     Running tests/fairness_contract.rs (target/debug/deps/fairness_contract-01c9cffd49df6b42)
+
+running 1 test
+test normal_sixteen_root_rr_is_not_a_resource_bypass ... FAILED
+
+failures:
+
+---- normal_sixteen_root_rr_is_not_a_resource_bypass stdout ----
+
+thread 'normal_sixteen_root_rr_is_not_a_resource_bypass' panicked at tests/fairness_contract.rs:605:9:
+root 9 must keep its ordinary RR turn
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    normal_sixteen_root_rr_is_not_a_resource_bypass
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test fairness_contract`

@@ -1,0 +1,72 @@
+{
+  "at": "2026-09-13T08:04:52.183108+00:00",
+  "phase": "native-task6-quality-fix",
+  "passed": true,
+  "changed_paths": [
+    "product/packaging/install.ps1",
+    "product/scripts/package_native.py",
+    "product/tests/test_installers.py",
+    "product/tests/test_package_native.py"
+  ],
+  "q1": {
+    "captured_member_hash_expression_verified": true,
+    "package_identity_equals_member_sha256": true,
+    "member_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+    "deterministic_interleaving_regression": "PASS"
+  },
+  "q2": {
+    "replace_exception_catch_reports_original_error_and_paths": true,
+    "catch_target_backup_candidate_mutations": 0,
+    "preserve_recovery_clears_in_catch": 0,
+    "windows_runtime_verified": false,
+    "regression": "static PASS"
+  },
+  "source": {
+    "files": 101,
+    "archive_members": 102,
+    "embedded_manifest_exact": true,
+    "live_archive_drift": []
+  },
+  "unchanged_counts": {
+    "cargo": 2,
+    "rust_runtime": 47,
+    "docs": 5,
+    "other_runtime_inputs": 43
+  },
+  "rust_cargo_docs_runtime_unchanged": true,
+  "package": {
+    "members": [
+      "README.md",
+      "docs/client-compatibility.md",
+      "docs/installation.md",
+      "docs/runtime-contract.md",
+      "llmgw"
+    ],
+    "all_regular_unique": true,
+    "docs_equal_current_source": true,
+    "binary_equals_held": true,
+    "byte_identical_to_spec_doc_fix": true,
+    "sha256": "ba03203e9416a4eb75ca972fb0b3e5eba8618c46b2c26c7f65e2b7ffff387a22"
+  },
+  "retained_runtime_evidence": {
+    "identity": "product/artifacts/native-task6/final-v2/final-identity.json",
+    "identity_sha256": "59924cdd8ded2c7570e0e34d55daee35c25632a6155c75ac83ff56b9825102d0",
+    "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+    "rust_tests_earlier": 365,
+    "python_tests_earlier": 64,
+    "not_new_execution": true
+  },
+  "new_execution": {
+    "targeted_python_tests": 5,
+    "cargo": false,
+    "rust_tests": false,
+    "full_python_matrix": false,
+    "clients": false,
+    "native_measurement": false,
+    "windows": false
+  },
+  "limitations": [
+    "PowerShell/Windows is source/static only and remains unverified",
+    "Retained runtime counts are earlier immutable evidence for unchanged compiled inputs and binary, not new test executions"
+  ]
+}

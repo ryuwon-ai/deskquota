@@ -1,0 +1,178 @@
+{
+  "changed_files_from_spec_fix": [
+    "docs/benchmark-method.md",
+    "scripts/benchmark_accounting.py",
+    "tests/test_benchmark_accounting.py"
+  ],
+  "cleanup": {
+    "active_matching_processes": [],
+    "all_recorded_gateway_pids_reaped": true,
+    "owned_temp_paths": [],
+    "recorded_gateway_pids": [
+      31684,
+      31715
+    ]
+  },
+  "hold_for": "same_QUALITY_re_review",
+  "limits": [
+    "No Rust/Cargo edit, build, or suite",
+    "No old benchmark executable run",
+    "No 300-second quota matrix",
+    "No real or paid API/model call",
+    "Client usage observation is not proof of gateway internal refund",
+    "No Git, release, Task 2, or wizard action"
+  ],
+  "preserved": {
+    "native_task1_archive": {
+      "expected": "d84f5b1ee94fc2a57a697b92007e2b2715168735a97ef33c2209f4e01f6d5c33",
+      "matches": true,
+      "path": "artifacts/native-task1/quality-fix/source-hold.tar.gz",
+      "sha256": "d84f5b1ee94fc2a57a697b92007e2b2715168735a97ef33c2209f4e01f6d5c33"
+    },
+    "ordinary_binary": {
+      "expected": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+      "matches": true,
+      "path": "target/native/release/llmgw",
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    },
+    "pilot40_manifest": {
+      "expected": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6",
+      "matches": true,
+      "path": "artifacts/pilot.json",
+      "sha256": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6"
+    },
+    "spec_fix_archive": {
+      "expected": "8fa679bc16b651912e6ac68d3babc8d5958903782db12278633ad9195be5e255",
+      "matches": true,
+      "path": "artifacts/accounting-ablation/spec-fix/source-hold.tar.gz",
+      "sha256": "8fa679bc16b651912e6ac68d3babc8d5958903782db12278633ad9195be5e255"
+    },
+    "spec_fix_smoke": {
+      "expected": "cc7704c0209d72b715827eb39091a801dc1afd7e019c4f3050ce9260225d3a56",
+      "matches": true,
+      "path": "artifacts/accounting-ablation/spec-fix/smoke-final.json",
+      "sha256": "cc7704c0209d72b715827eb39091a801dc1afd7e019c4f3050ce9260225d3a56"
+    }
+  },
+  "source_archive": {
+    "bytes": 174816,
+    "manifest_matches": true,
+    "members": 60,
+    "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/source-hold.tar.gz",
+    "sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4"
+  },
+  "source_files": 59,
+  "source_manifest": {
+    "passed": true,
+    "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/source-manifest.json",
+    "sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304"
+  },
+  "source_stable_after_smoke": true,
+  "status": "DONE",
+  "task2_started": false,
+  "verification": {
+    "focused_green": {
+      "passed": true,
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/green-quality-findings.log",
+      "tests": 3
+    },
+    "focused_green_attempt1": {
+      "expected_test_expectation_failure": 1,
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/green-quality-attempt1.log",
+      "retained": true
+    },
+    "focused_red": {
+      "expected_failures": 20,
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/red-quality-findings.log",
+      "tests": 3
+    },
+    "self_check": {
+      "passed": true,
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/self-check-final.log"
+    },
+    "smoke": {
+      "interpretation_scope": "smoke_validation_only_no_efficiency_conclusion",
+      "matrix_complete": true,
+      "mode": "accounting",
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/smoke-final.json",
+      "runs": [
+        {
+          "all_measurement_timestamps_finite": true,
+          "arm": "production_rr",
+          "attempts": 20,
+          "binary_identity_matches_manifest": true,
+          "config_accounting": "reserved",
+          "gateway_pid": 31684,
+          "gateway_pid_reaped": true,
+          "id": "smoke-seed1-production_rr",
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 17
+          },
+          "owned_processes_cleaned": true,
+          "registered_sha_matches": true,
+          "runtime_statuses": {
+            "final_status": {
+              "accounting": "reserved",
+              "fingerprint_matches_toml": true
+            },
+            "initial_status": {
+              "accounting": "reserved",
+              "fingerprint_matches_toml": true
+            }
+          },
+          "snapshot_accounting": "reserved",
+          "submitted": 20,
+          "usage_statuses": {
+            "not_applicable": 2,
+            "not_observed": 3,
+            "observed": 15
+          },
+          "within_measurement_completed": 17
+        },
+        {
+          "all_measurement_timestamps_finite": true,
+          "arm": "production_actual",
+          "attempts": 20,
+          "binary_identity_matches_manifest": true,
+          "config_accounting": "actual",
+          "gateway_pid": 31715,
+          "gateway_pid_reaped": true,
+          "id": "smoke-seed1-production_actual",
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 17
+          },
+          "owned_processes_cleaned": true,
+          "registered_sha_matches": true,
+          "runtime_statuses": {
+            "final_status": {
+              "accounting": "actual",
+              "fingerprint_matches_toml": true
+            },
+            "initial_status": {
+              "accounting": "actual",
+              "fingerprint_matches_toml": true
+            }
+          },
+          "snapshot_accounting": "actual",
+          "submitted": 20,
+          "usage_statuses": {
+            "not_applicable": 2,
+            "not_observed": 3,
+            "observed": 15
+          },
+          "within_measurement_completed": 17
+        }
+      ],
+      "sha256": "e1931ecd62031d39b38c163d1330de73036f7d2266aacaf7d8f11d5ba147e0fd",
+      "source_identity_matches_hold": true,
+      "status": "completed_smoke"
+    },
+    "unit": {
+      "passed": true,
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/accounting-ablation/quality-fix/unit-final.log",
+      "tests": 29
+    }
+  }
+}

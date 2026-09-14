@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.76s
+     Running tests/stream_lifetime.rs (target/native/debug/deps/stream_lifetime-12f8bbf7abbb514d)
+
+running 1 test
+test stop_drains_active_worker_before_returning ... FAILED
+
+failures:
+
+---- stop_drains_active_worker_before_returning stdout ----
+
+thread 'stop_drains_active_worker_before_returning' panicked at tests/support/fixture.rs:566:10:
+status code
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    stop_drains_active_worker_before_returning
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.11s
+
+error: test failed, to rerun pass `--test stream_lifetime`

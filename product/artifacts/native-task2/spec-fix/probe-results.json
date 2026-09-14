@@ -1,0 +1,77 @@
+{
+  "noop": {
+    "exit": 0,
+    "same_bytes": true,
+    "before_sha": "6d3e11f2f1d42740d31af2f16c309c8a0864627f933ecf3cbad985cc4eaa3314",
+    "after_sha": "6d3e11f2f1d42740d31af2f16c309c8a0864627f933ecf3cbad985cc4eaa3314"
+  },
+  "auth_defaults": {
+    "exit": 0,
+    "same_bytes": false,
+    "before_sha": "52eebe24e93acb06f1fd0964960d694b0354369e3ffc21026cb79615f82713e5",
+    "after_sha": "ac228dc5b874414d1083406f19d85628dd738dd790f83a4da513880122626436",
+    "old_reference_preserved": false,
+    "old_header_preserved": false,
+    "new_default_reference": true
+  },
+  "pending_defaults": {
+    "exit": 0,
+    "before": {
+      "version": 1,
+      "shared_with_other_pcs": true,
+      "separate_input_output": true,
+      "login_requested": true,
+      "clients": [
+        "pi",
+        "codex"
+      ]
+    },
+    "after": {
+      "version": 1,
+      "shared_with_other_pcs": true,
+      "separate_input_output": true,
+      "login_requested": false,
+      "clients": []
+    }
+  },
+  "endpoint_defaults": {
+    "exit": 0,
+    "same_bytes": false,
+    "before_sha": "edd5b6f725433c9f92ca621439ce68cc0983ac4686705dffb0327d295fe3de8a",
+    "after_sha": "edc35f1cf9ccf04785cc1a3da72c2db3da3af8ac63db3721ba7adb4e7569fcef",
+    "models_endpoint_preserved": false,
+    "count_tokens_preserved": false
+  },
+  "request_bounded": {
+    "doctor_exit": 0,
+    "setup_exit": 1,
+    "same_bytes": true,
+    "error": true
+  },
+  "concurrent_edit": {
+    "exit": 0,
+    "external_edit_preserved": false,
+    "stale_value_restored": true
+  },
+  "partial_write": {
+    "exit": -25,
+    "before_bytes": 417,
+    "after_bytes": 100,
+    "same_bytes": false,
+    "signal_name": "SIGXFSZ"
+  },
+  "invalid_cli": {
+    "doctor": {
+      "exit": 1,
+      "stderr": "error: invalid configuration syntax or shape at line 1, column 5"
+    },
+    "on": {
+      "exit": 1,
+      "stderr": "error: invalid configuration syntax or shape at line 1, column 5"
+    }
+  },
+  "missing_inference_args": {
+    "exit": 1,
+    "stderr": "error: --model is required with --inference"
+  }
+}

@@ -1,0 +1,34 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running tests/task5_usage_contract.rs (target/debug/deps/task5_usage_contract-a754649b0411ade9)
+
+running 27 tests
+test messages_error_after_final_stop_keeps_reservation ... ok
+test chat_missing_choices_usage_is_not_a_final_report ... ok
+test chat_null_usage_delta_then_final_report_preserves_cached_subset ... ok
+test chat_nonempty_choices_usage_is_not_a_final_report ... ok
+test chat_final_usage_must_precede_done ... ok
+test chat_numeric_interim_usage_does_not_replace_supported_final_report ... ok
+test messages_error_before_final_stop_keeps_reservation ... ok
+test messages_named_error_event_without_json_type_keeps_reservation ... ok
+test chat_error_cannot_leave_successful_usage_for_refund ... ok
+test named_error_event_without_json_error_field_invalidates_chat_usage ... ok
+test quality_messages_non_accounting_events_after_stop_preserve_final_usage ... ok
+test named_error_event_without_json_type_invalidates_responses_usage ... ok
+test quality_messages_ordered_start_delta_stop_settles_known_usage ... ok
+test consistent_repeated_terminal_reports_and_unknown_events_remain_supported ... ok
+test quality_messages_start_stop_delta_cannot_qualify_final_usage ... ok
+test quality_messages_stop_start_delta_cannot_qualify_final_usage ... ok
+test quality_messages_qualified_usage_then_post_stop_delta_is_unknown ... ok
+test responses_failed_after_completed_keeps_reservation ... ok
+test quality_messages_qualified_usage_then_post_stop_start_is_unknown ... ok
+test responses_incomplete_after_completed_keeps_reservation ... ok
+test responses_failed_before_completed_keeps_reservation ... ok
+test responses_incomplete_before_completed_keeps_reservation ... ok
+test chat_malformed_choices_usage_is_not_a_final_report ... ok
+test responses_later_completed_without_usage_cannot_reuse_stale_usage ... ok
+test responses_error_before_or_after_completed_keeps_reservation ... ok
+test responses_conflicting_nested_status_or_error_keeps_reservation ... ok
+test reserved_accounting_keeps_estimate_with_valid_supported_final_usage ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

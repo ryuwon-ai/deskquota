@@ -1,0 +1,35 @@
+   Compiling task7-quality-rereview v0.0.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/task7-quality-review/rereview)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `reqwest`
+   --> ../../../product/tests/retry_contract.rs:500:20
+    |
+500 |     let response = reqwest::Client::builder()
+    |                    ^^^^^^^ use of unresolved module or unlinked crate `reqwest`
+    |
+    = help: if you wanted to use a crate named `reqwest`, use `cargo add reqwest` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `reqwest`
+   --> ../../../product/tests/retry_contract.rs:501:16
+    |
+501 |         .retry(reqwest::retry::never())
+    |                ^^^^^^^ use of unresolved module or unlinked crate `reqwest`
+    |
+    = help: if you wanted to use a crate named `reqwest`, use `cargo add reqwest` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `reqwest`
+   --> ../../../product/tests/retry_contract.rs:502:19
+    |
+502 |         .redirect(reqwest::redirect::Policy::none())
+    |                   ^^^^^^^ use of unresolved module or unlinked crate `reqwest`
+    |
+    = help: if you wanted to use a crate named `reqwest`, use `cargo add reqwest` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `httpdate`
+   --> ../../../product/tests/retry_contract.rs:232:13
+    |
+232 |             httpdate::fmt_http_date(std::time::SystemTime::now() + Duration::from_secs(20))
+    |             ^^^^^^^^ use of unresolved module or unlinked crate `httpdate`
+    |
+    = help: if you wanted to use a crate named `httpdate`, use `cargo add httpdate` to add it to your `Cargo.toml`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `task7-quality-rereview` (test "product_retry_contract") due to 4 previous errors

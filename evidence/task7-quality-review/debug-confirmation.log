@@ -1,0 +1,30 @@
+   Compiling task7-quality-review v0.0.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/task7-quality-review)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.65s
+     Running tests/transport.rs (evidence/task7-quality-review/target/debug/deps/transport-052d7d729ec8004f)
+
+running 3 tests
+raw_read=Ok(Ok(0)) response_len=0
+OUTCOME {"active":0,"case":"truncated429","http_head":false,"ingress":1,"response_bytes":0,"starts":1,"upstream_http_attempts":1}
+raw_read=Ok(Ok(191)) response_len=191
+
+thread 'truncated_429_before_downstream_headers_has_an_http_outcome' panicked at tests/transport.rs:21:83:
+pre-header probe failure must return an HTTP error outcome rather than an empty socket
+OUTCOME {"active":0,"case":"complete429-control","http_head":true,"ingress":1,"response_bytes":191,"starts":1,"upstream_http_attempts":1}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test complete_unknown_429_is_preserved_positive_control ... ok
+test truncated_429_before_downstream_headers_has_an_http_outcome ... FAILED
+OUTCOME {"active":0,"case":"gated-truncated429","http_head":false,"ingress":1,"pre_error_no_downstream_bytes":true,"read_completed":true,"response_bytes":0,"starts":1,"upstream_http_attempts":1}
+
+thread 'gated_truncated_429_cannot_flush_a_known_error_as_normal_response' panicked at tests/transport.rs:45:90:
+known pre-header probe error returned no HTTP response
+test gated_truncated_429_cannot_flush_a_known_error_as_normal_response ... FAILED
+
+failures:
+
+failures:
+    gated_truncated_429_cannot_flush_a_known_error_as_normal_response
+    truncated_429_before_downstream_headers_has_an_http_outcome
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+error: test failed, to rerun pass `--test transport`

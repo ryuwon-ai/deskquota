@@ -1,0 +1,67 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.46s
+     Running tests/fairness_contract.rs (target/debug/deps/fairness_contract-01c9cffd49df6b42)
+
+running 10 tests
+test cap_one_running_long_request_is_nonpreemptible ... ok
+test expired_barrier_removes_head_and_releases_other_root ... FAILED
+test root_fifo_heavy_light_heavy_cannot_skip_its_head ... FAILED
+test five_seconds_independently_protect_heavy ... FAILED
+test root_round_robin_not_global_fifo ... FAILED
+test queued_cancel_never_starts_and_invalid_head_does_not_block ... ok
+test later_fifo_head_keeps_original_age ... FAILED
+test eight_actual_bypasses_protect_heavy_from_continuous_small_arrivals ... FAILED
+test total_queue_has_64_waiting_metadata_including_all_roots ... FAILED
+test scans_and_time_events_do_not_count_as_bypasses ... ok
+
+failures:
+
+---- expired_barrier_removes_head_and_releases_other_root stdout ----
+
+thread 'expired_barrier_removes_head_and_releases_other_root' panicked at tests/fairness_contract.rs:28:359:
+assertion failed: !light.is_finished()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- root_fifo_heavy_light_heavy_cannot_skip_its_head stdout ----
+
+thread 'root_fifo_heavy_light_heavy_cannot_skip_its_head' panicked at tests/fairness_contract.rs:13:309:
+same-root light must wait behind heavy head
+
+---- five_seconds_independently_protect_heavy stdout ----
+
+thread 'five_seconds_independently_protect_heavy' panicked at tests/fairness_contract.rs:22:227:
+age alone must block small admission
+
+---- root_round_robin_not_global_fifo stdout ----
+
+thread 'root_round_robin_not_global_fifo' panicked at tests/fairness_contract.rs:17:279:
+root1 takes the next turn after root0 actual admission
+
+---- later_fifo_head_keeps_original_age stdout ----
+
+thread 'later_fifo_head_keeps_original_age' panicked at tests/fairness_contract.rs:30:298:
+new FIFO head retains original enqueue age
+
+---- eight_actual_bypasses_protect_heavy_from_continuous_small_arrivals stdout ----
+
+thread 'eight_actual_bypasses_protect_heavy_from_continuous_small_arrivals' panicked at tests/fairness_contract.rs:20:299:
+eight actual bypasses must erect barrier for current-budget-unfit heavy
+
+---- total_queue_has_64_waiting_metadata_including_all_roots stdout ----
+
+thread 'total_queue_has_64_waiting_metadata_including_all_roots' panicked at tests/fairness_contract.rs:15:305:
+65th waiting request must reject immediately
+
+
+failures:
+    eight_actual_bypasses_protect_heavy_from_continuous_small_arrivals
+    expired_barrier_removes_head_and_releases_other_root
+    five_seconds_independently_protect_heavy
+    later_fifo_head_keeps_original_age
+    root_fifo_heavy_light_heavy_cannot_skip_its_head
+    root_round_robin_not_global_fifo
+    total_queue_has_64_waiting_metadata_including_all_roots
+
+test result: FAILED. 3 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test fairness_contract`

@@ -1,0 +1,128 @@
+{
+  "captured_utc": "2026-09-12T13:59:03.299830+00:00",
+  "classification": "direct_file_hash_and_retained_log_audit_not_new_test_execution",
+  "prior_manifest": "product/artifacts/native-task1/source-manifest-final.json",
+  "current_manifest": "product/artifacts/native-task1/quality-fix/source-manifest.json",
+  "files": [
+    {
+      "path": "product/src/admission/quota.rs",
+      "sha256": "09c0371ced10b11be9e1d27359934c6f82b6474eda08d1c84e66653b45603cc1",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/src/transport/stream.rs",
+      "sha256": "cb88ec7085d09b72a2b31c483ce626d0e44aa7560e85f4c1941563f82cedf8f3",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/src/transport/upstream.rs",
+      "sha256": "d7d62f9aa065614c3ea16b5d7027c996e6504ae6fed097a3c626bbfe76b44d02",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/tests/quota_contract.rs",
+      "sha256": "d9b66771b6ba995c236621f62af1fa70ced7a56d0150c19f74cd22018113a414",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/tests/task5_usage_contract.rs",
+      "sha256": "6d3ee55ddcf122438f1fac6f0dd620bd9c5e4ef74456d1f674ba1186e5e78166",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/tests/stream_lifetime.rs",
+      "sha256": "798bda9ba62470343f0f8939b8c913c993e2c0d925f9aa18afaaf7a3dd154d92",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/Cargo.toml",
+      "sha256": "578428bdb1efd69f92dd232b5459f039d951db80509645323ab2b0e4751bafbe",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    },
+    {
+      "path": "product/Cargo.lock",
+      "sha256": "1bd9b7323dc65aa2847791489d87383437c6a41f149082d4e56563817c03722a",
+      "same_prior_tested_source": true,
+      "same_current_hold": true
+    }
+  ],
+  "prior_logs": [
+    {
+      "path": "product/artifacts/native-task1/final-debug-211.log",
+      "sha256": "1730ec8902491c4a288e4be158a98724baafd158e141189792e0ec8cde34534e",
+      "logged_total_pass": 211,
+      "selected_tests": [
+        {
+          "name": "actual_settles_once_and_excess_creates_debt",
+          "logged_pass": true
+        },
+        {
+          "name": "reserved_retains_full_estimate_and_unknown_actual_does_too",
+          "logged_pass": true
+        },
+        {
+          "name": "late_usage_is_new_debit_and_old_identity_cannot_refund_new_work",
+          "logged_pass": true
+        },
+        {
+          "name": "chat_final_usage_must_precede_done",
+          "logged_pass": true
+        },
+        {
+          "name": "quality_messages_ordered_start_delta_stop_settles_known_usage",
+          "logged_pass": true
+        },
+        {
+          "name": "quality_messages_qualified_usage_then_post_stop_delta_is_unknown",
+          "logged_pass": true
+        }
+      ]
+    },
+    {
+      "path": "product/artifacts/native-task1/final-release-211.log",
+      "sha256": "7a23a696fb0419dc1e637b996fc0b22b466722c61d3211ee5da6ff2423dd0821",
+      "logged_total_pass": 211,
+      "selected_tests": [
+        {
+          "name": "actual_settles_once_and_excess_creates_debt",
+          "logged_pass": true
+        },
+        {
+          "name": "reserved_retains_full_estimate_and_unknown_actual_does_too",
+          "logged_pass": true
+        },
+        {
+          "name": "late_usage_is_new_debit_and_old_identity_cannot_refund_new_work",
+          "logged_pass": true
+        },
+        {
+          "name": "chat_final_usage_must_precede_done",
+          "logged_pass": true
+        },
+        {
+          "name": "quality_messages_ordered_start_delta_stop_settles_known_usage",
+          "logged_pass": true
+        },
+        {
+          "name": "quality_messages_qualified_usage_then_post_stop_delta_is_unknown",
+          "logged_pass": true
+        }
+      ]
+    }
+  ],
+  "new_runtime_or_build": false,
+  "passed": true,
+  "limits": [
+    "Tests were executed at earlier native source, not rerun on the quality-fix revision.",
+    "File identity does not prove compiler provenance or real provider quota semantics.",
+    "Client numerical usage observations do not alone prove internal gateway refunds.",
+    "Current lifecycle-only changes have separate 25-case verification and pending quality re-review."
+  ]
+}

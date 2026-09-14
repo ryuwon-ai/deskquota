@@ -1,0 +1,223 @@
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:154:
+         let snapshot = snapshot(&target_path, spec.label(), platform)?;
+         let manager_snapshot = observe_manager(&spec, &target_path, &snapshot);
+         let state = registration_state(&snapshot, &manager_snapshot, executable);
+-        let preview_hash = preview_hash(
+-            &spec,
+-            action,
+-            &target_path,
+-            &snapshot,
+-            &manager_snapshot,
+-        );
++        let preview_hash = preview_hash(&spec, action, &target_path, &snapshot, &manager_snapshot);
+         Ok(Self {
+             spec,
+             action,
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:217:
+                 "schtasks /Create /TN \\\\llmgw\\{} /XML {}{}",
+                 self.spec.label(),
+                 quoted_display(&self.target_path),
+-                if matches!(self.manager_snapshot, ManagerSnapshot::Present { owned: true, .. }) {
++                if matches!(
++                    self.manager_snapshot,
++                    ManagerSnapshot::Present { owned: true, .. }
++                ) {
+                     " /F"
+                 } else {
+                     ""
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:354:
+         if !valid_windows_sid(user_identity) {
+             return Err(Error::message("Windows current-user SID is invalid"));
+         }
+-        Self::new_with_user(
+-            Platform::Windows,
+-            executable,
+-            config,
+-            Some(user_identity),
+-        )
++        Self::new_with_user(Platform::Windows, executable, config, Some(user_identity))
+     }
+ 
+     fn new_with_user(
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:625:
+             reason: "Linux user manager did not report a loaded or absent unit".to_owned(),
+         };
+     }
+-    let Some(fragment) = properties.get("FragmentPath").filter(|value| !value.is_empty()) else {
++    let Some(fragment) = properties
++        .get("FragmentPath")
++        .filter(|value| !value.is_empty())
++    else {
+         return ManagerSnapshot::Unknown {
+             reason: "Linux user manager omitted the unit fragment path".to_owned(),
+         };
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:882:
+             Some("enabled")
+         }
+         [task, actions, exec, command]
+-            if task == "Task"
+-                && actions == "Actions"
+-                && exec == "Exec"
+-                && command == "Command" =>
++            if task == "Task" && actions == "Actions" && exec == "Exec" && command == "Command" =>
+         {
+             Some("command")
+         }
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1022:
+ pub fn query_current(config: &Path, auth: &Auth) -> Value {
+     match prepare_current(config, Action::On) {
+         Ok(plan) => {
+-            let (manager, manager_scope, manager_ownership, reason) =
+-                manager_registration(&plan);
++            let (manager, manager_scope, manager_ownership, reason) = manager_registration(&plan);
+             let registration = match (&plan.manager_snapshot, plan.state()) {
+                 (ManagerSnapshot::Unknown { .. }, _) => "unknown",
+                 (ManagerSnapshot::Present { owned: false, .. }, _) => "blocked",
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1100:
+                     "foreign".to_owned(),
+                     scope.to_owned(),
+                     "foreign".to_owned(),
+-                    Some("manager registration is not owned by this llmgw configuration".to_owned()),
++                    Some(
++                        "manager registration is not owned by this llmgw configuration".to_owned(),
++                    ),
+                 );
+             }
+             (
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1416:
+             "<Task xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\"><RegistrationInfo><Description>llmgw-owned:{label}</Description></RegistrationInfo><Triggers><LogonTrigger><Enabled>true</Enabled><UserId>{user}</UserId></LogonTrigger></Triggers><Principals><Principal><UserId>{user}</UserId></Principal></Principals><Settings><Enabled>false</Enabled></Settings><Actions><Exec><Command>C:\\llmgw &amp; gateway.exe</Command></Exec></Actions></Task>"
+         );
+         let disabled = windows_manager_snapshot_from_xml(label, target, user, &owned);
+-        assert!(matches!(disabled, ManagerSnapshot::Present { owned: true, enabled: false, .. }));
++        assert!(matches!(
++            disabled,
++            ManagerSnapshot::Present {
++                owned: true,
++                enabled: false,
++                ..
++            }
++        ));
+         assert_eq!(
+             match disabled {
+-                ManagerSnapshot::Present { registered_executable, .. } => registered_executable,
++                ManagerSnapshot::Present {
++                    registered_executable,
++                    ..
++                } => registered_executable,
+                 _ => None,
+             },
+             Some(PathBuf::from(r"C:\llmgw & gateway.exe"))
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1431:
+             user,
+             "<Task xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\"><Settings><Enabled>true</Enabled></Settings></Task>",
+         );
+-        assert!(matches!(foreign, ManagerSnapshot::Present { owned: false, .. }));
++        assert!(matches!(
++            foreign,
++            ManagerSnapshot::Present { owned: false, .. }
++        ));
+ 
+         let unscoped = owned.replace(
+             &format!("<UserId>{user}</UserId></LogonTrigger>"),
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1449:
+ 
+     #[test]
+     fn linux_manager_definition_exposes_global_or_foreign_scope() {
+-        let target = Path::new("/home/fixture/.config/systemd/user/io.llmgw.gateway.fixture.service");
++        let target =
++            Path::new("/home/fixture/.config/systemd/user/io.llmgw.gateway.fixture.service");
+         let observed = linux_manager_snapshot_from_show(
+             target,
+             "LoadState=loaded\nUnitFileState=enabled\nFragmentPath=/etc/systemd/user/io.llmgw.gateway.fixture.service\n",
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1456:
+         );
+-        assert!(matches!(observed, ManagerSnapshot::Present { owned: false, enabled: true, scope: ManagerScope::GlobalOrForeign, .. }));
++        assert!(matches!(
++            observed,
++            ManagerSnapshot::Present {
++                owned: false,
++                enabled: true,
++                scope: ManagerScope::GlobalOrForeign,
++                ..
++            }
++        ));
+     }
+ 
+     #[test]
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1469:
+         ));
+     }
+ 
+-
+     #[test]
+     fn windows_utf16_task_xml_decodes_before_semantic_parsing() {
+         let text = "<?xml version=\"1.0\" encoding=\"UTF-16\"?><Task xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\"/>";
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/autostart/mod.rs:1485:
+         assert_eq!(
+             registration_state(
+                 &local,
+-                &ManagerSnapshot::Unknown { reason: "blocked".into() },
++                &ManagerSnapshot::Unknown {
++                    reason: "blocked".into()
++                },
+                 executable,
+             ),
+             RegistrationState::Blocked
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/cli.rs:971:
+                 autostart["registration"].as_str().unwrap_or("unknown"),
+                 autostart["manager"].as_str().unwrap_or("unknown"),
+                 autostart["manager_scope"].as_str().unwrap_or("unknown"),
+-                autostart["manager_ownership"]
+-                    .as_str()
+-                    .unwrap_or("unknown"),
++                autostart["manager_ownership"].as_str().unwrap_or("unknown"),
+                 autostart["reason"]
+                     .as_str()
+                     .map_or(String::new(), |reason| format!("; reason: {reason}")),
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/src/lifecycle/platform/windows.rs:135:
+         if length == 256 {
+             return Err(denied());
+         }
+-        String::from_utf16(std::slice::from_raw_parts(identity.0, length))
+-            .map_err(|_| denied())
++        String::from_utf16(std::slice::from_raw_parts(identity.0, length)).map_err(|_| denied())
+     }
+ }
+ fn sid_fits(sid: PSID, end: usize) -> bool {
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/autostart_templates.rs:151:
+         header: "authorization".into(),
+         name: name.clone(),
+     });
++    assert_eq!(availability, LoginAuthAvailability::Unknown);
+     assert_eq!(
+-        availability,
+-        LoginAuthAvailability::Unknown
+-    );
+-    assert_eq!(
+         login_auth_availability(&Auth::None),
+         LoginAuthAvailability::Available
+     );
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/autostart_templates.rs:293:
+     assert!(!linux_commands.contains("sudo"));
+     assert!(!linux_commands.contains(" start"));
+ 
+-    let windows =
+-        RegistrationPlan::prepare_for_windows_user(
+-            Path::new(r"C:\Program Files\llmgw.exe"),
+-            Path::new(r"C:\Users\fixture\gateway.toml"),
+-            Path::new(r"C:\Users\fixture"),
+-            Action::On,
+-            "S-1-5-21-1-2-3-1001",
+-        )
+-        .unwrap();
++    let windows = RegistrationPlan::prepare_for_windows_user(
++        Path::new(r"C:\Program Files\llmgw.exe"),
++        Path::new(r"C:\Users\fixture\gateway.toml"),
++        Path::new(r"C:\Users\fixture"),
++        Action::On,
++        "S-1-5-21-1-2-3-1001",
++    )
++    .unwrap();
+     let windows_commands = windows.manager_commands().join("\n");
+     assert!(windows_commands.contains("schtasks /Create"));
+     assert!(

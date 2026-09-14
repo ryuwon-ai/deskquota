@@ -1,0 +1,140 @@
+{
+  "phase": "FINAL_HOLD",
+  "execution_finished": true,
+  "source_stable_after_capture": true,
+  "source_drift": [],
+  "source_files": 70,
+  "changed_files": 12,
+  "source_manifest_sha256": "1ad4bd171021f1249b3e5a6fbdfd4377b55c4f87c055e2cfe6fe3594d8d1b55f",
+  "changed_files_manifest_sha256": "b4c7de930f4f7eb5e39e14e7534a6a7c015db902937040c19384b883352bb18a",
+  "source_archive_sha256": "7183f33d9c4eff60a31f61aa44b5b0cddb860788c385149c60ccbb2f97eb1955",
+  "source_archive_bytes": 210671,
+  "binaries": {
+    "current_release": {
+      "path": "target/native-task2-spec-fix/release/llmgw",
+      "bytes": 9298000,
+      "sha256": "821973c23b30b62270a08b19db3b73399275c06d44f2d0d81526c7426fb91530"
+    },
+    "current_debug": {
+      "path": "target/native-task2-spec-fix/debug/llmgw",
+      "bytes": 28207288,
+      "sha256": "b3dfda27393f301fb1246a58c9a336591ea6fb731f410a70161eb08bed8f321c"
+    },
+    "initial_native_task2_release": {
+      "path": "target/native-task2/release/llmgw",
+      "bytes": 9287392,
+      "sha256": "8b33e86bcc7a612316dfb37a686fa768d3371d8fdcd8da7a88919ed5bcf4d56b"
+    },
+    "preserved_native_release": {
+      "path": "target/native/release/llmgw",
+      "bytes": 8697040,
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    },
+    "preserved_held_release": {
+      "path": "artifacts/accounting-ablation/task2/held-llmgw",
+      "bytes": 8697040,
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    }
+  },
+  "preserved": {
+    "initial_native_task2_source_manifest_sha256": "8ffc043b2e1da422e2cbe638443d9d8bd19e4116674379d68b2ecd31f2329254",
+    "initial_native_task2_source_archive_sha256": "1b705ee53f6a488fe3fb27e6402bcff2db5ef71bee8ed1ae8abad13911a045a5",
+    "accounting_baseline_manifest_sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304",
+    "accounting_baseline_archive_sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4",
+    "accounting_pilot_sha256": "bfe367592eae5953edf0f1bb64dc808c7864f78ce41b48137f47d9dc9901c41c",
+    "spec_review_readme_sha256": "3b0b0318b9d064ae0a94474895f717c5dcf054f0e2afe2c81cc8371f7f93c573"
+  },
+  "f1_f7": {
+    "F1": "same-directory full write/sync publication; SIGXFSZ preserves 417-byte existing file; Windows ambiguous replacement retains protected original and candidate recovery paths",
+    "F2": "persistent setup writer lock plus exact draft snapshot carried to the immediate pre-publication check; concurrent edit rejected and preserved",
+    "F3": "loaded Env header/name and Models/CountTokens selections remain defaults; metadata-only root is accepted without inventing generation support",
+    "F4": "loaded login and client pending intents remain selected and persisted",
+    "F5": "request-bounded model without a configured fallback is accepted; summary distinguishes request cap from provider limit",
+    "F6": "unchanged SaveAndStart uses authenticated on and preserves PID, nonce, fingerprint, address, and start time",
+    "F7": "invalid config and missing inference arguments exit 2 while live malformed-edit restart-required behavior and off/status identity recovery remain intact"
+  },
+  "verification": {
+    "all_targets": {
+      "passed": 255,
+      "failed": 0,
+      "test_result_rows": [
+        9,
+        0,
+        3,
+        19,
+        22,
+        25,
+        12,
+        7,
+        19,
+        36,
+        32,
+        27,
+        44
+      ],
+      "test_binaries": 13,
+      "log": "artifacts/native-task2/spec-fix/full-tests-final.log"
+    },
+    "setup_contract": {
+      "passed": 36,
+      "failed": 0,
+      "log": "artifacts/native-task2/spec-fix/focused-green-setup-final.log"
+    },
+    "lifecycle_contract": {
+      "passed": 25,
+      "failed": 0,
+      "log": "artifacts/native-task2/spec-fix/lifecycle-green.log"
+    },
+    "windows_failure_model": {
+      "passed": 3,
+      "failed": 0,
+      "red_log": "artifacts/native-task2/spec-fix/windows-recovery-red.log",
+      "green_log": "artifacts/native-task2/spec-fix/windows-recovery-final.log",
+      "actual_windows_runtime": "unverified"
+    },
+    "static": {
+      "fmt": "passed",
+      "check_all_targets": "passed",
+      "clippy_all_targets_deny_warnings": "passed",
+      "release_build": "passed"
+    },
+    "pty": {
+      "result": "pass",
+      "cases": 7,
+      "binary": {
+        "path": "target/native-task2-spec-fix/release/llmgw",
+        "bytes": 9298000,
+        "sha256": "821973c23b30b62270a08b19db3b73399275c06d44f2d0d81526c7426fb91530"
+      },
+      "script": {
+        "path": "scripts/probe_native_setup.py",
+        "bytes": 12887,
+        "sha256": "0bcd9750d78eeba44702b1965564c58fba83d4a44b149c60291b74867e89daba"
+      },
+      "result_file": {
+        "path": "artifacts/native-task2/spec-fix/pty-final-exact.json",
+        "bytes": 5583,
+        "sha256": "377b36df227273142d1955f4693615733f2bbdfbe6faff8db5c7a8db14753bf9"
+      },
+      "stderr_bytes": 0
+    },
+    "red_green": {
+      "combined_red": "artifacts/native-task2/spec-fix/probe-results.json",
+      "combined_green": "artifacts/native-task2/spec-fix/green-probe-results.json",
+      "running_red": "artifacts/native-task2/spec-fix/running-noop-results.json",
+      "running_green": "artifacts/native-task2/spec-fix/green-running-noop-results.json",
+      "metadata_only_red": "artifacts/native-task2/spec-fix/metadata-only-red-result.json",
+      "metadata_only_green": "artifacts/native-task2/spec-fix/metadata-only-result.json"
+    }
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+  "cleanup": "artifacts/native-task2/spec-fix/cleanup-final.json",
+  "limits": [
+    "macOS PTY and owned loopback runtime only",
+    "Linux and Windows setup runtime unverified; the Windows failure model is host-side simulation only",
+    "no Windows cross-build rerun because the previously recorded SDK/aws-lc headers blocker did not change",
+    "no real or paid API, model download/start, current-user client file, login registration, installer, commit, release, benchmark, or accounting matrix exercised",
+    "the last snapshot check plus rename/ReplaceFileW is not an external-editor filesystem CAS primitive"
+  ]
+}

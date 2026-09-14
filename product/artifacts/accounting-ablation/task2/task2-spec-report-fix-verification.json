@@ -1,0 +1,369 @@
+{
+  "captured_utc": "2026-09-12T17:04:13.479633+00:00",
+  "checks": {
+    "independent_raw_aggregate_matches_report_values": true,
+    "manifest_preserved": true,
+    "new_report_revision_identified": true,
+    "old_report_revision_identified": true,
+    "original_and_held_binary_preserved": true,
+    "owned_runtime_zero": true,
+    "raw_hashes_match_final_manifest": true,
+    "report_contains_fixed_drain_final_subgroup_breakdown": true,
+    "report_links_exist": true,
+    "review_snapshot_preserved_except_authorized_report": true,
+    "source_manifest_preserved": true,
+    "subgroup_fixed_plus_drain_reconciles_to_final": true,
+    "zero_outcomes_accounted": true
+  },
+  "execution_finished": true,
+  "independent_raw_aggregation": {
+    "arm_order": [
+      "reserved",
+      "actual"
+    ],
+    "raw_hash_errors": [],
+    "reconciliation_errors": [],
+    "rows": {
+      "length:long": {
+        "drain_completed": [
+          8,
+          10
+        ],
+        "drain_rejected": [
+          2,
+          0
+        ],
+        "drain_timeout": [
+          10,
+          10
+        ],
+        "final_cancelled": [
+          50,
+          50
+        ],
+        "final_completed": [
+          33,
+          35
+        ],
+        "final_error": [
+          0,
+          0
+        ],
+        "final_rejected": [
+          2,
+          0
+        ],
+        "final_timeout": [
+          15,
+          15
+        ],
+        "fixed_cancelled": [
+          50,
+          50
+        ],
+        "fixed_completed": [
+          25,
+          25
+        ],
+        "fixed_timeout": [
+          5,
+          5
+        ],
+        "submitted": [
+          100,
+          100
+        ]
+      },
+      "length:short": {
+        "drain_completed": [
+          104,
+          110
+        ],
+        "drain_rejected": [
+          1,
+          0
+        ],
+        "drain_timeout": [
+          10,
+          0
+        ],
+        "final_cancelled": [
+          25,
+          25
+        ],
+        "final_completed": [
+          364,
+          375
+        ],
+        "final_error": [
+          0,
+          0
+        ],
+        "final_rejected": [
+          1,
+          0
+        ],
+        "final_timeout": [
+          10,
+          0
+        ],
+        "fixed_cancelled": [
+          25,
+          25
+        ],
+        "fixed_completed": [
+          260,
+          265
+        ],
+        "fixed_timeout": [
+          0,
+          0
+        ],
+        "submitted": [
+          400,
+          400
+        ]
+      },
+      "root:0": {
+        "drain_completed": [
+          43,
+          45
+        ],
+        "drain_rejected": [
+          2,
+          0
+        ],
+        "drain_timeout": [
+          11,
+          10
+        ],
+        "final_cancelled": [
+          25,
+          25
+        ],
+        "final_completed": [
+          182,
+          185
+        ],
+        "final_error": [
+          0,
+          0
+        ],
+        "final_rejected": [
+          2,
+          0
+        ],
+        "final_timeout": [
+          16,
+          15
+        ],
+        "fixed_cancelled": [
+          25,
+          25
+        ],
+        "fixed_completed": [
+          139,
+          140
+        ],
+        "fixed_timeout": [
+          5,
+          5
+        ],
+        "submitted": [
+          225,
+          225
+        ]
+      },
+      "root:1": {
+        "drain_completed": [
+          33,
+          35
+        ],
+        "drain_rejected": [
+          1,
+          0
+        ],
+        "drain_timeout": [
+          2,
+          0
+        ],
+        "final_cancelled": [
+          25,
+          25
+        ],
+        "final_completed": [
+          97,
+          100
+        ],
+        "final_error": [
+          0,
+          0
+        ],
+        "final_rejected": [
+          1,
+          0
+        ],
+        "final_timeout": [
+          2,
+          0
+        ],
+        "fixed_cancelled": [
+          25,
+          25
+        ],
+        "fixed_completed": [
+          64,
+          65
+        ],
+        "fixed_timeout": [
+          0,
+          0
+        ],
+        "submitted": [
+          125,
+          125
+        ]
+      },
+      "root:2": {
+        "drain_completed": [
+          13,
+          15
+        ],
+        "drain_rejected": [
+          0,
+          0
+        ],
+        "drain_timeout": [
+          3,
+          0
+        ],
+        "final_cancelled": [
+          25,
+          25
+        ],
+        "final_completed": [
+          47,
+          50
+        ],
+        "final_error": [
+          0,
+          0
+        ],
+        "final_rejected": [
+          0,
+          0
+        ],
+        "final_timeout": [
+          3,
+          0
+        ],
+        "fixed_cancelled": [
+          25,
+          25
+        ],
+        "fixed_completed": [
+          34,
+          35
+        ],
+        "fixed_timeout": [
+          0,
+          0
+        ],
+        "submitted": [
+          75,
+          75
+        ]
+      },
+      "root:3": {
+        "drain_completed": [
+          23,
+          25
+        ],
+        "drain_rejected": [
+          0,
+          0
+        ],
+        "drain_timeout": [
+          4,
+          0
+        ],
+        "final_cancelled": [
+          0,
+          0
+        ],
+        "final_completed": [
+          71,
+          75
+        ],
+        "final_error": [
+          0,
+          0
+        ],
+        "final_rejected": [
+          0,
+          0
+        ],
+        "final_timeout": [
+          4,
+          0
+        ],
+        "fixed_cancelled": [
+          0,
+          0
+        ],
+        "fixed_completed": [
+          48,
+          50
+        ],
+        "fixed_timeout": [
+          0,
+          0
+        ],
+        "submitted": [
+          75,
+          75
+        ]
+      }
+    },
+    "window_definitions": {
+      "drain": "terminal recorded after the fixed cutoff during bounded drain",
+      "final": "fixed plus drain over the full submitted subgroup denominator",
+      "fixed": "terminal recorded at or before exact start_monotonic_s plus 300 seconds"
+    }
+  },
+  "new_report": {
+    "bytes": 8338,
+    "links_checked": 8,
+    "missing_links": [],
+    "path": "reports/accounting-ablation-results.md",
+    "sha256": "67c360ba0f31093b3b02bc1c1cd8bf1da43836926734788e977dbfe52e222a44"
+  },
+  "notes": [
+    "The subgroup aggregation was recomputed from all ten preserved raw result files without importing product code.",
+    "The final timeout reduction is confined to short requests; long final timeouts remain 15 in each arm.",
+    "No experiment, product source, raw result, manifest, binary, runtime, build, test, Pi, Git, or Native wizard action was performed.",
+    "One earlier verification command failed before execution because Markdown backticks terminated its outer JavaScript string. It created no evidence file and changed no data."
+  ],
+  "old_report": {
+    "review": "evidence/accounting-task2-spec-review/README.md",
+    "sha256": "361a340ef367dffba18da82449b5987bb6fcb3563b55bb0ac98bb62b683e9f4f"
+  },
+  "passed": true,
+  "preservation": {
+    "held_binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "historical_final_verification_sha256": "7c0bfd7f938257be6dc38542e34f93527392c60b845ea8dc4b30d4367234acb4",
+    "historical_task2_hold_sha256": "0e12c32dea05e44a73fb01fdc40e1bde2a54ce2e3a5dc2bae1fa0bbed1d5d57c",
+    "manifest_sha256": "bfe367592eae5953edf0f1bb64dc808c7864f78ce41b48137f47d9dc9901c41c",
+    "mismatches": [],
+    "ordinary_binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "review_snapshot_files_checked_excluding_report": 103,
+    "source_manifest_sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304"
+  },
+  "runtime": {
+    "llmgw_listeners": [],
+    "matching_processes": [],
+    "owned_runtime": 0,
+    "recorded_owned_pids_alive": []
+  },
+  "status": "TASK2_SPEC_REPORT_FIX_HOLD"
+}

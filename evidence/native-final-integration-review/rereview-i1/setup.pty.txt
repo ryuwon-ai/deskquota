@@ -1,0 +1,113 @@
+? Setup: Environment ›
+❯ Continue
+  Cancel
+✔ Setup: Environment · Continue
+? Environment preset (defaults only; protocol remains your choice) ›
+  Local LLM
+  Corporate LLM
+❯ External API
+
+✔ Environment preset (defaults only; protocol remains your choice) · External API
+? Setup: Connection ›
+❯ Continue
+  Back
+  Cancel
+✔ Setup: Connection · Continue
+? Upstream API base (prefix preserved; /v1 is not duplicated) (http://127.0.0.1:60378/v1) › ✔ Upstream API base (prefix preserved; /v1 is not duplicated) · http://127.0.0.1:60378/v1
+? Actually supported endpoint formats; unknown is never enabled ›
+✔ Completions
+⬚ Responses
+⬚ Messages
+
+✔ Actually supported endpoint formats; unknown is never enabled · Completions
+? Upstream auth ›
+  Forward incoming header
+  Environment reference
+❯ None
+✔ Upstream auth · None
+? Setup: Models ›
+❯ Continue
+  Back
+  Cancel
+✔ Setup: Models · Continue
+? Keep all existing models and routes unchanged? (y/n) › yes✔ Keep all existing models and routes unchanged? · yes
+? Setup: Quota ›
+❯ Continue
+  Back
+  Cancel
+
+✔ Setup: Quota · Continue
+? RPM ›
+  Known nonzero number
+  Unknown
+❯ Unlimited
+
+✔ RPM · Unlimited
+? TPM ›
+  Known nonzero number
+❯ Unknown
+  Unlimited
+
+✔ TPM · Unknown
+? Is this same quota shared by other PCs? (y/n) › no
+✔ Is this same quota shared by other PCs? · no
+? Does the provider specify separate input/output limits? (v0.1 reports this as estimated) (y/n) › no
+✔ Does the provider specify separate input/output limits? (v0.1 reports this as estimated) · no
+? Concurrency 1..16 (1) › 
+✔ Concurrency 1..16 · 1
+? Setup: Run ›
+❯ Continue
+  Back
+  Cancel
+
+✔ Setup: Run · Continue
+? Local loopback port (60379) › 
+✔ Local loopback port · 60379
+? Start at next user login? After the config is saved, the exact OS registration target and argv will be previewed for separate confirmation (y/n) › no
+✔ Start at next user login? After the config is saved, the exact OS registration target and argv will be previewed for separate confirmation · no
+? Setup: Tools ›
+❯ Continue
+  Back
+  Cancel
+
+✔ Setup: Tools · Continue
+? Client intents (pending only; no client file is changed) ›
+⬚ Pi
+⬚ Claude Code
+
+⬚ Codex
+⬚ Manual
+✔ Client intents (pending only; no client file is changed) · 
+? Setup: Apply ›
+❯ Continue
+  Back
+  Cancel
+
+✔ Setup: Apply · Continue
+
+config: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/gateway/config.toml
+state: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/gateway/.llmgw-e6ac295e1c685cb445dea358b1a5f79f4ff3504fe4bff2a5842c63f7b8cded5c (final apply initializes protected local data/control tokens; preview and cancel create no state)
+setup pending metadata: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-final-integration-review/rereview-i1/scratch/gateway/.config.toml.setup-pending.json (intent only; no credentials)
+upstream original: http://127.0.0.1:60378/v1
+upstream new normalized: http://127.0.0.1:60378/v1
+proxy: disabled; TLS: system roots; verification remains enabled
+OpenAI client base: http://127.0.0.1:60379/r/pi-work/v1
+Messages client base: http://127.0.0.1:60379/r/pi-work (client appends /v1/messages -> http://127.0.0.1:60379/r/pi-work/v1/messages)
+protocols: [ChatCompletions]
+model: example-model; reservation output bound: 64; user-supplied accounting fallback used only when a request omits its cap, not a verified provider limit, and not injected or enforced upstream; listing: unverified/manual; capabilities: unverified
+quota: estimated; shared with other PCs: false; separate input/output contract: false
+auth: none
+quota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness
+login requested: no; pending, registration not applied; after config save, exact OS target preview and separate confirmation
+clients: none; pending, client files not changed
+fingerprint impact: desired 6edd367bfec451ac1199464684ad265816ec1ddb2bf0aabd7ac621ee07f0cbb0; lifecycle state is stopped; Save and start starts this configuration and verifies authenticated readiness
+fairness: configured route root pi-work; sessions sharing this root share one budget
+
+? Apply ›
+  Save and start
+❯ Save only
+  Back
+  Cancel
+✔ Apply · Save only
+gateway config stage: applied (SaveOnly); runtime: not_started; authenticated readiness: false
+autostart registration stage: disabled; no OS resource change required

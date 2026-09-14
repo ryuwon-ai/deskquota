@@ -1,0 +1,152 @@
+Command: cargo test --locked --release --all-targets
+Expected exit: 0
+Actual exit: 0
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `release` profile [optimized] target(s) in 6.83s
+     Running unittests src/lib.rs (target/release/deps/llmgw-3d4a8d87b95e0741)
+
+running 4 tests
+test transport::body_budget::tests::permit_lives_until_the_last_bytes_clone ... ok
+test admission::tests::unpolled_worker_future_still_owns_and_releases_admission ... ok
+test admission::tests::starting_provisional_hold_wakes_waiters_to_schedule_its_expiry ... ok
+test transport::stream::tests::observer_retained_buffer_capacity_is_bounded_across_fields_and_lines ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/release/deps/llmgw-5bd9b808f26442b7)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/config_contract.rs (target/release/deps/config_contract-9a365870d1a5bd14)
+
+running 19 tests
+test config_debug_redacts_upstream_query_values ... ok
+test canonical_source_fingerprint_and_state_paths_share_the_explicit_location ... ok
+test actual_accounting_is_explicitly_supported ... ok
+test listen_address_must_be_loopback ... ok
+test endpoints_are_an_explicit_method_and_path_allowlist ... ok
+test known_tpm_without_a_default_output_bound_is_valid ... ok
+test auth_modes_require_only_their_own_fields ... ok
+test cancel_policy_defaults_to_drain_and_accepts_only_close ... ok
+test quota_modes_are_distinct_and_known_zero_is_rejected ... ok
+test api_base_rejects_credentials_non_http_urls_and_fragments ... ok
+test model_output_bound_is_optional_but_cannot_be_zero ... ok
+test valid_config_preserves_limits_auth_accounting_and_url ... ok
+test concurrency_defaults_to_one_and_is_bounded ... ok
+test unknown_fields_are_rejected_without_echoing_the_key_or_input ... ok
+test env_auth_rejects_transport_reserved_headers ... ok
+test syntax_errors_report_a_safe_location_without_source_text ... ok
+test lossless_query_rejects_a_raw_config_query_that_url_would_transform ... ok
+test invalid_scalar_values_are_redacted_from_display_and_debug ... ok
+test root_ids_must_be_unique_url_safe_and_limited_to_sixteen ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/quota_contract.rs (target/release/deps/quota_contract-a7d0e5b0aa4a0da1)
+
+running 12 tests
+test actual_settles_once_and_excess_creates_debt ... ok
+test estimated_cost_addition_cannot_wrap_and_metadata_needs_no_tpm ... ok
+test expired_unknown_usage_has_no_fresh_credit_and_time_cannot_move_backwards ... ok
+test joint_admission_does_not_hold_quota_while_concurrency_is_full ... ok
+test late_usage_is_new_debit_and_old_identity_cannot_refund_new_work ... ok
+test provisional_holds_never_expire_and_queued_candidates_hold_nothing ... ok
+test reserved_retains_full_estimate_and_unknown_actual_does_too ... ok
+test restart_hold_expires_exactly_at_sixty_seconds ... ok
+test resume_recomputes_window_without_accumulated_burst ... ok
+test rpm_debits_only_on_start_and_never_refunds_on_finish ... ok
+test unsupported_and_unknown_limits_are_not_zero_or_provider_unlimited_claims ... ok
+test maximum_retained_entries_wait_instead_of_losing_unexpired_debits ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/stream_lifetime.rs (target/release/deps/stream_lifetime-7c70e591ff4b1448)
+
+running 32 tests
+test chat_cached_usage_is_preserved_without_double_counting_input ... ok
+test chat_explicit_zero_cached_usage_is_known ... ok
+test anthropic_decreasing_cumulative_usage_is_unknown ... ok
+test anthropic_output_usage_is_cumulative_not_summed ... ok
+test chat_empty_choices_final_usage_is_observed ... ok
+test anthropic_provisional_output_without_final_delta_usage_is_unknown ... ok
+test first_event_arrives_before_eof ... ok
+test close_policy_terminates_socket ... ok
+test chat_malformed_cache_or_decreasing_usage_is_unknown ... ok
+test incomplete_trailing_sse_event_is_not_dispatched ... ok
+test huge_comment_does_not_poison_later_usage ... ok
+test huge_event_marks_usage_unknown ... ok
+test public_spawn_rejects_constructed_concurrency_outside_fixed_range ... ok
+test pre_header_close_policy_closes_upstream_socket ... ok
+test known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt ... ok
+test responses_completed_nested_usage_is_observed ... ok
+test responses_malformed_cached_usage_is_unknown ... ok
+test forced_shutdown_joins_a_worker_blocked_before_body_eof ... ok
+test disconnect_drains_without_releasing_slot ... ok
+test split_utf8_and_sse_bytes_preserved ... ok
+test metadata_endpoint_shares_stream_capacity ... ok
+test sse_bom_crlf_and_multiline_data_are_observed_without_rewriting ... ok
+test pre_header_disconnect_drains_and_holds_slot ... ok
+test upstream_body_error_is_not_a_clean_downstream_eof ... ok
+test terminal_cleanup_happens_once ... ok
+test request_write_half_close_remains_valid_while_upstream_is_silent ... ok
+test absolute_deadline_covers_silent_upstream_body ... ok
+test absolute_deadline_covers_silent_upstream_headers ... ok
+test slow_reader_has_a_bounded_application_queue ... ok
+test stop_drains_active_worker_before_returning ... ok
+test queued_disconnect_never_starts_upstream ... ok
+test absolute_deadline_covers_blocked_downstream_delivery ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/wire_contract.rs (target/release/deps/wire_contract-96171363add8195e)
+
+running 44 tests
+test control_rejects_origin ... ok
+test control_rejects_data_token ... ok
+test empty_query_presence_is_rejected_instead_of_silently_dropped ... ok
+test duplicate_data_credentials_are_rejected ... ok
+test body_is_unchanged ... ok
+test env_auth_removes_both_old_credentials ... ok
+test data_token_is_stripped ... ok
+test admitted_prestart_reset_releases_joint_hold_once_without_http_attempt ... ok
+test duplicate_top_level_inspected_fields_are_rejected_before_upstream ... ok
+test forward_auth_is_unchanged ... ok
+test invalid_utf8_in_ignored_json_values_is_rejected_before_upstream ... ok
+test gzip_response_status_headers_and_compressed_bytes_are_unchanged ... ok
+test hop_by_hop_and_connection_nominated_headers_are_scrubbed_both_directions ... ok
+test known_tpm_rejects_missing_output_bound_before_upstream ... ok
+test lossless_query_rejects_a_request_query_that_url_would_transform ... ok
+test many_small_chunked_frames_preserve_body_bytes ... ok
+test local_control_reports_bounded_metrics_and_stops_without_upstream ... ok
+test missing_token_is_rejected_before_body_read ... ok
+test model_allowlist_and_body_limit_are_enforced_before_upstream ... ok
+test known_tpm_cannot_be_bypassed_by_caps_modalities_or_nested_tool_media ... ok
+test known_tpm_rejects_multimodal_and_oversized_estimate_without_attempt ... ok
+test actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits ... ok
+test models_metadata_does_not_require_a_generation_body ... ok
+test known_tpm_explicit_caps_and_text_only_inputs_forward_exact_bytes ... ok
+test oversized_header_is_bounded_by_the_actual_http_receiver ... ok
+test none_auth_strips_both_known_credentials ... ok
+test model_default_and_explicit_cap_precedence_do_not_rewrite_body ... ok
+test public_spawn_rejects_non_loopback_before_other_startup_work ... ok
+test reserved_env_auth_header_is_rejected_before_any_http_attempt ... ok
+test query_conflict_is_rejected ... ok
+test start_validation_rejects_a_constructed_non_loopback_config_before_bind ... ok
+test protocol_specific_opaque_fields_do_not_become_multimodal_inputs ... ok
+test responses_tool_output_media_is_rejected_before_admission ... ok
+test prefix_is_preserved ... ok
+test stop_cancels_admitted_unstarted_worker_and_its_quota_hold ... ok
+test unsupported_background_and_upgrade_never_reach_upstream ... ok
+test supported_encoded_queries_are_forwarded_without_reserialization ... ok
+test unknown_route_never_reaches_upstream ... ok
+test runtime_credentials_require_protected_preprovisioned_state_files ... ok
+test known_quota_production_startup_holds_before_any_http_attempt ... ok
+test known_quota_queue_deadline_holds_no_resources_and_starts_no_http ... ok
+test library_retry_is_disabled_on_response_failure ... ok
+test no_cross_host_redirect ... ok
+test metadata_endpoints_have_zero_generation_tpm_and_share_rpm_across_roots ... ok
+
+test result: ok. 44 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

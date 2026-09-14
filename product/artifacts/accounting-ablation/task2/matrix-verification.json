@@ -1,0 +1,155 @@
+{
+  "captured_utc": "2026-09-12T16:43:08Z",
+  "status": "MATRIX_HOLD",
+  "execution_finished": true,
+  "command_exit_code": 0,
+  "manifest": {
+    "path": "artifacts/accounting-ablation/pilot.json",
+    "sha256": "bfe367592eae5953edf0f1bb64dc808c7864f78ce41b48137f47d9dc9901c41c",
+    "status": "completed_accounting_matrix",
+    "mode": "accounting",
+    "seeds": [1, 2, 3, 4, 5],
+    "windows": 5,
+    "planned_pairs": 5,
+    "completed_pairs": 5,
+    "runs": 10,
+    "matrix_complete": true,
+    "benchmark_executable_used": false,
+    "ordinary_binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "ordinary_binary_features": []
+  },
+  "paired_fixed_time_results": {
+    "actual_minus_reserved_completed_by_seed": [1, 1, 1, 1, 1],
+    "reserved": {
+      "submitted": 500,
+      "completed": 285,
+      "generation_completed": 255,
+      "metadata_completed": 30,
+      "cancelled": 75,
+      "timeout": 5
+    },
+    "actual": {
+      "submitted": 500,
+      "completed": 290,
+      "generation_completed": 260,
+      "metadata_completed": 30,
+      "cancelled": 75,
+      "timeout": 5
+    }
+  },
+  "complete_terminal_denominators": {
+    "reserved": {
+      "completed": 397,
+      "cancelled": 75,
+      "rejected": 3,
+      "timeout": 25
+    },
+    "actual": {
+      "completed": 410,
+      "cancelled": 75,
+      "timeout": 15
+    }
+  },
+  "post_cutoff_drain": {
+    "reserved": {
+      "completed": 112,
+      "rejected": 3,
+      "timeout": 20
+    },
+    "actual": {
+      "completed": 120,
+      "timeout": 10
+    }
+  },
+  "attempts": {
+    "reserved_gateway_started_and_mock_received": 400,
+    "actual_gateway_started_and_mock_received": 410,
+    "reserved_mock_429": 3,
+    "actual_mock_429": 0,
+    "additional_attempts_beyond_first": 0
+  },
+  "fixed_time_length_results": {
+    "reserved": {"long": 25, "short": 260},
+    "actual": {"long": 25, "short": 265}
+  },
+  "fixed_time_root_results": {
+    "reserved": {"r0": 139, "r1": 64, "r2": 34, "r3": 48},
+    "actual": {"r0": 140, "r1": 65, "r2": 35, "r3": 50}
+  },
+  "usage_denominator": {
+    "reserved": {"observed_numeric": 347, "not_applicable_metadata": 50, "not_observed": 103},
+    "actual": {"observed_numeric": 360, "not_applicable_metadata": 50, "not_observed": 90}
+  },
+  "success_only_completion_latency_ms_across_run_range": {
+    "reserved_p50": {"min": 72355.32950000197, "max": 72370.5585419957},
+    "reserved_p95": {"min": 119970.41045800142, "max": 119981.24395799823},
+    "actual_p50": {"min": 72369.1133329994, "max": 72378.30854200001},
+    "actual_p95": {"min": 119958.88874999946, "max": 119973.85133300122}
+  },
+  "direct_checks": {
+    "manifest_raw_hashes_match": true,
+    "raw_files": 10,
+    "journal_files": 10,
+    "journals_each_have_one_start_gateway_start_measurement_end_validation": true,
+    "journals_each_have_100_unique_terminal_events": true,
+    "submitted_ids_unique_and_equal_terminal_ids_each_run": true,
+    "attempt_ids_unique_linked_and_terminal_each_run": true,
+    "gateway_started_counts_match_mock_attempts_each_run": true,
+    "within_measurement_flags_match_exact_cutoff_each_run": true,
+    "completed_payloads_valid_each_run": true,
+    "usage_integer_and_formula_checks_each_run": true,
+    "normalized_pair_configs_equal_except_accounting": true,
+    "submitted_trace_identical_within_each_pair": true,
+    "initial_and_final_status_match_written_toml_and_accounting": true,
+    "runner_owned_processes_cleaned_each_run": true,
+    "failed_result_files": 0,
+    "seed1_raw_and_journal_bytes_unchanged_after_resume": true
+  },
+  "hold_identity": {
+    "source_manifest_sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304",
+    "source_files_hash_and_size_verified": 59,
+    "source_archive_sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4",
+    "source_archive_bytes": 174816,
+    "source_archive_members": 60,
+    "usage_basis_files_verified": 8,
+    "ordinary_binary_source_path": "target/native/release/llmgw",
+    "ordinary_binary_held_copy": "artifacts/accounting-ablation/task2/held-llmgw",
+    "ordinary_binary_source_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "ordinary_binary_copy_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "ordinary_binary_source_bytes": 8697040,
+    "ordinary_binary_copy_bytes": 8697040,
+    "ordinary_binary_copy_executable": true
+  },
+  "cleanup": {
+    "benchmark_pids_alive": 0,
+    "gateway_pids_alive": 0,
+    "llmgw_processes": 0,
+    "llmgw_listeners": 0,
+    "cargo_or_rustc_processes": 0,
+    "benchmark_or_pi_python_processes": 0,
+    "matching_temp_directories": 0,
+    "owned_runtime": 0
+  },
+  "interpretation_limits": [
+    "Five seeds repeat one fixed synthetic fixture with seeded scheduling jitter; they are not five independent real-world agent workloads.",
+    "The within-pair submitted trace is identical, but the same aggregate length count can contain different completed request IDs; no every-request improvement is claimed.",
+    "Fixture byte and output units are not provider or tokenizer tokens, and client-observed usage is not proof of internal refund behavior.",
+    "Configured roots are route-level fairness boundaries; sessions sharing one agent profile share one root, with no automatic per-agent separation claim.",
+    "The paired +1 values are descriptive synthetic results, not broad performance, actual agent success, low-end hardware, competitor, or default-policy evidence."
+  ],
+  "logs": {
+    "full_stdout_stderr_sha256": "8b1bf6ea4bab47253ce02e16762fc7f819dec60bbc18aadacf8b677cce2167bd",
+    "full_stdout_stderr_bytes": 8802,
+    "full_invocation_sha256": "d4eea4d0bccff4472cea7c0231d5268e4d2771b9d5145cc3c689106a75639053",
+    "full_resume_preflight_sha256": "836937a4e0e385c9fc782e0d7f9a13957a4d9fb79cc1345a81b0690f2ceb5389",
+    "full_runtime_handle_sha256": "96a7ce519f9370febcb9a6998d136c32237476b0293933b9319701e1c6180fbf"
+  },
+  "parent_full_audit": {
+    "status": "pending",
+    "expected_pairs": 5
+  },
+  "notes": [
+    "Three local read-only verification commands had shell or jq construction errors and were corrected without changing source, result data, runtime, or acceptance criteria: an incorrect postflight manifest path, a jq root-scope mistake, and a zsh unmatched failed-file glob. Corrected checks passed.",
+    "No product source, dependency, workload, config rule, or original binary changed. No build, test, Pi, real API, model, user configuration, OS registration, Git, or Native wizard action was performed."
+  ]
+}

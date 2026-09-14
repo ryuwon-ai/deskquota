@@ -1,0 +1,13 @@
+    Checking llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error: read amount is not handled
+   --> tests/lifecycle_contract.rs:453:9
+    |
+453 |         socket.read(&mut [0; 4096]).unwrap();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: use `Read::read_exact` instead, or handle partial reads
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#unused_io_amount
+    = note: `#[deny(clippy::unused_io_amount)]` on by default
+
+error: could not compile `llmgw` (test "lifecycle_contract") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

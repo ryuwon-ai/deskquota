@@ -1,0 +1,27 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0599]: no variant or associated item named `RegisteredBinaryMoved` found for enum `RegistrationState` in the current scope
+   --> tests/autostart_templates.rs:232:50
+    |
+232 |     assert_eq!(moved.state(), RegistrationState::RegisteredBinaryMoved);
+    |                                                  ^^^^^^^^^^^^^^^^^^^^^ variant or associated item not found in `RegistrationState`
+    |
+help: there is a variant with a similar name
+    |
+232 -     assert_eq!(moved.state(), RegistrationState::RegisteredBinaryMoved);
+232 +     assert_eq!(moved.state(), RegistrationState::RegisteredBinaryMissing);
+    |
+
+error[E0599]: no method named `registered_executable` found for struct `RegistrationPlan` in the current scope
+   --> tests/autostart_templates.rs:233:22
+    |
+233 |     assert_eq!(moved.registered_executable(), Some(old_executable.as_path()));
+    |                      ^^^^^^^^^^^^^^^^^^^^^ method not found in `RegistrationPlan`
+
+error[E0599]: no method named `registered_executable` found for struct `RegistrationPlan` in the current scope
+   --> tests/autostart_templates.rs:244:24
+    |
+244 |     assert_eq!(missing.registered_executable(), Some(old_executable.as_path()));
+    |                        ^^^^^^^^^^^^^^^^^^^^^ method not found in `RegistrationPlan`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `llmgw` (test "autostart_templates") due to 3 previous errors

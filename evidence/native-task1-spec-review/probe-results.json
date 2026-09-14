@@ -1,0 +1,108 @@
+{
+  "concurrent_on": {
+    "exit_codes": [
+      0,
+      0
+    ],
+    "state": "running",
+    "worker_pid": 98915
+  },
+  "invalid_disk_on": {
+    "code": 1,
+    "stdout": "",
+    "stderr": "error: invalid configuration syntax or shape at line 1, column 12\n",
+    "elapsed": 0.004,
+    "pending_restart": true
+  },
+  "invalid_restart": {
+    "code": 1,
+    "stdout": "Restart cancels queued requests and drains active requests for up to 10 seconds before applying the saved configuration.\n",
+    "stderr": "error: invalid configuration syntax or shape at line 1, column 12\n",
+    "elapsed": 0.004,
+    "old_worker_unchanged": true
+  },
+  "valid_disk_on": {
+    "code": 1,
+    "stdout": "",
+    "stderr": "error: restart_required\n",
+    "elapsed": 0.004
+  },
+  "identity_mismatch": [
+    {
+      "field": "path_hash",
+      "code": 1,
+      "error": "error: failed: worker identity invalid",
+      "worker_survived": true,
+      "unrelated_survived": true
+    },
+    {
+      "field": "fingerprint",
+      "code": 1,
+      "error": "error: identity_mismatch",
+      "worker_survived": true,
+      "unrelated_survived": true
+    },
+    {
+      "field": "nonce",
+      "code": 1,
+      "error": "error: identity_mismatch",
+      "worker_survived": true,
+      "unrelated_survived": true
+    },
+    {
+      "field": "address",
+      "code": 1,
+      "error": "error: control_unreachable",
+      "worker_survived": true,
+      "unrelated_survived": true
+    },
+    {
+      "field": "pid",
+      "code": 1,
+      "error": "error: identity_mismatch",
+      "worker_survived": true,
+      "unrelated_survived": true
+    },
+    {
+      "field": "started_unix_ms",
+      "code": 1,
+      "error": "error: identity_mismatch",
+      "worker_survived": true,
+      "unrelated_survived": true
+    }
+  ],
+  "conditional_nonce": {
+    "status": 409
+  },
+  "off": {
+    "code": 0,
+    "stdout": "gateway: stopped\nClient URLs and next-login settings are preserved; use on to reconnect. Autostart and client adapters: not implemented; existing external settings: unknown.\n",
+    "stderr": "",
+    "elapsed": 0.032,
+    "port_closed": true,
+    "state": "stopped",
+    "helper_survived": true
+  },
+  "stale_pid": {
+    "off": 0,
+    "on": 0,
+    "helper_survived": true
+  },
+  "inherited_acl": {
+    "exit": 1,
+    "error": "error: state extended ACL or concurrent path change is not allowed",
+    "data_token_exists": false,
+    "control_token_exists": false
+  },
+  "cleanup_off": 1,
+  "cleanup": {
+    "owned_pids": [
+      98912,
+      98915,
+      98938
+    ],
+    "remaining_pids": [],
+    "last_worker_port_closed": true,
+    "temp_removed": true
+  }
+}

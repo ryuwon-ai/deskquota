@@ -1,0 +1,266 @@
+--- unowned-fix/product/tests/patch_contract.rs
++++ quality-fix/product/tests/patch_contract.rs
+@@ -264,6 +264,134 @@
+     let final_text = fs::read_to_string(path).unwrap();
+     assert!(final_text.contains("unrelated = \"user-edited\""));
+     assert!(final_text.contains("base_url = \"https://before.invalid\" # endpoint comment"));
++}
++
++#[test]
++fn toml_owned_datetime_is_refused_before_client_write() {
++    let fixture = Fixture::new("toml-owned-datetime");
++    let path = fixture.path("client/profile.toml");
++    let before = b"last_used = 2026-09-13T07:00:00Z\nkeep = 42\n";
++    write_private(&path, before);
++    let tx = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::Toml,
++            Scope::UserPrivate,
++            Some(before),
++            vec![set(
++                key(&["last_used"]),
++                EditValue::Public(json!("gateway")),
++            )],
++        )],
++    );
++
++    let error = preview(&tx).unwrap_err().to_string();
++    assert!(error.contains("TOML owned value"));
++    assert!(!error.contains("2026-09-13"));
++    assert_eq!(fs::read(&path).unwrap(), before);
++    assert!(!fixture.journal().exists());
++    let parsed = fs::read_to_string(path)
++        .unwrap()
++        .parse::<toml_edit::DocumentMut>()
++        .unwrap();
++    assert!(parsed["last_used"].as_datetime().is_some());
++}
++
++#[test]
++fn toml_owned_nested_datetime_subtrees_are_refused() {
++    for (index, temporal) in [
++        "1979-05-27",
++        "07:32:00",
++        "1979-05-27T07:32:00",
++        "1979-05-27T07:32:00Z",
++    ]
++    .into_iter()
++    .enumerate()
++    {
++        let fixture = Fixture::new(&format!("toml-owned-nested-datetime-{index}"));
++        let path = fixture.path("client/profile.toml");
++        let before =
++            format!("profile = {{ model = \"original\", schedule = [{temporal}] }}\nkeep = true\n");
++        write_private(&path, before.as_bytes());
++        let tx = transaction(
++            fixture.journal(),
++            vec![patch(
++                &path,
++                Format::Toml,
++                Scope::UserPrivate,
++                Some(before.as_bytes()),
++                vec![set(
++                    key(&["profile"]),
++                    EditValue::Public(json!({"model":"gateway"})),
++                )],
++            )],
++        );
++
++        let error = preview(&tx).unwrap_err().to_string();
++        assert!(error.contains("TOML owned value"));
++        assert!(!error.contains(temporal));
++        assert_eq!(fs::read(&path).unwrap(), before.as_bytes());
++        assert!(!fixture.journal().exists());
++    }
++}
++
++#[test]
++fn unrelated_toml_datetime_survives_normal_string_edit_and_restore() {
++    let fixture = Fixture::new("toml-unrelated-datetime");
++    let path = fixture.path("client/profile.toml");
++    let before = b"last_used = 2026-09-13T07:00:00Z\nmodel = \"original\"\n";
++    write_private(&path, before);
++    let tx = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::Toml,
++            Scope::UserPrivate,
++            Some(before),
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway")))],
++        )],
++    );
++    apply_reviewed(&tx);
++    assert!(restore(fixture.journal()).unwrap().conflicts.is_empty());
++    assert_eq!(fs::read(&path).unwrap(), before);
++    let parsed = fs::read_to_string(path)
++        .unwrap()
++        .parse::<toml_edit::DocumentMut>()
++        .unwrap();
++    assert!(parsed["last_used"].as_datetime().is_some());
++    assert_eq!(parsed["model"].as_str(), Some("original"));
++}
++
++#[test]
++fn ordinary_toml_marker_shaped_table_is_not_misclassified_as_datetime() {
++    let fixture = Fixture::new("toml-marker-table");
++    let path = fixture.path("client/profile.toml");
++    let before = b"value = { \"$__toml_private_datetime\" = \"ordinary-data\" }\n";
++    write_private(&path, before);
++    let tx = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::Toml,
++            Scope::UserPrivate,
++            Some(before),
++            vec![set(key(&["value"]), EditValue::Public(json!("gateway")))],
++        )],
++    );
++    apply_reviewed(&tx);
++    assert!(restore(fixture.journal()).unwrap().conflicts.is_empty());
++    let parsed = fs::read_to_string(path)
++        .unwrap()
++        .parse::<toml_edit::DocumentMut>()
++        .unwrap();
++    let value = parsed["value"].as_inline_table().unwrap();
++    assert_eq!(
++        value
++            .get("$__toml_private_datetime")
++            .and_then(toml_edit::Value::as_str),
++        Some("ordinary-data")
++    );
+ }
+ 
+ #[test]
+@@ -573,6 +701,128 @@
+     assert_eq!(fs::read(path).unwrap(), before);
+ }
+ 
++#[test]
++fn absent_case_aliases_contend_on_the_actual_filesystem_lock() {
++    assert_absent_aliases_contend("SETTINGS.JSON", "settings.json", "case");
++}
++
++#[test]
++fn absent_unicode_aliases_contend_when_the_filesystem_equates_them() {
++    assert_absent_aliases_contend("caf\u{e9}.json", "cafe\u{301}.json", "unicode");
++}
++
++#[test]
++fn missing_resource_lock_uses_the_adjacent_filename_and_fixed_suffix() {
++    let fixture = Fixture::new("missing-resource-lock-name");
++    let parent = fixture.path("client");
++    private_dir(&parent);
++    let path = parent.join("settings.json");
++    let lock_path = cooperating_lock_path(&path).unwrap();
++    assert_eq!(
++        lock_path.parent().unwrap(),
++        fs::canonicalize(parent).unwrap()
++    );
++    assert_eq!(
++        lock_path.file_name().unwrap(),
++        "settings.json.llmgw-config-patch.lock"
++    );
++}
++
++fn assert_absent_aliases_contend(first_name: &str, second_name: &str, label: &str) {
++    use fs4::FileExt;
++    use std::fs::OpenOptions;
++
++    let fixture = Fixture::new(&format!("absent-{label}-alias-lock"));
++    let parent = fixture.path("client");
++    private_dir(&parent);
++    let marker = parent.join(first_name);
++    write_private(&marker, b"marker");
++    let aliases_match = parent.join(second_name).exists();
++    fs::remove_file(&marker).unwrap();
++    if !aliases_match {
++        return;
++    }
++
++    let first = parent.join(first_name);
++    let second = parent.join(second_name);
++    let held_path = cooperating_lock_path(&first).unwrap();
++    let lock = OpenOptions::new()
++        .create(true)
++        .truncate(false)
++        .read(true)
++        .write(true)
++        .open(&held_path)
++        .unwrap();
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        fs::set_permissions(&held_path, fs::Permissions::from_mode(0o600)).unwrap();
++    }
++    FileExt::lock(&lock).unwrap();
++    let tx = transaction(
++        fixture.journal(),
++        vec![patch(
++            &second,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            None,
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway")))],
++        )],
++    );
++    let shown = preview(&tx).unwrap();
++    let error = apply(&tx, &shown.hash).unwrap_err().to_string();
++    assert!(error.contains("another llmgw client resource edit"));
++    assert!(!first.exists());
++    assert!(!second.exists());
++}
++
++#[test]
++fn absent_case_distinct_files_keep_independent_locks_on_case_sensitive_filesystems() {
++    use fs4::FileExt;
++    use std::fs::OpenOptions;
++
++    let fixture = Fixture::new("absent-case-distinct-lock");
++    let parent = fixture.path("client");
++    private_dir(&parent);
++    let upper = parent.join("SETTINGS.JSON");
++    let lower = parent.join("settings.json");
++    write_private(&upper, b"marker");
++    let aliases_match = lower.exists();
++    fs::remove_file(&upper).unwrap();
++    if aliases_match {
++        return;
++    }
++
++    let held_path = cooperating_lock_path(&upper).unwrap();
++    let lower_path = cooperating_lock_path(&lower).unwrap();
++    assert_ne!(held_path, lower_path);
++    let lock = OpenOptions::new()
++        .create(true)
++        .truncate(false)
++        .read(true)
++        .write(true)
++        .open(&held_path)
++        .unwrap();
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        fs::set_permissions(&held_path, fs::Permissions::from_mode(0o600)).unwrap();
++    }
++    FileExt::lock(&lock).unwrap();
++    let tx = transaction(
++        fixture.journal(),
++        vec![patch(
++            &lower,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            None,
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway")))],
++        )],
++    );
++    apply_reviewed(&tx);
++    assert!(lower.exists());
++}
++
+ #[cfg(unix)]
+ #[test]
+ fn adjacent_resource_lock_preserves_an_existing_ordinary_parent_mode() {

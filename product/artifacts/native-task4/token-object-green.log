@@ -1,0 +1,21 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.76s
+     Running tests/patch_contract.rs (target/native-task4/debug/deps/patch_contract-c8928a174386669d)
+
+running 1 test
+
+thread 'local_data_token_object_is_private_opaque_and_restores_as_one_owned_value' panicked at tests/patch_contract.rs:2123:5:
+assertion `left == right` failed
+  left: [123, 34, 112, 114, 111, 118, 105, 100, 101, 114, 115, 34, 58, 123, 10, 32, 32, 32, 32, 34, 111, 116, 104, 101, 114, 34, 58, 123, 34, 109, 111, 100, 101, 108, 115, 34, 58, 91, 93, 125, 10, 32, 32, 125, 125]
+ right: [123, 34, 112, 114, 111, 118, 105, 100, 101, 114, 115, 34, 58, 123, 34, 111, 116, 104, 101, 114, 34, 58, 123, 34, 109, 111, 100, 101, 108, 115, 34, 58, 91, 93, 125, 125, 125]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test local_data_token_object_is_private_opaque_and_restores_as_one_owned_value ... FAILED
+
+failures:
+
+failures:
+    local_data_token_object_is_private_opaque_and_restores_as_one_owned_value
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 49 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `--test patch_contract`

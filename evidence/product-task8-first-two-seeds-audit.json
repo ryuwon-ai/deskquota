@@ -1,0 +1,52 @@
+{
+  "created_utc": "2026-09-12T10:28:53.264347+00:00",
+  "audit": "independent_completed_quota_artifact_inspection",
+  "script_sha256": "d196fca8d4d3f20b747e952781922389ba9c98df2e4db7d19d6c1d57763fa69e",
+  "manifest_status": "in_progress",
+  "partial_allowed": true,
+  "verified_runs": 0,
+  "expected_runs": 20,
+  "verified_ingress": 0,
+  "runs": [],
+  "passed": false,
+  "errors": [
+    {
+      "run": "quota-seed1-direct",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed1-production_rr",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed1-benchmark_fifo",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed1-benchmark_rr",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed2-production_rr",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed2-benchmark_fifo",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed2-benchmark_rr",
+      "check_error": "retry off"
+    },
+    {
+      "run": "quota-seed2-direct",
+      "check_error": "retry off"
+    }
+  ],
+  "limits": [
+    "Does not execute gateway, mock, benchmark or provider API",
+    "Does not replace source review or validate actual payload bytes absent from artifacts",
+    "Snapshot cutoff and nominal measurement cutoff can differ; no equality of pending lists is assumed",
+    "No-wait measurements and real client/OS performance are outside this audit"
+  ]
+}

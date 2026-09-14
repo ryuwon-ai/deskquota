@@ -1,0 +1,37 @@
+{
+  "runtime": {
+    "argv": [
+      "python3",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/runtime_probe.py"
+    ],
+    "exit_code": 0,
+    "log": "runtime-probe.log",
+    "nested_commands": "runtime-probe.json"
+  },
+  "driver_mock": {
+    "argv": [
+      "python3",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/driver_probe.py"
+    ],
+    "exit_code": 0,
+    "log": "driver-probe.log"
+  },
+  "before": {
+    "argv": [
+      "python3",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/preserve.py",
+      "before"
+    ],
+    "exit_code": 0
+  },
+  "after": {
+    "argv": [
+      "python3",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task5-spec-review/rereview-s1-s7/preserve.py",
+      "after"
+    ],
+    "exit_code": 0
+  },
+  "rust": "compile-commands.json and probe-commands.json",
+  "linux_projection": "linux-commands.json"
+}

@@ -1,0 +1,521 @@
+--- task1-hold/product/scripts/benchmark.py
++++ spec-fix/product/scripts/benchmark.py
+@@ -162,7 +162,11 @@
+         await asyncio.wait_for(proc.wait(), 3)
+ 
+ async def start_gateway(arm, binary, reference, upstream_port, quota, temp, event):
+-    from benchmark_accounting import build_gateway_config
++    from benchmark_accounting import (
++        build_gateway_config,
++        validate_runtime_config,
++        validate_written_config,
++    )
+     # Binding a temporary server lets the OS select a port; foreground readiness detects any race.
+     probe = await asyncio.start_server(lambda r,w: w.close(), "127.0.0.1", 0)
+     port = probe.sockets[0].getsockname()[1]
+@@ -185,6 +189,15 @@
+     )
+     config_path = Path(temp)/"gateway.toml"
+     config_path.write_text(config)
++    if product_arm:
++        config_metadata = validate_written_config(
++            config_path,
++            config_metadata,
++            expected_arm=arm,
++            expected_quota=quota,
++            cap=CAP,
++            roots=ROOTS,
++        )
+     paths_process = await asyncio.create_subprocess_exec(str(binary), "doctor", "--config", str(config_path), "--json", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+     try:
+         paths_output, _ = await asyncio.wait_for(paths_process.communicate(), timeout=10)
+@@ -212,10 +225,14 @@
+                 raise RuntimeError("gateway failed startup")
+             try:
+                 await control(port, "health")
+-                config_metadata["started_monotonic_s"] = started
+-                return proc, port, config_metadata
++                status = await control(port) if product_arm else None
+             except (OSError, ValueError, asyncio.IncompleteReadError):
+                 await asyncio.sleep(.025)
++                continue
++            if product_arm:
++                validate_runtime_config(config_metadata, status)
++            config_metadata["started_monotonic_s"] = started
++            return proc, port, config_metadata
+         raise RuntimeError("gateway readiness deadline")
+     except BaseException as error:
+         # Ownership transfers to run_arm only on return. Repeated cancellation
+@@ -551,6 +568,7 @@
+         if args.pilot_only:
+             if completed_pairs != 1:
+                 raise ValueError("pilot checkpoint requires one complete pair")
++            manifest["matrix_complete"] = False
+             manifest["status"] = "accounting_pilot_completed"
+         elif args.smoke:
+             manifest["status"] = "completed_smoke"
+--- task1-hold/product/scripts/benchmark_accounting.py
++++ spec-fix/product/scripts/benchmark_accounting.py
+@@ -6,6 +6,7 @@
+ import re
+ import tomllib
+ from collections import Counter
++from pathlib import Path
+ 
+ 
+ ACCOUNTING_ARMS = ("production_rr", "production_actual")
+@@ -22,6 +23,9 @@
+ 
+ 
+ def paired_schedule(seeds, phase="quota"):
++    seeds = list(seeds)
++    if len(seeds) != len(set(seeds)):
++        raise ValueError("duplicate planned seed")
+     schedule = []
+     for index, seed in enumerate(seeds):
+         order = ACCOUNTING_ARMS if index % 2 == 0 else ACCOUNTING_ARMS[::-1]
+@@ -127,6 +131,49 @@
+     return expected_snapshot
+ 
+ 
++def validate_written_config(
++    path, metadata, *, expected_arm, expected_quota=_UNSET, cap=2, roots=4
++):
++    """Return provenance derived from the exact TOML bytes that will be launched."""
++    raw = Path(path).read_bytes()
++    try:
++        snapshot = _sanitized_snapshot(raw.decode("utf-8"))
++    except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
++        raise ValueError("written TOML is invalid") from error
++    raw_sha256 = hashlib.sha256(raw).hexdigest()
++    accounting = snapshot.get("accounting")
++    if (
++        metadata.get("raw_toml_sha256") != raw_sha256
++        or metadata.get("snapshot") != snapshot
++        or metadata.get("accounting") != accounting
++    ):
++        raise ValueError("written TOML does not match generated metadata")
++    actual = copy.deepcopy(metadata)
++    actual.update(
++        raw_toml_sha256=raw_sha256,
++        snapshot=snapshot,
++        accounting=accounting,
++    )
++    validate_config_provenance(
++        actual,
++        expected_arm=expected_arm,
++        expected_quota=expected_quota,
++        cap=cap,
++        roots=roots,
++    )
++    return actual
++
++
++def validate_runtime_config(metadata, status):
++    if status.get("identity", {}).get("fingerprint") != metadata.get(
++        "raw_toml_sha256"
++    ):
++        raise ValueError("runtime config fingerprint mismatch")
++    if status.get("admission", {}).get("accounting") != metadata.get("accounting"):
++        raise ValueError("runtime accounting mismatch")
++    return True
++
++
+ def normalize_config_snapshot(snapshot, generated_paths=()):
+     normalized = copy.deepcopy(snapshot)
+     replacements = [(str(path), "<generated-path>") for path in generated_paths]
+@@ -253,6 +300,15 @@
+         usage = outcome.get("usage")
+         if not isinstance(usage, dict) or usage.get("status") != "observed":
+             raise ValueError("completed generation usage not observed")
++        usage_values = (
++            usage.get("prompt_tokens"),
++            usage.get("completion_tokens"),
++        )
++        if any(
++            type(value) is not int or not 0 <= value <= 2**64 - 1
++            for value in usage_values
++        ):
++            raise ValueError("completed generation usage must contain u64 integers")
+         completed_attempts = [
+             attempt
+             for attempt in attempts_by_ingress.get(outcome["id"], [])
+@@ -369,6 +425,9 @@
+ 
+ 
+ def paired_summary(runs, planned_seeds, phase):
++    planned_seeds = list(planned_seeds)
++    if len(planned_seeds) != len(set(planned_seeds)):
++        raise ValueError("duplicate planned seed")
+     if phase == "smoke":
+         expected_duration, expected_windows = 3, 0
+     elif phase == "quota":
+--- task1-hold/product/tests/test_benchmark_accounting.py
++++ spec-fix/product/tests/test_benchmark_accounting.py
+@@ -4,6 +4,7 @@
+ import hashlib
+ import json
+ import math
++import os
+ import sys
+ import tempfile
+ import unittest
+@@ -75,6 +76,8 @@
+                 ("quota", 13, "production_actual"),
+             ],
+         )
++        with self.assertRaisesRegex(ValueError, "duplicate planned seed"):
++            paired_schedule([11, 11])
+ 
+     def test_actual_config_uses_one_accounting_value_in_toml_and_metadata(self):
+         from benchmark_accounting import build_gateway_config, validate_config_provenance
+@@ -343,6 +346,13 @@
+         with self.assertRaisesRegex(ValueError, "usage"):
+             validate_accounting_run(altered)
+ 
++        for value in (1.0, True, "1", -1, 2**64):
++            with self.subTest(value=value):
++                invalid = self.valid_run()
++                invalid["outcomes"][0]["usage"]["prompt_tokens"] = value
++                with self.assertRaisesRegex(ValueError, "usage"):
++                    validate_accounting_run(invalid)
++
+     def test_metadata_and_noncompleted_outcomes_need_no_usage(self):
+         from benchmark_accounting import validate_accounting_run
+ 
+@@ -393,6 +403,8 @@
+             paired_summary([reserved, forged], [1], "quota")
+         with self.assertRaisesRegex(ValueError, "duplicate"):
+             paired_summary([reserved, actual, copy.deepcopy(actual)], [1], "quota")
++        with self.assertRaisesRegex(ValueError, "duplicate planned seed"):
++            paired_summary([reserved, actual], [1, 1], "quota")
+         wrong_duration = [copy.deepcopy(reserved), copy.deepcopy(actual)]
+         for run in wrong_duration:
+             run["measurement_duration_s"] = 299
+@@ -426,6 +438,30 @@
+                 with self.assertRaises(ValueError):
+                     await benchmark.main(args)
+                 self.assertFalse(output.parent.exists())
++
++    async def test_duplicate_accounting_seeds_reject_before_output_creation(self):
++        with tempfile.TemporaryDirectory(prefix="accounting-duplicate-seeds-") as tmp:
++            root = Path(tmp)
++            binary = root / "binary"
++            binary.write_bytes(b"identity")
++            output = root / "result" / "manifest.json"
++            args = argparse.Namespace(
++                binary=binary,
++                reference_binary=root / "unused-reference",
++                seeds="1,1",
++                windows=5,
++                output=output,
++                smoke=False,
++                phase="quota",
++                mode="accounting",
++                pilot_only=False,
++            )
++            with mock.patch.object(
++                benchmark, "run_arm", side_effect=AssertionError("spawned")
++            ):
++                with self.assertRaisesRegex(ValueError, "unique seeds"):
++                    await benchmark.main(args)
++            self.assertFalse(output.parent.exists())
+ 
+     def args(self, root, *, pilot_only):
+         binary = root / "llmgw"
+@@ -586,6 +622,34 @@
+             self.assertEqual(completed["completed_pairs"], 2)
+             self.assertEqual(len(completed["runs"]), 4)
+ 
++    async def test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair(self):
++        with tempfile.TemporaryDirectory(prefix="accounting-single-pilot-") as tmp:
++            root = Path(tmp)
++            args = self.args(root, pilot_only=True)
++            args.seeds = "1"
++            calls = []
++            with mock.patch.object(
++                benchmark, "run_arm", self.fake_run(args.binary, calls)
++            ):
++                await benchmark.main(args)
++            pilot = json.loads(args.output.read_text())
++            self.assertEqual(pilot["status"], "accounting_pilot_completed")
++            self.assertEqual(pilot["completed_pairs"], 1)
++            self.assertEqual(pilot["planned_pairs"], 1)
++            self.assertFalse(pilot["matrix_complete"])
++
++            calls.clear()
++            args.pilot_only = False
++            with mock.patch.object(
++                benchmark, "run_arm", self.fake_run(args.binary, calls)
++            ):
++                await benchmark.main(args)
++            completed = json.loads(args.output.read_text())
++            self.assertEqual(calls, [])
++            self.assertEqual(completed["status"], "completed_accounting_matrix")
++            self.assertTrue(completed["matrix_complete"])
++            self.assertEqual(completed["completed_pairs"], 1)
++
+     async def test_forged_accounting_or_snapshot_rejects_before_next_spawn(self):
+         with tempfile.TemporaryDirectory(prefix="accounting-forgery-") as tmp:
+             root = Path(tmp)
+@@ -642,6 +706,40 @@
+                 benchmark, "run_arm", self.fake_run(args.binary, calls)
+             ):
+                 with self.assertRaisesRegex(ValueError, "TOML"):
++                    await benchmark.main(args)
++            self.assertEqual(calls, [])
++
++    async def test_rehashed_equal_float_usage_rejects_before_next_spawn(self):
++        with tempfile.TemporaryDirectory(prefix="accounting-float-resume-") as tmp:
++            root = Path(tmp)
++            args = self.args(root, pilot_only=True)
++            calls = []
++            with mock.patch.object(
++                benchmark, "run_arm", self.fake_run(args.binary, calls)
++            ):
++                await benchmark.main(args)
++            manifest = json.loads(args.output.read_text())
++            run_path = Path(manifest["runs"][0]["path"])
++            forged = json.loads(run_path.read_text())
++            terminal = next(
++                row
++                for row in forged["outcomes"]
++                if row["outcome"] == "completed"
++                and row["usage"]["status"] == "observed"
++            )
++            terminal["usage"]["prompt_tokens"] = float(
++                terminal["usage"]["prompt_tokens"]
++            )
++            benchmark.write_json(run_path, forged)
++            manifest["runs"][0]["sha256"] = benchmark.digest(run_path)
++            benchmark.write_json(args.output, manifest)
++
++            calls.clear()
++            args.pilot_only = False
++            with mock.patch.object(
++                benchmark, "run_arm", self.fake_run(args.binary, calls)
++            ):
++                with self.assertRaisesRegex(ValueError, "usage"):
+                     await benchmark.main(args)
+             self.assertEqual(calls, [])
+ 
+@@ -694,6 +792,165 @@
+ 
+ 
+ class StartupCancellationTests(unittest.IsolatedAsyncioTestCase):
++    async def test_benchmark_arm_keeps_its_existing_health_only_startup_contract(self):
++        class FixtureProcess:
++            def __init__(self, pid, returncode):
++                self.pid = pid
++                self.returncode = returncode
++
++            async def communicate(self):
++                return json.dumps({"state_directory": str(state)}).encode(), b""
++
++            async def wait(self):
++                return self.returncode
++
++            def terminate(self):
++                self.returncode = -15
++
++            def kill(self):
++                self.returncode = -9
++
++        with tempfile.TemporaryDirectory(prefix="accounting-benchmark-arm-") as tmp:
++            root = Path(tmp)
++            state = root / "state"
++            binary = root / "llmgw"
++            reference = root / "bench_gateway"
++            binary.write_bytes(b"ordinary")
++            reference.write_bytes(b"bench")
++            doctor = FixtureProcess(101, 0)
++            worker = FixtureProcess(102, None)
++            controls = []
++
++            async def fixture_control(port, path="status", method="GET"):
++                controls.append((path, method))
++                return {"status": "ok"}
++
++            with mock.patch.object(
++                benchmark.asyncio,
++                "create_subprocess_exec",
++                side_effect=[doctor, worker],
++            ), mock.patch.object(
++                benchmark, "control", fixture_control
++            ), mock.patch(
++                "benchmark_accounting.validate_written_config",
++                side_effect=AssertionError("ordinary written-config guard called"),
++            ), mock.patch(
++                "benchmark_accounting.validate_runtime_config",
++                side_effect=AssertionError("ordinary runtime guard called"),
++            ):
++                proc, _, metadata = await benchmark.start_gateway(
++                    "benchmark_rr",
++                    binary,
++                    reference,
++                    9,
++                    None,
++                    root,
++                    lambda event: None,
++                )
++            self.assertIs(proc, worker)
++            self.assertEqual(metadata["launched_binary"]["features"], ["bench-harness"])
++            self.assertEqual(controls, [("health", "GET")])
++            await benchmark.abort_startup(worker)
++
++    async def test_builder_toml_metadata_mismatch_rejects_before_spawn(self):
++        from benchmark_accounting import build_gateway_config
++
++        binary = PRODUCT / "target/native/release/llmgw"
++        if not binary.is_file():
++            self.skipTest("accepted native release binary unavailable")
++
++        def wrong_actual_toml(**kwargs):
++            text, metadata = build_gateway_config(**kwargs)
++            return text.replace(
++                'accounting = "actual"', 'accounting = "reserved"'
++            ), metadata
++
++        with tempfile.TemporaryDirectory(prefix="accounting-builder-mismatch-") as tmp:
++            with mock.patch(
++                "benchmark_accounting.build_gateway_config", wrong_actual_toml
++            ), mock.patch.object(
++                benchmark.asyncio,
++                "create_subprocess_exec",
++                side_effect=AssertionError("subprocess spawned"),
++            ):
++                with self.assertRaisesRegex(ValueError, "written TOML"):
++                    await benchmark.start_gateway(
++                        "production_actual",
++                        binary,
++                        None,
++                        9,
++                        benchmark.QUOTA,
++                        tmp,
++                        lambda event: None,
++                    )
++
++    async def test_written_toml_mutation_rejects_before_spawn(self):
++        binary = PRODUCT / "target/native/release/llmgw"
++        if not binary.is_file():
++            self.skipTest("accepted native release binary unavailable")
++        original_write_text = Path.write_text
++
++        def wrong_write(path, text, *args, **kwargs):
++            if path.name == "gateway.toml":
++                text = text.replace(
++                    'accounting = "actual"', 'accounting = "reserved"'
++                )
++            return original_write_text(path, text, *args, **kwargs)
++
++        with tempfile.TemporaryDirectory(prefix="accounting-write-mismatch-") as tmp:
++            with mock.patch.object(Path, "write_text", wrong_write), mock.patch.object(
++                benchmark.asyncio,
++                "create_subprocess_exec",
++                side_effect=AssertionError("subprocess spawned"),
++            ):
++                with self.assertRaisesRegex(ValueError, "written TOML"):
++                    await benchmark.start_gateway(
++                        "production_actual",
++                        binary,
++                        None,
++                        9,
++                        benchmark.QUOTA,
++                        tmp,
++                        lambda event: None,
++                    )
++
++    async def test_runtime_accounting_mismatch_reaps_owned_child(self):
++        binary = PRODUCT / "target/native/release/llmgw"
++        if not binary.is_file():
++            self.skipTest("accepted native release binary unavailable")
++        original_control = benchmark.control
++        events = []
++
++        async def wrong_status(port, path="status", method="GET"):
++            result = await original_control(port, path, method)
++            if path == "status":
++                result["admission"]["accounting"] = "reserved"
++            return result
++
++        with tempfile.TemporaryDirectory(prefix="accounting-runtime-mismatch-") as tmp:
++            returned = None
++            with mock.patch.object(benchmark, "control", wrong_status):
++                try:
++                    returned = await benchmark.start_gateway(
++                        "production_actual",
++                        binary,
++                        None,
++                        9,
++                        benchmark.QUOTA,
++                        tmp,
++                        events.append,
++                    )
++                except ValueError as error:
++                    self.assertRegex(str(error), "runtime accounting")
++                else:
++                    await benchmark.stop_gateway(returned[0], returned[1])
++                    self.fail("runtime accounting mismatch accepted")
++            pid = next(
++                event["pid"] for event in events if event["event"] == "gateway_started"
++            )
++            with self.assertRaises(ProcessLookupError):
++                os.kill(pid, 0)
++
+     async def test_real_gateway_startup_cancellation_reaps_owned_child(self):
+         binary = PRODUCT / "target/native/release/llmgw"
+         if not binary.is_file():
+@@ -733,7 +990,7 @@
+                 with self.assertRaises(asyncio.CancelledError):
+                     await task
+                 with self.assertRaises(ProcessLookupError):
+-                    __import__("os").kill(pid, 0)
++                    os.kill(pid, 0)
+ 
+ 
+ if __name__ == "__main__":
+--- task1-hold/product/docs/benchmark-method.md
++++ spec-fix/product/docs/benchmark-method.md
+@@ -42,17 +42,27 @@
+ ```
+ 
+ Each product run stores the accounting value together with the launched binary
+-identity, SHA256 of the exact generated TOML, and a sanitized snapshot parsed
+-from that TOML. The snapshot permits only loopback, auth `none`, retry off,
++identity, SHA256 of the exact written TOML, and a sanitized snapshot parsed back
++from those on-disk bytes before spawn. Startup also requires the worker's
++authenticated status fingerprint and admission accounting to match those bytes;
++an inconsistency reaps the owned child and fails the run. The snapshot permits
++only loopback, auth `none`, retry off,
+ close-on-cancel, concurrency two, four registered roots, the fixed model bound,
+ and the phase quota. Pair comparison normalizes allocated loopback port numbers
+ and generated temporary paths. Scheme, host, upstream path/query, endpoints,
+ root/model IDs, model output bound, quota, and every other setting remain exact;
+ the normalized snapshots may differ only at `accounting`.
+ 
++These written-file and worker-identity checks apply to the two ordinary product
++arms in this accounting experiment. The separate baseline benchmark executable
++keeps its existing health-only startup contract and is not labelled as an
++ordinary product binary.
++
+ Completed generation responses must contain exactly one valid numerical usage
+ object before `[DONE]`. Both token fields must be integers in the unsigned
+ 64-bit range and must match the linked submitted ratio and actual mock attempt.
++Resume repeats the exact integer type and range checks on persisted usage, so a
++rehashed equal-valued float remains invalid.
+ Metadata completion records usage as `not_applicable`; a cancellation, timeout,
+ rejection, or disconnect may record `not_observed`. Missing, duplicated,
+ post-terminal, or altered usage invalidates accounting evidence without turning
+@@ -65,7 +75,11 @@
+ cutoff, complete terminal denominators, root/length results, mock 429s, observed
+ additional attempts, and scheduled cancellation outcomes. Post-cutoff drain
+ completions and success-only latency stay separate. A first-pair checkpoint is
+-labelled as one-pair evidence and carries no multi-seed conclusion.
++labelled as one-pair evidence and carries no multi-seed conclusion. Its
++`matrix_complete` field remains false even when the requested schedule contains
++one seed; the same command without `--pilot-only` can reuse that verified pair
++and mark the full one-seed schedule complete. Duplicate planned seeds are
++rejected rather than counted twice.
+ 
+ ## Arms and build identity
+ 

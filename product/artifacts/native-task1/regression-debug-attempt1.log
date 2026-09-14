@@ -1,0 +1,207 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.83s
+     Running unittests src/lib.rs (target/native/debug/deps/llmgw-fb79c03c6421029d)
+
+running 6 tests
+test transport::body_budget::tests::permit_lives_until_the_last_bytes_clone ... ok
+test admission::tests::unpolled_worker_future_still_owns_and_releases_admission ... ok
+test admission::tests::status_keeps_wide_debt_decimal_without_loss_or_exact_estimator_claim ... ok
+test admission::tests::starting_provisional_hold_wakes_waiters_to_schedule_its_expiry ... ok
+test transport::stream::retained_delivery_tests::completed_eof_producers_leave_bounded_payload_owned_by_each_response ... ok
+test transport::stream::tests::observer_retained_buffer_capacity_is_bounded_across_fields_and_lines ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/native/debug/deps/llmgw-2c5d2469447cd0a4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/benchmark_trace.rs (target/native/debug/deps/benchmark_trace-8f5b4e50468eebaa)
+
+running 3 tests
+test cap_one_running_long_is_not_preempted_and_cancelled_waiter_never_starts ... ok
+test both_heavy_light_arrival_orders_account_for_long_timeout ... ok
+test continual_small_arrivals_and_shared_root_cancellation_preserve_heavy ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/config_contract.rs (target/native/debug/deps/config_contract-c5234582d4c2d837)
+
+running 19 tests
+test config_debug_redacts_upstream_query_values ... ok
+test actual_accounting_is_explicitly_supported ... ok
+test known_tpm_without_a_default_output_bound_is_valid ... ok
+test endpoints_are_an_explicit_method_and_path_allowlist ... ok
+test canonical_source_fingerprint_and_state_paths_share_the_explicit_location ... ok
+test listen_address_must_be_loopback ... ok
+test cancel_policy_defaults_to_drain_and_accepts_only_close ... ok
+test auth_modes_require_only_their_own_fields ... ok
+test model_output_bound_is_optional_but_cannot_be_zero ... ok
+test api_base_rejects_credentials_non_http_urls_and_fragments ... ok
+test quota_modes_are_distinct_and_known_zero_is_rejected ... ok
+test concurrency_defaults_to_one_and_is_bounded ... ok
+test syntax_errors_report_a_safe_location_without_source_text ... ok
+test env_auth_rejects_transport_reserved_headers ... ok
+test unknown_fields_are_rejected_without_echoing_the_key_or_input ... ok
+test valid_config_preserves_limits_auth_accounting_and_url ... ok
+test lossless_query_rejects_a_raw_config_query_that_url_would_transform ... ok
+test invalid_scalar_values_are_redacted_from_display_and_debug ... ok
+test root_ids_must_be_unique_url_safe_and_limited_to_sixteen ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/fairness_contract.rs (target/native/debug/deps/fairness_contract-e7eff720ed4a18c2)
+
+running 22 tests
+test directly_constructed_config_cannot_create_unbounded_or_ambiguous_roots ... ok
+test admitted_owner_retains_original_wait_start_and_queue_deadline ... ok
+test admitted_but_unpolled_waiter_cancel_releases_hold_once ... ok
+test expired_barrier_removes_head_and_releases_other_root ... ok
+test cap_one_running_long_request_is_nonpreemptible ... ok
+test five_seconds_independently_protect_heavy ... ok
+test heavy_heavy_light_in_same_root_finishes_in_fifo_order ... ok
+test eight_actual_bypasses_protect_heavy_from_continuous_small_arrivals ... ok
+test oldest_valid_barrier_wins_across_roots ... ok
+test root_fifo_heavy_light_heavy_cannot_skip_its_head ... ok
+test later_fifo_head_keeps_original_age ... ok
+test queued_cancel_never_starts_and_invalid_head_does_not_block ... ok
+test root_round_robin_not_global_fifo ... ok
+test bypass_trigger_selects_oldest_valid_head_even_if_it_was_current_fit ... ok
+test chosen_barrier_persists_until_its_own_admission_or_removal ... ok
+test control_reports_registered_roots_and_estimated_mode ... ok
+test scans_and_time_events_do_not_count_as_bypasses ... ok
+test wire_metadata_across_roots_share_rpm_without_tpm ... ok
+test normal_sixteen_root_rr_is_not_a_resource_bypass ... ok
+test wire_root_plus_fifteen_children_share_fifo_and_one_rr_turn ... ok
+test total_queue_has_64_waiting_metadata_including_all_roots ... ok
+test wire_64_total_waiters_overflow_429_and_rst_never_start ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-86a6ed386b85f0cb)
+
+running 12 tests
+test occupied_port_does_not_stop_unrelated_listener ... ok
+test stopped_is_success_and_off_is_idempotent ... ok
+test weak_existing_state_permissions_are_rejected_without_chmod ... ok
+test loopback_control_ignores_proxy_environment ... ok
+test known_quota_is_ready_with_empty_queue_startup_hold ... ok
+test control_stop_rejects_a_previous_instance_nonce ... ok
+test edited_listen_port_off_reaches_recorded_address ... ok
+test stale_pid_never_kills_an_unrelated_process ... ok
+test concurrent_on_has_one_identity ... ok
+test same_directory_configs_have_independent_workers ... ok
+test changed_config_requires_restart_and_invalid_edit_can_stop_old_port ... ok
+test off_drains_a_live_request_closes_sockets_and_exposes_draining ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.62s
+
+     Running tests/quota_contract.rs (target/native/debug/deps/quota_contract-dd398b708e648f7b)
+
+running 12 tests
+test estimated_cost_addition_cannot_wrap_and_metadata_needs_no_tpm ... ok
+test actual_settles_once_and_excess_creates_debt ... ok
+test late_usage_is_new_debit_and_old_identity_cannot_refund_new_work ... ok
+test expired_unknown_usage_has_no_fresh_credit_and_time_cannot_move_backwards ... ok
+test provisional_holds_never_expire_and_queued_candidates_hold_nothing ... ok
+test joint_admission_does_not_hold_quota_while_concurrency_is_full ... ok
+test reserved_retains_full_estimate_and_unknown_actual_does_too ... ok
+test restart_hold_expires_exactly_at_sixty_seconds ... ok
+test resume_recomputes_window_without_accumulated_burst ... ok
+test rpm_debits_only_on_start_and_never_refunds_on_finish ... ok
+test unsupported_and_unknown_limits_are_not_zero_or_provider_unlimited_claims ... ok
+test maximum_retained_entries_wait_instead_of_losing_unexpired_debits ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.92s
+
+     Running tests/resource_bounds.rs (target/native/debug/deps/resource_bounds-9949a35712047e51)
+
+running 7 tests
+test declared_body_cap_uses_protocol_error_and_starts_no_wire_attempt ... ok
+test sixty_four_partial_bodies_release_memory_on_rejection_and_another_request_progresses ... ok
+test ingress_128_connections_cap_rejects_129th_and_reopens_after_release ... ok
+test slow_downstream_lifetimes_bound_delivery_and_release_workers_queue_and_bodies ... ok
+test original_request_deadline_includes_a_slow_partial_body ... ok
+test sixty_four_barrier_released_writers_account_for_every_memory_pressure_outcome ... ok
+test production_header_and_body_read_timeouts_release_slow_senders ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 30.02s
+
+     Running tests/retry_contract.rs (target/native/debug/deps/retry_contract-99deb720564cb59f)
+
+running 19 tests
+test library_retry_wait_has_no_slot_preserves_age_deadline_and_unknown_tpm_debt ... ok
+test opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges ... ok
+test chunked_error_observation_overflow_is_transparent_and_never_replayed ... ok
+test opted_post_retry_preserves_the_identical_wire_body_and_headers ... ok
+test canceled_retry_queue_releases_request_body_and_never_starts_a_second_attempt ... ok
+test ordinary_rate_limit_code_accepts_only_compatible_type ... ok
+test invalid_utf8_in_ignored_error_payload_cannot_qualify_replay ... ok
+test retry_original_queue_deadline_expires_without_acquiring_or_refreshing_age ... ok
+test invalid_delay_does_not_turn_recognized_body_into_an_early_retry ... ok
+test socket_ambiguity_503_redirect_and_partial_stream_have_exactly_one_wire_attempt_even_opted_in ... ok
+test permanent_unknown_conflicting_malformed_encoded_and_oversized_errors_are_not_replayed ... ok
+test full_queue_on_retry_returns_protocol_429_and_is_not_a_deadline ... ok
+test real_retry_reenters_known_rpm_and_has_no_slot_while_waiting ... ok
+test positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header ... ok
+test opted_retry_deadline_keeps_cooldown_for_the_next_client ... ok
+test retry_after_survives_request_deadline_and_new_root_metadata_client ... ok
+test pre_head_rejection_body_failure_returns_502_keeps_cooldown_and_unknown_debt ... ok
+test seconds_http_date_and_ms_share_cooldown_even_with_retry_off ... ok
+test recognized_without_header_waits_one_second_with_jitter_and_replays_only_once ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.13s
+
+     Running tests/stream_lifetime.rs (target/native/debug/deps/stream_lifetime-12f8bbf7abbb514d)
+
+running 32 tests
+test chat_explicit_zero_cached_usage_is_known ... ok
+test anthropic_decreasing_cumulative_usage_is_unknown ... ok
+test chat_cached_usage_is_preserved_without_double_counting_input ... ok
+test anthropic_output_usage_is_cumulative_not_summed ... ok
+test anthropic_provisional_output_without_final_delta_usage_is_unknown ... ok
+test chat_empty_choices_final_usage_is_observed ... ok
+test first_event_arrives_before_eof ... ok
+test close_policy_terminates_socket ... ok
+test incomplete_trailing_sse_event_is_not_dispatched ... ok
+test chat_malformed_cache_or_decreasing_usage_is_unknown ... ok
+test pre_header_close_policy_closes_upstream_socket ... ok
+test huge_comment_does_not_poison_later_usage ... ok
+test public_spawn_rejects_constructed_concurrency_outside_fixed_range ... ok
+test huge_event_marks_usage_unknown ... ok
+test known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt ... ok
+test responses_completed_nested_usage_is_observed ... ok
+test responses_malformed_cached_usage_is_unknown ... ok
+test forced_shutdown_joins_a_worker_blocked_before_body_eof ... ok
+test split_utf8_and_sse_bytes_preserved ... ok
+test disconnect_drains_without_releasing_slot ... ok
+test sse_bom_crlf_and_multiline_data_are_observed_without_rewriting ... ok
+test metadata_endpoint_shares_stream_capacity ... ok
+test terminal_cleanup_happens_once ... ok
+test upstream_body_error_is_not_a_clean_downstream_eof ... ok
+test pre_header_disconnect_drains_and_holds_slot ... ok
+test request_write_half_close_remains_valid_while_upstream_is_silent ... ok
+test absolute_deadline_covers_silent_upstream_body ... ok
+test absolute_deadline_covers_silent_upstream_headers ... ok
+test slow_reader_has_a_bounded_application_queue ... ok
+test stop_drains_active_worker_before_returning ... FAILED
+test queued_disconnect_never_starts_upstream ... ok
+test absolute_deadline_covers_blocked_downstream_delivery ... ok
+
+failures:
+
+---- stop_drains_active_worker_before_returning stdout ----
+
+thread 'stop_drains_active_worker_before_returning' panicked at tests/stream_lifetime.rs:957:5:
+listener closes before worker drain
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    stop_drains_active_worker_before_returning
+
+test result: FAILED. 31 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+error: test failed, to rerun pass `--test stream_lifetime`

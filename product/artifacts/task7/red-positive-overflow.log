@@ -1,0 +1,24 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.68s
+     Running tests/retry_contract.rs (target/debug/deps/retry_contract-f82645aa8fb01641)
+
+running 1 test
+test positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header ... FAILED
+
+failures:
+
+---- positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header stdout ----
+
+thread 'positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header' panicked at tests/retry_contract.rs:598:9:
+assertion `left == right` failed: positive decimal overflow cannot become an immediate group retry
+  left: 429
+ right: 504
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test retry_contract`

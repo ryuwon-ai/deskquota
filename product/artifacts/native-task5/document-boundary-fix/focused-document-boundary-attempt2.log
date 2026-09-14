@@ -1,0 +1,126 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+warning: unreachable pattern
+   --> src/autostart/mod.rs:935:13
+    |
+935 |             _ => {}
+    |             ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> src/autostart/mod.rs:935:13
+    |
+828 |             Event::Start(start) => {
+    |             ------------------- matches some of the same values
+...
+847 |             Event::Empty(empty) => {
+    |             ------------------- matches some of the same values
+...
+867 |             Event::End(end) => {
+    |             --------------- matches some of the same values
+...
+876 |             Event::Text(text) => {
+    |             ----------------- matches some of the same values
+...
+935 |             _ => {}
+    |             ^ ...and 5 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` on by default
+
+warning: `llmgw` (lib test) generated 1 warning (1 duplicate)
+warning: `llmgw` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running unittests src/lib.rs (target/native-task5-document-boundary-fix/debug/deps/llmgw-e9be1ca211112d94)
+
+running 1 test
+test autostart::manager_snapshot_tests::windows_manager_requires_one_complete_task_document ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/native-task5-document-boundary-fix/debug/deps/llmgw-f2b251d5f4f45545)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/autostart_templates.rs (target/native-task5-document-boundary-fix/debug/deps/autostart_templates-276d338428a20d61)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+     Running tests/benchmark_trace.rs (target/native-task5-document-boundary-fix/debug/deps/benchmark_trace-b0ac3de1a8d87d1c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/client_profiles.rs (target/native-task5-document-boundary-fix/debug/deps/client_profiles-7c32db6d14749411)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+     Running tests/config_contract.rs (target/native-task5-document-boundary-fix/debug/deps/config_contract-296dfbd10dfd7747)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+
+     Running tests/fairness_contract.rs (target/native-task5-document-boundary-fix/debug/deps/fairness_contract-92e253e84340c933)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.00s
+
+     Running tests/lifecycle_contract.rs (target/native-task5-document-boundary-fix/debug/deps/lifecycle_contract-ad06e9afcd0e4e1c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s
+
+     Running tests/patch_contract.rs (target/native-task5-document-boundary-fix/debug/deps/patch_contract-1984e7f8263a1ff2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 50 filtered out; finished in 0.00s
+
+     Running tests/quota_contract.rs (target/native-task5-document-boundary-fix/debug/deps/quota_contract-321e3ad04481266f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+     Running tests/resource_bounds.rs (target/native-task5-document-boundary-fix/debug/deps/resource_bounds-4b752d747d11a62a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+     Running tests/retry_contract.rs (target/native-task5-document-boundary-fix/debug/deps/retry_contract-8749eca071826304)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+
+     Running tests/setup_contract.rs (target/native-task5-document-boundary-fix/debug/deps/setup_contract-0929a251593bf7f5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.00s
+
+     Running tests/stream_lifetime.rs (target/native-task5-document-boundary-fix/debug/deps/stream_lifetime-9b2df8e1c173ac73)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 32 filtered out; finished in 0.00s
+
+     Running tests/task5_usage_contract.rs (target/native-task5-document-boundary-fix/debug/deps/task5_usage_contract-95ceabe946950ffb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 27 filtered out; finished in 0.00s
+
+     Running tests/wire_contract.rs (target/native-task5-document-boundary-fix/debug/deps/wire_contract-90590246ae6d48ed)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 44 filtered out; finished in 0.00s
+

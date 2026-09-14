@@ -1,0 +1,44 @@
+{
+  "check": "foreground_stream_lifetime_loopback_only",
+  "timestamp": "2026-09-12T03:53:18.591788+00:00",
+  "os": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "binary_sha256": "c04766b2d9947435c34dc183ff70c86e545857aa7c20e2981805da27b3b3514e",
+  "binary_unchanged_during_probe": true,
+  "passed": true,
+  "cases": [
+    {
+      "policy": "drain",
+      "disconnect_phase": "after_terminal_marker",
+      "passed": true,
+      "upstream_attempts": 2,
+      "upstream_close_observed": false,
+      "body_eof_gate_completed": true,
+      "control_stop_exit_zero": true
+    },
+    {
+      "policy": "close",
+      "disconnect_phase": "after_terminal_marker",
+      "passed": true,
+      "upstream_attempts": 2,
+      "upstream_close_observed": true,
+      "body_eof_gate_completed": false,
+      "control_stop_exit_zero": true
+    },
+    {
+      "policy": "drain",
+      "disconnect_phase": "before_headers",
+      "passed": true,
+      "upstream_attempts": 2,
+      "upstream_close_observed": false,
+      "body_eof_gate_completed": true,
+      "control_stop_exit_zero": true
+    }
+  ],
+  "limitations": [
+    "Synthetic HTTP, no actual LLM or agent task",
+    "RST cancellation; does not replace half-close, graceful-close or slow-reader tests",
+    "HTTP body/connection observations do not prove engine abort or quota refund",
+    "No performance or cross-platform acceptance claim",
+    "Candidate port is released before process bind; startup is checked"
+  ]
+}

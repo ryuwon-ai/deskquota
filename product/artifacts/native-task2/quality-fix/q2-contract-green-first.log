@@ -1,0 +1,28 @@
+warning: unused import: `Endpoint`
+ --> src/setup/document.rs:3:61
+  |
+3 | use crate::config::{Accounting, Auth, CancelPolicy, Config, Endpoint, Limit};
+  |                                                             ^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: `llmgw` (lib) generated 1 warning (run `cargo fix --lib -p llmgw` to apply 1 suggestion)
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running tests/lifecycle_contract.rs (target/native-task2-quality-fix/debug/deps/lifecycle_contract-0fa12f3518d6c21a)
+
+running 1 test
+
+thread 'restart_preflights_ca_without_stopping_authenticated_worker_or_contacting_upstream' panicked at tests/lifecycle_contract.rs:205:5:
+assertion failed: String::from_utf8_lossy(&malformed.stderr).contains("configured CA bundle is not valid PEM certificates")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test restart_preflights_ca_without_stopping_authenticated_worker_or_contacting_upstream ... FAILED
+
+failures:
+
+failures:
+    restart_preflights_ca_without_stopping_authenticated_worker_or_contacting_upstream
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.56s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

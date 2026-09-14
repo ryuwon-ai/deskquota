@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "immutable_original_files_verified": 43,
+  "original_pilot_sha256": "9e6cbbb57bfaac2149eb39efaf43169dbf8e47cf708075cf83b83716615854f6",
+  "archives_unchanged": {
+    "product-task8-measured-source.tar.gz": "622225adc3c885d4a7a6ed659ca5b9e32604b1318fb5606354dd36b4ebdce075",
+    "product-task8-final-review-source.tar.gz": "b2a1813489d6f146b7b550994bfc57331622dca3cf379baf701e2ef71bc60f23"
+  },
+  "changed_source_paths": [
+    "docs/benchmark-method.md",
+    "scripts/benchmark.py"
+  ],
+  "smoke_runs": [
+    {
+      "id": "smoke-seed941-direct",
+      "ingress": 20,
+      "attempts": 20,
+      "owned_processes_cleaned": true
+    },
+    {
+      "id": "smoke-seed941-production_rr",
+      "ingress": 20,
+      "attempts": 19,
+      "owned_processes_cleaned": true
+    },
+    {
+      "id": "smoke-seed941-benchmark_fifo",
+      "ingress": 20,
+      "attempts": 19,
+      "owned_processes_cleaned": true
+    },
+    {
+      "id": "smoke-seed941-benchmark_rr",
+      "ingress": 20,
+      "attempts": 19,
+      "owned_processes_cleaned": true
+    }
+  ],
+  "smoke_outcomes": {
+    "completed": 68,
+    "cancelled": 12
+  },
+  "smoke_attempt_terminal": {
+    "completed": 68,
+    "disconnected": 9
+  },
+  "owned_pids_checked": [
+    68747,
+    69522,
+    69721,
+    69722,
+    69723,
+    69894,
+    69919,
+    69935,
+    69962,
+    70285
+  ],
+  "owned_pids_still_present": [],
+  "no_rust_build_or_full_matrix_repeated": true
+}

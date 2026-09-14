@@ -1,0 +1,20 @@
+   Compiling task6-quality-review v0.0.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/task6-quality-review)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running unittests src/lib.rs (evidence/task6-quality-review/build/debug/deps/task6_quality_review-a4d6467305745568)
+
+running 3 tests
+deadline tie: 64/64 queued requests expire before reservation at quota expiry; no extra starts/cleanup, fresh full-capacity ticket succeeds
+test tests::simultaneous_quota_expiry_and_queue_deadlines_cannot_start_expired_work ... ok
+race: 8 rounds; ingress=656 = initial holds128 + waiting512 + rejected8 + refill8; waiting completed256/canceled256; starts328; cleanup counts=[60, 56, 56, 59, 59, 57, 58, 58]
+test tests::parallel_cancel_release_start_and_snapshot_preserve_joint_ownership ... ok
+saturated: ledger8192, waiting64; age wakes=64, idle wakes=0, expiry wakes=64; 16 provisional canceled exactly once, 48 pending canceled, refill succeeds
+test tests::full_ledger_and_full_queue_have_no_repeated_idle_wakes_and_reclaim_all_holds ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.32s
+
+   Doc-tests task6_quality_review
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

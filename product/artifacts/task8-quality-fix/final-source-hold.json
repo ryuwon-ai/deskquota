@@ -1,0 +1,78 @@
+{
+  "phase": "task8-quality-fix-HOLD",
+  "utc": "2026-09-12T12:19:38Z",
+  "identity": {
+    "production": {
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/release/llmgw",
+      "sha256": "410645600d70a69e69d9558420ea1cda61bf127a878497a6b8a0e88b17ba342e",
+      "features": []
+    },
+    "benchmark": {
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/bench/release/examples/bench_gateway",
+      "sha256": "38b24b2934448716c74bad2dceaa91492e1bbc168b351e1f61460b90572c5faa",
+      "features": [
+        "bench-harness"
+      ]
+    },
+    "sources": {
+      "docs/benchmark-method.md": "5ec47a40fb1973ca7d902007243a5567a32c9e5932b5efc71bfb86daa989606f",
+      "docs/runtime-contract.md": "65241c5a74693079fd6c6b08d1fccacfb1718ac843fd9b62201d7b7fc373da42",
+      "examples/bench_gateway.rs": "99344c7216ec3b02f206484efaca957f4af6be03d7e541c2a2709c915feb1fc9",
+      "examples/fixture.toml": "ec6320b0b628f69dfae2bd05ec0e0cc4f51bac5a8174f1e6f6d4881f696e1f0c",
+      "fixtures/workloads/burst.json": "27bf05c16d892ac312100b4e92bebd485ebeb4b8f33f5b7beed568c9b4962ab9",
+      "fixtures/workloads/cancellation.json": "e43eac74c2bc7e527f08e45e7208180e7949e5c160db52ff3cc8781268df20a6",
+      "fixtures/workloads/mixed_lengths.json": "3c8658afec81e87ce0ace04c1f983b6a6d2a1edd9ec65bb0c4d65d6f4c3fb43f",
+      "fixtures/workloads/shared_quota.json": "acd4955d490170e8f0903190516983f0725b122f45f7147703c042104e8eb468",
+      "scripts/benchmark.py": "fa6d33daf209ddc281a4a01ddee686a621f945609ae0a8549e572bb77f0fe26e",
+      "scripts/benchmark_http.py": "989f061bb60f3ca00011315c7f8d4fea378d7676a75d20899f97b5f735ce97eb",
+      "scripts/probe_pi.py": "c3c5246d89016a033e44fb86e5c33a6fc62181f9b961d7d664e3231d18d81df9",
+      "src/admission/mod.rs": "ef0585f786010633cb53216a321549e7bb0bac3e5aaaefdc102c9d7da24a1d87",
+      "src/admission/queue.rs": "e4ffbe330650276163e60bf104f87f7701912a553507dd30d008ec629dab101a",
+      "src/admission/quota.rs": "e5e4ec57ad45375a8302920ded25a7f887b51a4b030be4f2cbfe096e8fb56d95",
+      "src/admission/retry.rs": "ae4d88f93cafe4f34fa7744d33f1025e0816e361ca30ea0547fa30c2f9c343f9",
+      "src/cli.rs": "f8bdd577de79aaf0956ed58a46318fff84dea71e6a08d5c6dcbab9546914415f",
+      "src/config/validate.rs": "abc726d9b7c4ea724e800c26d8a1abf0f8caa3e4dc41c214e3b6f2e3e3e8eab1",
+      "src/config.rs": "1ef8bdac1a884e3e2d1658506b05a459ab568054f1abb99902e5d886067b7a2b",
+      "src/control.rs": "0f9d364224677fdf0432916836fbd4e36fef8a136e1b595175cb3b869aaadf11",
+      "src/lib.rs": "c6f2a094f11281b76b33d715ac9a3ea52e0762f9dee1c081bb4d30771486d6b3",
+      "src/main.rs": "1938906c6f329017b0c5ead9fe28884a6947e9868a251979698e10ef86c1d37b",
+      "src/metrics.rs": "ca9bf5228b68468b70d2b9e101232ed3a894d6bb9127bcb13892e626af1c859d",
+      "src/protocol/completions.rs": "9e3db2ee1f8a6ae5db942828bd8b77437a6d2736de40d9fe7156bd821347fd77",
+      "src/protocol/messages.rs": "26f0f21a2ed236c3feb1f9717bec59781a9ab41a6cfce7e498d4063154110146",
+      "src/protocol/mod.rs": "9d6629537cdb5122d800c0924971ed5fde8ac3b5103d0318ba25e74935a7e424",
+      "src/protocol/request.rs": "52347e595a26bbde48a75793a90d3d45f40dcddc7cf666a5922ec63b899795ef",
+      "src/protocol/responses.rs": "613cd7a54d03b8a6990e3f46943f25d1495d770cbf024a68c4e9106295f7bb69",
+      "src/server.rs": "6fada7849b22c3531a5b31bf879a69baef2da455873e570a25fae1cfd4b3b38c",
+      "src/transport/body_budget.rs": "3bf44dfa9b0627559b0eba5a6d4381c48d26ab07ebee25ebdb4584930f751320",
+      "src/transport/headers.rs": "4c24a899c71eb8472a3c559869881fb054b1d11f4d859fac28efdcf3ccdbbf25",
+      "src/transport/mod.rs": "0695c3f5edd7fb66960beee5f01abd473a5fcc86ac8086d9c454144961f8b9ce",
+      "src/transport/stream.rs": "cb88ec7085d09b72a2b31c483ce626d0e44aa7560e85f4c1941563f82cedf8f3",
+      "src/transport/upstream.rs": "d7d62f9aa065614c3ea16b5d7027c996e6504ae6fed097a3c626bbfe76b44d02",
+      "tests/benchmark_trace.rs": "cae498c48612eb5f1d52abbe941afb937cb8e3e8b410f35109f9ec5dc482983e",
+      "tests/config_contract.rs": "e30769334e85757c896e2146393a446e30b92758a784bfb0149a8930f27d150c",
+      "tests/fairness_contract.rs": "42a9755deb61144e52d44093f431f3a90aa7876d0550ada707ee3983cd85f050",
+      "tests/fixtures/pi-models.json": "44228610dac6b3dba5d86a5e9b8a04239ca051a4d5f2f840641cfae1ef5138ad",
+      "tests/quota_contract.rs": "d9b66771b6ba995c236621f62af1fa70ced7a56d0150c19f74cd22018113a414",
+      "tests/resource_bounds.rs": "0289bb9e2b00f58d87cc4da7c79d520c08c7424744bb3f72200ab25dc5d9d1a6",
+      "tests/retry_contract.rs": "a9217b22917dba2e0c82f3214d953ac55e173d82090bbcfda436dd128de882c5",
+      "tests/stream_lifetime.rs": "2f344c9c484e11de93d6a2fa039a2390c703a53ae23630e72c4465d9581e63e5",
+      "tests/support/fixture.rs": "0370e813cc68d43648576acbf5f692fad9ced8449af5b6e239d568eea65a8a7f",
+      "tests/support/mod.rs": "8b97b524ccba81d4ace73bd2f2b9d50e2a09896b929e8eb0f820158cff16dc6c",
+      "tests/task5_usage_contract.rs": "6d3ee55ddcf122438f1fac6f0dd620bd9c5e4ef74456d1f674ba1186e5e78166",
+      "tests/test_pi_probe.py": "f4b34b0c66ab24f14afbc60ffde7c3e52c750972bca2c3f0f2c520bde12d228a",
+      "tests/wire_contract.rs": "c4c0dee25fe156d80311bf8520009699bcd984d5ee8ec143d83e8407b05f2ee7",
+      "Cargo.toml": "e09244a7b88b42f6f18c9727bb5e254fac6d44c79e4f9f517d4fbe5d3f453205",
+      "Cargo.lock": "ff22fdface767d6007181387456522ed03e558ef53b060996c630992f59f850f",
+      "rust-toolchain.toml": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b"
+    }
+  },
+  "extra_source_files": {
+    ".gitignore": "32612892f1c9e15fe772b8034945f8072b83e025153aef597e45d5eccbe98c43"
+  },
+  "original_measured_source_sha256": "622225adc3c885d4a7a6ed659ca5b9e32604b1318fb5606354dd36b4ebdce075",
+  "pre_fix_review_source_sha256": "b2a1813489d6f146b7b550994bfc57331622dca3cf379baf701e2ef71bc60f23",
+  "changed_source_paths": [
+    "docs/benchmark-method.md",
+    "scripts/benchmark.py"
+  ]
+}

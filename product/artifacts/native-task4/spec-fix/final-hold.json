@@ -1,0 +1,77 @@
+{
+  "phase": "native-task4-spec-fix",
+  "status": "DONE_WITH_CONCERNS",
+  "hold": "FINAL_HOLD",
+  "execution_finished": true,
+  "writer_runtime_test_ownership_released": true,
+  "next_review": "same fresh SPEC reviewer",
+  "quality_started": false,
+  "spec_1": {
+    "corrected": true,
+    "native_tracked_target_refused": true,
+    "scope_rechecked_before_activation": true,
+    "scope_rechecked_before_client_write": true,
+    "ordinary_native_nonrepo_supported": true,
+    "project_local_guard_preserved": true,
+    "canonical_parent_alias_supported": true,
+    "git_redirection_environment_sanitized": true,
+    "cli_refusal_gateway_and_client_unchanged": true
+  },
+  "verification": {
+    "focused_claude": {"passed": 9, "failed": 0},
+    "full_locked": {"result_rows": 16, "passed": 336, "failed": 0},
+    "release_client_profiles": {"passed": 21, "failed": 0},
+    "python_driver_tests": {"passed": 7, "failed": 0},
+    "fresh_reviewer_named_probes": {"passed": 3, "failed": 0},
+    "fmt_check": true,
+    "locked_check_all_targets": true,
+    "locked_clippy_all_targets_deny_warnings": true,
+    "locked_release_build": true,
+    "installed_claude": {
+      "version": "2.1.63",
+      "generated_profile_without_driver_auth": true,
+      "selection": "verified",
+      "inference": "verified",
+      "tools": "verified",
+      "off_upstream_attempts": 0,
+      "reload_after_disconnect": "verified"
+    },
+    "pi_rerun": false,
+    "codex_rerun": false,
+    "rerun_boundary": "shared Pi and Codex behavior unchanged"
+  },
+  "identities": {
+    "source_files": 88,
+    "source_manifest": "source-manifest-final2.json",
+    "source_manifest_sha256": "ffe2eaae543808401e51105cd948f071d7f73170e3c4b86c9253b7221c9a498f",
+    "source_archive": "source-hold-final2.tar.gz",
+    "source_archive_sha256": "a8282024113d4da65b07642df98f1a5b093fcc941689e40c158f13f1763a4e33",
+    "release_binary": "target/native-task4-spec-fix/release/llmgw",
+    "release_binary_bytes": 9935696,
+    "release_binary_sha256": "4414957b603bc04d77cb55275d5ca335477645159c2509735ce84b3cd8013801",
+    "debug_binary_sha256": "d61bc5de5fc89c8402753d6471aa75e99bfa1582621923e1063aa6987f15bd9f",
+    "debug_rlib_sha256": "9e658ae3ac6e2dea276bd5d81371389bf1d424f1e2d4fbfbacf65174f215bca0",
+    "cargo_lock_sha256": "c82e9357a135eb84f0d1be70d0a5f16d2a6c0f7a520cc140562306418a0d3e1",
+    "rust_toolchain_sha256": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b"
+  },
+  "preservation": {
+    "review_after_baseline": 1066,
+    "live_source_excluded": 88,
+    "review_non_source_checked": 978,
+    "review_non_source_drift": [],
+    "task2_checked": 426,
+    "task2_drift": [],
+    "task3_extra_checked": 357,
+    "task3_extra_drift": [],
+    "old_fixed_identity_drift": [],
+    "source_stable_after_capture": true,
+    "archive_members_match": true
+  },
+  "concerns": [
+    "One observed macOS protected-journal ACL-path EINVAL did not reproduce; its precise lower-level cause is unconfirmed and state after the error was not inspected because fixture cleanup ran during panic unwind",
+    "Windows and Linux runtime remain unverified",
+    "Claude 2.1.63 discovery and Codex catalog listing remain unverified"
+  ],
+  "owned_processes_remaining": [],
+  "owned_temporary_paths_remaining": []
+}

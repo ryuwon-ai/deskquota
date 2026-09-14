@@ -1,0 +1,464 @@
+--- accepted/product/scripts/verify_native.py
++++ current/product/scripts/verify_native.py
+@@ -294,8 +294,12 @@
+         if errors:
+             raise RuntimeError(f"templates-only acceptance failed: {', '.join(errors)}")
+         return record
+-    with tempfile.TemporaryDirectory(prefix="llmgw-native-task5-") as temporary:
+-        home = pathlib.Path(temporary).resolve()
++    home = pathlib.Path(tempfile.mkdtemp(prefix="llmgw-native-task5-")).resolve()
++    worker_start_attempted = False
++    worker_cleanup_confirmed = False
++    record = None
++    original_failure: BaseException | None = None
++    try:
+         config = home / "설정 & $100%" / "gateway <fixture>.toml"
+         config.parent.mkdir(parents=True)
+         config.write_text(config_text(free_port(), 'mode = "none"'), encoding="utf-8")
+@@ -330,6 +334,7 @@
+             if checked.returncode != 0:
+                 raise RuntimeError("plutil rejected owned temporary LaunchAgent")
+ 
++        worker_start_attempted = True
+         started = cli(binary, config, home, "on")
+         if started.returncode != 0:
+             raise RuntimeError(f"manual on fixture failed: {started.stderr}")
+@@ -342,6 +347,10 @@
+         stopped = cli(binary, config, home, "off")
+         if stopped.returncode != 0:
+             raise RuntimeError(f"manual authenticated off cleanup failed: {stopped.stderr}")
++        manual_cleanup = status(binary, config, home)
++        if manual_cleanup["state"] != "stopped":
++            raise RuntimeError("manual authenticated off did not leave the fixture stopped")
++        worker_cleanup_confirmed = True
+ 
+         secret = "synthetic-native-task5-secret"
+         auth_config = home / "빈 로그인 환경" / "gateway auth.toml"
+@@ -390,7 +399,7 @@
+                 "worker_processes_after_autostart_on": 0 if stopped_after_on["state"] == "stopped" else "unexpected",
+                 "authenticated_identity_preserved": running_after_off["identity"]["nonce"] == nonce,
+                 "worker_preserved": running_after_off["state"] == "running" and running_after_off["identity"]["nonce"] == nonce,
+-                "manual_cleanup_state": status(binary, config, home)["state"],
++                "manual_cleanup_state": manual_cleanup["state"],
+             },
+             "login_environment": {
+                 "registration": auth_status["autostart"]["registration"],
+@@ -416,7 +425,48 @@
+         if errors:
+             raise RuntimeError(f"templates-only acceptance failed: {', '.join(errors)}")
+         record["passed"] = True
+-        return record
++    except BaseException as error:
++        original_failure = error
++
++    cleanup_failure = None
++    if worker_start_attempted and not worker_cleanup_confirmed:
++        try:
++            cleanup = cli(binary, config, home, "off")
++            if cleanup.returncode != 0:
++                cleanup_failure = f"authenticated off exited {cleanup.returncode}"
++            else:
++                cleanup_status = status(binary, config, home)
++                if cleanup_status.get("state") == "stopped":
++                    worker_cleanup_confirmed = True
++                else:
++                    cleanup_failure = "authenticated off did not confirm a stopped fixture"
++        except BaseException:
++            cleanup_failure = "authenticated off or its status confirmation raised an error"
++
++    if not worker_start_attempted or worker_cleanup_confirmed:
++        try:
++            shutil.rmtree(home)
++        except OSError as error:
++            if original_failure is not None:
++                raise RuntimeError(
++                    f"{original_failure}; owned fixture removal failed; recovery files retained at {home}"
++                ) from original_failure
++            raise error
++    else:
++        detail = cleanup_failure or "authenticated cleanup was not confirmed"
++        if original_failure is not None:
++            raise RuntimeError(
++                f"{original_failure}; authenticated cleanup failed ({detail}); "
++                f"recovery files retained at {home}"
++            ) from original_failure
++        raise RuntimeError(
++            f"authenticated cleanup failed ({detail}); recovery files retained at {home}"
++        )
++
++    if original_failure is not None:
++        raise original_failure
++    assert record is not None
++    return record
+ 
+ 
+ def iso_timestamp(value: str | None) -> str:
+@@ -489,6 +539,7 @@
+             observed=login_observation_summary(observed),
+             actual_login_verified=verified,
+         )
++        return record, 0 if verified else 1
+     elif args.stage == "remove":
+         preview, _ = apply_autostart(binary, config, home, "off", terminal_env)
+         record.update(result="removed_for_next_login", preview=preview)
+@@ -502,6 +553,7 @@
+             observed=login_observation_summary(observed),
+             actual_login_verified=verified,
+         )
++        return record, 0 if verified else 1
+     else:
+         raise ValueError(f"unsupported stage {args.stage}")
+     return record, 0
+--- accepted/product/src/autostart/mod.rs
++++ current/product/src/autostart/mod.rs
+@@ -10,7 +10,8 @@
+ use sha2::{Digest, Sha256};
+ use std::{
+     collections::BTreeMap,
+-    fmt, fs, io,
++    fmt, fs,
++    io::{self, Write},
+     path::{Path, PathBuf},
+     process::Command,
+ };
+@@ -297,10 +298,16 @@
+             .ok_or_else(|| Error::message("autostart target has no parent"))?;
+         fs::create_dir_all(parent)?;
+         let temporary = parent.join(format!(".{}.{}.tmp", self.spec.label(), std::process::id()));
+-        if temporary.exists() {
+-            return Err(Error::message("autostart temporary path already exists"));
+-        }
+-        fs::write(&temporary, self.spec.definition().as_bytes())?;
++        let mut temporary_file = crate::lifecycle::platform::open(&temporary, true, true)?;
++        let write_result = (|| -> io::Result<()> {
++            temporary_file.write_all(self.spec.definition().as_bytes())?;
++            temporary_file.sync_all()
++        })();
++        drop(temporary_file);
++        if let Err(error) = write_result {
++            let _ = fs::remove_file(&temporary);
++            return Err(error.into());
++        }
+         let backup = parent.join(format!(
+             ".{}.{}.previous",
+             self.spec.label(),
+@@ -308,9 +315,16 @@
+         ));
+         let had_previous = self.target_path.exists();
+         if had_previous {
+-            if backup.exists() {
+-                let _ = fs::remove_file(&temporary);
+-                return Err(Error::message("autostart backup path already exists"));
++            match fs::symlink_metadata(&backup) {
++                Ok(_) => {
++                    let _ = fs::remove_file(&temporary);
++                    return Err(Error::message("autostart backup path already exists"));
++                }
++                Err(error) if error.kind() == io::ErrorKind::NotFound => {}
++                Err(error) => {
++                    let _ = fs::remove_file(&temporary);
++                    return Err(error.into());
++                }
+             }
+             fs::rename(&self.target_path, &backup)?;
+         }
+--- accepted/product/tests/autostart_templates.rs
++++ current/product/tests/autostart_templates.rs
+@@ -240,6 +240,134 @@
+ 
+ #[cfg(target_os = "macos")]
+ #[test]
++fn dangling_temporary_symlink_is_refused_without_writing_its_destination() {
++    use std::os::unix::fs::symlink;
++
++    let root = std::env::temp_dir().join(format!(
++        "llmgw-autostart-{}-dangling temporary fixture",
++        std::process::id()
++    ));
++    let _ = std::fs::remove_dir_all(&root);
++    std::fs::create_dir_all(&root).unwrap();
++    let executable = root.join("llmgw");
++    let config = root.join("gateway.toml");
++    std::fs::write(&executable, "fixture executable").unwrap();
++    std::fs::write(&config, "fixture config").unwrap();
++    let plan = RegistrationPlan::prepare(Platform::Macos, &executable, &config, &root, Action::On)
++        .unwrap();
++    let parent = plan.target_path().parent().unwrap();
++    std::fs::create_dir_all(parent).unwrap();
++    let temporary = parent.join(format!(
++        ".{}.{}.tmp",
++        plan.spec().label(),
++        std::process::id()
++    ));
++    let unrelated = root.join("unrelated missing file");
++    symlink(&unrelated, &temporary).unwrap();
++
++    let error = plan.apply().unwrap_err().to_string();
++
++    assert!(!unrelated.exists(), "{error}");
++    assert!(!plan.target_path().exists(), "{error}");
++    assert!(
++        std::fs::symlink_metadata(&temporary)
++            .unwrap()
++            .file_type()
++            .is_symlink(),
++        "the pre-existing temporary symlink must be preserved"
++    );
++    std::fs::remove_dir_all(root).unwrap();
++}
++
++#[cfg(target_os = "macos")]
++#[test]
++fn predictable_install_path_collisions_are_preserved() {
++    let root = std::env::temp_dir().join(format!(
++        "llmgw-autostart-{}-regular temporary fixture",
++        std::process::id()
++    ));
++    let _ = std::fs::remove_dir_all(&root);
++    std::fs::create_dir_all(&root).unwrap();
++    let executable = root.join("llmgw");
++    let config = root.join("gateway.toml");
++    std::fs::write(&executable, "fixture executable").unwrap();
++    std::fs::write(&config, "fixture config").unwrap();
++    let plan = RegistrationPlan::prepare(Platform::Macos, &executable, &config, &root, Action::On)
++        .unwrap();
++    let parent = plan.target_path().parent().unwrap();
++    std::fs::create_dir_all(parent).unwrap();
++    let temporary = parent.join(format!(
++        ".{}.{}.tmp",
++        plan.spec().label(),
++        std::process::id()
++    ));
++    std::fs::write(&temporary, "pre-existing fixture").unwrap();
++
++    assert!(plan.apply().is_err());
++    assert_eq!(
++        std::fs::read_to_string(&temporary).unwrap(),
++        "pre-existing fixture"
++    );
++    assert!(!plan.target_path().exists());
++    std::fs::remove_dir_all(root).unwrap();
++
++    let backup_root = std::env::temp_dir().join(format!(
++        "llmgw-autostart-{}-dangling backup fixture",
++        std::process::id()
++    ));
++    let _ = std::fs::remove_dir_all(&backup_root);
++    std::fs::create_dir_all(&backup_root).unwrap();
++    let old_executable = backup_root.join("old llmgw");
++    let new_executable = backup_root.join("new llmgw");
++    let backup_config = backup_root.join("gateway.toml");
++    std::fs::write(&old_executable, "old fixture executable").unwrap();
++    std::fs::write(&new_executable, "new fixture executable").unwrap();
++    std::fs::write(&backup_config, "fixture config").unwrap();
++    let initial = RegistrationPlan::prepare(
++        Platform::Macos,
++        &old_executable,
++        &backup_config,
++        &backup_root,
++        Action::On,
++    )
++    .unwrap();
++    let initial_definition = initial.spec().definition().to_owned();
++    initial.apply().unwrap();
++    let replacement = RegistrationPlan::prepare(
++        Platform::Macos,
++        &new_executable,
++        &backup_config,
++        &backup_root,
++        Action::On,
++    )
++    .unwrap();
++    let backup = replacement.target_path().parent().unwrap().join(format!(
++        ".{}.{}.previous",
++        replacement.spec().label(),
++        std::process::id()
++    ));
++    let unrelated = backup_root.join("unrelated missing backup destination");
++    std::os::unix::fs::symlink(&unrelated, &backup).unwrap();
++
++    let error = replacement.apply().unwrap_err().to_string();
++
++    assert!(!unrelated.exists(), "{error}");
++    assert!(
++        std::fs::symlink_metadata(&backup)
++            .unwrap()
++            .file_type()
++            .is_symlink(),
++        "the pre-existing backup symlink must be preserved"
++    );
++    assert_eq!(
++        std::fs::read_to_string(replacement.target_path()).unwrap(),
++        initial_definition
++    );
++    std::fs::remove_dir_all(backup_root).unwrap();
++}
++
++#[cfg(target_os = "macos")]
++#[test]
+ fn registered_missing_or_moved_binary_is_exposed_before_update() {
+     let root = std::env::temp_dir().join(format!(
+         "llmgw-autostart-{}-moved fixture",
+--- accepted/product/tests/test_verify_native.py
++++ current/product/tests/test_verify_native.py
+@@ -1,7 +1,9 @@
+ import importlib.util
+ import os
+ import pathlib
++import shutil
+ import subprocess
++import tempfile
+ import types
+ import unittest
+ from unittest import mock
+@@ -116,6 +118,150 @@
+         self.assertEqual(record["on_exit"], 1)
+         self.assertNotEqual(code, 0)
+ 
++    def test_failed_attested_login_observations_return_nonzero(self):
++        module = self.load()
++        cases = (
++            ("observe-login-on", "stopped", "registered", False, 1),
++            ("observe-login-on", "running", "registered", True, 0),
++            ("observe-login-off", "running", "disabled", False, 1),
++            ("observe-login-off", "stopped", "disabled", True, 0),
++        )
++        for stage, state, registration, verified, expected_code in cases:
++            with self.subTest(stage=stage, state=state):
++                args = types.SimpleNamespace(
++                    stage=stage,
++                    execute=True,
++                    confirm_temporary_os_account=True,
++                    confirm_human_login_observed=True,
++                    human_login_at="2026-09-13T15:00:00+09:00",
++                )
++                observed = {
++                    "state": state,
++                    "autostart": {"registration": registration},
++                }
++                with mock.patch.object(module, "status", return_value=observed), mock.patch.object(
++                    module, "terminal_child_env", return_value={}
++                ), mock.patch.object(
++                    pathlib.Path,
++                    "home",
++                    return_value=pathlib.Path("/tmp/owned-driver-home"),
++                ):
++                    record, code = module.manual_stage(
++                        args,
++                        pathlib.Path("/tmp/llmgw"),
++                        pathlib.Path("/tmp/config.toml"),
++                    )
++                self.assertEqual(record["actual_login_verified"], verified)
++                self.assertEqual(code, expected_code)
++
++    def test_post_start_failure_attempts_authenticated_cleanup_before_deleting_home(self):
++        module = self.load()
++        homes = []
++        events = []
++        status_calls = 0
++        real_mkdtemp = tempfile.mkdtemp
++
++        def owned_mkdtemp(*_args, **_kwargs):
++            home = pathlib.Path(real_mkdtemp(prefix="llmgw-quality-cleanup-"))
++            homes.append(home)
++            return str(home)
++
++        def fake_status(_binary, _config, home):
++            nonlocal status_calls
++            status_calls += 1
++            if status_calls == 3:
++                raise RuntimeError("injected status failure after manual on")
++            return {
++                "state": "stopped",
++                "autostart": {"target": str(home / "fixture.plist")},
++            }
++
++        def fake_autostart(_binary, _config, home, action, *_args, **_kwargs):
++            events.append(f"autostart {action}")
++            (home / "fixture.plist").write_text("fixture", encoding="utf-8")
++            return "preview hash: fixture", subprocess.CompletedProcess([], 0, "", "")
++
++        def fake_cli(_binary, _config, _home, *arguments, **_kwargs):
++            events.append(f"cli {' '.join(arguments)}")
++            return subprocess.CompletedProcess([], 0, "", "")
++
++        with mock.patch.object(module.sys, "platform", "darwin"), mock.patch.object(
++            module, "cargo_template_tests", return_value={"passed": True}
++        ), mock.patch.object(module.tempfile, "mkdtemp", side_effect=owned_mkdtemp), mock.patch.object(
++            module, "free_port", return_value=12345
++        ), mock.patch.object(module, "status", side_effect=fake_status), mock.patch.object(
++            module, "apply_autostart", side_effect=fake_autostart
++        ), mock.patch.object(module, "cli", side_effect=fake_cli), mock.patch.object(
++            module.shutil, "which", return_value=None
++        ), mock.patch.object(
++            module.subprocess,
++            "run",
++            return_value=subprocess.CompletedProcess([], 0, "fixture plutil OK", ""),
++        ):
++            with self.assertRaisesRegex(RuntimeError, "injected status failure"):
++                module.templates_only(pathlib.Path("/tmp/llmgw"), pathlib.Path("/tmp/target"))
++
++        self.assertIn("cli off", events)
++        self.assertTrue(homes)
++        self.assertTrue(all(not home.exists() for home in homes))
++
++    def test_failed_authenticated_cleanup_retains_recovery_home(self):
++        module = self.load()
++        homes = []
++        status_calls = 0
++        real_mkdtemp = tempfile.mkdtemp
++
++        def owned_mkdtemp(*_args, **_kwargs):
++            home = pathlib.Path(real_mkdtemp(prefix="llmgw-quality-recovery-"))
++            homes.append(home)
++            return str(home)
++
++        def fake_status(_binary, _config, home):
++            nonlocal status_calls
++            status_calls += 1
++            if status_calls == 3:
++                raise RuntimeError("injected original failure")
++            return {
++                "state": "stopped",
++                "autostart": {"target": str(home / "fixture.plist")},
++            }
++
++        def fake_autostart(_binary, _config, home, _action, *_args, **_kwargs):
++            (home / "fixture.plist").write_text("fixture", encoding="utf-8")
++            return "preview hash: fixture", subprocess.CompletedProcess([], 0, "", "")
++
++        def fake_cli(_binary, _config, _home, *arguments, **_kwargs):
++            return subprocess.CompletedProcess(
++                [], 1 if arguments == ("off",) else 0, "", "injected cleanup failure"
++            )
++
++        try:
++            with mock.patch.object(module.sys, "platform", "darwin"), mock.patch.object(
++                module, "cargo_template_tests", return_value={"passed": True}
++            ), mock.patch.object(module.tempfile, "mkdtemp", side_effect=owned_mkdtemp), mock.patch.object(
++                module, "free_port", return_value=12345
++            ), mock.patch.object(module, "status", side_effect=fake_status), mock.patch.object(
++                module, "apply_autostart", side_effect=fake_autostart
++            ), mock.patch.object(module, "cli", side_effect=fake_cli), mock.patch.object(
++                module.shutil, "which", return_value=None
++            ), mock.patch.object(
++                module.subprocess,
++                "run",
++                return_value=subprocess.CompletedProcess([], 0, "fixture plutil OK", ""),
++            ):
++                with self.assertRaisesRegex(
++                    RuntimeError,
++                    "original failure.*authenticated cleanup failed.*recovery files retained",
++                ) as raised:
++                    module.templates_only(
++                        pathlib.Path("/tmp/llmgw"), pathlib.Path("/tmp/target")
++                    )
++            self.assertTrue(homes[0].is_dir())
++            self.assertIn(str(homes[0]), str(raised.exception))
++        finally:
++            for home in homes:
++                shutil.rmtree(home, ignore_errors=True)
++
+     def test_login_observation_summary_omits_authenticated_identity(self):
+         module = self.load()
+         observed = {

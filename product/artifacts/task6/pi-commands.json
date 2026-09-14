@@ -1,0 +1,76 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/probe_pi.py",
+      "--binary",
+      "target/debug/llmgw",
+      "--output",
+      "artifacts/task6/pi-debug-positive.json"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "passed": true,
+    "expected_failure_observed": null,
+    "attempts": [
+      1,
+      2
+    ]
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/probe_pi.py",
+      "--binary",
+      "target/debug/llmgw",
+      "--output",
+      "artifacts/task6/pi-debug-negative.json",
+      "--gateway-off"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "passed": false,
+    "expected_failure_observed": true,
+    "attempts": [
+      0,
+      0
+    ]
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/probe_pi.py",
+      "--binary",
+      "target/release/llmgw",
+      "--output",
+      "artifacts/task6/pi-release-positive.json"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "passed": true,
+    "expected_failure_observed": null,
+    "attempts": [
+      1,
+      2
+    ]
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/probe_pi.py",
+      "--binary",
+      "target/release/llmgw",
+      "--output",
+      "artifacts/task6/pi-release-negative.json",
+      "--gateway-off"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 1,
+    "passed": false,
+    "expected_failure_observed": true,
+    "attempts": [
+      0,
+      0
+    ]
+  }
+]

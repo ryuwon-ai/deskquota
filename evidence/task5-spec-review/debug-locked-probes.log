@@ -1,0 +1,37 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests/review.rs (llm-gateway-research/evidence/task5-spec-review/target/debug/deps/review-1a198eddad336974)
+
+running 6 tests
+test independent_ledger_interleaving ... ok
+
+thread 'chat_missing_choices_usage_must_not_refund' panicked at tests/review.rs:36:182:
+assertion `left == right` failed: missing choices is not the supported final usage report
+  left: 2
+ right: 352
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test valid_chat_final_usage_settles ... ok
+test overflowing_usage_keeps_reservation ... ok
+
+thread 'chat_nonfinal_usage_must_not_refund' panicked at tests/review.rs:34:229:
+assertion `left == right` failed: nonempty choices is not the supported final usage report
+  left: 2
+ right: 352
+
+thread 'responses_failed_after_completed_must_not_refund' panicked at tests/review.rs:40:247:
+assertion `left == right` failed: conflicting terminal states must remain unknown
+  left: 2
+ right: 365
+test chat_nonfinal_usage_must_not_refund ... FAILED
+test responses_failed_after_completed_must_not_refund ... FAILED
+test chat_missing_choices_usage_must_not_refund ... FAILED
+
+failures:
+
+failures:
+    chat_missing_choices_usage_must_not_refund
+    chat_nonfinal_usage_must_not_refund
+    responses_failed_after_completed_must_not_refund
+
+test result: FAILED. 3 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test review`

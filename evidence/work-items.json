@@ -1,0 +1,372 @@
+{
+  "objective": "네이티브 로컬 PC에서 제한된 LLM 자원을 고효율로 사용하는 최소 gateway를 근거와 반복 검증으로 개발하고, 실제 채택과 5,000 stars 이상 및 Codex for OSS 지원을 목표로 한다.",
+  "items": [
+    {
+      "id": "R01",
+      "title": "공식 참고 저장소 9개 클론 및 출처 고정",
+      "status": "done",
+      "evidence": [
+        "evidence/repositories.json",
+        "evidence/github-metadata.json"
+      ],
+      "next_action": "비교 실행 시 stable release 별도 고정"
+    },
+    {
+      "id": "R02",
+      "title": "9개 저장소의 관련 코드와 설치 경계 분석",
+      "status": "done",
+      "evidence": [
+        "reports/repository-analysis.md"
+      ],
+      "next_action": "실행 검증은 V01에서 수행"
+    },
+    {
+      "id": "R03",
+      "title": "2026년 학회 논문 3편 원문 및 기업 자료 검토",
+      "status": "done",
+      "evidence": [
+        "reports/literature-review.md",
+        "papers/manifest.json"
+      ],
+      "next_action": "설계 확정 시 최근 변경 재확인"
+    },
+    {
+      "id": "R04",
+      "title": "수요 신호와 세 제품 접근법 비교",
+      "status": "done",
+      "evidence": [
+        "reports/demand-and-positioning.md"
+      ],
+      "next_action": "실제 반복 사용 검증은 U01에서 수행"
+    },
+    {
+      "id": "R05",
+      "title": "설계 초안 및 benchmark 명세 작성",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-11-local-quota-gateway-draft.md",
+        "reports/benchmark-spec.md"
+      ],
+      "next_action": "Superseded by reviewed September 12 specifications and implementation plans."
+    },
+    {
+      "id": "R06",
+      "title": "기존 scheduler 도착 순서와 TCP 취소 정책의 동작 검증",
+      "status": "done",
+      "evidence": [
+        "reports/reference-validation.md",
+        "scripts/probe-overlaat-reservation.py",
+        "scripts/probe-overlaat-tcp.py",
+        "evidence/reference-tests/overlaat/run.json",
+        "evidence/reference-tests/overlaat/scheduler-and-queue.xml",
+        "evidence/reference-tests/overlaat/reservation-order.json",
+        "evidence/reference-tests/overlaat/tcp-runs.json",
+        "evidence/reference-tests/overlaat/behavior-assessment.json"
+      ],
+      "next_action": "발견한 도착 순서와 실제 socket 취소 반례를 제품 수용 조건에 포함. 제품 성능 검증은 V01/V02에서 수행"
+    },
+    {
+      "id": "R07",
+      "title": "설치된 Pi CLI의 loopback 재시도·세션 헤더 검증",
+      "status": "done",
+      "evidence": [
+        "reports/client-integration-validation.md",
+        "scripts/probe-pi-client.py",
+        "evidence/reference-tests/pi/smoke.json",
+        "evidence/reference-tests/pi/client-behavior.json",
+        "evidence/reference-tests/pi/assessment.json"
+      ],
+      "next_action": "client/gateway retry 소유권과 식별 힌트의 수용 조건 반영. 최신 Pi와 다른 도구·API·OS 검증은 V02에 유지"
+    },
+    {
+      "id": "R08",
+      "title": "Hermes native setup 소스와 최신 client config/OS 계약 검토",
+      "status": "done",
+      "evidence": [
+        "reports/native-setup-research.md",
+        "evidence/repositories.json"
+      ],
+      "next_action": "실제 native/client acceptance는 V02에서 수행. 문서상 지원과 실행을 구분."
+    },
+    {
+      "id": "R09",
+      "title": "참조26개 클론과 SHA·sparse 범위 고정",
+      "status": "done",
+      "evidence": [
+        "evidence/repositories.json",
+        "evidence/additional-reference-candidates.json",
+        "evidence/otari-metadata.json",
+        "evidence/paper-vendor-references.json",
+        "reports/reference-catalog.md"
+      ],
+      "next_action": "구체적인 재현 사례에 필요한 추가 파일만 고정 SHA에서 펼침. 모델/데이터/전체 dependency 설치 금지."
+    },
+    {
+      "id": "R10",
+      "title": "추가16개 gateway·engine·client·paper artifact 소스 심층 분석",
+      "status": "done",
+      "evidence": [
+        "reports/gateway-source-deep-dive.md",
+        "reports/engine-source-deep-dive.md",
+        "reports/local-client-source-deep-dive.md",
+        "reports/dynamo-source-deep-dive.md",
+        "reports/paper-artifact-source-deep-dive.md",
+        "scripts/probe-laps-metric.py",
+        "evidence/reference-tests/laps/metric-boundary.json",
+        "evidence/reference-tests/laps/probe-requirements.txt",
+        "scripts/verify-source-links.py",
+        "evidence/source-audit-verification.json"
+      ],
+      "next_action": "소스에서 도출한 불변식을 코어 Task 2/3/5/6/7/8의 검증에 적용. 실제 엔진 성능은 아직 미검증."
+    },
+    {
+      "id": "R11",
+      "title": "Bifrost 공식 benchmark 저장소 추가 클론과 측정 경계 분석",
+      "status": "done",
+      "evidence": [
+        "reports/benchmark-reference-audit.md",
+        "evidence/repositories.json",
+        "evidence/benchmark-release-candidates-2026-09-12.json",
+        "evidence/benchmark-reference-source-links.json",
+        "evidence/benchmark-bifrost-native-distribution.json"
+      ],
+      "next_action": "Task 8 하네스의 실제 quota·전체 종료 분모·관측 시점 검증에 적용. 외부 하네스 실행·경쟁 성능 비교는 아직 수행하지 않음."
+    },
+    {
+      "id": "H01",
+      "title": "작업 하네스와 조사 무결성 검증 명령 확인",
+      "status": "done",
+      "evidence": [
+        "HARNESS.md",
+        "scripts/research.py",
+        "evidence/loop-log.jsonl"
+      ],
+      "next_action": "Each subsequent task records a hypothesis, authoritative result and next action"
+    },
+    {
+      "id": "D01",
+      "title": "v0.1 범위 확인 및 명세 리뷰",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-12-local-quota-gateway-design.md",
+        "docs/superpowers/specs/2026-09-12-native-setup-design.md",
+        "evidence/design-plan-review.json"
+      ],
+      "next_action": "User scope approval recorded. Reviewed specification now drives implementation; no repeated scope confirmation."
+    },
+    {
+      "id": "I01",
+      "title": "writing-plans 기반 구현 계획",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/plans/2026-09-12-gateway-core.md",
+        "docs/superpowers/plans/2026-09-12-native-experience.md",
+        "evidence/design-plan-review.json"
+      ],
+      "next_action": "Execute core Chunk 1 then quota and native experience with fixture-first evidence."
+    },
+    {
+      "id": "I02",
+      "title": "Rust gateway의 최소 완성 경로 구현",
+      "status": "done",
+      "evidence": [
+        "evidence/implementation-progress.json",
+        "reports/stream-protocol-contracts.md",
+        "evidence/task3-spec-review/README.md",
+        "evidence/product-task3-pre-review-source-manifest.json",
+        "scripts/probe-product-stream.py",
+        "scripts/fingerprint-product.py",
+        "evidence/task3-spec-rereview/README.md",
+        "evidence/product-task3-spec-fix-source-manifest.json",
+        "evidence/task3-quality-rereview/README.md",
+        "evidence/product-task3-final-debug-source-manifest.json",
+        "evidence/product-task3-final-release-source-manifest.json",
+        "evidence/task4-pi-preflight.json",
+        "evidence/task4-spec-review/README.md",
+        "evidence/task4-quality-rereview/README.md",
+        "evidence/product-task4-final-source-manifest.json",
+        "product/artifacts/pi-e2e.json",
+        "product/artifacts/task5-results.md",
+        "evidence/product-task5-pre-review-source-manifest.json",
+        "evidence/product-stream-task5-release.json",
+        "evidence/task5-spec-review/README.md",
+        "evidence/task5-spec-rereview/README.md",
+        "evidence/product-task5-spec-fix-source-manifest.json",
+        "evidence/task5-quality-review/README.md",
+        "evidence/task5-quality-rereview/README.md",
+        "evidence/product-task5-final-source-manifest.json",
+        "scripts/probe-product-fairness.py",
+        "evidence/product-fairness-fixture-self-check.json",
+        "product/artifacts/task6-results.md",
+        "evidence/product-task6-pre-review-source-manifest.json",
+        "evidence/product-fairness-task6-debug.json",
+        "evidence/product-fairness-task6-release.json",
+        "evidence/task6-spec-review/README.md",
+        "evidence/task6-quality-review/README.md",
+        "evidence/product-task6-final-source-manifest.json",
+        "evidence/product-task6-source-archive.json",
+        "reports/retry-classification-notes.md",
+        "evidence/retry-source-audit-verification.json",
+        "scripts/probe-product-retry.py",
+        "evidence/product-retry-fixture-self-check-v3.json",
+        "evidence/product-task7-parent-verification.json",
+        "product/artifacts/task7-results.md",
+        "evidence/product-task7-parent-probed-source-manifest.json",
+        "evidence/product-task7-parent-probed-release-source-manifest.json",
+        "evidence/task7-spec-review/README.md",
+        "evidence/task7-spec-review/README-initial-pass.md",
+        "product/artifacts/task7-spec-fix/README.md",
+        "product/artifacts/task7-spec-fix/results.json",
+        "evidence/product-task7-spec-fixed-source-manifest.json",
+        "evidence/product-task7-spec-fixed-release-source-manifest.json",
+        "evidence/task7-quality-review/rereview/README.md",
+        "evidence/product-task7-quality-parent-verification.json",
+        "evidence/task8-quality-review/rereview/README.md",
+        "evidence/product-task8-quality-fixed-source-manifest.json",
+        "product/artifacts/native-task1/README.md",
+        "evidence/native-task1-parent-hold-audit.json",
+        "evidence/native-task1-parent-footprint.json",
+        "reports/native-platform-decision.md",
+        "reports/native-wizard-preflight.md",
+        "evidence/native-task1-spec-review/README.md",
+        "product/artifacts/native-task1/quality-fix/README.md",
+        "evidence/native-task1-spec-review/rereview/README.md",
+        "evidence/native-task1-quality-review/README.md",
+        "evidence/native-task1-quality-review/rereview/README.md",
+        "evidence/accounting-task1-spec-review/rereview/README.md",
+        "evidence/accounting-task1-quality-review/rereview/README.md",
+        "product/artifacts/accounting-ablation/quality-fix/README.md",
+        "scripts/audit-accounting-results.py",
+        "evidence/accounting-auditor-self-check/result.json",
+        "reports/accounting-ablation-results.md",
+        "evidence/accounting-ablation-parent-audit.json",
+        "evidence/accounting-ablation-parent-runtime-hold-check.json",
+        "evidence/accounting-task2-spec-review/rereview/README.md",
+        "evidence/accounting-task2-quality-review/README.md",
+        "product/artifacts/native-task2/quality-fix/README.md",
+        "evidence/native-task2-spec-review/rereview-f8/README.md",
+        "evidence/native-task2-quality-review/rereview/README.md",
+        "product/artifacts/native-task3/nonfinite-fix/README.md",
+        "evidence/native-task3-quality-review/rereview-q3/README.md",
+        "evidence/native-task3-spec-review/final-confirmation/README.md",
+        "evidence/native-task4-accepted.json",
+        "evidence/native-task4-spec-review/final-confirmation/README.md",
+        "evidence/native-task4-quality-review/rereview-q1-q2/README.md",
+        "evidence/native-task5-accepted.json",
+        "evidence/native-task5-quality-review/rereview-q1-q3/README.md",
+        "evidence/native-task5-spec-review/final-confirmation/README.md",
+        "evidence/native-task6-accepted.json",
+        "evidence/native-final-packaged-parent-check.json",
+        "evidence/native-final-integration-review/rereview-i1/README.md",
+        "product/artifacts/native-final-integration-package/acceptance/README.md"
+      ],
+      "next_action": "Core1–8 and Native1–6 minimal implementation accepted in recorded scope. Current macOS arm64 package and isolated installed-agent flows verified. Performance superiority stays V01; actual OS/low-end/login stays V02; public VCS/release needs separate authorization."
+    },
+    {
+      "id": "V01",
+      "title": "공개 mock과 경쟁 baseline 성능 검증",
+      "status": "in_progress",
+      "evidence": [
+        "reports/benchmark-pilot-preparation.md",
+        "evidence/benchmark-preflight-task7-review.json",
+        "evidence/benchmark-release-candidates-2026-09-12.json",
+        "reports/benchmark-reference-audit.md",
+        "evidence/product-task8-no-wait-parent-audit.json",
+        "reports/benchmark-pilot-results.md",
+        "evidence/product-task8-full-matrix-parent-audit.json",
+        "evidence/product-task8-full-quota-parent-audit.json",
+        "reports/accounting-ablation-plan.md",
+        "evidence/product-task8-accounting-opportunity.json",
+        "docs/superpowers/plans/2026-09-12-accounting-ablation.md",
+        "evidence/accounting-plan-review.md",
+        "evidence/accounting-plan-review-round2.md",
+        "evidence/accounting-usage-source-basis.json",
+        "evidence/accounting-task1-spec-review/rereview/README.md",
+        "evidence/accounting-task1-quality-review/rereview/README.md",
+        "product/artifacts/accounting-ablation/quality-fix/README.md",
+        "scripts/audit-accounting-results.py",
+        "evidence/accounting-auditor-self-check/result.json",
+        "reports/accounting-ablation-results.md",
+        "evidence/accounting-ablation-parent-audit.json",
+        "evidence/accounting-ablation-parent-runtime-hold-check.json",
+        "evidence/accounting-task2-spec-review/rereview/README.md",
+        "evidence/accounting-task2-quality-review/README.md",
+        "reports/scheduler-utilization-followup.md",
+        "docs/superpowers/specs/2026-09-13-bounded-backfill-experiment.md",
+        "docs/superpowers/plans/2026-09-13-bounded-backfill-experiment.md",
+        "evidence/backfill-design-review.md",
+        "reports/backfill-experiment-results.md",
+        "reports/nvidia-api-evaluation.md",
+        "scripts/run-backfill-experiment.py",
+        "product/artifacts/backfill-resume-2026-09-14/review-and-source-check.json",
+        "product/artifacts/backfill-resume-2026-09-14/pilot-cap2/manifest.json",
+        "product/artifacts/backfill-resume-2026-09-14/negative-cap1/manifest.json",
+        "product/artifacts/backfill-resume-2026-09-14/nvidia-preparation.json",
+        "product/artifacts/backfill-resume-2026-09-14/final-verification.json",
+        "product/artifacts/backfill-resume-2026-09-14/repeat-descriptive.json",
+        "product/artifacts/backfill-resume-2026-09-14/research-integrity.json",
+        "reports/additional-quota-references-2026-09-14.md",
+        "reports/recent-scheduling-evidence-2026-09-14.md"
+      ],
+      "next_action": "이번 round 종료:60초5시드에서 짧은 최종 평균16.3% 감소, p95·처리량 동률. 기본값 승격 전 새 holdout·별도120초5쌍·전체 장부 scan 비용 확인. 실제 NVIDIA 호환성은 키 위치 대기; 경쟁 성능·저사양 우위는 미검증."
+    },
+    {
+      "id": "V02",
+      "title": "실제 도구·native OS·저사양 환경 검증",
+      "status": "in_progress",
+      "evidence": [
+        "evidence/task4-spec-review/README.md",
+        "evidence/task4-quality-rereview/README.md",
+        "evidence/native-task1-parent-footprint.json",
+        "product/artifacts/native-task2/quality-fix/README.md",
+        "evidence/native-task2-spec-review/rereview-f8/README.md",
+        "evidence/native-task2-quality-review/rereview/README.md",
+        "evidence/native-task4-accepted.json",
+        "evidence/native-task4-spec-review/final-confirmation/README.md",
+        "evidence/native-task4-quality-review/rereview-q1-q2/README.md",
+        "evidence/native-task5-accepted.json",
+        "evidence/native-task5-quality-review/rereview-q1-q3/README.md",
+        "evidence/native-task5-spec-review/final-confirmation/README.md",
+        "evidence/native-task6-accepted.json",
+        "evidence/native-final-packaged-parent-check.json",
+        "evidence/native-final-integration-review/rereview-i1/README.md",
+        "product/artifacts/native-final-integration-package/acceptance/README.md"
+      ],
+      "next_action": "Current macOS arm64 packaged binary passed isolated install/reinstall/PATH, real Pi/Claude/Codex wire/tool/off/disconnect flows and descriptive native observations. Actual Windows/Linux/macOSx64, clean native account, low-end hardware, signing/quarantine and human login remain unverified."
+    },
+    {
+      "id": "U01",
+      "title": "실제 사용자 반복 사용과 가치 검증",
+      "status": "pending",
+      "evidence": [],
+      "next_action": "공개 가능한 artifact 완성 후 승인된 사용자 피드백 수집"
+    },
+    {
+      "id": "G01",
+      "title": "공개 OSS 유지보수와 5,000 stars 이상",
+      "status": "pending",
+      "evidence": [],
+      "next_action": "유용성 입증·배포·채택 근거를 쌓고 실제 GitHub 상태 확인"
+    },
+    {
+      "id": "G02",
+      "title": "Codex for OSS 지원 및 선정",
+      "status": "pending",
+      "evidence": [],
+      "next_action": "공식 기준을 재확인하고 근거 있는 신청서를 준비해 제출 승인 요청"
+    },
+    {
+      "id": "R12",
+      "title": "추가 quota proxy3개 고정 clone과 ICML2026 최근 논문 근거 재검토",
+      "status": "done",
+      "evidence": [
+        "reports/additional-quota-references-2026-09-14.md",
+        "evidence/additional-quota-references-2026-09-14.json",
+        "reports/recent-scheduling-evidence-2026-09-14.md",
+        "evidence/recent-scheduling-evidence-2026-09-14.json"
+      ],
+      "next_action": "소스·게재 상태 조사만 완료. 경쟁 성능·논문 재현·실제 NVIDIA 및 채택 검증은 별도."
+    }
+  ],
+  "updated_at": "2026-09-13T11:54:11.473538+00:00"
+}

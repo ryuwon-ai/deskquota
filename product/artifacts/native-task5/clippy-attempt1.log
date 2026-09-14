@@ -1,0 +1,27 @@
+    Checking llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error: this loop could be written as a `for` loop
+   --> src/autostart/mod.rs:447:5
+    |
+447 |     while let Some(character) = characters.next() {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `for character in characters`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#while_let_on_iterator
+    = note: `-D clippy::while-let-on-iterator` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::while_let_on_iterator)]`
+
+error: variables can be used directly in the `format!` string
+   --> src/cli.rs:356:5
+    |
+356 | /     println!(
+357 | |         "autostart registration stage: {:?}; current runtime: unchanged",
+358 | |         action
+359 | |     );
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#uninlined_format_args
+    = note: `-D clippy::uninlined-format-args` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::uninlined_format_args)]`
+
+error: could not compile `llmgw` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `llmgw` (lib test) due to 2 previous errors

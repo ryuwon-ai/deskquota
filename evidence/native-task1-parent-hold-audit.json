@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "captured_at": "2026-09-12T13:21:35.178845+00:00",
+  "source_files": 57,
+  "research_helpers": 4,
+  "archive_files_verified": 61,
+  "archive_sha256": "d8c05e4191aed5326e2ecdec7887bde199806796dfb7ba017b15f7adc8b9e70f",
+  "native_binaries_verified": {
+    "target/native/debug/llmgw": {
+      "bytes": 25427288,
+      "sha256": "4a2edd00ad9b4f0294a53ac80ad27215f54a7e8275a1d94164af46420617f825"
+    },
+    "target/native/release/llmgw": {
+      "bytes": 8679872,
+      "sha256": "09dff35ac5311ac499f4980d2572c013b72cd2f7bbcce4a9fb9a81921134a1ec"
+    },
+    "target/native/release/examples/bench_gateway": {
+      "bytes": 8426208,
+      "sha256": "2e62d2b6f2d2d39471c07f0900933b28312b8126137ab16872d6da99fd234a42"
+    }
+  },
+  "preserved_items_verified": 4,
+  "pilot_runs_verified": 40,
+  "tests": {
+    "final-debug-211.log": {
+      "sum": 211,
+      "groups": [
+        6,
+        0,
+        3,
+        19,
+        22,
+        20,
+        12,
+        7,
+        19,
+        32,
+        27,
+        44,
+        0
+      ],
+      "sha256": "1730ec8902491c4a288e4be158a98724baafd158e141189792e0ec8cde34534e",
+      "evidence_type": "implementer logs read and counted, not parent execution"
+    },
+    "final-release-211.log": {
+      "sum": 211,
+      "groups": [
+        6,
+        0,
+        3,
+        19,
+        22,
+        20,
+        12,
+        7,
+        19,
+        32,
+        27,
+        44,
+        0
+      ],
+      "sha256": "7a23a696fb0419dc1e637b996fc0b22b466722c61d3211ee5da6ff2423dd0821",
+      "evidence_type": "implementer logs read and counted, not parent execution"
+    }
+  },
+  "implementer_report_sha256": "72db3f24477c0806df0e3b40c915794bc1e5bdd82bdcb30a8cdee12341d50243",
+  "limitations": [
+    "Read-only provenance/log audit; no new Rust execution or Windows/Linux proof",
+    "No new archive; authoritative final implementer archive remains unchanged"
+  ]
+}

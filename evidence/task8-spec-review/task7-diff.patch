@@ -1,0 +1,187 @@
+--- task7/docs/runtime-contract.md
++++ final/docs/runtime-contract.md
+@@ -625,3 +625,17 @@
+ No process-wide RSS bound, idle/peak RSS target, latency advantage, Windows
+ runtime behavior or provider compute cancellation is established by these
+ functional tests. Those require separate measurements and accepted evidence.
++
++## Benchmark observation boundary (Task 8)
++
++Authenticated admission status now also reports `retained`, the existing scalar
++count of ledger entries. Its meaning and bounds are unchanged. The optional
++`bench-harness` build enables a required-feature example that selects benchmark
++FIFO or ordinary RR through example arguments. Production CLI and TOML schema
++have no scheduling-policy option. Both arms use the same HTTP body estimator,
++transport, admission ledger, cancellation and production deadlines.
++
++[Benchmark method](benchmark-method.md) separates exact internal traces, no-wait
++transport samples and the five-window composite quota pilot. Only a completed
++artifact establishes its measured results; no real-provider, native OS matrix,
++client compatibility or real coding-task success is established by mock timing.
+--- task7/src/admission/mod.rs
++++ final/src/admission/mod.rs
+@@ -23,6 +23,7 @@
+ pub(crate) struct AdmissionStatus {
+     queue_length: usize,
+     active: usize,
++    retained: usize,
+     roots: Vec<RootStatus>,
+     blocked_reason: Option<&'static str>,
+     barrier_root: Option<String>,
+@@ -149,6 +150,12 @@
+                 notify,
+             }),
+         }
++    }
++    #[cfg(feature = "bench-harness")]
++    pub fn benchmark_fifo(config: &Config, manual: Option<ManualClock>) -> Self {
++        let admission = Self::new(config, manual);
++        admission.inner.queue.lock().expect("queue lock").fifo = true;
++        admission
+     }
+     pub async fn acquire(
+         &self,
+@@ -259,6 +266,7 @@
+         AdmissionStatus {
+             queue_length: queue.len(),
+             active: snapshot.active,
++            retained: snapshot.retained,
+             roots,
+             blocked_reason: queue.blocked_reason(now),
+             barrier_root: queue
+--- task7/src/admission/queue.rs
++++ final/src/admission/queue.rs
+@@ -20,6 +20,8 @@
+ }
+ pub(super) struct Queue {
+     pub ledger: Ledger,
++    #[cfg(feature = "bench-harness")]
++    pub fifo: bool,
+     pub cooldown_until: Duration,
+     roots: Vec<VecDeque<Waiting>>,
+     cursor: usize,
+@@ -30,6 +32,8 @@
+     pub fn new(ledger: Ledger, roots: usize) -> Self {
+         Self {
+             ledger,
++            #[cfg(feature = "bench-harness")]
++            fifo: false,
+             cooldown_until: Duration::ZERO,
+             roots: (0..roots).map(|_| VecDeque::new()).collect(),
+             cursor: 0,
+@@ -90,6 +94,11 @@
+         self.protect(now);
+     }
+     fn protect(&mut self, now: Duration) {
++        #[cfg(feature = "bench-harness")]
++        if self.fifo {
++            self.barrier = None;
++            return;
++        }
+         if self.barrier.is_some_and(|(root, sequence)| {
+             self.roots[root]
+                 .front()
+@@ -144,6 +153,17 @@
+                     .map(|offset| (self.cursor + offset) % self.roots.len())
+                     .find(|root| fits[*root])
+             };
++            #[cfg(feature = "bench-harness")]
++            let selected = if self.fifo {
++                self.roots
++                    .iter()
++                    .enumerate()
++                    .filter_map(|(root, q)| q.front().map(|head| (root, head)))
++                    .min_by_key(|(_, head)| (head.enqueued, head.sequence))
++                    .and_then(|(root, _)| fits[root].then_some(root))
++            } else {
++                selected
++            };
+             let Some(root) = selected else {
+                 break;
+             };
+--- task7/src/server.rs
++++ final/src/server.rs
+@@ -46,12 +46,16 @@
+     request: Duration,
+     capacity_wait: Duration,
+     shutdown: Duration,
++    #[cfg(feature = "bench-harness")]
++    fifo: bool,
+ }
+ 
+ const PRODUCTION_LIMITS: RuntimeLimits = RuntimeLimits {
+     request: REQUEST_TIMEOUT,
+     capacity_wait: CAPACITY_WAIT_TIMEOUT,
+     shutdown: SHUTDOWN_TIMEOUT,
++    #[cfg(feature = "bench-harness")]
++    fifo: false,
+ };
+ 
+ #[derive(Clone)]
+@@ -288,6 +292,26 @@
+     credentials: RuntimeCredentials,
+ ) -> Result<GatewayHandle, StartError> {
+     spawn_inner(config, credentials, PRODUCTION_LIMITS, None, None).await
++}
++
++/// Benchmark-only global FIFO switch; config, transport and deadlines remain production values.
++#[cfg(feature = "bench-harness")]
++pub async fn spawn_benchmark(
++    config: Config,
++    credentials: RuntimeCredentials,
++    fifo: bool,
++) -> Result<GatewayHandle, StartError> {
++    spawn_inner(
++        config,
++        credentials,
++        RuntimeLimits {
++            fifo,
++            ..PRODUCTION_LIMITS
++        },
++        None,
++        None,
++    )
++    .await
+ }
+ 
+ async fn spawn_inner(
+@@ -312,7 +336,13 @@
+         stop_rx.clone(),
+         force_workers_rx,
+     ));
+-    let admission = Admission::new(&config, clock);
++    let admission = Admission::new(&config, clock.clone());
++    #[cfg(feature = "bench-harness")]
++    let admission = if limits.fifo {
++        Admission::benchmark_fifo(&config, clock)
++    } else {
++        admission
++    };
+     let handle_admission = admission.clone();
+     let state = Arc::new(AppState {
+         config,
+@@ -366,6 +396,8 @@
+                 request,
+                 capacity_wait: request,
+                 shutdown,
++                #[cfg(feature = "bench-harness")]
++                fifo: false,
+             },
+             None,
+             None,
+--- task7/Cargo.toml
++++ final/Cargo.toml
+@@ -5,6 +5,13 @@
+ rust-version = "1.88"
+ description = "Native local quota gateway"
+ license = "MIT OR Apache-2.0"
++
++[features]
++bench-harness = []
++
++[[example]]
++name = "bench_gateway"
++required-features = ["bench-harness"]
+ 
+ [dependencies]
+ axum = { version = "=0.8.9", default-features = false, features = ["http1"] }

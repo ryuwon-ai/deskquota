@@ -1,0 +1,51 @@
+E.F....EEE
+======================================================================
+ERROR: test_cargo_template_tests_honors_caller_target (tests.test_verify_native.VerifyNativeUnitTests.test_cargo_template_tests_honors_caller_target)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 80, in test_cargo_template_tests_honors_caller_target
+    module.cargo_template_tests(target)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+TypeError: cargo_template_tests() takes 0 positional arguments but 1 was given
+
+======================================================================
+ERROR: test_templates_only_never_dispatches_linux_or_windows_registration (tests.test_verify_native.VerifyNativeUnitTests.test_templates_only_never_dispatches_linux_or_windows_registration) (platform='linux')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 93, in test_templates_only_never_dispatches_linux_or_windows_registration
+    record = module.templates_only(binary, pathlib.Path("/tmp/target"))
+TypeError: templates_only() takes 1 positional argument but 2 were given
+
+======================================================================
+ERROR: test_templates_only_never_dispatches_linux_or_windows_registration (tests.test_verify_native.VerifyNativeUnitTests.test_templates_only_never_dispatches_linux_or_windows_registration) (platform='win32')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 93, in test_templates_only_never_dispatches_linux_or_windows_registration
+    record = module.templates_only(binary, pathlib.Path("/tmp/target"))
+TypeError: templates_only() takes 1 positional argument but 2 were given
+
+======================================================================
+ERROR: test_terminal_environment_preserves_explicit_auth_and_windows_runtime (tests.test_verify_native.VerifyNativeUnitTests.test_terminal_environment_preserves_explicit_auth_and_windows_runtime)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 29, in test_terminal_environment_preserves_explicit_auth_and_windows_runtime
+    env = module.terminal_child_env(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'verify_native' has no attribute 'terminal_child_env'
+
+======================================================================
+FAIL: test_failed_manual_cycle_returns_nonzero (tests.test_verify_native.VerifyNativeUnitTests.test_failed_manual_cycle_returns_nonzero)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_verify_native.py", line 114, in test_failed_manual_cycle_returns_nonzero
+    self.assertNotEqual(code, 0)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+AssertionError: 0 == 0
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.011s
+
+FAILED (failures=1, errors=4)
+generated/removed label: unknown
+generated/removed path: unknown
+foreground argv: /tmp/llmgw --config /tmp/config.toml run

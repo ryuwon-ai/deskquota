@@ -1,0 +1,29 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.43s
+     Running tests/client_profiles.rs (target/native-task4/debug/deps/client_profiles-2f750a8b4307e19e)
+
+running 2 tests
+test codex_refuses_an_unowned_existing_llmgw_provider_collision ... FAILED
+test codex_uses_a_separate_responses_profile_and_static_native_header ... FAILED
+
+failures:
+
+---- codex_refuses_an_unowned_existing_llmgw_provider_collision stdout ----
+
+thread 'codex_refuses_an_unowned_existing_llmgw_provider_collision' panicked at tests/client_profiles.rs:379:33:
+called `Result::unwrap_err()` on an `Ok` value: PreparedProfile { client: Codex, transaction: Transaction { journal_path: "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/gateway-state/clients/codex.json", patches: [Patch { path: "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/home/.codex/llmgw.config.toml", expected_hash: "26b9e5564a3ba1fb840685530f91226071b776b4de8c9f93a85ef918e7697aaf", format: Toml, scope: UserPrivate, edits: [Set { key: KeyPath("model"), value: Public(String("example-model")) }, Set { key: KeyPath("model_provider"), value: Public(String("llmgw")) }, Set { key: KeyPath("model_providers.llmgw.name"), value: Public(String("llmgw")) }, Set { key: KeyPath("model_providers.llmgw.base_url"), value: Public(String("http://127.0.0.1:4141/r/shared-work/v1")) }, Set { key: KeyPath("model_providers.llmgw.wire_api"), value: Public(String("responses")) }, Set { key: KeyPath("model_providers.llmgw.requires_openai_auth"), value: Public(Bool(false)) }, Set { key: KeyPath("model_providers.llmgw.supports_websockets"), value: Public(Bool(false)) }, Set { key: KeyPath("model_providers.llmgw.http_headers.X-LLMGW-Token"), value: LocalDataToken([REDACTED]) }], owned_keys: [KeyPath("model"), KeyPath("model_provider"), KeyPath("model_providers.llmgw.name"), KeyPath("model_providers.llmgw.base_url"), KeyPath("model_providers.llmgw.wire_api"), KeyPath("model_providers.llmgw.requires_openai_auth"), KeyPath("model_providers.llmgw.supports_websockets"), KeyPath("model_providers.llmgw.http_headers.X-LLMGW-Token")], warnings: [] }] }, preview: ClientPreview { hash: "0c81329803edc39e7a2b8612156405bd180fc4a6dd137c0410d7e8fcd89a294c", text: "client: codex 0.154.0\nscope: user-private\npublic URL: http://127.0.0.1:4141/r/shared-work/v1\ngateway config fingerprint: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nroot: shared-work (all clients on this root share one FIFO/fairness share)\nmodel: example-model\nprotocol: openai_responses\ntarget files:\n  - /var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/home/.codex/llmgw.config.toml\nowned keys:\n/private/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/home/.codex/llmgw.config.toml: 8 owned key(s), 0 warning(s)\n  set model = [reviewed value]\n  set model_provider = [reviewed value]\n  set model_providers.llmgw.name = [reviewed value]\n  set model_providers.llmgw.base_url = [reviewed value]\n  set model_providers.llmgw.wire_api = [reviewed value]\n  set model_providers.llmgw.requires_openai_auth = [reviewed value]\n  set model_providers.llmgw.supports_websockets = [reviewed value]\n  set model_providers.llmgw.http_headers.X-LLMGW-Token = [REDACTED local data token]\ncooperating llmgw editors use one stable adjacent lock per normalized client resource; external editor CAS is not guaranteed\ncredential: local data token from /var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/gateway-state/data-token [REDACTED]\npreview hash: 0c81329803edc39e7a2b8612156405bd180fc4a6dd137c0410d7e8fcd89a294c\ndisconnect: llmgw disconnect codex --journal /var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/gateway-state/clients/codex.json\nlisting: not requested\nselection: configured\ninference: unverified\ntools: unverified\n\nwarning: use `codex --profile llmgw`; the global config and MCP headers are not changed" }, config_patch_hash: "a898bfc28fc5913d476a783e3b454297ba041ab53e815fa39b517031e3f279e0", targets: ["/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-client-profiles-codex-collision-86039-2bdeccc0d3d210cd/home/.codex/llmgw.config.toml"], capabilities: CapabilityResults { listing: NotRequested, selection: Configured, inference: Unverified, tools: Unverified } }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- codex_uses_a_separate_responses_profile_and_static_native_header stdout ----
+
+thread 'codex_uses_a_separate_responses_profile_and_static_native_header' panicked at tests/client_profiles.rs:358:5:
+assertion failed: restored.get("model_providers").is_none()
+
+
+failures:
+    codex_refuses_an_unowned_existing_llmgw_provider_collision
+    codex_uses_a_separate_responses_profile_and_static_native_header
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.20s
+
+error: test failed, to rerun pass `--test client_profiles`

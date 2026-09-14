@@ -1,0 +1,35 @@
+{
+  "build_command": [
+    "rustc",
+    "--edition=2024",
+    "--test",
+    "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/patch_contract.rs",
+    "-L",
+    "dependency=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-lock-fix/debug/deps",
+    "--extern",
+    "llmgw=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-lock-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+    "--extern",
+    "serde_json=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-lock-fix/debug/deps/libserde_json-a21f0692595b2a08.rlib",
+    "--extern",
+    "rand=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-lock-fix/debug/deps/librand-3dbc04899fc89175.rlib",
+    "--extern",
+    "fs4=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-lock-fix/debug/deps/libfs4-b0ec3a0caafff687.rlib",
+    "--extern",
+    "exacl=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task3-lock-fix/debug/deps/libexacl-351586a9e860654c.rlib",
+    "-o",
+    "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task3-spec-review/patch-contract-tests"
+  ],
+  "test_binary_sha256": "331cdcf9e18f392e457a22f22153e120e39a66e69e01f398b9b8b7fb2b233866",
+  "exit_code": 0,
+  "elapsed_seconds": 2.6793922079959884,
+  "temp_contents_after_tests": [],
+  "owned_fixture_cleaned": true,
+  "actual_os": "macOS",
+  "not_executed": [
+    "Windows",
+    "Linux",
+    "gateway server",
+    "real client",
+    "LLM"
+  ]
+}

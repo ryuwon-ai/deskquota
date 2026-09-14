@@ -1,0 +1,448 @@
+--- lock-fix/product/tests/patch_contract.rs
++++ spec-fix/product/tests/patch_contract.rs
+@@ -751,11 +751,92 @@
+                 vec![set(key(&["env", "TOKEN"]), value)],
+             )],
+         );
++        let debug = format!("{tx:?}");
++        assert!(!debug.contains(DATA_SENTINEL));
++        assert!(!debug.contains(UPSTREAM_SENTINEL));
++        assert!(!debug.contains(CONTROL_SENTINEL));
+         let error = preview(&tx).unwrap_err().to_string();
+         assert!(!error.contains(DATA_SENTINEL));
+         assert!(!error.contains(UPSTREAM_SENTINEL));
+         assert!(!error.contains(CONTROL_SENTINEL));
+         assert_eq!(fs::read(&path).unwrap(), before);
++    }
++}
++
++#[test]
++fn typed_secret_debug_diff_output_journal_and_summaries_are_redacted() {
++    let fixture = Fixture::new("typed-secret-surfaces");
++    let output = Command::new(std::env::current_exe().unwrap())
++        .arg("--exact")
++        .arg("config_patch_redaction_child")
++        .arg("--nocapture")
++        .env("LLMGW_PATCH_REDACTION_FIXTURE", &fixture.root)
++        .output()
++        .unwrap();
++    assert!(output.status.success());
++
++    let stdout = String::from_utf8(output.stdout).unwrap();
++    let stderr = String::from_utf8(output.stderr).unwrap();
++    let journal = fs::read_to_string(fixture.journal()).unwrap();
++    assert!(stdout.contains("[REDACTED]"));
++    for sentinel in [UPSTREAM_SENTINEL, DATA_SENTINEL, CONTROL_SENTINEL] {
++        assert!(!stdout.contains(sentinel));
++        assert!(!stderr.contains(sentinel));
++        assert!(!journal.contains(sentinel));
++    }
++}
++
++#[test]
++fn config_patch_redaction_child() {
++    let Some(root) = std::env::var_os("LLMGW_PATCH_REDACTION_FIXTURE") else {
++        return;
++    };
++    let root = PathBuf::from(root);
++    let path = root.join("client/settings.json");
++    let journal_path = root.join("state/patch-journal.json");
++    let before = br#"{"env":{}}"#;
++    write_private(&path, before);
++    let local = transaction(
++        journal_path.clone(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(before),
++            vec![set(
++                key(&["env", "TOKEN"]),
++                EditValue::LocalDataToken(DATA_SENTINEL.into()),
++            )],
++        )],
++    );
++    println!("transaction={local:?}");
++    let shown = preview(&local).unwrap();
++    println!("preview={shown:?}");
++    println!("apply={:?}", apply(&local, &shown.hash).unwrap());
++    println!("doctor={:?}", inspect_journal(&journal_path).unwrap());
++    println!("restore={:?}", restore(&journal_path).unwrap());
++
++    for (index, value) in [
++        EditValue::UpstreamCredential(UPSTREAM_SENTINEL.into()),
++        EditValue::ControlToken(CONTROL_SENTINEL.into()),
++    ]
++    .into_iter()
++    .enumerate()
++    {
++        let rejected = transaction(
++            root.join(format!("state/rejected-{index}.json")),
++            vec![patch(
++                &path,
++                Format::StrictJson,
++                Scope::UserPrivate,
++                Some(before),
++                vec![set(key(&["env", "TOKEN"]), value)],
++            )],
++        );
++        println!("rejected={rejected:?}");
++        let error = preview(&rejected).unwrap_err();
++        println!("error-debug={error:?}");
++        eprintln!("error={error}");
+     }
+ }
+ 
+@@ -812,6 +893,79 @@
+ 
+ #[cfg(unix)]
+ #[test]
++fn partial_three_file_apply_records_and_preserves_every_reviewed_target() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let fixture = Fixture::new("partial-three");
++    let paths = (0..3)
++        .map(|index| fixture.path(&format!("client-{index}/settings.json")))
++        .collect::<Vec<_>>();
++    let before = br#"{"model":"original"}"#;
++    for path in &paths {
++        write_private(path, before);
++    }
++    fs::set_permissions(
++        paths[1].parent().unwrap(),
++        fs::Permissions::from_mode(0o500),
++    )
++    .unwrap();
++    let tx = transaction(
++        fixture.journal(),
++        paths
++            .iter()
++            .map(|path| {
++                patch(
++                    path,
++                    Format::StrictJson,
++                    Scope::UserPrivate,
++                    Some(before),
++                    vec![set(key(&["model"]), EditValue::Public(json!("gateway")))],
++                )
++            })
++            .collect(),
++    );
++    let shown = preview(&tx).unwrap();
++    let error = apply(&tx, &shown.hash).unwrap_err().to_string();
++    assert!(error.contains("partial"));
++
++    let journal = inspect_journal(fixture.journal()).unwrap();
++    assert_eq!(journal.resources.len(), 3);
++    assert_eq!(
++        journal
++            .resources
++            .iter()
++            .map(|resource| resource.stage.as_str())
++            .collect::<Vec<_>>(),
++        ["verified", "failed", "unstarted"]
++    );
++    assert_eq!(
++        journal
++            .resources
++            .iter()
++            .map(|resource| resource.owned_keys.len())
++            .collect::<Vec<_>>(),
++        [1, 0, 0]
++    );
++    assert!(journal.resources[2].backup_refs.is_empty());
++    assert_eq!(fs::read(&paths[2]).unwrap(), before);
++
++    fs::set_permissions(
++        paths[1].parent().unwrap(),
++        fs::Permissions::from_mode(0o700),
++    )
++    .unwrap();
++    let restored = restore(fixture.journal()).unwrap();
++    assert_eq!(restored.restored_resources, 1);
++    assert!(restored.conflicts.is_empty());
++    for path in paths {
++        assert_eq!(fs::read(path).unwrap(), before);
++    }
++    let journal = inspect_journal(fixture.journal()).unwrap();
++    assert!(journal.recovery.contains("never owned"));
++}
++
++#[cfg(unix)]
++#[test]
+ fn partial_two_file_restore_is_explicit_and_recoverable() {
+     use std::os::unix::fs::PermissionsExt;
+ 
+@@ -854,6 +1008,87 @@
+     fs::set_permissions(second.parent().unwrap(), fs::Permissions::from_mode(0o700)).unwrap();
+     assert!(restore(fixture.journal()).unwrap().conflicts.is_empty());
+     assert_eq!(fs::read(second).unwrap(), before_b);
++}
++
++#[test]
++fn interrupted_created_file_reconnect_keeps_verified_removal_boundary() {
++    let fixture = Fixture::new("created-reconnect-crash");
++    let created = fixture.path("client-created/settings.json");
++    let first = transaction(
++        fixture.journal(),
++        vec![patch(
++            &created,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            None,
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v1")))],
++        )],
++    );
++    apply_reviewed(&first);
++    for index in 0..64 {
++        write_private(
++            &fixture.path(&format!("clients/{index:02}.json")),
++            br#"{"model":"original"}"#,
++        );
++    }
++
++    let child = Command::new(std::env::current_exe().unwrap())
++        .arg("--exact")
++        .arg("config_patch_created_reconnect_crash_child")
++        .arg("--nocapture")
++        .env("LLMGW_PATCH_CREATED_RECONNECT_CRASH_FIXTURE", &fixture.root)
++        .stdout(Stdio::null())
++        .stderr(Stdio::null())
++        .spawn()
++        .unwrap();
++    let mut child = ChildGuard::new(child);
++    let deadline = Instant::now() + Duration::from_secs(10);
++    while Instant::now() < deadline {
++        if fs::read_to_string(&created).is_ok_and(|text| text.contains("gateway-v2")) {
++            break;
++        }
++        if let Some(status) = child.child_mut().try_wait().unwrap() {
++            panic!("created reconnect crash fixture exited before interruption: {status}");
++        }
++        thread::sleep(Duration::from_millis(1));
++    }
++    assert!(fs::read_to_string(&created).unwrap().contains("gateway-v2"));
++    assert!(!child.interrupt_and_wait().success());
++
++    let restored = restore(fixture.journal()).unwrap();
++    assert!(restored.conflicts.is_empty());
++    assert!(!created.exists());
++}
++
++#[test]
++fn config_patch_created_reconnect_crash_child() {
++    let Some(root) = std::env::var_os("LLMGW_PATCH_CREATED_RECONNECT_CRASH_FIXTURE") else {
++        return;
++    };
++    let root = PathBuf::from(root);
++    let created = root.join("client-created/settings.json");
++    let mut patches = vec![patch(
++        &created,
++        Format::StrictJson,
++        Scope::UserPrivate,
++        fs::read(&created).ok().as_deref(),
++        vec![set(key(&["model"]), EditValue::Public(json!("gateway-v2")))],
++    )];
++    patches.extend((0..64).map(|index| {
++        let path = root.join(format!("clients/{index:02}.json"));
++        patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            fs::read(&path).ok().as_deref(),
++            vec![set(
++                key(&["model"]),
++                EditValue::Public(json!(format!("gateway-{index:02}"))),
++            )],
++        )
++    }));
++    let tx = transaction(root.join("state/patch-journal.json"), patches);
++    apply_reviewed(&tx);
+ }
+ 
+ #[test]
+@@ -1024,6 +1259,184 @@
+     assert_eq!(value["unrelated"], true);
+ }
+ 
++#[test]
++fn created_file_user_field_and_comment_survive_reconnect_and_restore() {
++    let fixture = Fixture::new("created-reconnect-user-edit");
++    let path = fixture.path("client/settings.json");
++    let first = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::JsonWithComments,
++            Scope::UserPrivate,
++            None,
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v1")))],
++        )],
++    );
++    apply_reviewed(&first);
++
++    let user_edited = br#"{
++  // user comment must survive
++  "model": "gateway-v1",
++  "user_added": "preserve-me"
++}
++"#;
++    fs::write(&path, user_edited).unwrap();
++    let second = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::JsonWithComments,
++            Scope::UserPrivate,
++            Some(user_edited),
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v2")))],
++        )],
++    );
++    apply_reviewed(&second);
++
++    let report = restore(fixture.journal()).unwrap();
++    assert!(report.conflicts.is_empty());
++    assert!(path.exists());
++    let restored = fs::read_to_string(path).unwrap();
++    assert!(restored.contains("// user comment must survive"));
++    assert!(restored.contains("preserve-me"));
++    assert!(!restored.contains("gateway-v2"));
++}
++
++#[test]
++fn unchanged_created_file_remains_removable_after_reconnect() {
++    let fixture = Fixture::new("created-reconnect-unchanged");
++    let path = fixture.path("client/settings.json");
++    let first = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            None,
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v1")))],
++        )],
++    );
++    apply_reviewed(&first);
++    let first_written = fs::read(&path).unwrap();
++    let second = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(&first_written),
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v2")))],
++        )],
++    );
++    apply_reviewed(&second);
++    restore(fixture.journal()).unwrap();
++    assert!(!path.exists());
++}
++
++#[cfg(unix)]
++#[test]
++fn failed_created_file_reconnect_keeps_last_verified_removal_boundary() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let fixture = Fixture::new("created-reconnect-failed");
++    let path = fixture.path("client/settings.json");
++    let first = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            None,
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v1")))],
++        )],
++    );
++    apply_reviewed(&first);
++    let first_written = fs::read(&path).unwrap();
++    let second = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(&first_written),
++            vec![set(key(&["model"]), EditValue::Public(json!("gateway-v2")))],
++        )],
++    );
++    fs::set_permissions(path.parent().unwrap(), fs::Permissions::from_mode(0o500)).unwrap();
++    let shown = preview(&second).unwrap();
++    assert!(apply(&second, &shown.hash).is_err());
++    fs::set_permissions(path.parent().unwrap(), fs::Permissions::from_mode(0o700)).unwrap();
++    assert_eq!(fs::read(&path).unwrap(), first_written);
++    restore(fixture.journal()).unwrap();
++    assert!(!path.exists());
++}
++
++#[test]
++fn reconnect_rejects_descendant_then_ancestor_ownership_overlap() {
++    assert_reconnect_overlap_is_rejected(
++        &["provider", "model"],
++        json!("gateway"),
++        &["provider"],
++        json!({"model":"gateway","other":"changed"}),
++    );
++}
++
++#[test]
++fn reconnect_rejects_ancestor_then_descendant_ownership_overlap() {
++    assert_reconnect_overlap_is_rejected(
++        &["provider"],
++        json!({"model":"gateway","other":"keep"}),
++        &["provider", "model"],
++        json!("gateway-v2"),
++    );
++}
++
++fn assert_reconnect_overlap_is_rejected(
++    first_key: &[&str],
++    first_value: serde_json::Value,
++    second_key: &[&str],
++    second_value: serde_json::Value,
++) {
++    let fixture = Fixture::new("reconnect-overlap");
++    let path = fixture.path("client/settings.json");
++    let original = br#"{"provider":{"model":"original","other":"keep"}}"#;
++    write_private(&path, original);
++    let first = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(original),
++            vec![set(key(first_key), EditValue::Public(first_value))],
++        )],
++    );
++    apply_reviewed(&first);
++    let first_written = fs::read(&path).unwrap();
++    let second = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(&first_written),
++            vec![set(key(second_key), EditValue::Public(second_value))],
++        )],
++    );
++    let shown = preview(&second).unwrap();
++    let error = apply(&second, &shown.hash).unwrap_err().to_string();
++    assert!(error.contains("overlaps an existing owned key"));
++    assert!(!error.contains("gateway"));
++    assert_eq!(fs::read(&path).unwrap(), first_written);
++
++    let restored = restore(fixture.journal()).unwrap();
++    assert!(restored.conflicts.is_empty());
++    let final_value: serde_json::Value = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
++    let original_value: serde_json::Value = serde_json::from_slice(original).unwrap();
++    assert_eq!(final_value, original_value);
++}
++
+ #[cfg(unix)]
+ #[test]
+ fn failed_repeated_connect_keeps_the_last_verified_owned_value_recoverable() {

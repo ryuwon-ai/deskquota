@@ -1,0 +1,9 @@
+[package]
+name = "task5-spec-probe"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+llmgw = { path = "../../product" }
+tokio = { version = "=1.49.0", features = ["macros", "rt-multi-thread", "time", "sync", "io-util", "net"] }
+socket2 = "=0.6.5"
+bytes = "=1.11.1"

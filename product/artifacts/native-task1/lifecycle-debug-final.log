@@ -1,0 +1,23 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-86a6ed386b85f0cb)
+
+running 15 tests
+test occupied_port_does_not_stop_unrelated_listener ... ok
+test known_quota_is_ready_with_empty_queue_startup_hold ... ok
+test loopback_control_ignores_proxy_environment ... ok
+test empty_queue_reports_shared_cooldown_without_a_new_request ... ok
+test control_stop_rejects_a_previous_instance_nonce ... ok
+test edited_listen_port_off_reaches_recorded_address ... ok
+test stopped_is_success_and_off_is_idempotent ... ok
+test weak_existing_state_permissions_are_rejected_without_chmod ... ok
+test held_lock_with_unknown_identity_is_failed_json_and_never_killed ... ok
+test concurrent_on_has_one_identity ... ok
+test stale_pid_never_kills_an_unrelated_process ... ok
+test changed_config_requires_restart_and_invalid_edit_can_stop_old_port ... ok
+test same_directory_configs_have_independent_workers ... ok
+test stale_record_of_owned_unrelated_child_preserves_child_and_lock_file ... ok
+test off_drains_a_live_request_closes_sockets_and_exposes_draining ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.62s
+

@@ -1,0 +1,95 @@
+{
+  "recorded_at": "2026-09-12T08:43:20.364913+00:00",
+  "scope": "Read-only benchmark preparation; no gateway, competitor or model executed",
+  "product_executed": false,
+  "performance_measured": false,
+  "host": {
+    "system": "Darwin",
+    "release": "25.5.0",
+    "machine": "arm64",
+    "logical_cpus": 10,
+    "load_average_snapshot": [
+      5.0380859375,
+      5.2099609375,
+      4.98486328125
+    ]
+  },
+  "python": {
+    "version": "3.14.6",
+    "executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "monotonic": {
+      "implementation": "mach_absolute_time()",
+      "monotonic": true,
+      "adjustable": false,
+      "resolution": 4.166666666666666e-08
+    },
+    "perf_counter": {
+      "implementation": "mach_absolute_time()",
+      "monotonic": true,
+      "adjustable": false,
+      "resolution": 4.166666666666666e-08
+    }
+  },
+  "tools": {
+    "rustc": {
+      "argv": [
+        "rustc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+      "stderr": ""
+    },
+    "cargo": {
+      "argv": [
+        "cargo",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cargo 1.88.0 (873a06493 2025-05-10)",
+      "stderr": ""
+    },
+    "cpu_model": {
+      "argv": [
+        "sysctl",
+        "-n",
+        "machdep.cpu.brand_string"
+      ],
+      "exit_code": 0,
+      "stdout": "Apple M4",
+      "stderr": ""
+    },
+    "memory_bytes": {
+      "argv": [
+        "sysctl",
+        "-n",
+        "hw.memsize"
+      ],
+      "exit_code": 0,
+      "stdout": "34359738368",
+      "stderr": ""
+    },
+    "physical_cpus": {
+      "argv": [
+        "sysctl",
+        "-n",
+        "hw.physicalcpu"
+      ],
+      "exit_code": 0,
+      "stdout": "10",
+      "stderr": ""
+    },
+    "self_ps": {
+      "argv": [
+        "ps",
+        "-o",
+        "pid=,rss=,time=",
+        "-p",
+        "86374"
+      ],
+      "exit_code": 0,
+      "stdout": "86374  17584   0:00.05",
+      "stderr": ""
+    }
+  }
+}

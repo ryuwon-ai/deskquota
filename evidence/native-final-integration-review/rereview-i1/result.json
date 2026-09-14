@@ -1,0 +1,76 @@
+{
+  "phase": "native-final-integration-rereview-i1",
+  "passed": true,
+  "verdict": "PASS_WITH_PLATFORM_LIMITATIONS",
+  "actionable_findings": [],
+  "i1_disposition": "fixed",
+  "direct_execution": {
+    "passed": true,
+    "scope": "actual PTY SaveOnly -> Pi preview/hash restart/apply -> disconnect/off",
+    "setup": {
+      "exit": 0,
+      "state": "stopped",
+      "worker_count": 0,
+      "tokens": {
+        "data_bytes": 64,
+        "control_bytes": 64,
+        "distinct": true,
+        "directory_mode": "0700",
+        "file_modes": [
+          "0600",
+          "0600"
+        ]
+      }
+    },
+    "preview": {
+      "exit": 0,
+      "hash_present": true,
+      "client_bytes_unchanged": true,
+      "tokens_unchanged": true
+    },
+    "apply": {
+      "exit": 0,
+      "reviewed_hash_reused": true,
+      "restart_requested": true,
+      "state": "running",
+      "desired_fingerprint": true,
+      "pending_restart": false,
+      "client_patch_applied": true,
+      "client_credential_matches_setup_token": true,
+      "unrelated_client_value_preserved": true
+    },
+    "cleanup": {
+      "disconnect_exit": 0,
+      "client_user_values_restored": true,
+      "owned_llmgw_provider_removed": true,
+      "off_exit": 0,
+      "final_state": "stopped",
+      "worker_count": 0,
+      "tokens_unchanged": true
+    },
+    "security": {
+      "protected_token_in_outputs": false
+    },
+    "upstream_calls": 0,
+    "client_execution_scope": "actual llmgw CLI with a synthetic Pi --version executable; installed Pi was not executed",
+    "all_pty_waited": true,
+    "owned_workers_remaining": 0,
+    "scratch_removed": true
+  },
+  "retained_evidence": {
+    "rust_tests": "370 passed, 0 failed in frozen artifact/parent check; reviewer did not rerun Cargo",
+    "neighbor_contracts": "private permissions, token preservation, partial failure, running-worker no-repair, and three fake-version client profiles"
+  },
+  "reviewer_harness_note": "The first reviewer attempt incorrectly required Pi JSON whitespace to restore byte-for-byte. Authenticated off and scratch cleanup completed. The assertion was corrected to the documented owned-key/user-value restoration contract; the one final bounded flow then passed.",
+  "limitations": [
+    "Direct client integration used a synthetic Pi --version executable; no installed Pi/Claude/Codex client was executed in this rereview.",
+    "Windows, Linux, macOS x64, real human login, signing, notarization, quarantine, and clean-account execution remain unverified.",
+    "No production-all-OS, percentile latency, low-end memory, or performance-advantage claim is made."
+  ],
+  "cleanup": {
+    "execution_finished": true,
+    "runtime_ownership_released": true,
+    "owned_workers_remaining": 0,
+    "owned_fixture_paths_remaining": 0
+  }
+}

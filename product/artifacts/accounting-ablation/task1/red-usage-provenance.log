@@ -1,0 +1,134 @@
+test_invalid_mode_combinations_reject_before_output_creation (test_benchmark_accounting.AccountingCliBoundaryTests.test_invalid_mode_combinations_reject_before_output_creation) ... ok
+test_accounting_identity_has_no_benchmark_binary (test_benchmark_accounting.AccountingRulesTests.test_accounting_identity_has_no_benchmark_binary) ... ERROR
+test_actual_config_uses_one_accounting_value_in_toml_and_metadata (test_benchmark_accounting.AccountingRulesTests.test_actual_config_uses_one_accounting_value_in_toml_and_metadata) ... ok
+test_arm_profiles_and_alternating_pair_schedule (test_benchmark_accounting.AccountingRulesTests.test_arm_profiles_and_alternating_pair_schedule) ... ok
+test_normalized_pair_config_may_differ_only_in_accounting (test_benchmark_accounting.AccountingRulesTests.test_normalized_pair_config_may_differ_only_in_accounting) ... ok
+test_completed_generation_usage_is_linked_to_submitted_and_attempt (test_benchmark_accounting.AccountingRunValidationTests.test_completed_generation_usage_is_linked_to_submitted_and_attempt) ... ERROR
+test_cutoff_is_recomputed_and_exact_boundary_is_included (test_benchmark_accounting.AccountingRunValidationTests.test_cutoff_is_recomputed_and_exact_boundary_is_included) ... ERROR
+test_metadata_and_noncompleted_outcomes_need_no_usage (test_benchmark_accounting.AccountingRunValidationTests.test_metadata_and_noncompleted_outcomes_need_no_usage) ... ERROR
+test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) ... 
+  test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":true,"completion_tokens":3}}') ... ERROR
+  test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":"7","completion_tokens":3}}') ... ERROR
+  test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":-1,"completion_tokens":3}}') ... ERROR
+  test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":18446744073709551616,"completion_tokens":3}}') ... ERROR
+test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) ... ERROR
+test_one_numeric_usage_before_done_is_observed (test_benchmark_accounting.UsageObservationTests.test_one_numeric_usage_before_done_is_observed) ... ERROR
+test_usage_failure_does_not_hide_completed_payload (test_benchmark_accounting.UsageObservationTests.test_usage_failure_does_not_hide_completed_payload) ... ERROR
+
+======================================================================
+ERROR: test_accounting_identity_has_no_benchmark_binary (test_benchmark_accounting.AccountingRulesTests.test_accounting_identity_has_no_benchmark_binary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 127, in test_accounting_identity_has_no_benchmark_binary
+    identity = benchmark.identities(binary, None, "accounting")
+TypeError: identities() takes 2 positional arguments but 3 were given
+
+======================================================================
+ERROR: test_completed_generation_usage_is_linked_to_submitted_and_attempt (test_benchmark_accounting.AccountingRunValidationTests.test_completed_generation_usage_is_linked_to_submitted_and_attempt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 288, in test_completed_generation_usage_is_linked_to_submitted_and_attempt
+    from benchmark_accounting import validate_accounting_run
+ImportError: cannot import name 'validate_accounting_run' from 'benchmark_accounting' (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark_accounting.py)
+
+======================================================================
+ERROR: test_cutoff_is_recomputed_and_exact_boundary_is_included (test_benchmark_accounting.AccountingRunValidationTests.test_cutoff_is_recomputed_and_exact_boundary_is_included)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 278, in test_cutoff_is_recomputed_and_exact_boundary_is_included
+    from benchmark_accounting import validate_accounting_run
+ImportError: cannot import name 'validate_accounting_run' from 'benchmark_accounting' (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark_accounting.py)
+
+======================================================================
+ERROR: test_metadata_and_noncompleted_outcomes_need_no_usage (test_benchmark_accounting.AccountingRunValidationTests.test_metadata_and_noncompleted_outcomes_need_no_usage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 301, in test_metadata_and_noncompleted_outcomes_need_no_usage
+    from benchmark_accounting import validate_accounting_run
+ImportError: cannot import name 'validate_accounting_run' from 'benchmark_accounting' (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/scripts/benchmark_accounting.py)
+
+======================================================================
+ERROR: test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":true,"completion_tokens":3}}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 171, in test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit
+    self.assertEqual(result["usage"]["status"], "invalid")
+                     ~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+======================================================================
+ERROR: test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":"7","completion_tokens":3}}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 171, in test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit
+    self.assertEqual(result["usage"]["status"], "invalid")
+                     ~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+======================================================================
+ERROR: test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":-1,"completion_tokens":3}}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 171, in test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit
+    self.assertEqual(result["usage"]["status"], "invalid")
+                     ~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+======================================================================
+ERROR: test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit) (frame=b'{"choices":[],"usage":{"prompt_tokens":18446744073709551616,"completion_tokens":3}}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 171, in test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit
+    self.assertEqual(result["usage"]["status"], "invalid")
+                     ~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+======================================================================
+ERROR: test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit (test_benchmark_accounting.UsageObservationTests.test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 179, in test_invalid_duplicate_after_terminal_and_missing_usage_are_explicit
+    self.assertEqual(duplicate["usage"]["status"], "invalid")
+                     ~~~~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+======================================================================
+ERROR: test_one_numeric_usage_before_done_is_observed (test_benchmark_accounting.UsageObservationTests.test_one_numeric_usage_before_done_is_observed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 155, in test_one_numeric_usage_before_done_is_observed
+    result["usage"],
+    ~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+======================================================================
+ERROR: test_usage_failure_does_not_hide_completed_payload (test_benchmark_accounting.UsageObservationTests.test_usage_failure_does_not_hide_completed_payload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py", line 128, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 204, in test_usage_failure_does_not_hide_completed_payload
+    self.assertEqual(result["usage"], {"status": "missing"})
+                     ~~~~~~^^^^^^^^^
+KeyError: 'usage'
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.023s
+
+FAILED (errors=11)

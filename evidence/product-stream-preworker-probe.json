@@ -1,0 +1,38 @@
+{
+  "check": "foreground_stream_lifetime_loopback_only",
+  "timestamp": "2026-09-12T03:45:41.089931+00:00",
+  "os": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "binary_sha256": "6a93aec300e85f68994124f555534f7311a445444cae63d360c3f928a6fad2a4",
+  "binary_unchanged_during_probe": true,
+  "passed": false,
+  "cases": [
+    {
+      "policy": "drain",
+      "disconnect_phase": "after_terminal_marker",
+      "passed": false,
+      "error_class": "AssertionError",
+      "error": "capacity released before first response body EOF"
+    },
+    {
+      "policy": "close",
+      "disconnect_phase": "after_terminal_marker",
+      "passed": false,
+      "error_class": "AssertionError",
+      "error": "close policy did not close upstream HTTP"
+    },
+    {
+      "policy": "drain",
+      "disconnect_phase": "before_headers",
+      "passed": false,
+      "error_class": "AssertionError",
+      "error": "capacity released before first response body EOF"
+    }
+  ],
+  "limitations": [
+    "Synthetic HTTP, no actual LLM or agent task",
+    "RST cancellation; does not replace half-close, graceful-close or slow-reader tests",
+    "HTTP body/connection observations do not prove engine abort or quota refund",
+    "No performance or cross-platform acceptance claim",
+    "Candidate port is released before process bind; startup is checked"
+  ]
+}

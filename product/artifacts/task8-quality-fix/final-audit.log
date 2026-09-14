@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/task8-quality-fix/audit.py", line 23, in <module>
+    attempt_outcomes.update(r['terminal'] for r in run['attempts'])
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/collections/__init__.py", line 709, in update
+    _count_elements(self, iterable)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/task8-quality-fix/audit.py", line 23, in <genexpr>
+    attempt_outcomes.update(r['terminal'] for r in run['attempts'])
+                            ~^^^^^^^^^^^^
+KeyError: 'terminal'

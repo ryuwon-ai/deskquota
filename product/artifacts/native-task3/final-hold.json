@@ -1,0 +1,155 @@
+{
+  "phase": "FINAL_HOLD",
+  "execution_finished": true,
+  "writer_runtime_ownership_released": true,
+  "source_stable_after_capture": true,
+  "source_drift": [],
+  "source_files": 79,
+  "changed_files": 12,
+  "source_manifest_sha256": "6cdfbec0b41839689364345e4b973a2f6af9409234fc5e2189f77f4144873e9a",
+  "changed_files_manifest_sha256": "598f7149080cdf3009d5a557d4b71491260e28ee3a20b4341c8025dd95157e10",
+  "source_archive_sha256": "17c82d6aec084de464f4ae4b1eca850772c46f195d55997dcd534b0b15b4451d",
+  "source_archive_bytes": 234307,
+  "binaries": {
+    "release": {
+      "path": "target/native-task3/release/llmgw",
+      "bytes": 9314736,
+      "sha256": "215511357446c5583ebd5d4a3d9aee6b8ea5df4d83387d31d0ce23ae2a97eb6d"
+    },
+    "debug": {
+      "path": "target/native-task3/debug/llmgw",
+      "bytes": 28254424,
+      "sha256": "66142c7dd7cd21a500b4075e77bf840283c4741ef178b275a09a5f19d3ba504c"
+    }
+  },
+  "lockfile": {
+    "path": "Cargo.lock",
+    "bytes": 52711,
+    "sha256": "c82e9357a135eb84f0d1be70d0a5f16d2a6c0f7a520cc140562306418a0d3e1c"
+  },
+  "toolchain_file": {
+    "path": "rust-toolchain.toml",
+    "bytes": 52,
+    "sha256": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b"
+  },
+  "verification": {
+    "full_debug": {
+      "passed": 283,
+      "failed": 0,
+      "rows": [
+        11,
+        0,
+        3,
+        19,
+        22,
+        26,
+        19,
+        12,
+        7,
+        19,
+        42,
+        32,
+        27,
+        44,
+        0
+      ],
+      "log": "artifacts/native-task3/cargo-test-full-final.log"
+    },
+    "patch_debug": {
+      "passed": 19,
+      "failed": 0
+    },
+    "patch_release": {
+      "passed": 19,
+      "failed": 0
+    },
+    "setup_contract": {
+      "passed": 42,
+      "failed": 0
+    },
+    "setup_persist_shared_helper": {
+      "passed": 5,
+      "failed": 0
+    },
+    "static": {
+      "rustfmt": "passed",
+      "check_all_targets": "passed",
+      "clippy_all_targets_deny_warnings": "passed",
+      "release_build": "passed"
+    }
+  },
+  "red_green": {
+    "initial_red": "artifacts/native-task3/patch-contract-red.log",
+    "nested_duplicate_red": "artifacts/native-task3/nested-duplicate-red.log",
+    "restore_partial_red": "artifacts/native-task3/restore-partial-red.log",
+    "final_green": "artifacts/native-task3/patch-contract-final.log",
+    "release_green": "artifacts/native-task3/patch-contract-release-final.log",
+    "misleading_failed_intermediate_names": [
+      "artifacts/native-task3/json-boundary-green.log",
+      "artifacts/native-task3/patch-contract-final-focused.log",
+      "artifacts/native-task3/restore-partial-green.log"
+    ]
+  },
+  "platform_evidence": {
+    "macos_runtime": [
+      "0600 token target enforcement without chmod",
+      "ordinary mode and extended ACL preservation",
+      "partial apply and partial restore recovery",
+      "bounded child-process interruption and journal recovery"
+    ],
+    "windows": [
+      "static cfg review of current-user DACL validation and ReplaceFileW path",
+      "three shared replacement-helper failure-model tests executed on macOS",
+      "no Windows host runtime claim"
+    ],
+    "linux": "static cfg review only; no Linux host runtime claim"
+  },
+  "protected": {
+    "baseline": "evidence/native-task2-quality-review/rereview/after.json",
+    "checked": 426,
+    "drift": [],
+    "benchmark_raws": 40,
+    "accounting_raws": 10,
+    "task2_source_manifest_sha256": "3495daf57907d5e4472513aaef5131cd6bf418fa58d369041b2d0484454ca603",
+    "task2_source_archive_sha256": "b221562a379edbd6cfe1e6faad77a1176ac0622774936a479d7734a190a6cd99",
+    "task2_final_hold_sha256": "573b40427c6dead18ceb5972ba33478d0e56839cb0c3e744f4a840655c76a5f7",
+    "task2_release": {
+      "path": "target/native-task2-quality-fix/release/llmgw",
+      "bytes": 9335616,
+      "sha256": "aa4015d5b34426b5d8e502d8cfbb2f4af2757e16a7cd2094b43e219c974cb3a6"
+    },
+    "task2_debug": {
+      "path": "target/native-task2-quality-fix/debug/llmgw",
+      "bytes": 28267032,
+      "sha256": "606b268ce4c0822263ffe2960f0075b61fec125eb3b02ac944bc8fb61b6aab4d"
+    },
+    "accounting_held": {
+      "path": "artifacts/accounting-ablation/task2/held-llmgw",
+      "bytes": 8697040,
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    },
+    "native_held": {
+      "path": "target/native/release/llmgw",
+      "bytes": 8697040,
+      "sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f"
+    }
+  },
+  "dependency": {
+    "added": "jsonc-parser 0.33.1",
+    "features": [
+      "cst",
+      "serde_json"
+    ],
+    "default_features": false,
+    "lock_change": "one direct package added; no retained package version changed"
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)\nbinary: rustc\ncommit-hash: 6b00bc3880198600130e1cf62b8f8a93494488cc\ncommit-date: 2025-06-23\nhost: aarch64-apple-darwin\nrelease: 1.88.0\nLLVM version: 20.1.5",
+  "cargo": "cargo 1.88.0 (873a06493 2025-05-10)\nrelease: 1.88.0\ncommit-hash: 873a0649350c486caf67be772828a4f36bb4734c\ncommit-date: 2025-05-10\nhost: aarch64-apple-darwin\nlibgit2: 1.9.0 (sys:0.20.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.80+curl-8.12.1 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.4.1 11 Feb 2025\nos: Mac OS 26.5.1 [64-bit]",
+  "cleanup": "artifacts/native-task3/cleanup-final.json",
+  "limits": [
+    "ConfigPatch is a library foundation; Task4 client adapters and CLI connect/disconnect wiring were not implemented",
+    "no real user client/auth file, real credential, external message, login, service registration, paid endpoint, model start/download, Git action, benchmark, or accounting rerun",
+    "external editors may still race the final metadata/hash check and atomic rename; no filesystem CAS is claimed"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "binary": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/artifacts/native-task6/final-v2/llmgw-macos-arm64",
+  "binary_sha256": "cf7c436c442c426a6e9a1d485a5261fe5e5a05c8b131b130e679e00eec2c646b",
+  "host": {
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "development_host": "Apple M4 32 GiB; not a low-end or clean OS account"
+  },
+  "environment_keys": [
+    "HOME",
+    "LC_ALL",
+    "PATH",
+    "TMPDIR",
+    "USERPROFILE",
+    "XDG_CONFIG_HOME"
+  ],
+  "wizard": {
+    "client_selection": "manual",
+    "client_version_query_children": 0,
+    "invocations": {
+      "direct_pid_sampled": {
+        "completed_save_only": true,
+        "sample_interval_ms": 20,
+        "sample_count": 1,
+        "raw_pid_samples": [
+          {
+            "elapsed_nanoseconds": 0,
+            "pid": 16878,
+            "rss_bytes": 2473984
+          }
+        ],
+        "sampled_pid_max_rss_bytes": 2473984,
+        "scope": "exact direct llmgw setup PID from the owned PTY process",
+        "limit": "sample maximum; peaks between observations may be missed"
+      },
+      "timed_command_tree": {
+        "completed_save_only": true,
+        "os_command_tree_peak_rss_bytes": 8896512,
+        "raw_peak_line": "             8896512  maximum resident set size",
+        "scope": "macOS wait4 value for the timed command and its descendants"
+      }
+    },
+    "invocation_count": 2,
+    "reason": "one direct invocation permits exact PID sampling; a separate timed invocation records the OS command-tree peak"
+  },
+  "idle_worker": {
+    "sample_interval_ms": 100,
+    "samples_bytes": [
+      10010624,
+      10010624,
+      10010624,
+      10010624,
+      10010624,
+      10010624,
+      10010624,
+      10010624,
+      10010624,
+      10010624
+    ],
+    "sampled_max_rss_bytes": 10010624,
+    "scope": "owned worker PID only"
+  },
+  "lifecycle": {
+    "cycles": 3,
+    "on_raw_nanoseconds": [
+      46194917,
+      42126584,
+      34719375
+    ],
+    "off_raw_nanoseconds": [
+      46519917,
+      34706000,
+      36115292
+    ],
+    "final_authenticated_state": "stopped"
+  },
+  "network": {
+    "upstream_attempts_observed": "not instrumented",
+    "saved_upstream": {
+      "api_base": "http://127.0.0.1:11434/v1",
+      "auth": "none"
+    },
+    "wizard_model_listing_selected": false,
+    "wizard_inference_selected": false
+  },
+  "cleanup": {
+    "authenticated_off_and_stopped_confirmed": true,
+    "temporary_home_removed": true
+  },
+  "limitations": [
+    "macOS development host observation only",
+    "no clean OS account, low-end PC, Windows, Linux, login, signing, or quarantine proof",
+    "raw samples are descriptive and are not percentiles or superiority evidence"
+  ]
+}

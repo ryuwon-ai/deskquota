@@ -1,0 +1,60 @@
+{
+  "check": "foreground_stream_lifetime_loopback_only",
+  "timestamp": "2026-09-12T05:49:46.151654+00:00",
+  "os": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "binary_sha256": "a5edaa0c559a043272119e4b21493a2e6cd91889045df25e6f9eea816de47b76",
+  "binary_unchanged_during_probe": true,
+  "passed": true,
+  "cases": [
+    {
+      "policy": "drain",
+      "disconnect_phase": "after_terminal_marker",
+      "passed": true,
+      "upstream_attempts": 2,
+      "upstream_close_observed": false,
+      "body_eof_gate_completed": true,
+      "control_stop_exit_zero": true
+    },
+    {
+      "policy": "close",
+      "disconnect_phase": "after_terminal_marker",
+      "passed": true,
+      "upstream_attempts": 2,
+      "upstream_close_observed": true,
+      "body_eof_gate_completed": false,
+      "control_stop_exit_zero": true
+    },
+    {
+      "policy": "drain",
+      "disconnect_phase": "before_headers",
+      "passed": true,
+      "upstream_attempts": 2,
+      "upstream_close_observed": false,
+      "body_eof_gate_completed": true,
+      "control_stop_exit_zero": true
+    },
+    {
+      "policy": "drain",
+      "disconnect_phase": "after_terminal_marker",
+      "force_shutdown": true,
+      "passed": true,
+      "upstream_attempts": 1,
+      "upstream_close_observed": true,
+      "body_eof_gate_completed": false,
+      "control_stop_exit_zero": true,
+      "observed_stop_seconds": 10.004
+    }
+  ],
+  "quota_fixture": {
+    "rpm": "unlimited",
+    "tpm": "unknown"
+  },
+  "limitations": [
+    "Synthetic HTTP, no actual LLM or agent task",
+    "RST cancellation; does not replace half-close, graceful-close or slow-reader tests",
+    "HTTP body/connection observations do not prove engine abort or quota refund",
+    "Forced process exit does not independently prove library child-task join ordering",
+    "No performance or cross-platform acceptance claim",
+    "Candidate port is released before process bind; startup is checked"
+  ]
+}

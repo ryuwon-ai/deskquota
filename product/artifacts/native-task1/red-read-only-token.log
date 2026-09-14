@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-816a0bd904765dcb)
+
+running 1 test
+test existing_read_only_private_tokens_need_no_permission_changes ... FAILED
+
+failures:
+
+---- existing_read_only_private_tokens_need_no_permission_changes stdout ----
+
+thread 'existing_read_only_private_tokens_need_no_permission_changes' panicked at tests/lifecycle_contract.rs:552:380:
+existing private token should only be read
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    existing_read_only_private_tokens_need_no_permission_changes
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.93s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

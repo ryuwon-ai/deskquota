@@ -1,0 +1,25 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.93s
+     Running tests/resource_bounds.rs (target/debug/deps/resource_bounds-b134dc434ffe8e72)
+
+running 2 tests
+test declared_body_cap_uses_protocol_error_and_starts_no_wire_attempt ... ok
+test sixty_four_partial_bodies_release_memory_on_rejection_and_another_request_progresses ... FAILED
+
+failures:
+
+---- sixty_four_partial_bodies_release_memory_on_rejection_and_another_request_progresses stdout ----
+
+thread 'sixty_four_partial_bodies_release_memory_on_rejection_and_another_request_progresses' panicked at tests/resource_bounds.rs:59:5:
+assertion `left == right` failed
+  left: 400
+ right: 200
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    sixty_four_partial_bodies_release_memory_on_rejection_and_another_request_progresses
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `--test resource_bounds`

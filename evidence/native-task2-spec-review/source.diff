@@ -1,0 +1,4256 @@
+--- baseline/product/Cargo.lock
++++ product/Cargo.lock
+@@ -266,6 +266,18 @@
+ ]
+ 
+ [[package]]
++name = "console"
++version = "0.16.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e96a4956774c13c126a8b5af4daa79384f4d826534c95a02d76afb39e2ab64e3"
++dependencies = [
++ "encode_unicode",
++ "libc",
++ "unicode-width",
++ "windows-sys 0.61.2",
++]
++
++[[package]]
+ name = "const-oid"
+ version = "0.10.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -303,6 +315,16 @@
+ checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
+ dependencies = [
+  "hybrid-array",
++]
++
++[[package]]
++name = "dialoguer"
++version = "0.12.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "25f104b501bf2364e78d0d3974cbc774f738f5865306ed128e1e0d7499c0ad96"
++dependencies = [
++ "console",
++ "shell-words",
+ ]
+ 
+ [[package]]
+@@ -332,6 +354,12 @@
+ version = "1.0.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
++
++[[package]]
++name = "encode_unicode"
++version = "1.0.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
+ 
+ [[package]]
+ name = "equivalent"
+@@ -858,6 +886,7 @@
+  "axum",
+  "bytes",
+  "clap",
++ "dialoguer",
+  "exacl",
+  "fs4",
+  "futures-util",
+@@ -869,11 +898,13 @@
+  "rand",
+  "reqwest",
+  "rustix",
++ "rustls",
+  "serde",
+  "serde_json",
+  "sha2",
+  "socket2",
+  "tokio",
++ "tokio-rustls",
+  "toml_edit",
+  "url",
+  "windows-sys 0.61.2",
+@@ -1166,6 +1197,7 @@
+ checksum = "6725596c3f2c3a0aef021139e145d4eafe314a6623e4680ca83852b2c67ab2ba"
+ dependencies = [
+  "aws-lc-rs",
++ "log",
+  "once_cell",
+  "rustls-pki-types",
+  "rustls-webpki",
+@@ -1357,6 +1389,12 @@
+ ]
+ 
+ [[package]]
++name = "shell-words"
++version = "1.1.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "dc6fe69c597f9c37bfeeeeeb33da3530379845f10be461a66d16d03eca2ded77"
++
++[[package]]
+ name = "shlex"
+ version = "2.0.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1688,6 +1726,12 @@
+ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+ 
+ [[package]]
++name = "unicode-width"
++version = "0.2.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
++
++[[package]]
+ name = "untrusted"
+ version = "0.9.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+--- baseline/product/Cargo.toml
++++ product/Cargo.toml
+@@ -17,6 +17,7 @@
+ axum = { version = "=0.8.9", default-features = false, features = ["http1"] }
+ bytes = "=1.11.1"
+ clap = { version = "=4.6.6", features = ["derive"] }
++dialoguer = { version = "=0.12.0", default-features = false }
+ fs4 = { version = "=1.1.0", default-features = false, features = ["sync"] }
+ futures-util = { version = "=0.3.32", default-features = false, features = ["std"] }
+ httpdate = "=1.0.3"
+@@ -30,7 +31,7 @@
+ serde_json = "=1.0.149"
+ sha2 = "=0.11.0"
+ socket2 = "=0.6.5"
+-tokio = { version = "=1.49.0", features = ["net", "rt-multi-thread", "macros", "time", "sync", "signal", "io-util"] }
++tokio = { version = "=1.49.0", features = ["net", "rt-multi-thread", "rt", "macros", "time", "sync", "signal", "io-util"] }
+ toml_edit = { version = "=0.25.15", features = ["serde"] }
+ url = "=2.5.8"
+ 
+@@ -44,7 +45,9 @@
+ windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Threading"] }
+ 
+ [dev-dependencies]
++rustls = "=0.23.44"
+ tokio = { version = "=1.49.0", features = ["test-util"] }
++tokio-rustls = "=0.26.5"
+ 
+ [lints.rust]
+ unsafe_code = "deny"
+--- baseline/product/docs/runtime-contract.md
++++ product/docs/runtime-contract.md
+@@ -3,17 +3,123 @@
+ This package implements typed configuration and a native loopback HTTP gateway
+ with bounded streaming and worker-owned upstream lifetimes. Core behavior is
+ unchanged except that authenticated control remains available during shutdown.
+-Native Task 1 adds the following lifecycle boundary; setup, client adapters,
+-autostart and installers remain separate work.
+-
+-## Native lifecycle (Task 1)
+-
+-An explicit global `--config PATH` is required, before or after the subcommand.
+-`on`, `off`, `restart`, `status [--json]`, `run`, and offline `doctor [--json]`
+-are supported. Bare-command defaults and setup are not implemented. Doctor JSON
+-reports `state_directory` as the machine-readable fixture boundary and creates
+-no runtime state. Its current check validates configuration; network/inference
+-and client diagnostics are not implemented.
++Native Tasks 1 and 2 add lifecycle control, first-run setup, explicit upstream
++transport settings, and bounded doctor network checks. Client adapters,
++autostart registration, installers, and model management remain separate work.
++
++## Native lifecycle and setup (Tasks 1–2)
++
++The global `--config PATH` is accepted before or after every subcommand. A
++relative path is resolved once from the invocation directory. With no explicit
++path, the standard config is `%APPDATA%\\llmgw\\config.toml` on Windows,
++`~/Library/Application Support/llmgw/config.toml` on macOS, and
++`${XDG_CONFIG_HOME:-~/.config}/llmgw/config.toml` on other Unix systems.
++
++`llmgw` with no subcommand starts setup when the resolved config is absent and
++runs `on` when it exists. `llmgw setup` reconfigures an existing file using its
++current values as defaults. `on`, `off`, `restart`, `status [--json]`, `run`, and
++`doctor [--json]` remain available. First-run setup requires terminal input. A
++pipe or other non-terminal first run exits 2 immediately, creates nothing, and
++prints the explicit setup command plus `examples/fixture.toml` guidance. Normal
++or idempotent operations exit 0, operational failures exit 1, invalid arguments
++and unconfigured non-terminal use exit 2, and an explicit wizard cancel exits
++130. Ctrl-C while Dialoguer is reading an input follows the terminal's SIGINT
++path, whose shell status is also 130.
++
++### Setup boundary
++
++The wizard uses Dialoguer 0.12.0 and creates its terminal adapter only for the
++interactive setup command. Each step has a Back/Cancel action. No config, state,
++client, or login file is written before final Apply. The environment choice is
++only a set of defaults: it does not start or download a local model and does not
++infer a verified provider protocol. The connection step requires the user to
++select the Completions, Responses, or Messages formats the upstream actually
++supports. The gateway performs no API format translation.
++
++Upstream authentication can forward the incoming client header, read a complete
++header value from a named environment variable, or send no auth. The environment
++mode neither displays the value nor invents a `Bearer` prefix. Availability in
++the current shell and availability after the next login are separate facts.
++Setup only records a login request as pending; it never copies a secret into a
++login registration. Forward mode cannot be exercised by doctor because doctor
++has no incoming client credential.
++
++Corporate setup may add an explicit HTTP(S) proxy without embedded credentials
++and a PEM CA bundle. Environment proxy discovery remains disabled. Explicit
++proxy use always bypasses localhost and loopback addresses. The client merges
++the explicit CA bundle with normal system roots, keeps TLS verification enabled,
++disables redirects and retries, and is built once when a worker starts. It reads
++the CA file once while building that client. No CA is installed into the OS.
++
++Model listing is a separate, optional, bounded 10-second `GET` to the designated
++upstream's `/models` path. Responses are limited to 64 KiB and 256 nonempty IDs.
++A 404, malformed response, empty listing, missing auth, or network failure is
++shown as unavailable and manual model entry remains possible. Listing success
++does not verify generation, tools, vision, reasoning, prices, or any other model
++capability. Setup performs no catalog, pricing, telemetry, update, or inference
++request automatically.
++
++RPM and TPM are each explicitly known with a nonzero number, unknown, or
++unlimited. Unknown is not treated as unlimited. Setup separately records whether
++other PCs share the contract and whether the provider describes combined or
++separate input/output limits; contracts that the gateway cannot model are shown
++as estimated. Concurrency defaults to 1 and is bounded to 1–16. Existing
++accounting, retry, cancel, multi-root, and multi-model settings are preserved
++during reconfiguration unless the user explicitly replaces them.
++
++The model `max_output_tokens` value collected by setup is a user-supplied
++reservation fallback for local accounting when a request omits its own cap. It
++is not a verified provider limit. The gateway does not insert it into the body
++or enforce it upstream. The summary keeps listing verification and capability
++verification separate and leaves unknown capabilities unverified.
++
++Setup listens on loopback port 4141 by default. Pi, Claude Code, Codex, and manual
++client choices are pending intents only: Task 2 never edits their files or
++claims they are connected. Login registration is likewise pending. Setup stores
++only these client names, the login request, and the shared/separate quota answers
++in a private `.<config-name>.setup-pending.json` sidecar so a rerun preserves
++them. The sidecar contains no credential value or client before-image and does
++not affect the worker config fingerprint. The final
++preview shows absolute config/state paths, old and normalized new upstream bases,
++explicit proxy/CA behavior, route URLs, protocol/model visibility, estimated
++quota facts, the auth environment name without its value, fingerprint impact,
++and pending client/login work. Root IDs use only ASCII letters, digits, `-`, and
++`_`; for example `pi-work` is valid and a root containing a space is rejected.
++OpenAI-style clients use `http://127.0.0.1:4141/r/pi-work/v1`. A Messages client
++uses `http://127.0.0.1:4141/r/pi-work` and appends `/v1/messages` exactly once.
++Sessions sharing that configured root share one root budget.
++
++Save only writes the config and preserves any running worker and all client
++files. A changed file then remains pending for an explicit restart. Save and
++start calls the authenticated lifecycle: it starts a stopped config or explicitly
++restarts a running one and claims success only after fingerprint/nonce/address
++readiness. That readiness is separate from the known-quota admission hold, which
++can still last 60 seconds.
++
++New config directories are created privately on Unix and new config and pending
++files use mode 0600. Existing regular non-symlink files are updated without
++silently changing their permissions or ACL. A no-op reconfiguration preserves
++the exact config source bytes, including comments, and edited scalar values
++preserve TOML decor and inline comments. Setup refuses a link or non-regular
++config or pending target.
++
++### Doctor boundary
++
++Plain `doctor` is fully offline. It validates config and reports the resolved
++state path, local port availability, TLS/CA availability, auth-reference
++availability, and that worker readiness was not checked. `doctor --network`
++performs exactly one bounded TLS/`GET /models` check and no generation.
++`doctor --inference --model ID --max-output-tokens N` performs exactly one
++bounded generation request for that configured model and does not list models.
++Non-2xx, missing auth, unsupported Forward auth, missing CA, timeout, and response
++size failures remain distinct operational failures. Outputs name environment
++references but never print their values.
++
++Doctor JSON reports `state_directory` as the machine-readable fixture boundary
++and creates no runtime state. No mandatory Python, Node.js, Redis, Docker, or WSL
++runtime is introduced. The owned PTY and network fixture drivers use Python only
++as test tooling. Interactive and synthetic loopback runtime verification for
++Task 2 was performed on macOS; Linux and Windows setup runtime remain unverified.
+ 
+ The canonical config path's SHA256 selects a sibling `.llmgw-<64 hex hash>`
+ directory. Config content SHA256 separately identifies the immutable running
+--- baseline/product/scripts/probe_native_setup.py
++++ product/scripts/probe_native_setup.py
+@@ -0,0 +1,295 @@
++#!/usr/bin/env python3
++"""Owned macOS PTY smoke for the first-run wizard. Uses no real upstream."""
++from __future__ import annotations
++
++import argparse
++import fcntl
++import json
++import os
++import pty
++import select
++import signal
++import shutil
++import socket
++import subprocess
++import tempfile
++import termios
++import time
++from pathlib import Path
++
++
++def free_port() -> int:
++    with socket.socket() as sock:
++        sock.bind(("127.0.0.1", 0))
++        return int(sock.getsockname()[1])
++
++
++class PtyRun:
++    def __init__(self, binary: Path, config: Path, registry: list[PtyRun]):
++        master, slave = pty.openpty()
++        self.master = master
++        self.buffer = b""
++        self.cursor = 0
++        self.closed = False
++
++        def attach_controlling_terminal() -> None:
++            os.setsid()
++            fcntl.ioctl(slave, termios.TIOCSCTTY, 0)
++
++        self.process = subprocess.Popen(
++            [str(binary), "setup", "--config", str(config)],
++            stdin=slave,
++            stdout=slave,
++            stderr=slave,
++            close_fds=True,
++            preexec_fn=attach_controlling_terminal,
++        )
++        os.close(slave)
++        registry.append(self)
++
++    def expect(self, marker: str, timeout: float = 5.0) -> None:
++        wanted = marker.encode()
++        deadline = time.monotonic() + timeout
++        while True:
++            found = self.buffer.find(wanted, self.cursor)
++            if found >= 0:
++                self.cursor = found + len(wanted)
++                return
++            remaining = deadline - time.monotonic()
++            if remaining <= 0:
++                raise AssertionError(f"PTY timeout waiting for {marker!r}: {self.buffer[-2000:]!r}")
++            ready, _, _ = select.select([self.master], [], [], remaining)
++            if not ready:
++                continue
++            try:
++                chunk = os.read(self.master, 4096)
++            except OSError:
++                chunk = b""
++            if not chunk:
++                raise AssertionError(f"PTY closed waiting for {marker!r}: {self.buffer[-2000:]!r}")
++            self.buffer += chunk
++
++    def send(self, value: bytes) -> None:
++        os.write(self.master, value)
++
++    def finish(self, expected: int) -> str:
++        deadline = time.monotonic() + 10
++        while self.process.poll() is None and time.monotonic() < deadline:
++            ready, _, _ = select.select([self.master], [], [], 0.1)
++            if ready:
++                try:
++                    self.buffer += os.read(self.master, 4096)
++                except OSError:
++                    pass
++        code = self.process.wait(timeout=1)
++        self.close()
++        if code != expected:
++            raise AssertionError(f"expected exit {expected}, got {code}: {self.buffer[-4000:]!r}")
++        return self.buffer.decode("utf-8", errors="replace")
++
++    def close(self) -> None:
++        if self.closed:
++            return
++        if self.process.poll() is None:
++            try:
++                os.killpg(self.process.pid, signal.SIGTERM)
++                self.process.wait(timeout=2)
++            except (ProcessLookupError, subprocess.TimeoutExpired):
++                if self.process.poll() is None:
++                    try:
++                        os.killpg(self.process.pid, signal.SIGKILL)
++                    except ProcessLookupError:
++                        pass
++                    self.process.wait(timeout=2)
++        os.close(self.master)
++        self.closed = True
++
++
++def choose(run: PtyRun, marker: str, keys: bytes = b"\r") -> None:
++    run.expect(marker)
++    run.send(keys)
++
++
++def complete(binary: Path, config: Path, port: int, start: bool, registry: list[PtyRun]) -> str:
++    run = PtyRun(binary, config, registry)
++    choose(run, "Setup: Environment")
++    choose(run, "Environment preset")
++    choose(run, "Setup: Connection")
++    choose(run, "Upstream API base")
++    choose(run, "Actually supported endpoint", b" \r")
++    choose(run, "Upstream auth")
++    choose(run, "Setup: Models")
++    choose(run, "Try one bounded GET")
++    choose(run, "Manual model ID", "모델 with space\r".encode())
++    choose(run, "Nonzero reservation bound")
++    choose(run, "Setup: Quota")
++    choose(run, "RPM")
++    choose(run, "TPM")
++    choose(run, "same quota shared")
++    choose(run, "separate input/output")
++    choose(run, "Concurrency")
++    choose(run, "Setup: Run")
++    choose(run, "Local loopback port", f"{port}\r".encode())
++    choose(run, "Request start at next login")
++    choose(run, "Setup: Tools")
++    choose(run, "Client intents")
++    choose(run, "Setup: Apply")
++    choose(run, "Apply", b"\x1b[A\r" if start else b"\r")
++    return run.finish(0)
++
++
++def stop_owned_configs(binary: Path, configs: list[Path], strict: bool) -> None:
++    failures: list[str] = []
++    for config in configs:
++        if not config.exists():
++            continue
++        try:
++            off = subprocess.run(
++                [binary, "off", "--config", config],
++                capture_output=True,
++                timeout=12,
++            )
++            status = subprocess.run(
++                [binary, "status", "--json", "--config", config],
++                capture_output=True,
++                text=True,
++                timeout=5,
++            )
++            state = json.loads(status.stdout).get("state") if status.returncode == 0 else None
++            if off.returncode != 0 or state != "stopped":
++                failures.append(f"{config}: off={off.returncode}, state={state}")
++        except (subprocess.SubprocessError, json.JSONDecodeError) as error:
++            failures.append(f"{config}: {error}")
++    if strict and failures:
++        raise AssertionError("owned worker cleanup failed: " + "; ".join(failures))
++
++
++def cleanup_then_remove(binary: Path, runs: list[PtyRun], configs: list[Path], root: Path) -> None:
++    for run in runs:
++        run.close()
++    stop_owned_configs(binary, configs, strict=True)
++    shutil.rmtree(root)
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--binary", type=Path, required=True)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    root = Path(tempfile.mkdtemp(prefix="llmgw-native-setup-한글 space-"))
++    evidence: dict[str, object] = {"binary": str(args.binary.resolve()), "cases": {}}
++    runs: list[PtyRun] = []
++    possible_configs: list[Path] = []
++    try:
++        cancel_config = root / "cancel 경로" / "gateway 설정.toml"
++        possible_configs.append(cancel_config)
++        cancel_config.parent.mkdir()
++        run = PtyRun(args.binary, cancel_config, runs)
++        run.expect("Setup: Environment")
++        run.send(b"\x1b")
++        cancel_log = run.finish(130)
++        if cancel_config.exists() or list(cancel_config.parent.iterdir()):
++            raise AssertionError("cancel created a file")
++        evidence["cases"]["cancel"] = {"exit": 130, "files": 0, "log_tail": cancel_log[-800:]}
++
++        back_config = root / "back 경로" / "gateway 설정.toml"
++        possible_configs.append(back_config)
++        back_config.parent.mkdir()
++        run = PtyRun(args.binary, back_config, runs)
++        choose(run, "Setup: Environment")
++        choose(run, "Environment preset")
++        choose(run, "Setup: Connection", b"\x1b[B\r")
++        run.expect("Setup: Environment")
++        run.send(b"\x1b")
++        back_log = run.finish(130)
++        if back_log.count("Setup: Environment") < 2:
++            raise AssertionError("Back did not produce a fresh Environment screen")
++        if back_config.exists() or list(back_config.parent.iterdir()):
++            raise AssertionError("back/cancel created a file")
++        evidence["cases"]["back_then_cancel"] = {"exit": 130, "returned_to_environment": True, "files": 0, "log_tail": back_log[-1000:]}
++
++        ctrl_config = root / "ctrl-c 경로" / "gateway 설정.toml"
++        possible_configs.append(ctrl_config)
++        ctrl_config.parent.mkdir()
++        run = PtyRun(args.binary, ctrl_config, runs)
++        choose(run, "Setup: Environment")
++        choose(run, "Environment preset")
++        choose(run, "Setup: Connection")
++        run.expect("Upstream API base")
++        run.send(b"\x03")
++        ctrl_log = run.finish(-signal.SIGINT)
++        if ctrl_config.exists() or list(ctrl_config.parent.iterdir()):
++            raise AssertionError("Ctrl-C created a file")
++        evidence["cases"]["input_ctrl_c"] = {"subprocess_signal": "SIGINT", "shell_equivalent_exit": 130, "files": 0, "log_tail": ctrl_log[-800:]}
++
++        save_config = root / "저장 only space" / "gateway 설정.toml"
++        possible_configs.append(save_config)
++        save_config.parent.mkdir()
++        save_log = complete(args.binary, save_config, free_port(), False, runs)
++        status = subprocess.run([args.binary, "status", "--json", "--config", save_config], check=True, capture_output=True, text=True)
++        state = json.loads(status.stdout)
++        if state["state"] != "stopped":
++            raise AssertionError(state)
++        model_unicode = "모델 with space" in save_config.read_text()
++        if not model_unicode:
++            raise AssertionError("Unicode model input was not preserved")
++        evidence["cases"]["save_only"] = {"exit": 0, "state": "stopped", "model_unicode": True, "log_tail": save_log[-1200:]}
++
++        start_config = root / "저장 and start space" / "gateway 설정.toml"
++        possible_configs.append(start_config)
++        start_config.parent.mkdir()
++        start_log = complete(args.binary, start_config, free_port(), True, runs)
++        status = subprocess.run([args.binary, "status", "--json", "--config", start_config], check=True, capture_output=True, text=True)
++        state = json.loads(status.stdout)
++        if state["state"] != "running" or not state.get("identity", {}).get("fingerprint"):
++            raise AssertionError(state)
++        subprocess.run([args.binary, "off", "--config", start_config], check=True, capture_output=True)
++        evidence["cases"]["save_and_start"] = {"exit": 0, "state": "running", "authenticated_identity": True, "cleaned": True, "log_tail": start_log[-1200:]}
++
++        failure_config = root / "intentional failure cleanup" / "gateway 설정.toml"
++        possible_configs.append(failure_config)
++        failure_config.parent.mkdir()
++        try:
++            complete(args.binary, failure_config, free_port(), True, runs)
++            raise AssertionError("synthetic harness failure after authenticated start")
++        except AssertionError as error:
++            if str(error) != "synthetic harness failure after authenticated start":
++                raise
++        finally:
++            stop_owned_configs(args.binary, [failure_config], strict=True)
++        evidence["cases"]["intentional_failure_cleanup"] = {
++            "injected_after_start": True,
++            "authenticated_off": True,
++            "confirmed_stopped": True,
++        }
++
++        preserve_root = Path(tempfile.mkdtemp(prefix="llmgw-cleanup-failure-preserve-"))
++        preserve_config = preserve_root / "gateway.toml"
++        preserve_config.write_text("synthetic cleanup failure fixture\n")
++        failing_binary = preserve_root / "fail-off.sh"
++        failing_binary.write_text("#!/bin/sh\nexit 1\n")
++        failing_binary.chmod(0o700)
++        try:
++            cleanup_then_remove(failing_binary, [], [preserve_config], preserve_root)
++            raise AssertionError("cleanup failure did not stop temp removal")
++        except AssertionError as error:
++            if not str(error).startswith("owned worker cleanup failed:"):
++                raise
++            if not preserve_root.exists() or not preserve_config.exists():
++                raise AssertionError("cleanup failure did not preserve recovery state")
++        finally:
++            shutil.rmtree(preserve_root, ignore_errors=True)
++        evidence["cases"]["cleanup_failure_preserves_state"] = {
++            "injected_off_failure": True,
++            "temp_and_control_state_preserved": True,
++        }
++        evidence["result"] = "pass"
++        args.output.parent.mkdir(parents=True, exist_ok=True)
++        args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n")
++        return 0
++    finally:
++        cleanup_then_remove(args.binary, runs, possible_configs, root)
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- baseline/product/src/admission/mod.rs
++++ product/src/admission/mod.rs
+@@ -424,6 +424,8 @@
+             upstream: Upstream {
+                 api_base: "http://127.0.0.1:9".parse().unwrap(),
+                 auth: Auth::None,
++                proxy: None,
++                ca_bundle: None,
+             },
+             quota: Quota {
+                 rpm: Limit::Unlimited,
+@@ -467,6 +469,8 @@
+             upstream: Upstream {
+                 api_base: "http://127.0.0.1:9".parse().unwrap(),
+                 auth: Auth::None,
++                proxy: None,
++                ca_bundle: None,
+             },
+             quota: Quota {
+                 rpm: Limit::Known(1.try_into().unwrap()),
+@@ -524,6 +528,8 @@
+             upstream: Upstream {
+                 api_base: "http://127.0.0.1:9".parse().unwrap(),
+                 auth: Auth::None,
++                proxy: None,
++                ca_bundle: None,
+             },
+             quota: Quota {
+                 rpm: Limit::Unknown,
+--- baseline/product/src/cli.rs
++++ product/src/cli.rs
+@@ -1,6 +1,10 @@
+ use crate::config::LoadedConfig;
+ use clap::{Parser, Subcommand};
+-use std::{path::PathBuf, process::ExitCode};
++use std::{
++    io::IsTerminal,
++    path::{Path, PathBuf},
++    process::ExitCode,
++};
+ #[derive(Debug, Parser)]
+ #[command(
+     name = "llmgw",
+@@ -11,10 +15,12 @@
+     #[arg(long, global = true, value_name = "PATH")]
+     config: Option<PathBuf>,
+     #[command(subcommand)]
+-    command: Command,
++    command: Option<Command>,
+ }
+ #[derive(Debug, Subcommand)]
+ enum Command {
++    /// Configure the gateway interactively. No files are changed before final apply.
++    Setup,
+     /// Run in the foreground until Ctrl-C or authenticated stop.
+     Run,
+     /// Start one background worker and confirm authenticated readiness.
+@@ -32,6 +38,16 @@
+     Doctor {
+         #[arg(long)]
+         json: bool,
++        /// Perform one bounded TLS and GET /models check against the configured upstream.
++        #[arg(long, conflicts_with = "inference")]
++        network: bool,
++        /// Perform one explicit paid-capable generation smoke. Never runs as part of --network.
++        #[arg(long)]
++        inference: bool,
++        #[arg(long, requires = "inference")]
++        model: Option<String>,
++        #[arg(long, requires = "inference", value_parser = clap::value_parser!(u64).range(1..))]
++        max_output_tokens: Option<u64>,
+     },
+     #[command(hide = true)]
+     Worker {
+@@ -41,41 +57,73 @@
+ }
+ pub fn run() -> Result<ExitCode, crate::lifecycle::Error> {
+     let cli = Cli::parse();
+-    let config = cli
+-        .config
+-        .ok_or_else(|| {
+-            clap::Error::raw(
+-                clap::error::ErrorKind::MissingRequiredArgument,
+-                "--config <PATH> is required",
+-            )
+-        })
+-        .unwrap_or_else(|e| e.exit());
+-    if let Command::Doctor { json } = cli.command {
++    let config = resolve_config(cli.config.as_deref())?;
++    let command = cli.command;
++    if matches!(command, Some(Command::Setup)) || (command.is_none() && !config.exists()) {
++        if !std::io::stdin().is_terminal() || !std::io::stderr().is_terminal() {
++            eprintln!(
++                "setup required: run `llmgw setup --config {}` in a terminal; sample config: examples/fixture.toml; runtime guide: docs/runtime-contract.md",
++                config.display()
++            );
++            return Ok(ExitCode::from(2));
++        }
++        let existing = if config.exists() {
++            Some(LoadedConfig::load(&config)?)
++        } else {
++            None
++        };
++        let mut prompts = crate::setup::prompts::DialoguerIo::new(config.clone());
++        return match crate::setup::run_wizard(&mut prompts, existing.as_ref())? {
++            crate::setup::SetupOutcome::Cancelled => Ok(crate::setup::cancelled_exit()),
++            crate::setup::SetupOutcome::Ready { draft, mode } => {
++                let result = crate::setup::apply(&config, &draft, mode)?;
++                println!("{}", draft.summary(&result.config_path)?);
++                println!(
++                    "apply: {:?}; runtime: {}; authenticated readiness: {}",
++                    result.mode, result.runtime_state, result.authenticated_readiness
++                );
++                Ok(ExitCode::SUCCESS)
++            }
++        };
++    }
++    if !config.exists() && !matches!(&command, Some(Command::Worker { .. })) {
++        eprintln!(
++            "gateway is not configured at {}; run `llmgw setup --config {}`",
++            config.display(),
++            config.display()
++        );
++        return Ok(ExitCode::from(2));
++    }
++    let command = command.unwrap_or(Command::On);
++    if let Command::Doctor {
++        json,
++        network,
++        inference,
++        model,
++        max_output_tokens,
++    } = command
++    {
+         let loaded = LoadedConfig::load(&config)?;
+-        if json {
+-            println!(
+-                "{}",
+-                serde_json::json!({"configuration":"valid", "source_path":loaded.source_path, "fingerprint":loaded.fingerprint.as_str(), "state_directory":loaded.state_paths.directory})
+-            );
+-        } else {
+-            println!(
+-                "configuration valid: {} ({})",
+-                loaded.source_path.display(),
+-                loaded.fingerprint.as_str()
+-            );
+-        }
+-        return Ok(ExitCode::SUCCESS);
+-    }
+-    if matches!(cli.command, Command::Worker { .. }) {
++        return doctor(
++            loaded,
++            json,
++            network,
++            inference,
++            model.as_deref(),
++            max_output_tokens,
++        );
++    }
++    if matches!(command, Command::Worker { .. }) {
+         crate::lifecycle::prepare_worker()?;
+     }
+     let runtime = tokio::runtime::Builder::new_multi_thread()
+         .enable_all()
+         .build()?;
+     runtime.block_on(async move {
+-        let json = matches!(cli.command, Command::Status { json: true });
+-        let off = matches!(cli.command, Command::Off);
+-        let result = match cli.command {
++        let json = matches!(command, Command::Status { json: true });
++        let off = matches!(command, Command::Off);
++        let result = match command {
++            Command::Setup => unreachable!(),
+             Command::Run => return crate::lifecycle::worker(&config, None).await.map(|()| ExitCode::SUCCESS),
+             Command::Worker { fingerprint } => {
+                 return match crate::lifecycle::worker(&config, Some(&fingerprint)).await {
+@@ -104,6 +152,166 @@
+     })
+ }
+ 
++fn doctor(
++    loaded: LoadedConfig,
++    json: bool,
++    network: bool,
++    inference: bool,
++    model: Option<&str>,
++    max_output_tokens: Option<u64>,
++) -> Result<ExitCode, crate::lifecycle::Error> {
++    let auth = match &loaded.config.upstream.auth {
++        crate::config::Auth::None => "not required".to_owned(),
++        crate::config::Auth::Forward => {
++            "incoming client credential required; direct network doctor unsupported".to_owned()
++        }
++        crate::config::Auth::Env { name, .. } if std::env::var_os(name).is_some() => {
++            format!("environment reference {name} available; value hidden")
++        }
++        crate::config::Auth::Env { name, .. } => {
++            format!("environment reference {name} unavailable")
++        }
++    };
++    let ca = loaded.config.upstream.ca_bundle.as_ref().map_or_else(
++        || "system trust only".to_owned(),
++        |path| {
++            format!(
++                "system trust plus explicit bundle {} ({})",
++                path.display(),
++                if path.is_file() {
++                    "available"
++                } else {
++                    "unavailable"
++                }
++            )
++        },
++    );
++    let port = match std::net::TcpListener::bind(loaded.config.listen) {
++        Ok(listener) => {
++            drop(listener);
++            "available"
++        }
++        Err(_) => "unavailable (possibly occupied by this gateway or another process)",
++    };
++    let static_unavailable = matches!(loaded.config.upstream.auth, crate::config::Auth::Env { ref name, .. } if std::env::var_os(name).is_none())
++        || loaded
++            .config
++            .upstream
++            .ca_bundle
++            .as_ref()
++            .is_some_and(|path| !path.is_file());
++    if !network && !inference {
++        if json {
++            println!(
++                "{}",
++                serde_json::json!({
++                    "configuration":"valid", "source_path":loaded.source_path,
++                    "fingerprint":loaded.fingerprint.as_str(), "state_directory":loaded.state_paths.directory,
++                    "network":"not_requested", "inference":"not_requested", "auth_availability":auth,
++                    "tls":ca, "proxy":loaded.config.upstream.proxy.as_ref().map_or("disabled", |_| "explicit"),
++                    "port_availability":port, "worker_readiness":"not_checked"
++                })
++            );
++        } else {
++            println!(
++                "configuration valid: {} ({})",
++                loaded.source_path.display(),
++                loaded.fingerprint.as_str()
++            );
++            println!("TLS: {ca}");
++            println!("auth availability: {auth}");
++            println!("port availability: {port}");
++            println!("worker readiness: not checked");
++            println!("network: not requested");
++            println!("inference: not requested");
++        }
++        if static_unavailable {
++            return Err(std::io::Error::other(
++                "required TLS or environment reference is unavailable; values remain hidden",
++            )
++            .into());
++        }
++        return Ok(ExitCode::SUCCESS);
++    }
++    let runtime = tokio::runtime::Builder::new_current_thread()
++        .enable_all()
++        .build()?;
++    if network {
++        let listing = runtime.block_on(crate::setup::fetch_models(&loaded.config.upstream))?;
++        match listing {
++            crate::setup::ModelListing::Available(models) => {
++                if json {
++                    println!(
++                        "{}",
++                        serde_json::json!({"configuration":"valid","network":"models_get_succeeded","models":models,"inference":"not_requested","auth_availability":auth,"tls":ca,"worker_readiness":"not_checked"})
++                    );
++                } else {
++                    println!(
++                        "network: bounded GET /models succeeded; inference: not requested\nmodels: {}",
++                        models.join(", ")
++                    );
++                }
++                return Ok(ExitCode::SUCCESS);
++            }
++            crate::setup::ModelListing::Unavailable { status, reason } => {
++                if json {
++                    println!(
++                        "{}",
++                        serde_json::json!({"configuration":"valid","network":"models_get_failed","status":status,"error":reason,"inference":"not_requested"})
++                    );
++                }
++                return Err(std::io::Error::other(reason).into());
++            }
++        }
++    }
++    let model =
++        model.ok_or_else(|| std::io::Error::other("--model is required with --inference"))?;
++    let output = max_output_tokens
++        .ok_or_else(|| std::io::Error::other("--max-output-tokens is required with --inference"))?;
++    let result = runtime.block_on(crate::setup::smoke_inference(&loaded.config, model, output))?;
++    if json {
++        println!(
++            "{}",
++            serde_json::json!({"configuration":"valid","network":"not_requested","inference":"succeeded","inference_calls":1,"model":model,"output_bound":output,"http_status":result.status,"worker_readiness":"not_checked"})
++        );
++    } else {
++        println!(
++            "network listing: not requested\ninference calls: 1\nmodel: {model}\noutput bound: {output}\nHTTP status: {}",
++            result.status
++        );
++    }
++    Ok(ExitCode::SUCCESS)
++}
++
++fn resolve_config(path: Option<&Path>) -> Result<PathBuf, crate::lifecycle::Error> {
++    let path = match path {
++        Some(path) => path.to_owned(),
++        None => standard_config_path()?,
++    };
++    Ok(crate::setup::absolute(&path)?)
++}
++
++fn standard_config_path() -> Result<PathBuf, crate::lifecycle::Error> {
++    #[cfg(target_os = "windows")]
++    let base = std::env::var_os("APPDATA").map(PathBuf::from);
++    #[cfg(target_os = "macos")]
++    let base = std::env::var_os("HOME")
++        .map(PathBuf::from)
++        .map(|home| home.join("Library/Application Support"));
++    #[cfg(all(unix, not(target_os = "macos")))]
++    let base = std::env::var_os("XDG_CONFIG_HOME")
++        .map(PathBuf::from)
++        .or_else(|| {
++            std::env::var_os("HOME")
++                .map(PathBuf::from)
++                .map(|home| home.join(".config"))
++        });
++    base.map(|base| base.join("llmgw/config.toml"))
++        .ok_or_else(|| {
++            std::io::Error::other("cannot determine standard user config directory").into()
++        })
++}
++
+ fn display(value: &serde_json::Value, off: bool) {
+     println!("gateway: {}", value["state"].as_str().unwrap_or("unknown"));
+     if let Some(identity) = value.get("identity") {
+--- baseline/product/src/config.rs
++++ product/src/config.rs
+@@ -99,6 +99,8 @@
+ pub struct Upstream {
+     pub api_base: url::Url,
+     pub auth: Auth,
++    pub proxy: Option<url::Url>,
++    pub ca_bundle: Option<PathBuf>,
+ }
+ 
+ impl fmt::Debug for Upstream {
+@@ -107,6 +109,8 @@
+             .debug_struct("Upstream")
+             .field("api_base", &"<redacted>")
+             .field("auth", &self.auth)
++            .field("proxy", &self.proxy.as_ref().map(|_| "<configured>"))
++            .field("ca_bundle", &self.ca_bundle)
+             .finish()
+     }
+ }
+@@ -186,6 +190,7 @@
+     pub source_path: PathBuf,
+     pub fingerprint: ConfigFingerprint,
+     pub state_paths: StatePaths,
++    pub source_bytes: Vec<u8>,
+ }
+ 
+ #[derive(Debug)]
+@@ -250,14 +255,7 @@
+             source,
+         })?;
+         let fingerprint = ConfigFingerprint::from_bytes(&bytes);
+-        let input: ConfigInput = toml_edit::de::from_slice(&bytes).map_err(|error| {
+-            let (line, column) = error
+-                .span()
+-                .map(|span| line_and_column(&bytes, span.start))
+-                .map_or((None, None), |(line, column)| (Some(line), Some(column)));
+-            ConfigError::Parse { line, column }
+-        })?;
+-        let config = validate::validate(input)?;
++        let config = parse(&bytes)?;
+         let state_paths = StatePaths::from_config_path(&source_path)?;
+ 
+         Ok(Self {
+@@ -265,8 +263,21 @@
+             source_path,
+             fingerprint,
+             state_paths,
++            source_bytes: bytes,
+         })
+     }
++}
++
++/// Parse and validate configuration bytes without filesystem, credentials, or network access.
++pub fn parse(bytes: &[u8]) -> Result<Config, ConfigError> {
++    let input: ConfigInput = toml_edit::de::from_slice(bytes).map_err(|error| {
++        let (line, column) = error
++            .span()
++            .map(|span| line_and_column(bytes, span.start))
++            .map_or((None, None), |(line, column)| (Some(line), Some(column)));
++        ConfigError::Parse { line, column }
++    })?;
++    validate::validate(input)
+ }
+ 
+ fn line_and_column(bytes: &[u8], offset: usize) -> (usize, usize) {
+@@ -300,6 +311,8 @@
+ struct UpstreamInput {
+     api_base: String,
+     auth: AuthInput,
++    proxy: Option<String>,
++    ca_bundle: Option<PathBuf>,
+ }
+ 
+ #[derive(Deserialize)]
+--- baseline/product/src/config/validate.rs
++++ product/src/config/validate.rs
+@@ -22,7 +22,12 @@
+ 
+     let cancel_policy = validate_cancel_policy(input.cancel_policy.as_deref().unwrap_or("drain"))?;
+     let accounting = validate_accounting(input.accounting.as_deref().unwrap_or("reserved"))?;
+-    let upstream = validate_upstream(input.upstream.api_base, input.upstream.auth)?;
++    let upstream = validate_upstream(
++        input.upstream.api_base,
++        input.upstream.auth,
++        input.upstream.proxy,
++        input.upstream.ca_bundle,
++    )?;
+     let quota = Quota {
+         rpm: validate_limit("quota.rpm", input.quota.rpm)?,
+         tpm: validate_limit("quota.tpm", input.quota.tpm)?,
+@@ -69,7 +74,12 @@
+     }
+ }
+ 
+-fn validate_upstream(api_base: String, auth: AuthInput) -> Result<Upstream, ConfigError> {
++fn validate_upstream(
++    api_base: String,
++    auth: AuthInput,
++    proxy: Option<String>,
++    ca_bundle: Option<std::path::PathBuf>,
++) -> Result<Upstream, ConfigError> {
+     let raw_query = raw_query_component(&api_base);
+     let api_base = url::Url::parse(&api_base).map_err(|_| {
+         ConfigError::Validation("upstream.api_base must be a valid absolute URL".to_owned())
+@@ -95,7 +105,27 @@
+     Ok(Upstream {
+         api_base,
+         auth: validate_auth(auth)?,
++        proxy: proxy.map(validate_proxy).transpose()?,
++        ca_bundle,
+     })
++}
++
++fn validate_proxy(raw: String) -> Result<url::Url, ConfigError> {
++    let url = url::Url::parse(&raw).map_err(|_| {
++        ConfigError::Validation("upstream.proxy must be a valid absolute URL".into())
++    })?;
++    if !matches!(url.scheme(), "http" | "https")
++        || url.host_str().is_none()
++        || !url.username().is_empty()
++        || url.password().is_some()
++        || url.query().is_some()
++        || url.fragment().is_some()
++    {
++        return invalid(
++            "upstream.proxy must be an http(s) URL with a host and no credentials, query, or fragment",
++        );
++    }
++    Ok(url)
+ }
+ 
+ fn raw_query_component(value: &str) -> Option<&str> {
+--- baseline/product/src/lib.rs
++++ product/src/lib.rs
+@@ -6,4 +6,5 @@
+ mod metrics;
+ mod protocol;
+ pub mod server;
++pub mod setup;
+ mod transport;
+--- baseline/product/src/server.rs
++++ product/src/server.rs
+@@ -194,7 +194,7 @@
+     InvalidConcurrency,
+     InvalidRoots,
+     Bind(io::Error),
+-    HttpClient(reqwest::Error),
++    HttpClient(crate::transport::upstream::BuildError),
+     InvalidCredential(&'static str),
+     CredentialsMustDiffer,
+     MissingEnvironmentCredential,
+@@ -339,7 +339,8 @@
+         identity.address = address;
+     }
+     let handle_identity = credentials.identity.clone();
+-    let upstream = UpstreamClient::new(limits.request).map_err(StartError::HttpClient)?;
++    let upstream =
++        UpstreamClient::new(limits.request, &config.upstream).map_err(StartError::HttpClient)?;
+     let (stop, stop_rx) = watch::channel(false);
+     let (worker_sender, worker_receiver) = mpsc::channel(16);
+     let (force_workers, force_workers_rx) = tokio::sync::oneshot::channel();
+--- baseline/product/src/setup/mod.rs
++++ product/src/setup/mod.rs
+@@ -0,0 +1,1248 @@
++//! First-run configuration. Prompt collection is separate from the typed draft and apply step.
++pub mod prompts;
++pub mod summary;
++pub mod validate;
++
++use crate::config::{
++    Accounting, Auth, CancelPolicy, Config, Endpoint, Limit, LoadedConfig, Model, Quota, Root,
++    Upstream,
++};
++use serde::{Deserialize, Serialize};
++use std::{
++    ffi::OsString,
++    fmt,
++    fs::{self, OpenOptions},
++    io::Write,
++    net::{IpAddr, Ipv4Addr, SocketAddr},
++    num::NonZeroU64,
++    path::{Path, PathBuf},
++    process::ExitCode,
++};
++
++#[derive(Debug)]
++pub struct Error(String);
++
++impl Error {
++    pub fn message(message: impl Into<String>) -> Self {
++        Self(message.into())
++    }
++}
++
++impl fmt::Display for Error {
++    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++        f.write_str(&self.0)
++    }
++}
++
++impl std::error::Error for Error {}
++
++impl From<std::io::Error> for Error {
++    fn from(value: std::io::Error) -> Self {
++        Self(value.to_string())
++    }
++}
++
++impl From<crate::config::ConfigError> for Error {
++    fn from(value: crate::config::ConfigError) -> Self {
++        Self(value.to_string())
++    }
++}
++
++impl From<crate::lifecycle::Error> for Error {
++    fn from(value: crate::lifecycle::Error) -> Self {
++        Self(value.to_string())
++    }
++}
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum EnvironmentPreset {
++    LocalLlm,
++    Corporate,
++    ExternalApi,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ConnectionAnswers {
++    pub api_base: String,
++    pub endpoints: Vec<Endpoint>,
++    pub auth: Auth,
++    pub proxy: Option<String>,
++    pub ca_bundle: Option<PathBuf>,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ModelAnswers {
++    pub id: String,
++    pub max_output_tokens: Option<u64>,
++    pub listing_verified: bool,
++    pub capabilities_verified: bool,
++}
++
++impl ModelAnswers {
++    pub fn manual(id: impl Into<String>, max_output_tokens: Option<u64>) -> Self {
++        Self {
++            id: id.into(),
++            max_output_tokens,
++            listing_verified: false,
++            capabilities_verified: false,
++        }
++    }
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub enum LimitAnswer {
++    Known(NonZeroU64),
++    Unknown,
++    Unlimited,
++}
++
++impl LimitAnswer {
++    pub fn known(value: u64) -> Result<Self, Error> {
++        NonZeroU64::new(value)
++            .map(Self::Known)
++            .ok_or_else(|| Error::message("known quota must be nonzero"))
++    }
++
++    pub fn to_limit(&self) -> Limit {
++        match self {
++            Self::Known(value) => Limit::Known(*value),
++            Self::Unknown => Limit::Unknown,
++            Self::Unlimited => Limit::Unlimited,
++        }
++    }
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct QuotaAnswers {
++    pub rpm: LimitAnswer,
++    pub tpm: LimitAnswer,
++    pub shared_with_other_pcs: bool,
++    pub separate_input_output: bool,
++    pub concurrency: u8,
++}
++
++impl QuotaAnswers {
++    pub fn validate(&self) -> Result<(), Error> {
++        if !(crate::config::MIN_CONCURRENCY..=crate::config::MAX_CONCURRENCY)
++            .contains(&self.concurrency)
++        {
++            return Err(Error::message("concurrency must be between 1 and 16"));
++        }
++        Ok(())
++    }
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct RunAnswers {
++    pub port: u16,
++    pub login_requested: bool,
++}
++
++#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
++#[serde(rename_all = "snake_case")]
++pub enum ClientIntent {
++    Pi,
++    ClaudeCode,
++    Codex,
++    Manual,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ToolAnswers {
++    pub clients: Vec<ClientIntent>,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct SetupDraft {
++    environment: EnvironmentPreset,
++    config: Config,
++    shared_with_other_pcs: bool,
++    separate_input_output: bool,
++    login_requested: bool,
++    clients: Vec<ClientIntent>,
++    listing_verified: bool,
++    capabilities_verified: bool,
++    connection_error: Option<String>,
++    original: Option<(Config, Vec<u8>)>,
++}
++
++impl SetupDraft {
++    pub fn new(environment: EnvironmentPreset) -> Self {
++        Self {
++            environment,
++            config: Config {
++                listen: SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 4141),
++                concurrency: 1,
++                cancel_policy: CancelPolicy::Drain,
++                accounting: Accounting::Reserved,
++                retry_transient_429: false,
++                upstream: Upstream {
++                    api_base: "http://127.0.0.1:11434/v1".parse().expect("static URL"),
++                    auth: Auth::None,
++                    proxy: None,
++                    ca_bundle: None,
++                },
++                quota: Quota {
++                    rpm: Limit::Unknown,
++                    tpm: Limit::Unknown,
++                },
++                models: Vec::new(),
++                roots: Vec::new(),
++            },
++            shared_with_other_pcs: false,
++            separate_input_output: false,
++            login_requested: false,
++            clients: Vec::new(),
++            listing_verified: false,
++            capabilities_verified: false,
++            connection_error: None,
++            original: None,
++        }
++    }
++
++    pub fn from_existing(config: &Config) -> Self {
++        Self::from_config(config.clone(), None)
++    }
++
++    pub fn from_loaded(loaded: &LoadedConfig) -> Result<Self, Error> {
++        let mut draft = Self::from_config(
++            loaded.config.clone(),
++            Some((loaded.config.clone(), loaded.source_bytes.clone())),
++        );
++        let path = pending_path(&loaded.source_path)?;
++        match fs::symlink_metadata(&path) {
++            Ok(metadata) => {
++                if !metadata.is_file() || metadata.file_type().is_symlink() {
++                    return Err(Error::message(
++                        "setup pending metadata must be a regular file, not a link",
++                    ));
++                }
++                let bytes = fs::read(&path)?;
++                if bytes.len() > 16_384 {
++                    return Err(Error::message("setup pending metadata exceeds 16384 bytes"));
++                }
++                let pending: PendingSetup = serde_json::from_slice(&bytes)
++                    .map_err(|_| Error::message("setup pending metadata is invalid"))?;
++                if pending.version != 1 {
++                    return Err(Error::message(
++                        "setup pending metadata version is unsupported",
++                    ));
++                }
++                draft.shared_with_other_pcs = pending.shared_with_other_pcs;
++                draft.separate_input_output = pending.separate_input_output;
++                draft.login_requested = pending.login_requested;
++                draft.clients = pending.clients;
++            }
++            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
++            Err(error) => return Err(error.into()),
++        }
++        Ok(draft)
++    }
++
++    fn from_config(config: Config, original: Option<(Config, Vec<u8>)>) -> Self {
++        Self {
++            environment: EnvironmentPreset::ExternalApi,
++            config,
++            shared_with_other_pcs: false,
++            separate_input_output: false,
++            login_requested: false,
++            clients: Vec::new(),
++            listing_verified: false,
++            capabilities_verified: false,
++            connection_error: None,
++            original,
++        }
++    }
++
++    pub fn connection(mut self, answers: ConnectionAnswers) -> Self {
++        self.connection_error = None;
++        match validate::api_base(&answers.api_base) {
++            Ok(url) => self.config.upstream.api_base = url,
++            Err(error) => self.connection_error = Some(error.to_string()),
++        }
++        self.config.upstream.auth = answers.auth;
++        self.config.upstream.proxy = match answers.proxy.as_deref().map(validate::proxy).transpose()
++        {
++            Ok(proxy) => proxy,
++            Err(error) => {
++                self.connection_error
++                    .get_or_insert_with(|| error.to_string());
++                None
++            }
++        };
++        self.config.upstream.ca_bundle =
++            match answers.ca_bundle.map(|path| absolute(&path)).transpose() {
++                Ok(path) => path,
++                Err(error) => {
++                    self.connection_error
++                        .get_or_insert_with(|| error.to_string());
++                    None
++                }
++            };
++        if let Some(root) = self.config.roots.first_mut() {
++            root.endpoints = answers.endpoints;
++        } else if !answers.endpoints.is_empty() {
++            self.config.roots.push(Root {
++                id: "default".into(),
++                endpoints: answers.endpoints,
++                models: Vec::new(),
++            });
++        }
++        self
++    }
++
++    pub fn models(mut self, answers: ModelAnswers) -> Self {
++        let max_output_tokens = answers.max_output_tokens.and_then(NonZeroU64::new);
++        self.config.models = vec![Model {
++            id: answers.id.clone(),
++            max_output_tokens,
++        }];
++        if let Some(root) = self.config.roots.first_mut() {
++            root.models = vec![answers.id];
++        }
++        self.listing_verified = answers.listing_verified;
++        self.capabilities_verified = answers.capabilities_verified;
++        self
++    }
++
++    pub fn quota(mut self, answers: QuotaAnswers) -> Self {
++        self.config.quota = Quota {
++            rpm: answers.rpm.to_limit(),
++            tpm: answers.tpm.to_limit(),
++        };
++        self.config.concurrency = answers.concurrency;
++        self.shared_with_other_pcs = answers.shared_with_other_pcs;
++        self.separate_input_output = answers.separate_input_output;
++        self
++    }
++
++    pub fn run(mut self, answers: RunAnswers) -> Self {
++        self.config.listen.set_port(answers.port);
++        self.login_requested = answers.login_requested;
++        self
++    }
++
++    pub fn tools(mut self, answers: ToolAnswers) -> Self {
++        self.clients = answers.clients;
++        self
++    }
++
++    pub fn concurrency(&self) -> u8 {
++        self.config.concurrency
++    }
++    pub fn login_requested(&self) -> bool {
++        self.login_requested
++    }
++    pub fn endpoints(&self) -> &[Endpoint] {
++        self.config
++            .roots
++            .first()
++            .map_or(&[], |root| root.endpoints.as_slice())
++    }
++    pub const fn local_model_started_or_downloaded(&self) -> bool {
++        false
++    }
++    pub fn accounting(&self) -> Accounting {
++        self.config.accounting
++    }
++    pub fn retry_transient_429(&self) -> bool {
++        self.config.retry_transient_429
++    }
++    pub fn config(&self) -> &Config {
++        &self.config
++    }
++    pub fn shared_with_other_pcs(&self) -> bool {
++        self.shared_with_other_pcs
++    }
++    pub fn separate_input_output(&self) -> bool {
++        self.separate_input_output
++    }
++    pub fn clients(&self) -> &[ClientIntent] {
++        &self.clients
++    }
++
++    pub fn validate(&self) -> Result<(), Error> {
++        if let Some(error) = &self.connection_error {
++            return Err(Error::message(error.clone()));
++        }
++        if self.config.models.is_empty() || self.config.roots.is_empty() {
++            return Err(Error::message("at least one model and route are required"));
++        }
++        if self
++            .config
++            .roots
++            .iter()
++            .any(|root| root.endpoints.is_empty())
++        {
++            return Err(Error::message(
++                "at least one supported endpoint must be selected",
++            ));
++        }
++        if self
++            .config
++            .models
++            .iter()
++            .any(|model| model.max_output_tokens.is_none())
++        {
++            return Err(Error::message("each model requires a nonzero output bound"));
++        }
++        if !(crate::config::MIN_CONCURRENCY..=crate::config::MAX_CONCURRENCY)
++            .contains(&self.config.concurrency)
++        {
++            return Err(Error::message("concurrency must be between 1 and 16"));
++        }
++        if self.config.listen.port() == 0 {
++            return Err(Error::message("listen port must be between 1 and 65535"));
++        }
++        let rendered = serialize_config(&self.config)?;
++        crate::config::parse(rendered.as_bytes())?;
++        Ok(())
++    }
++
++    pub fn render_config(&self) -> Result<String, Error> {
++        self.validate()?;
++        if let Some((config, bytes)) = &self.original {
++            if config == &self.config {
++                return String::from_utf8(bytes.clone())
++                    .map_err(|_| Error::message("existing configuration is not UTF-8"));
++            }
++            if config.models == self.config.models && config.roots == self.config.roots {
++                return render_preserving_document(bytes, &self.config);
++            }
++        }
++        serialize_config(&self.config)
++    }
++
++    pub fn summary(&self, config_path: &Path) -> Result<String, Error> {
++        summary::render(self, config_path)
++    }
++}
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum Step {
++    Environment,
++    Connection,
++    Models,
++    Quota,
++    Run,
++    Tools,
++    Apply,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub enum Flow {
++    SetEnvironment(EnvironmentPreset),
++    SetConnection(ConnectionAnswers),
++    SetModels(ModelAnswers),
++    SetQuota(QuotaAnswers),
++    SetRun(RunAnswers),
++    SetTools(ToolAnswers),
++    Apply(ApplyMode),
++    Keep,
++    Back,
++    Cancel,
++}
++
++pub trait PromptIo {
++    fn prompt(&mut self, step: Step, draft: &SetupDraft) -> Result<Flow, Error>;
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub enum SetupOutcome {
++    Cancelled,
++    Ready {
++        draft: Box<SetupDraft>,
++        mode: ApplyMode,
++    },
++}
++
++pub fn run_wizard(
++    io: &mut impl PromptIo,
++    existing: Option<&LoadedConfig>,
++) -> Result<SetupOutcome, Error> {
++    let mut draft = match existing {
++        Some(loaded) => SetupDraft::from_loaded(loaded)?,
++        None => SetupDraft::new(EnvironmentPreset::LocalLlm),
++    };
++    let steps = [
++        Step::Environment,
++        Step::Connection,
++        Step::Models,
++        Step::Quota,
++        Step::Run,
++        Step::Tools,
++        Step::Apply,
++    ];
++    let mut index = 0usize;
++    loop {
++        let answer = match io.prompt(steps[index], &draft) {
++            Err(error) if error.to_string() == "cancel" => return Ok(SetupOutcome::Cancelled),
++            result => result?,
++        };
++        match answer {
++            Flow::Cancel => return Ok(SetupOutcome::Cancelled),
++            Flow::Back => index = index.saturating_sub(1),
++            Flow::Keep => index += 1,
++            Flow::SetEnvironment(value) if steps[index] == Step::Environment => {
++                draft.environment = value;
++                index += 1;
++            }
++            Flow::SetConnection(value) if steps[index] == Step::Connection => {
++                draft = draft.connection(value);
++                index += 1;
++            }
++            Flow::SetModels(value) if steps[index] == Step::Models => {
++                draft = draft.models(value);
++                index += 1;
++            }
++            Flow::SetQuota(value) if steps[index] == Step::Quota => {
++                value.validate()?;
++                draft = draft.quota(value);
++                index += 1;
++            }
++            Flow::SetRun(value) if steps[index] == Step::Run => {
++                draft = draft.run(value);
++                index += 1;
++            }
++            Flow::SetTools(value) if steps[index] == Step::Tools => {
++                draft = draft.tools(value);
++                index += 1;
++            }
++            Flow::Apply(mode) if steps[index] == Step::Apply => {
++                draft.validate()?;
++                return Ok(SetupOutcome::Ready {
++                    draft: Box::new(draft),
++                    mode,
++                });
++            }
++            _ => {
++                return Err(Error::message(
++                    "prompt returned an answer for the wrong setup step",
++                ));
++            }
++        }
++    }
++}
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum ApplyMode {
++    SaveOnly,
++    SaveAndStart,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ApplyResult {
++    pub mode: ApplyMode,
++    pub runtime_state: &'static str,
++    pub worker_processes_started: u8,
++    pub authenticated_readiness: bool,
++    pub config_path: PathBuf,
++    pub pending_path: PathBuf,
++}
++
++#[derive(Debug, Deserialize, Serialize)]
++#[serde(deny_unknown_fields)]
++struct PendingSetup {
++    version: u8,
++    shared_with_other_pcs: bool,
++    separate_input_output: bool,
++    login_requested: bool,
++    clients: Vec<ClientIntent>,
++}
++
++fn pending_path(config_path: &Path) -> Result<PathBuf, Error> {
++    let file_name = config_path
++        .file_name()
++        .ok_or_else(|| Error::message("config path has no file name"))?;
++    let mut name = OsString::from(".");
++    name.push(file_name);
++    name.push(".setup-pending.json");
++    Ok(config_path.with_file_name(name))
++}
++
++fn render_pending(draft: &SetupDraft) -> Result<Vec<u8>, Error> {
++    serde_json::to_vec_pretty(&PendingSetup {
++        version: 1,
++        shared_with_other_pcs: draft.shared_with_other_pcs,
++        separate_input_output: draft.separate_input_output,
++        login_requested: draft.login_requested,
++        clients: draft.clients.clone(),
++    })
++    .map_err(|_| Error::message("setup pending metadata could not be serialized"))
++}
++
++pub fn apply(path: &Path, draft: &SetupDraft, mode: ApplyMode) -> Result<ApplyResult, Error> {
++    let path = absolute(path)?;
++    let bytes = draft.render_config()?;
++    let pending_path = pending_path(&path)?;
++    let pending = render_pending(draft)?;
++    let existed = path.exists();
++    let was_running = if existed {
++        let runtime = tokio::runtime::Builder::new_current_thread()
++            .enable_all()
++            .build()?;
++        runtime
++            .block_on(crate::lifecycle::status(&path))
++            .ok()
++            .is_some_and(|v| v["state"] != "stopped")
++    } else {
++        false
++    };
++    write_protected_file(&path, bytes.as_bytes(), "config")?;
++    write_protected_file(&pending_path, &pending, "setup pending metadata")?;
++    if mode == ApplyMode::SaveOnly {
++        return Ok(ApplyResult {
++            mode,
++            runtime_state: "not_started",
++            worker_processes_started: 0,
++            authenticated_readiness: false,
++            config_path: path,
++            pending_path,
++        });
++    }
++    let runtime = tokio::runtime::Builder::new_multi_thread()
++        .enable_all()
++        .build()?;
++    let status = if was_running {
++        runtime.block_on(crate::lifecycle::restart(&path))?
++    } else {
++        runtime.block_on(crate::lifecycle::on(&path))?
++    };
++    if status["state"] != "running" || status["identity"]["fingerprint"].as_str().is_none() {
++        return Err(Error::message(
++            "authenticated lifecycle readiness was not established",
++        ));
++    }
++    Ok(ApplyResult {
++        mode,
++        runtime_state: "running",
++        worker_processes_started: u8::from(!was_running),
++        authenticated_readiness: true,
++        config_path: path,
++        pending_path,
++    })
++}
++
++pub fn absolute(path: &Path) -> Result<PathBuf, Error> {
++    Ok(std::path::absolute(path)?)
++}
++
++fn write_protected_file(path: &Path, bytes: &[u8], kind: &str) -> Result<(), Error> {
++    let parent = path
++        .parent()
++        .ok_or_else(|| Error::message("config path has no parent"))?;
++    if !parent.exists() {
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::DirBuilderExt;
++            fs::DirBuilder::new()
++                .recursive(true)
++                .mode(0o700)
++                .create(parent)?;
++        }
++        #[cfg(not(unix))]
++        fs::create_dir_all(parent)?;
++    }
++    let existing = match fs::symlink_metadata(path) {
++        Ok(metadata) => Some(metadata),
++        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
++        Err(error) => return Err(error.into()),
++    };
++    if let Some(metadata) = existing {
++        if !metadata.is_file() || metadata.file_type().is_symlink() {
++            return Err(Error::message(format!(
++                "existing {kind} must be a regular file, not a link"
++            )));
++        }
++        if fs::read(path)? == bytes {
++            return Ok(());
++        }
++        #[cfg(unix)]
++        let mut file = {
++            use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
++            let file = OpenOptions::new()
++                .write(true)
++                .custom_flags(libc::O_NOFOLLOW)
++                .open(path)?;
++            let opened = file.metadata()?;
++            if opened.dev() != metadata.dev() || opened.ino() != metadata.ino() {
++                return Err(Error::message(format!(
++                    "existing {kind} changed while setup was opening it"
++                )));
++            }
++            file
++        };
++        #[cfg(not(unix))]
++        let mut file = OpenOptions::new().write(true).open(path)?;
++        file.set_len(0)?;
++        file.write_all(bytes)?;
++        file.sync_all()?;
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::MetadataExt;
++            let current = fs::symlink_metadata(path)?;
++            let opened = file.metadata()?;
++            if current.dev() != opened.dev() || current.ino() != opened.ino() {
++                return Err(Error::message(format!(
++                    "existing {kind} changed while setup was writing it"
++                )));
++            }
++        }
++        return Ok(());
++    }
++    let temporary = parent.join(format!(
++        ".llmgw-config-{}-{:016x}.tmp",
++        std::process::id(),
++        rand::random::<u64>()
++    ));
++    let result = (|| -> std::io::Result<()> {
++        #[cfg(unix)]
++        let mut file = {
++            use std::os::unix::fs::OpenOptionsExt;
++            OpenOptions::new()
++                .create_new(true)
++                .write(true)
++                .mode(0o600)
++                .open(&temporary)?
++        };
++        #[cfg(not(unix))]
++        let mut file = OpenOptions::new()
++            .create_new(true)
++            .write(true)
++            .open(&temporary)?;
++        file.write_all(bytes)?;
++        file.sync_all()?;
++        drop(file);
++        fs::rename(&temporary, path)?;
++        #[cfg(unix)]
++        fs::File::open(parent)?.sync_all()?;
++        Ok(())
++    })();
++    if result.is_err() {
++        let _ = fs::remove_file(&temporary);
++    }
++    result.map_err(Error::from)
++}
++
++#[derive(Debug)]
++pub struct ListRequest {
++    pub url: url::Url,
++    pub header: Option<(String, String)>,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub enum ModelListing {
++    Available(Vec<String>),
++    Unavailable { status: Option<u16>, reason: String },
++}
++
++pub fn list_models<F>(base: &str, auth: &Auth, send: F) -> Result<ModelListing, Error>
++where
++    F: FnOnce(ListRequest) -> Result<(u16, Vec<u8>), Error>,
++{
++    let base = validate::api_base(base)?;
++    let mut url = base.clone();
++    url.set_path(&format!("{}/models", base.path().trim_end_matches('/')));
++    let header = validate::auth_header(auth)?;
++    let (status, body) = send(ListRequest { url, header })?;
++    parse_listing_response(status, body)
++}
++
++fn parse_listing_response(status: u16, body: Vec<u8>) -> Result<ModelListing, Error> {
++    if status != 200 {
++        return Ok(ModelListing::Unavailable {
++            status: Some(status),
++            reason: format!("model listing returned HTTP {status}; enter a model ID manually"),
++        });
++    }
++    if body.len() > 65_536 {
++        return Ok(ModelListing::Unavailable {
++            status: Some(status),
++            reason: "model listing exceeded 65536 bytes".into(),
++        });
++    }
++    #[derive(serde::Deserialize)]
++    struct Response {
++        data: Vec<Item>,
++    }
++    #[derive(serde::Deserialize)]
++    struct Item {
++        id: String,
++    }
++    let parsed: Response = match serde_json::from_slice(&body) {
++        Ok(value) => value,
++        Err(_) => {
++            return Ok(ModelListing::Unavailable {
++                status: Some(status),
++                reason: "model listing response was not the supported JSON shape".into(),
++            });
++        }
++    };
++    let mut ids: Vec<_> = parsed
++        .data
++        .into_iter()
++        .map(|item| item.id)
++        .filter(|id| !id.is_empty())
++        .take(256)
++        .collect();
++    ids.sort();
++    ids.dedup();
++    Ok(ModelListing::Available(ids))
++}
++
++pub async fn fetch_models(upstream: &Upstream) -> Result<ModelListing, Error> {
++    let client =
++        crate::transport::upstream::build_client(std::time::Duration::from_secs(10), upstream)
++            .map_err(|error| Error::message(error.to_string()))?;
++    let mut url = upstream.api_base.clone();
++    url.set_path(&format!(
++        "{}/models",
++        upstream.api_base.path().trim_end_matches('/')
++    ));
++    let mut request = client.get(url);
++    let Some((header, value)) = validate::auth_header(&upstream.auth).map_err(|error| {
++        Error::message(format!(
++            "model listing unavailable: {error}; enter a model ID manually"
++        ))
++    })?
++    else {
++        let mut response = request.send().await.map_err(|_| {
++            Error::message("model listing network request failed; enter a model ID manually")
++        })?;
++        return bounded_listing_response(&mut response).await;
++    };
++    request = request.header(header, value);
++    let mut response = request.send().await.map_err(|_| {
++        Error::message("model listing network request failed; enter a model ID manually")
++    })?;
++    bounded_listing_response(&mut response).await
++}
++
++async fn bounded_listing_response(response: &mut reqwest::Response) -> Result<ModelListing, Error> {
++    let status = response.status().as_u16();
++    let mut body = Vec::new();
++    while let Some(chunk) = response
++        .chunk()
++        .await
++        .map_err(|_| Error::message("model listing response read failed"))?
++    {
++        if body.len() + chunk.len() > 65_536 {
++            return Ok(ModelListing::Unavailable {
++                status: Some(status),
++                reason: "model listing exceeded 65536 bytes".into(),
++            });
++        }
++        body.extend_from_slice(&chunk);
++    }
++    parse_listing_response(status, body)
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct InferenceResult {
++    pub status: u16,
++}
++
++pub async fn smoke_inference(
++    config: &Config,
++    model: &str,
++    max_output_tokens: u64,
++) -> Result<InferenceResult, Error> {
++    if max_output_tokens == 0 {
++        return Err(Error::message("inference output bound must be nonzero"));
++    }
++    if !config
++        .models
++        .iter()
++        .any(|configured| configured.id == model)
++    {
++        return Err(Error::message("inference model is not configured"));
++    }
++    let endpoint = config
++        .roots
++        .iter()
++        .filter(|root| root.models.iter().any(|configured| configured == model))
++        .flat_map(|root| root.endpoints.iter().copied())
++        .find(|endpoint| {
++            matches!(
++                endpoint,
++                Endpoint::Responses | Endpoint::Messages | Endpoint::ChatCompletions
++            )
++        })
++        .ok_or_else(|| Error::message("configured model has no generation endpoint"))?;
++    let client = crate::transport::upstream::build_client(
++        std::time::Duration::from_secs(15),
++        &config.upstream,
++    )
++    .map_err(|error| Error::message(error.to_string()))?;
++    let mut url = config.upstream.api_base.clone();
++    url.set_path(&format!(
++        "{}/{}",
++        config.upstream.api_base.path().trim_end_matches('/'),
++        endpoint.path()
++    ));
++    let body = match endpoint {
++        Endpoint::Responses => {
++            serde_json::json!({"model":model,"max_output_tokens":max_output_tokens,"input":"Reply with OK."})
++        }
++        Endpoint::Messages => {
++            serde_json::json!({"model":model,"max_tokens":max_output_tokens,"messages":[{"role":"user","content":"Reply with OK."}]})
++        }
++        Endpoint::ChatCompletions => {
++            serde_json::json!({"model":model,"max_tokens":max_output_tokens,"messages":[{"role":"user","content":"Reply with OK."}]})
++        }
++        Endpoint::CountTokens | Endpoint::Models => unreachable!(),
++    };
++    let mut request = client
++        .post(url)
++        .header("content-type", "application/json")
++        .body(body.to_string());
++    if let Some((header, value)) = validate::auth_header(&config.upstream.auth)? {
++        request = request.header(header, value);
++    }
++    let mut response = request
++        .send()
++        .await
++        .map_err(|_| Error::message("inference network request failed"))?;
++    let status = response.status().as_u16();
++    let mut body = Vec::new();
++    while let Some(chunk) = response
++        .chunk()
++        .await
++        .map_err(|_| Error::message("inference response read failed"))?
++    {
++        let size = body
++            .len()
++            .checked_add(chunk.len())
++            .ok_or_else(|| Error::message("inference response size overflow"))?;
++        if size > 65_536 {
++            return Err(Error::message("inference response exceeded 65536 bytes"));
++        }
++        body.extend_from_slice(&chunk);
++    }
++    if !(200..300).contains(&status) {
++        return Err(Error::message(format!("inference returned HTTP {status}")));
++    }
++    validate_generation_response(endpoint, &body)?;
++    Ok(InferenceResult { status })
++}
++
++fn validate_generation_response(endpoint: Endpoint, body: &[u8]) -> Result<(), Error> {
++    let value: serde_json::Value = serde_json::from_slice(body)
++        .map_err(|_| Error::message("inference response lacked valid JSON generation evidence"))?;
++    if value.get("error").is_some_and(|error| !error.is_null())
++        || matches!(
++            value.get("status").and_then(|status| status.as_str()),
++            Some("failed" | "cancelled" | "incomplete")
++        )
++    {
++        return Err(Error::message("inference provider reported failure"));
++    }
++    let nonempty =
++        |value: &serde_json::Value| value.as_str().is_some_and(|text| !text.trim().is_empty());
++    let generated = match endpoint {
++        Endpoint::Responses => {
++            value.get("status").and_then(|status| status.as_str()) == Some("completed")
++                && value
++                    .get("output")
++                    .and_then(|output| output.as_array())
++                    .is_some_and(|items| {
++                        items.iter().any(|item| {
++                            item.get("content")
++                                .and_then(|content| content.as_array())
++                                .is_some_and(|content| {
++                                    content.iter().any(|part| {
++                                        part.get("type").and_then(|kind| kind.as_str())
++                                            == Some("output_text")
++                                            && part.get("text").is_some_and(nonempty)
++                                    })
++                                })
++                        })
++                    })
++        }
++        Endpoint::Messages => {
++            value.get("type").and_then(|kind| kind.as_str()) == Some("message")
++                && value
++                    .get("content")
++                    .and_then(|content| content.as_array())
++                    .is_some_and(|content| {
++                        content.iter().any(|part| {
++                            part.get("type").and_then(|kind| kind.as_str()) == Some("text")
++                                && part.get("text").is_some_and(nonempty)
++                        })
++                    })
++        }
++        Endpoint::ChatCompletions => value
++            .get("choices")
++            .and_then(|choices| choices.as_array())
++            .is_some_and(|choices| {
++                choices
++                    .iter()
++                    .any(|choice| choice.pointer("/message/content").is_some_and(nonempty))
++            }),
++        Endpoint::CountTokens | Endpoint::Models => false,
++    };
++    if !generated {
++        return Err(Error::message(
++            "inference response lacked protocol-specific generation evidence",
++        ));
++    }
++    Ok(())
++}
++
++#[derive(Serialize)]
++struct ConfigOutput<'a> {
++    listen: String,
++    concurrency: u8,
++    cancel_policy: &'static str,
++    accounting: &'static str,
++    retry_transient_429: bool,
++    upstream: UpstreamOutput<'a>,
++    quota: QuotaOutput,
++    models: Vec<ModelOutput<'a>>,
++    roots: Vec<RootOutput<'a>>,
++}
++
++#[derive(Serialize)]
++struct UpstreamOutput<'a> {
++    api_base: &'a str,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    proxy: Option<&'a str>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    ca_bundle: Option<&'a Path>,
++    auth: AuthOutput<'a>,
++}
++
++#[derive(Serialize)]
++struct AuthOutput<'a> {
++    mode: &'static str,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    header: Option<&'a str>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    name: Option<&'a str>,
++}
++
++#[derive(Serialize)]
++struct QuotaOutput {
++    rpm: LimitOutput,
++    tpm: LimitOutput,
++}
++#[derive(Serialize)]
++struct LimitOutput {
++    kind: &'static str,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    value: Option<u64>,
++}
++#[derive(Serialize)]
++struct ModelOutput<'a> {
++    id: &'a str,
++    max_output_tokens: Option<u64>,
++}
++#[derive(Serialize)]
++struct RootOutput<'a> {
++    id: &'a str,
++    endpoints: Vec<&'static str>,
++    models: &'a [String],
++}
++
++fn serialize_config(config: &Config) -> Result<String, Error> {
++    let auth = match &config.upstream.auth {
++        Auth::Forward => AuthOutput {
++            mode: "forward",
++            header: None,
++            name: None,
++        },
++        Auth::None => AuthOutput {
++            mode: "none",
++            header: None,
++            name: None,
++        },
++        Auth::Env { header, name } => AuthOutput {
++            mode: "env",
++            header: Some(header),
++            name: Some(name),
++        },
++    };
++    let limit = |value: &Limit| match value {
++        Limit::Known(value) => LimitOutput {
++            kind: "known",
++            value: Some(value.get()),
++        },
++        Limit::Unknown => LimitOutput {
++            kind: "unknown",
++            value: None,
++        },
++        Limit::Unlimited => LimitOutput {
++            kind: "unlimited",
++            value: None,
++        },
++    };
++    let endpoint = |value: &Endpoint| match value {
++        Endpoint::ChatCompletions => "chat/completions",
++        Endpoint::Responses => "responses",
++        Endpoint::Messages => "messages",
++        Endpoint::CountTokens => "messages/count_tokens",
++        Endpoint::Models => "models",
++    };
++    let output = ConfigOutput {
++        listen: config.listen.to_string(),
++        concurrency: config.concurrency,
++        cancel_policy: match config.cancel_policy {
++            CancelPolicy::Drain => "drain",
++            CancelPolicy::Close => "close",
++        },
++        accounting: match config.accounting {
++            Accounting::Reserved => "reserved",
++            Accounting::Actual => "actual",
++        },
++        retry_transient_429: config.retry_transient_429,
++        upstream: UpstreamOutput {
++            api_base: config.upstream.api_base.as_str(),
++            proxy: config.upstream.proxy.as_ref().map(url::Url::as_str),
++            ca_bundle: config.upstream.ca_bundle.as_deref(),
++            auth,
++        },
++        quota: QuotaOutput {
++            rpm: limit(&config.quota.rpm),
++            tpm: limit(&config.quota.tpm),
++        },
++        models: config
++            .models
++            .iter()
++            .map(|model| ModelOutput {
++                id: &model.id,
++                max_output_tokens: model.max_output_tokens.map(NonZeroU64::get),
++            })
++            .collect(),
++        roots: config
++            .roots
++            .iter()
++            .map(|root| RootOutput {
++                id: &root.id,
++                endpoints: root.endpoints.iter().map(endpoint).collect(),
++                models: &root.models,
++            })
++            .collect(),
++    };
++    toml_edit::ser::to_string_pretty(&output).map_err(|error| Error::message(error.to_string()))
++}
++
++fn render_preserving_document(bytes: &[u8], config: &Config) -> Result<String, Error> {
++    use toml_edit::{DocumentMut, Item, TableLike, Value};
++    let source = std::str::from_utf8(bytes)
++        .map_err(|_| Error::message("existing configuration is not UTF-8"))?;
++    let mut document = source
++        .parse::<DocumentMut>()
++        .map_err(|_| Error::message("existing configuration document cannot be edited"))?;
++    fn replace(item: &mut Item, value: Value) {
++        let decor = item.as_value().map(|old| old.decor().clone());
++        *item = Item::Value(value);
++        if let (Some(decor), Some(value)) = (decor, item.as_value_mut()) {
++            *value.decor_mut() = decor;
++        }
++    }
++    fn replace_field(table: &mut dyn TableLike, key: &str, value: Value) {
++        replace(table.entry(key).or_insert(Item::None), value);
++    }
++    fn table_like<'a>(item: &'a mut Item, label: &str) -> Result<&'a mut dyn TableLike, Error> {
++        item.as_table_like_mut()
++            .ok_or_else(|| Error::message(format!("validated {label} is not table-like")))
++    }
++    replace(
++        &mut document["listen"],
++        Value::from(config.listen.to_string()),
++    );
++    replace(
++        &mut document["concurrency"],
++        Value::from(i64::from(config.concurrency)),
++    );
++    replace(
++        &mut document["cancel_policy"],
++        Value::from(match config.cancel_policy {
++            CancelPolicy::Drain => "drain",
++            CancelPolicy::Close => "close",
++        }),
++    );
++    replace(
++        &mut document["accounting"],
++        Value::from(match config.accounting {
++            Accounting::Reserved => "reserved",
++            Accounting::Actual => "actual",
++        }),
++    );
++    replace(
++        &mut document["retry_transient_429"],
++        Value::from(config.retry_transient_429),
++    );
++    let upstream = table_like(&mut document["upstream"], "upstream")?;
++    replace_field(
++        upstream,
++        "api_base",
++        Value::from(config.upstream.api_base.as_str()),
++    );
++    match &config.upstream.proxy {
++        Some(proxy) => replace_field(upstream, "proxy", Value::from(proxy.as_str())),
++        None => {
++            upstream.remove("proxy");
++        }
++    }
++    match &config.upstream.ca_bundle {
++        Some(path) => replace_field(
++            upstream,
++            "ca_bundle",
++            Value::from(path.to_string_lossy().as_ref()),
++        ),
++        None => {
++            upstream.remove("ca_bundle");
++        }
++    }
++    let (mode, header, name) = match &config.upstream.auth {
++        Auth::Forward => ("forward", None, None),
++        Auth::None => ("none", None, None),
++        Auth::Env { header, name } => ("env", Some(header.as_str()), Some(name.as_str())),
++    };
++    let auth_item = upstream
++        .get_mut("auth")
++        .ok_or_else(|| Error::message("validated upstream auth is missing"))?;
++    let auth = table_like(auth_item, "upstream auth")?;
++    replace_field(auth, "mode", Value::from(mode));
++    match header {
++        Some(value) => replace_field(auth, "header", Value::from(value)),
++        None => {
++            auth.remove("header");
++        }
++    }
++    match name {
++        Some(value) => replace_field(auth, "name", Value::from(value)),
++        None => {
++            auth.remove("name");
++        }
++    }
++    let quota = table_like(&mut document["quota"], "quota")?;
++    for (field, limit) in [("rpm", &config.quota.rpm), ("tpm", &config.quota.tpm)] {
++        let (kind, value) = match limit {
++            Limit::Known(value) => ("known", Some(value.get())),
++            Limit::Unknown => ("unknown", None),
++            Limit::Unlimited => ("unlimited", None),
++        };
++        let limit_item = quota
++            .get_mut(field)
++            .ok_or_else(|| Error::message(format!("validated quota {field} is missing")))?;
++        let table = table_like(limit_item, "quota limit")?;
++        replace_field(table, "kind", Value::from(kind));
++        match value {
++            Some(value) => replace_field(table, "value", Value::from(value as i64)),
++            None => {
++                table.remove("value");
++            }
++        }
++    }
++    let rendered = document.to_string();
++    crate::config::parse(rendered.as_bytes())?;
++    Ok(rendered)
++}
++
++pub use summary::{ExampleUrls, example_urls};
++
++pub fn cancelled_exit() -> ExitCode {
++    ExitCode::from(130)
++}
+--- baseline/product/src/setup/prompts.rs
++++ product/src/setup/prompts.rs
+@@ -0,0 +1,428 @@
++//! Dialoguer adapter. It is constructed only after the CLI confirms a real terminal.
++use super::*;
++use dialoguer::{Confirm, Input, MultiSelect, Select, console::Term, theme::ColorfulTheme};
++
++pub struct DialoguerIo {
++    term: Term,
++    theme: ColorfulTheme,
++    config_path: PathBuf,
++}
++
++impl DialoguerIo {
++    pub fn new(config_path: PathBuf) -> Self {
++        Self {
++            term: Term::stderr(),
++            theme: ColorfulTheme::default(),
++            config_path,
++        }
++    }
++
++    fn action(&self, step: Step) -> Result<bool, Error> {
++        let mut items = vec!["Continue"];
++        if step != Step::Environment {
++            items.push("Back");
++        }
++        items.push("Cancel");
++        let selected = Select::with_theme(&self.theme)
++            .with_prompt(format!("Setup: {step:?}"))
++            .items(&items)
++            .default(0)
++            .interact_on_opt(&self.term)
++            .map_err(|error| Error::message(error.to_string()))?;
++        match selected {
++            None => Err(Error::message("cancel")),
++            Some(0) => Ok(true),
++            Some(index) if items[index] == "Back" => Ok(false),
++            Some(_) => Err(Error::message("cancel")),
++        }
++    }
++
++    fn text(&self, prompt: &str, default: String) -> Result<String, Error> {
++        Input::<String>::with_theme(&self.theme)
++            .with_prompt(prompt)
++            .default(default)
++            .interact_text_on(&self.term)
++            .map_err(|error| Error::message(error.to_string()))
++    }
++
++    fn validated_text(
++        &self,
++        prompt: &str,
++        default: String,
++        validate: impl Fn(&str) -> Result<(), Error>,
++    ) -> Result<String, Error> {
++        loop {
++            let value = self.text(prompt, default.clone())?;
++            match validate(&value) {
++                Ok(()) => return Ok(value),
++                Err(error) => self
++                    .term
++                    .write_line(&format!("Invalid value: {error}"))
++                    .map_err(|write| Error::message(write.to_string()))?,
++            }
++        }
++    }
++
++    fn limit(&self, name: &str, current: &Limit) -> Result<LimitAnswer, Error> {
++        let default = match current {
++            Limit::Known(_) => 0,
++            Limit::Unknown => 1,
++            Limit::Unlimited => 2,
++        };
++        let choice = Select::with_theme(&self.theme)
++            .with_prompt(name)
++            .items(["Known nonzero number", "Unknown", "Unlimited"])
++            .default(default)
++            .interact_on_opt(&self.term)
++            .map_err(|error| Error::message(error.to_string()))?
++            .ok_or_else(|| Error::message("cancel"))?;
++        match choice {
++            0 => {
++                let default = match current {
++                    Limit::Known(value) => value.get(),
++                    _ => 1,
++                };
++                loop {
++                    let value = Input::<u64>::with_theme(&self.theme)
++                        .with_prompt(format!("{name} value"))
++                        .default(default)
++                        .interact_text_on(&self.term)
++                        .map_err(|error| Error::message(error.to_string()))?;
++                    match LimitAnswer::known(value) {
++                        Ok(answer) => break Ok(answer),
++                        Err(error) => self
++                            .term
++                            .write_line(&format!("Invalid value: {error}"))
++                            .map_err(|write| Error::message(write.to_string()))?,
++                    }
++                }
++            }
++            1 => Ok(LimitAnswer::Unknown),
++            _ => Ok(LimitAnswer::Unlimited),
++        }
++    }
++}
++
++impl PromptIo for DialoguerIo {
++    fn prompt(&mut self, step: Step, draft: &SetupDraft) -> Result<Flow, Error> {
++        match self.action(step) {
++            Ok(false) => return Ok(Flow::Back),
++            Err(error) if error.to_string() == "cancel" => return Ok(Flow::Cancel),
++            Err(error) => return Err(error),
++            Ok(true) => {}
++        }
++        match step {
++            Step::Environment => {
++                let choice = Select::with_theme(&self.theme)
++                    .with_prompt("Environment preset (defaults only; protocol remains your choice)")
++                    .items(["Local LLM", "Corporate LLM", "External API"])
++                    .default(match draft.environment {
++                        EnvironmentPreset::LocalLlm => 0,
++                        EnvironmentPreset::Corporate => 1,
++                        EnvironmentPreset::ExternalApi => 2,
++                    })
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?;
++                Ok(choice.map_or(Flow::Cancel, |v| {
++                    Flow::SetEnvironment(
++                        [
++                            EnvironmentPreset::LocalLlm,
++                            EnvironmentPreset::Corporate,
++                            EnvironmentPreset::ExternalApi,
++                        ][v],
++                    )
++                }))
++            }
++            Step::Connection => {
++                let base = self.validated_text(
++                    "Upstream API base (prefix preserved; /v1 is not duplicated)",
++                    draft.config.upstream.api_base.to_string(),
++                    |value| validate::api_base(value).map(|_| ()),
++                )?;
++                let choices = ["Completions", "Responses", "Messages"];
++                let defaults = [
++                    Endpoint::ChatCompletions,
++                    Endpoint::Responses,
++                    Endpoint::Messages,
++                ]
++                .map(|e| draft.endpoints().contains(&e));
++                let selected = MultiSelect::with_theme(&self.theme)
++                    .with_prompt("Actually supported endpoint formats; unknown is never enabled")
++                    .items(choices)
++                    .defaults(&defaults)
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?
++                    .ok_or_else(|| Error::message("cancel"))?;
++                if selected.is_empty() {
++                    return Err(Error::message(
++                        "select at least one actually supported endpoint",
++                    ));
++                }
++                let endpoints = selected
++                    .into_iter()
++                    .map(|i| {
++                        [
++                            Endpoint::ChatCompletions,
++                            Endpoint::Responses,
++                            Endpoint::Messages,
++                        ][i]
++                    })
++                    .collect();
++                let auth_choice = Select::with_theme(&self.theme)
++                    .with_prompt("Upstream auth")
++                    .items(["Forward incoming header", "Environment reference", "None"])
++                    .default(match draft.config.upstream.auth {
++                        Auth::Forward => 0,
++                        Auth::Env { .. } => 1,
++                        Auth::None => 2,
++                    })
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?
++                    .ok_or_else(|| Error::message("cancel"))?;
++                let auth = match auth_choice {
++                    0 => Auth::Forward,
++                    1 => Auth::Env {
++                        header: self.text("Header name", "authorization".into())?,
++                        name: self.text(
++                            "Environment variable (complete header value; secret is never copied)",
++                            "LLMGW_UPSTREAM_AUTH".into(),
++                        )?,
++                    },
++                    _ => Auth::None,
++                };
++                let mut proxy = draft
++                    .config
++                    .upstream
++                    .proxy
++                    .as_ref()
++                    .map(ToString::to_string);
++                let mut ca_bundle = draft.config.upstream.ca_bundle.clone();
++                if draft.environment == EnvironmentPreset::Corporate {
++                    if Confirm::with_theme(&self.theme)
++                        .with_prompt("Use an explicit upstream proxy? Loopback always bypasses it")
++                        .default(proxy.is_some())
++                        .interact_on_opt(&self.term)
++                        .map_err(|e| Error::message(e.to_string()))?
++                        .ok_or_else(|| Error::message("cancel"))?
++                    {
++                        proxy = Some(self.validated_text(
++                            "Proxy URL (credentials are not accepted)",
++                            proxy.unwrap_or_else(|| "http://proxy.example:8080".into()),
++                            |value| validate::proxy(value).map(|_| ()),
++                        )?);
++                    } else {
++                        proxy = None;
++                    }
++                    if Confirm::with_theme(&self.theme)
++                        .with_prompt("Merge an explicit PEM CA bundle with system trust?")
++                        .default(ca_bundle.is_some())
++                        .interact_on_opt(&self.term)
++                        .map_err(|e| Error::message(e.to_string()))?
++                        .ok_or_else(|| Error::message("cancel"))?
++                    {
++                        ca_bundle = Some(PathBuf::from(
++                            self.text(
++                                "PEM CA bundle path",
++                                ca_bundle
++                                    .map_or_else(String::new, |p| p.to_string_lossy().into_owned()),
++                            )?,
++                        ));
++                    } else {
++                        ca_bundle = None;
++                    }
++                }
++                Ok(Flow::SetConnection(ConnectionAnswers {
++                    api_base: base,
++                    endpoints,
++                    auth,
++                    proxy,
++                    ca_bundle,
++                }))
++            }
++            Step::Models => {
++                if draft.original.is_some()
++                    && Confirm::with_theme(&self.theme)
++                        .with_prompt("Keep all existing models and routes unchanged?")
++                        .default(true)
++                        .interact_on_opt(&self.term)
++                        .map_err(|e| Error::message(e.to_string()))?
++                        .ok_or_else(|| Error::message("cancel"))?
++                {
++                    return Ok(Flow::Keep);
++                }
++                self.term.write_line("Model listing is an optional bounded GET only; it does not verify inference, tools, vision, or reasoning.").map_err(|e| Error::message(e.to_string()))?;
++                let listed = Confirm::with_theme(&self.theme)
++                    .with_prompt("Try one bounded GET /models against this upstream now?")
++                    .default(false)
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?
++                    .ok_or_else(|| Error::message("cancel"))?;
++                let mut listing_verified = false;
++                let id = if listed {
++                    let runtime = tokio::runtime::Builder::new_current_thread()
++                        .enable_all()
++                        .build()
++                        .map_err(|e| Error::message(e.to_string()))?;
++                    match runtime.block_on(fetch_models(&draft.config.upstream)) {
++                        Ok(ModelListing::Available(models)) if !models.is_empty() => {
++                            let selected = Select::with_theme(&self.theme)
++                                .with_prompt(
++                                    "Model ID from listing (listing does not verify capabilities)",
++                                )
++                                .items(&models)
++                                .default(0)
++                                .interact_on_opt(&self.term)
++                                .map_err(|e| Error::message(e.to_string()))?;
++                            let Some(selected) = selected else {
++                                return Ok(Flow::Cancel);
++                            };
++                            listing_verified = true;
++                            models[selected].clone()
++                        }
++                        Ok(ModelListing::Available(_)) => {
++                            self.term
++                                .write_line(
++                                    "Model listing returned no model IDs; enter one manually.",
++                                )
++                                .map_err(|e| Error::message(e.to_string()))?;
++                            self.text(
++                                "Manual model ID",
++                                draft
++                                    .config
++                                    .models
++                                    .first()
++                                    .map_or_else(|| "model-id".into(), |m| m.id.clone()),
++                            )?
++                        }
++                        Ok(ModelListing::Unavailable { reason, .. }) | Err(Error(reason)) => {
++                            self.term
++                                .write_line(&reason)
++                                .map_err(|e| Error::message(e.to_string()))?;
++                            self.text(
++                                "Manual model ID",
++                                draft
++                                    .config
++                                    .models
++                                    .first()
++                                    .map_or_else(|| "model-id".into(), |m| m.id.clone()),
++                            )?
++                        }
++                    }
++                } else {
++                    self.text(
++                        "Manual model ID",
++                        draft
++                            .config
++                            .models
++                            .first()
++                            .map_or_else(|| "model-id".into(), |m| m.id.clone()),
++                    )?
++                };
++                let cap = self.validated_text(
++                    "Nonzero reservation bound used when a request omits an output cap (the gateway does not inject or enforce it upstream)",
++                    draft.config.models.first().and_then(|m| m.max_output_tokens).map_or(1024, NonZeroU64::get).to_string(),
++                    |value| match value.parse::<u64>() {
++                        Ok(value) if value > 0 => Ok(()),
++                        _ => Err(Error::message("reservation output bound must be a nonzero number")),
++                    },
++                )?.parse::<u64>().expect("validated number");
++                Ok(Flow::SetModels(ModelAnswers {
++                    id,
++                    max_output_tokens: Some(cap),
++                    listing_verified,
++                    capabilities_verified: false,
++                }))
++            }
++            Step::Quota => {
++                let rpm = self.limit("RPM", &draft.config.quota.rpm)?;
++                let tpm = self.limit("TPM", &draft.config.quota.tpm)?;
++                let shared_with_other_pcs = Confirm::with_theme(&self.theme)
++                    .with_prompt("Is this same quota shared by other PCs?")
++                    .default(draft.shared_with_other_pcs)
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?
++                    .ok_or_else(|| Error::message("cancel"))?;
++                let separate_input_output = Confirm::with_theme(&self.theme).with_prompt("Does the provider specify separate input/output limits? (v0.1 reports this as estimated)").default(draft.separate_input_output).interact_on_opt(&self.term).map_err(|e| Error::message(e.to_string()))?.ok_or_else(|| Error::message("cancel"))?;
++                let concurrency = loop {
++                    let value = Input::<u8>::with_theme(&self.theme)
++                        .with_prompt("Concurrency 1..16")
++                        .default(draft.config.concurrency)
++                        .interact_text_on(&self.term)
++                        .map_err(|e| Error::message(e.to_string()))?;
++                    if (crate::config::MIN_CONCURRENCY..=crate::config::MAX_CONCURRENCY)
++                        .contains(&value)
++                    {
++                        break value;
++                    }
++                    self.term
++                        .write_line("Invalid value: concurrency must be between 1 and 16")
++                        .map_err(|e| Error::message(e.to_string()))?;
++                };
++                Ok(Flow::SetQuota(QuotaAnswers {
++                    rpm,
++                    tpm,
++                    shared_with_other_pcs,
++                    separate_input_output,
++                    concurrency,
++                }))
++            }
++            Step::Run => {
++                let port = loop {
++                    let value = Input::<u16>::with_theme(&self.theme)
++                        .with_prompt("Local loopback port")
++                        .default(draft.config.listen.port())
++                        .interact_text_on(&self.term)
++                        .map_err(|e| Error::message(e.to_string()))?;
++                    if value > 0 {
++                        break value;
++                    }
++                    self.term
++                        .write_line("Invalid value: listen port must be between 1 and 65535")
++                        .map_err(|e| Error::message(e.to_string()))?;
++                };
++                let login_requested = Confirm::with_theme(&self.theme).with_prompt("Request start at next login? (recorded pending; registration is a later task)").default(false).interact_on_opt(&self.term).map_err(|e| Error::message(e.to_string()))?.ok_or_else(|| Error::message("cancel"))?;
++                Ok(Flow::SetRun(RunAnswers {
++                    port,
++                    login_requested,
++                }))
++            }
++            Step::Tools => {
++                let selected = MultiSelect::with_theme(&self.theme)
++                    .with_prompt("Client intents (pending only; no client file is changed)")
++                    .items(["Pi", "Claude Code", "Codex", "Manual"])
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?
++                    .ok_or_else(|| Error::message("cancel"))?;
++                let clients = selected
++                    .into_iter()
++                    .map(|i| {
++                        [
++                            ClientIntent::Pi,
++                            ClientIntent::ClaudeCode,
++                            ClientIntent::Codex,
++                            ClientIntent::Manual,
++                        ][i]
++                    })
++                    .collect();
++                Ok(Flow::SetTools(ToolAnswers { clients }))
++            }
++            Step::Apply => {
++                self.term
++                    .write_line(&draft.summary(&self.config_path)?)
++                    .map_err(|e| Error::message(e.to_string()))?;
++                let selected = Select::with_theme(&self.theme)
++                    .with_prompt("Apply")
++                    .items(["Save and start", "Save only", "Back", "Cancel"])
++                    .default(1)
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?;
++                Ok(match selected {
++                    Some(0) => Flow::Apply(ApplyMode::SaveAndStart),
++                    Some(1) => Flow::Apply(ApplyMode::SaveOnly),
++                    Some(2) => Flow::Back,
++                    _ => Flow::Cancel,
++                })
++            }
++        }
++    }
++}
+--- baseline/product/src/setup/summary.rs
++++ product/src/setup/summary.rs
+@@ -0,0 +1,143 @@
++use super::{ClientIntent, Error, SetupDraft, absolute, pending_path};
++use crate::config::{Auth, Limit, StatePaths};
++use std::path::Path;
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ExampleUrls {
++    pub openai: String,
++    pub messages: String,
++    pub messages_request: String,
++}
++
++pub fn example_urls(listen_base: &str, root: &str) -> Result<ExampleUrls, Error> {
++    if root.is_empty()
++        || root.len() > 64
++        || !root.as_bytes()[0].is_ascii_alphanumeric()
++        || !root
++            .bytes()
++            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
++    {
++        return Err(Error::message("root id is not registrable"));
++    }
++    let mut base = url::Url::parse(listen_base)
++        .map_err(|_| Error::message("listen base must be an absolute URL"))?;
++    base.set_path("");
++    {
++        let mut parts = base.path_segments_mut().expect("HTTP base URL");
++        parts.clear().push("r").push(root);
++    }
++    let messages = base.as_str().trim_end_matches('/').to_owned();
++    let openai = format!("{messages}/v1");
++    let messages_request = format!("{messages}/v1/messages");
++    Ok(ExampleUrls {
++        openai,
++        messages,
++        messages_request,
++    })
++}
++
++pub fn render(draft: &SetupDraft, config_path: &Path) -> Result<String, Error> {
++    draft.validate()?;
++    let config_path = absolute(config_path)?;
++    let state = StatePaths::from_config_path(&config_path)?;
++    let pending = pending_path(&config_path)?;
++    let root = draft.config.roots.first().expect("validated route");
++    let listen = format!("http://{}", draft.config.listen);
++    let urls = example_urls(&listen, &root.id)?;
++    let auth = match &draft.config.upstream.auth {
++        Auth::None => "none".to_owned(),
++        Auth::Forward => "forward (network doctor cannot supply incoming client auth)".to_owned(),
++        Auth::Env { header, name } => format!(
++            "env {name} -> {header}; value hidden; complete header value required; current shell: {}; next-login credential: not configured",
++            if std::env::var_os(name).is_some() {
++                "available"
++            } else {
++                "unavailable"
++            },
++        ),
++    };
++    let known = |limit: &Limit| matches!(limit, Limit::Known(_));
++    let quota = if draft.shared_with_other_pcs
++        || draft.separate_input_output
++        || !known(&draft.config.quota.rpm)
++        || !known(&draft.config.quota.tpm)
++    {
++        "estimated"
++    } else {
++        "configured"
++    };
++    let clients = draft
++        .clients
++        .iter()
++        .map(|client| match client {
++            ClientIntent::Pi => "Pi",
++            ClientIntent::ClaudeCode => "Claude Code",
++            ClientIntent::Codex => "Codex",
++            ClientIntent::Manual => "manual",
++        })
++        .collect::<Vec<_>>()
++        .join(", ");
++    let original_upstream = draft
++        .original
++        .as_ref()
++        .map_or("new configuration".to_owned(), |(config, _)| {
++            config.upstream.api_base.to_string()
++        });
++    let fingerprint_impact = match &draft.original {
++        None => "new config fingerprint; no existing worker is adopted".to_owned(),
++        Some((_, bytes)) if draft.render_config()?.as_bytes() == bytes => {
++            "unchanged config fingerprint; no restart required by setup edits".to_owned()
++        }
++        Some(_) => "changed config fingerprint; Save only preserves any running worker and leaves restart pending; Save and start explicitly restarts it and verifies authenticated readiness".to_owned(),
++    };
++    let transport = format!(
++        "proxy: {}; TLS: system roots{}; verification remains enabled",
++        if draft.config.upstream.proxy.is_some() {
++            "explicit (loopback bypassed)"
++        } else {
++            "disabled"
++        },
++        draft
++            .config
++            .upstream
++            .ca_bundle
++            .as_ref()
++            .map_or(String::new(), |path| format!(
++                " plus explicit CA {}",
++                path.display()
++            )),
++    );
++    Ok(format!(
++        "config: {}\nstate: {}\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {} (user-supplied accounting fallback used only when a request omits its cap; not a verified provider limit; not injected or enforced upstream); listing: {}; capabilities: {}\nquota: {quota}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness\nlogin requested: {}; pending, registration not applied\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
++        config_path.display(),
++        state.directory.display(),
++        pending.display(),
++        original_upstream,
++        draft.config.upstream.api_base,
++        transport,
++        urls.openai,
++        urls.messages,
++        urls.messages_request,
++        root.endpoints,
++        draft.config.models[0].id,
++        draft.config.models[0]
++            .max_output_tokens
++            .expect("validated output bound"),
++        if draft.listing_verified {
++            "verified GET only"
++        } else {
++            "unverified/manual"
++        },
++        if draft.capabilities_verified {
++            "verified"
++        } else {
++            "unverified"
++        },
++        draft.shared_with_other_pcs,
++        draft.separate_input_output,
++        if draft.login_requested { "yes" } else { "no" },
++        if clients.is_empty() { "none" } else { &clients },
++        fingerprint_impact,
++        root.id,
++    ))
++}
+--- baseline/product/src/setup/validate.rs
++++ product/src/setup/validate.rs
+@@ -0,0 +1,80 @@
++use super::Error;
++use crate::config::Auth;
++
++pub fn api_base(raw: &str) -> Result<url::Url, Error> {
++    let raw_query = raw
++        .split_once('?')
++        .map(|(_, query)| query.split_once('#').map_or(query, |(query, _)| query));
++    let url = url::Url::parse(raw)
++        .map_err(|_| Error::message("upstream API base must be a valid absolute URL"))?;
++    if !matches!(url.scheme(), "http" | "https") {
++        return Err(Error::message("upstream API base must use http or https"));
++    }
++    if url.host_str().is_none() {
++        return Err(Error::message(
++            "upstream API base absolute URL must include a host",
++        ));
++    }
++    if !url.username().is_empty() || url.password().is_some() {
++        return Err(Error::message(
++            "upstream API base must not contain credentials",
++        ));
++    }
++    if url.fragment().is_some() {
++        return Err(Error::message(
++            "upstream API base must not contain a fragment",
++        ));
++    }
++    if raw_query == Some("") || url.query() != raw_query {
++        return Err(Error::message(
++            "upstream API base query must be nonempty and already losslessly encoded",
++        ));
++    }
++    Ok(url)
++}
++
++pub fn proxy(raw: &str) -> Result<url::Url, Error> {
++    let url =
++        url::Url::parse(raw).map_err(|_| Error::message("proxy must be a valid absolute URL"))?;
++    if !matches!(url.scheme(), "http" | "https")
++        || url.host_str().is_none()
++        || !url.username().is_empty()
++        || url.password().is_some()
++        || url.query().is_some()
++        || url.fragment().is_some()
++    {
++        return Err(Error::message(
++            "proxy must be an http(s) URL with a host and no credentials, query, or fragment",
++        ));
++    }
++    Ok(url)
++}
++
++/// Check current-process availability only. This never reads or returns the secret value.
++pub fn available_auth(auth: &Auth) -> Result<(), Error> {
++    if let Auth::Env { name, .. } = auth {
++        if std::env::var_os(name).is_none() {
++            return Err(Error::message(format!(
++                "environment variable {name} is unavailable in the current process; it must contain the complete header value"
++            )));
++        }
++    }
++    Ok(())
++}
++
++pub(crate) fn auth_header(auth: &Auth) -> Result<Option<(String, String)>, Error> {
++    match auth {
++        Auth::None => Ok(None),
++        Auth::Forward => Err(Error::message(
++            "forward auth cannot be checked without an incoming client credential",
++        )),
++        Auth::Env { header, name } => {
++            let value = std::env::var(name).map_err(|_| {
++                Error::message(format!(
++                    "environment variable {name} is unavailable; provide the complete header value"
++                ))
++            })?;
++            Ok(Some((header.clone(), value)))
++        }
++    }
++}
+--- baseline/product/src/transport/upstream.rs
++++ product/src/transport/upstream.rs
+@@ -1,8 +1,41 @@
+-use std::time::Duration;
++use std::{fmt, fs, io, time::Duration};
+ 
+ use axum::http::{HeaderMap, Method};
++use reqwest::{Certificate, NoProxy, Proxy};
+ 
+ use super::body_budget::BudgetedBody;
++use crate::config::Upstream;
++
++#[derive(Debug)]
++pub enum BuildError {
++    ReadCa(io::Error),
++    InvalidCa(reqwest::Error),
++    EmptyCa,
++    Client(reqwest::Error),
++}
++
++impl fmt::Display for BuildError {
++    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
++        match self {
++            Self::ReadCa(_) => formatter.write_str("failed to read configured CA bundle"),
++            Self::InvalidCa(_) => {
++                formatter.write_str("configured CA bundle is not valid PEM certificates")
++            }
++            Self::EmptyCa => formatter.write_str("configured CA bundle contains no certificates"),
++            Self::Client(_) => formatter.write_str("failed to build upstream HTTP client"),
++        }
++    }
++}
++
++impl std::error::Error for BuildError {
++    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
++        match self {
++            Self::ReadCa(error) => Some(error),
++            Self::InvalidCa(error) | Self::Client(error) => Some(error),
++            Self::EmptyCa => None,
++        }
++    }
++}
+ 
+ #[derive(Clone)]
+ pub struct UpstreamClient {
+@@ -10,18 +43,44 @@
+ }
+ 
+ impl UpstreamClient {
+-    pub fn new(timeout: Duration) -> Result<Self, reqwest::Error> {
+-        let inner = reqwest::Client::builder()
+-            .retry(reqwest::retry::never())
+-            .redirect(reqwest::redirect::Policy::none())
+-            .no_proxy()
+-            .connect_timeout(Duration::from_secs(10))
+-            .timeout(timeout)
+-            .pool_max_idle_per_host(16)
+-            .build()?;
+-        Ok(Self { inner })
++    pub fn new(timeout: Duration, upstream: &Upstream) -> Result<Self, BuildError> {
++        Ok(Self {
++            inner: build_client(timeout, upstream)?,
++        })
+     }
++}
+ 
++pub(crate) fn build_client(
++    timeout: Duration,
++    upstream: &Upstream,
++) -> Result<reqwest::Client, BuildError> {
++    let mut builder = reqwest::Client::builder()
++        .retry(reqwest::retry::never())
++        .redirect(reqwest::redirect::Policy::none())
++        .connect_timeout(Duration::from_secs(10))
++        .timeout(timeout)
++        .pool_max_idle_per_host(16);
++    if let Some(proxy) = &upstream.proxy {
++        let bypass = NoProxy::from_string("localhost,127.0.0.0/8,::1");
++        let proxy = Proxy::all(proxy.as_str())
++            .map_err(BuildError::Client)?
++            .no_proxy(bypass);
++        builder = builder.proxy(proxy);
++    } else {
++        builder = builder.no_proxy();
++    }
++    if let Some(path) = &upstream.ca_bundle {
++        let pem = fs::read(path).map_err(BuildError::ReadCa)?;
++        let certificates = Certificate::from_pem_bundle(&pem).map_err(BuildError::InvalidCa)?;
++        if certificates.is_empty() {
++            return Err(BuildError::EmptyCa);
++        }
++        builder = builder.tls_certs_merge(certificates);
++    }
++    builder.build().map_err(BuildError::Client)
++}
++
++impl UpstreamClient {
+     pub async fn send(
+         &self,
+         method: Method,
+--- baseline/product/tests/benchmark_trace.rs
++++ product/tests/benchmark_trace.rs
+@@ -16,6 +16,8 @@
+         upstream: Upstream {
+             api_base: "http://127.0.0.1:9".parse().unwrap(),
+             auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,
+--- baseline/product/tests/fairness_contract.rs
++++ product/tests/fairness_contract.rs
+@@ -16,6 +16,8 @@
+         upstream: Upstream {
+             api_base: "http://127.0.0.1:9".parse().unwrap(),
+             auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,
+--- baseline/product/tests/fixtures/setup-localhost-cert.pem
++++ product/tests/fixtures/setup-localhost-cert.pem
+@@ -0,0 +1,19 @@
++-----BEGIN CERTIFICATE-----
++MIIDITCCAgmgAwIBAgIUC+EjNIFHjf1fVGcrhhxPp9Q+CTgwDQYJKoZIhvcNAQEL
++BQAwGDEWMBQGA1UEAwwNbGxtZ3ctdGVzdC1jYTAeFw0yNjA5MTIxNzM4MzNaFw0z
++NjA5MDkxNzM4MzNaMBgxFjAUBgNVBAMMDWxsbWd3LXRlc3QtY2EwggEiMA0GCSqG
++SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDDdQaQ5QtxaAng1X1zxt0EQ4EtCOZPooiy
++CQd34CciXCxcePYzZU5x7+xo1OV0hDM5ka7uwc6zSck70cuKd++L/FPaaJOQcdFf
++EW6mdtUf1rkLhIAonS0FF4UPrGsHJuogdY049XhzvK5hbyT46wuejZFdIzvP+1VK
++f2k+NM6jIyAh5ilZpULGw69BgB/jpl/Cpl9WLNqIOLlMttLLiUyBLIPqlWtP0t8H
++oh3BZ66ZIFrpAuRiyDYo2WG9lQ34B6LVIR9v/+GpyjSCPeAkAgNGtnlIKyYy+rRP
++ZwhmRQoUG74rI4tzKCQMf2Y9cjv6+pXIfSBf118cs498WlPQKnZzAgMBAAGjYzBh
++MB0GA1UdDgQWBBT7+guGZmzsVawhrBb452kHXp+vtTAfBgNVHSMEGDAWgBT7+guG
++ZmzsVawhrBb452kHXp+vtTAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
++BjANBgkqhkiG9w0BAQsFAAOCAQEAqO6nzqSVzBsofUWmJRXuErp6GF3rMRHCJwsb
++Ww+WEk9Lr0FiD+jGntU5mATR/QY8iFQjOyh0L+51L7Ya4g7deZMsRIRUoFL1f5vY
++6cOt+G4xuWDK30NP6R4CTdDJFwHAXx/pghtv0LzFeCFiCXb4GTHH6+3hEBypNJho
++7TYVKOKKloueONGkMCN0+CIH2wgSUddmoHEfFBIzvPirTAJDfKLj43Ha0MmZFKHJ
++zLPRmtd89FQO3CdQfR+wl28Gcvq1mBBDbXjP+Jhi619eu9WzyALdwqi26ujynL8R
++ZF6Y4PryAK9/N/oYY7kOKQ8t5L4r3l5j30qPwcsZoGsxBUledQ==
++-----END CERTIFICATE-----
+--- baseline/product/tests/fixtures/setup-localhost-key.pem
++++ product/tests/fixtures/setup-localhost-key.pem
+@@ -0,0 +1,28 @@
++-----BEGIN PRIVATE KEY-----
++MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDtwi1qShpafv5G
++nNgSHiAgR/VavPagHwM+Rut06hGW5Zf08aLSNyIcYD0ILMTwpMH5FPWx/N2os2os
++P3FlXuy0L+f5GM2kdKuI8DloMhrTQehzK9g0Y+yBHljutmZvDUrGmZwyxn5aYnvM
++PlEeluQIj2VXIDzNR5aiNgojSH2VWuhZREFieYxo9NLloakEofAcypDk5KtXGqUq
++vh+kJEavb6d2DZWpnDOf1Z9CBkoUVWsBXbRwQ6NV++zO10GEyPjR4uX3PwZtBik0
++in2Cw/Du6/3I+dQtAcY9sSOC0yzKtUptHJgTh0B3UXqkNVfDcWM0tm+1HBDd6UTT
++42qFCct5AgMBAAECggEATDEv8KHytBGCVwqoS5YP4Yht3jg0KLgHiAueJQdlv5+w
++BLTy4r78VW+Z32bJbfy+lJ3c5r8MIaXtXmSuaDf1TwETK8aBEDS7S9T/8J4t7olu
++fooMbS2gevhIs6cMSIZP8jkDz1nA4CIzXg6SXGUqinu5lCQml/pbEXyT3x658ARl
++1RFvh33ECGJe4TeuAqeKiiJdqhKuGkkqyZKU4MNfKe70mL7YOFmLXQTT8MJr7cpQ
++yPFL987O8XVSeoens5aUS29uIL1JSa7MqqRVuVWDPmy0nEwNOOtoPMUwOetsxrQn
++gxVCpzrJ9GkdVcI7tuh4WSQrLs+66z6eKoTHAozEaQKBgQD3xTJdjpHbSeOTAAR5
++kY4KrppR7QlOuswiM+goP4gt+N4mwWzQR7OnhwEjYCwX/s1YrG2WDw+isNtOtH0t
++tHqSuSA5RLYP8EX5iSugLFyp6Vfn/8fdyih4X3//+/1ABhBjLymZvf9zqwVq/o88
++JcrG+T19+9JqUPyxzdQS/ABqgwKBgQD1p9mRaqvMpJvNZUDyLpRIrgZqKWoYtE3d
++WeTU9Dih8u2sAXOu5AtdChQf9JhXL5CfGmEmumUkA+JIPkKMmDtiiYoSn1TwQkoq
++PWLoMKZ1tSdqu7SpgirvIWLuos1cB9g991CcU3cP0xwvQWjA1xvnqh7o9bxOe6Uz
++a9RHO/RBUwKBgQDUXWTp44UIm7A/EsjDGgrRBQ6oIa7UmC7XMf5OYQXrwV9HgIov
++iwVlFcXX+FpSxsZitofHEmmoXEXck76nKgXVNG92JnqV9q9DTlriEqPpzmLWKtm4
++M8m0QsaHNgi+k3QATzAs4jjNf0xJhJ5oQ0wmdwJJtUmIbpnoHC8lhnEk2QKBgQCL
++y3Qto6WWtIoRTbCy4TzzS01NNrowytKQx6pIYZ6k0qjcPItHmHC7BpRDRx82ZlQH
++pqxorKQH5cns0LlwZuVMgva2+EMO4rpv5TUW6zCfRXLj82OxHukt4jL5mF4DJFez
++k70k6P6VW87rOW7SZtdzc0VZzxXVF9oANDm+O+kZDwKBgQDHm+uFOV653+VYiXfX
++M9++tSPH0yjtAWms1pYjae9tHGFNF3v0v0faybFbJm8sdcrfSzD/K+DYBe9T8KmA
++Y52nhLijhN6bPAf9TxO6a4bU2fkdwJYJCfODKjr1iAI9SLeK0IUoQ1rHUW1RFUDc
++I/lZQl9qYXn6zY/4qamBNuuKgA==
++-----END PRIVATE KEY-----
+--- baseline/product/tests/fixtures/setup-localhost-server.pem
++++ product/tests/fixtures/setup-localhost-server.pem
+@@ -0,0 +1,20 @@
++-----BEGIN CERTIFICATE-----
++MIIDTTCCAjWgAwIBAgIUeKsgfOllZg5/6M+TmsK+oyUhd3YwDQYJKoZIhvcNAQEL
++BQAwGDEWMBQGA1UEAwwNbGxtZ3ctdGVzdC1jYTAeFw0yNjA5MTIxNzM4MzNaFw0y
++NzA5MTIxNzM4MzNaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcN
++AQEBBQADggEPADCCAQoCggEBAO3CLWpKGlp+/kac2BIeICBH9Vq89qAfAz5G63Tq
++EZbll/TxotI3IhxgPQgsxPCkwfkU9bH83aizaiw/cWVe7LQv5/kYzaR0q4jwOWgy
++GtNB6HMr2DRj7IEeWO62Zm8NSsaZnDLGflpie8w+UR6W5AiPZVcgPM1HlqI2CiNI
++fZVa6FlEQWJ5jGj00uWhqQSh8BzKkOTkq1capSq+H6QkRq9vp3YNlamcM5/Vn0IG
++ShRVawFdtHBDo1X77M7XQYTI+NHi5fc/Bm0GKTSKfYLD8O7r/cj51C0Bxj2xI4LT
++LMq1Sm0cmBOHQHdReqQ1V8NxYzS2b7UcEN3pRNPjaoUJy3kCAwEAAaOBkjCBjzAa
++BgNVHREEEzARgglsb2NhbGhvc3SHBH8AAAEwDAYDVR0TAQH/BAIwADAOBgNVHQ8B
++Af8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwEwHQYDVR0OBBYEFJ4mz/C5FMeB
++J6dMCN+bFy4lRfSPMB8GA1UdIwQYMBaAFPv6C4ZmbOxVrCGsFvjnaQden6+1MA0G
++CSqGSIb3DQEBCwUAA4IBAQBgKaijMceINGSU3018zbpkP1BNFn1BLUAH9Loz142z
++LlkGS+pnKPxgY88Hbc6xOd+kowJhSiCYOYyWAxljn3mjMeg1tgzCp2MQLYd8wzgK
++pxcCAowsdf+aaKn+utq6jAH2GJAhc2pinabfc/CMe5pV8FK0mYh5ZkhAxx1EN93Q
++Tnk+77PceUJwEvDRVkswZzZWdbaSHiZhmsDMsBO9BMzCR0ksAXnKIeXVmVn8TWg9
++Z+nh+6+XBjMoq8DZWTitxaZIcoTs7WfOukGC+aUsgWDOK2kb+K3W/l5vrVk+fI18
++3J4LizMfZSEMMveRIw72RfdUtDJ4ULboISrWXBz1uo6n
++-----END CERTIFICATE-----
+--- baseline/product/tests/retry_contract.rs
++++ product/tests/retry_contract.rs
+@@ -15,6 +15,8 @@
+         upstream: Upstream {
+             api_base: format!("http://{address}/v1").parse().unwrap(),
+             auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,
+--- baseline/product/tests/setup_contract.rs
++++ product/tests/setup_contract.rs
+@@ -0,0 +1,1015 @@
++//! Native setup contract. All network and process checks use owned loopback fixtures.
++use llmgw::config::{Accounting, Auth, CancelPolicy, Endpoint, Limit, LoadedConfig};
++use llmgw::setup::{
++    ApplyMode, ClientIntent, ConnectionAnswers, EnvironmentPreset, Flow, LimitAnswer, ModelAnswers,
++    ModelListing, PromptIo, QuotaAnswers, RunAnswers, SetupDraft, SetupOutcome, Step, ToolAnswers,
++    apply, example_urls, list_models, run_wizard,
++};
++use std::{
++    collections::VecDeque,
++    fs,
++    net::TcpListener,
++    path::PathBuf,
++    process::Command,
++    sync::{
++        Arc,
++        atomic::{AtomicUsize, Ordering},
++    },
++};
++mod support;
++use support::fixture::{response_body, send_raw, status};
++
++static NEXT: AtomicUsize = AtomicUsize::new(0);
++
++struct Temp {
++    dir: PathBuf,
++}
++
++impl Temp {
++    fn new(label: &str) -> Self {
++        let dir = std::env::temp_dir().join(format!(
++            "llmgw-setup-{}-{}-{label} 한글 space",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        fs::create_dir_all(&dir).unwrap();
++        Self { dir }
++    }
++
++    fn config(&self) -> PathBuf {
++        self.dir.join("gateway 설정.toml")
++    }
++}
++
++impl Drop for Temp {
++    fn drop(&mut self) {
++        let config = self.config();
++        if config.exists() {
++            let _ = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++                .args(["off", "--config"])
++                .arg(&config)
++                .output();
++        }
++        let _ = fs::remove_dir_all(&self.dir);
++    }
++}
++
++fn draft(port: u16) -> SetupDraft {
++    SetupDraft::new(EnvironmentPreset::ExternalApi)
++        .connection(ConnectionAnswers {
++            api_base: "http://127.0.0.1:9/prefix/v1".into(),
++            endpoints: vec![Endpoint::Responses],
++            auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
++        })
++        .models(ModelAnswers::manual("model-a", Some(64)))
++        .quota(QuotaAnswers {
++            rpm: LimitAnswer::Unlimited,
++            tpm: LimitAnswer::Unknown,
++            shared_with_other_pcs: false,
++            separate_input_output: false,
++            concurrency: 1,
++        })
++        .run(RunAnswers {
++            port,
++            login_requested: false,
++        })
++        .tools(ToolAnswers {
++            clients: vec![ClientIntent::Pi, ClientIntent::Manual],
++        })
++}
++
++#[test]
++fn presets_only_supply_defaults_and_never_claim_protocol_or_local_start() {
++    let local = SetupDraft::new(EnvironmentPreset::LocalLlm);
++    let corporate = SetupDraft::new(EnvironmentPreset::Corporate);
++    let external = SetupDraft::new(EnvironmentPreset::ExternalApi);
++
++    assert_eq!(local.concurrency(), 1);
++    assert!(!local.login_requested());
++    assert!(local.endpoints().is_empty());
++    assert!(!local.local_model_started_or_downloaded());
++    assert!(corporate.endpoints().is_empty());
++    assert!(external.endpoints().is_empty());
++    assert_eq!(local.accounting(), Accounting::Reserved);
++    assert!(!local.retry_transient_429());
++}
++
++#[test]
++fn quota_known_unknown_and_unlimited_are_typed_and_zero_is_rejected() {
++    assert_eq!(
++        LimitAnswer::known(12).unwrap().to_limit(),
++        Limit::Known(12.try_into().unwrap())
++    );
++    assert_eq!(LimitAnswer::Unknown.to_limit(), Limit::Unknown);
++    assert_eq!(LimitAnswer::Unlimited.to_limit(), Limit::Unlimited);
++    assert!(LimitAnswer::known(0).is_err());
++    assert!(
++        QuotaAnswers {
++            rpm: LimitAnswer::Unlimited,
++            tpm: LimitAnswer::Unknown,
++            shared_with_other_pcs: true,
++            separate_input_output: true,
++            concurrency: 17,
++        }
++        .validate()
++        .is_err()
++    );
++}
++
++#[test]
++fn invalid_base_is_rejected_before_model_listing_network_call() {
++    let calls = Arc::new(AtomicUsize::new(0));
++    let observed = Arc::clone(&calls);
++    let result = list_models(
++        "vendor.example/not-absolute",
++        &Auth::None,
++        move |_request| {
++            observed.fetch_add(1, Ordering::SeqCst);
++            unreachable!("invalid URL must not reach transport")
++        },
++    );
++    assert!(result.unwrap_err().to_string().contains("absolute URL"));
++    assert_eq!(calls.load(Ordering::SeqCst), 0);
++}
++
++#[test]
++fn typed_draft_preserves_invalid_api_base_error_until_validation() {
++    let invalid = draft(4141).connection(ConnectionAnswers {
++        api_base: "vendor.example/not-absolute".into(),
++        endpoints: vec![Endpoint::Responses],
++        auth: Auth::None,
++        proxy: None,
++        ca_bundle: None,
++    });
++    let error = invalid.validate().unwrap_err().to_string();
++    assert!(error.contains("absolute URL"), "{error}");
++}
++
++#[test]
++fn typed_draft_preserves_invalid_proxy_error_instead_of_dropping_proxy() {
++    let invalid = draft(4141).connection(ConnectionAnswers {
++        api_base: "https://example.invalid/v1".into(),
++        endpoints: vec![Endpoint::Responses],
++        auth: Auth::None,
++        proxy: Some("proxy.example:8080".into()),
++        ca_bundle: None,
++    });
++    let error = invalid.validate().unwrap_err().to_string();
++    assert!(error.contains("proxy must"), "{error}");
++}
++
++#[test]
++fn missing_env_is_distinct_from_valid_static_configuration_and_redacts_value() {
++    let name = format!("LLMGW_SETUP_MISSING_{}", std::process::id());
++    let auth = Auth::Env {
++        header: "authorization".into(),
++        name: name.clone(),
++    };
++    let error = llmgw::setup::validate::available_auth(&auth).unwrap_err();
++    assert!(error.to_string().contains(&name));
++    assert!(error.to_string().contains("complete header value"));
++    assert!(!error.to_string().contains("Bearer"));
++}
++
++#[test]
++fn listing_404_is_explained_and_manual_model_can_still_be_saved() {
++    let result = list_models("https://fixture.invalid/v1", &Auth::None, |_request| {
++        Ok((404, br#"{"error":"missing"}"#.to_vec()))
++    })
++    .unwrap();
++    assert!(matches!(
++        result,
++        ModelListing::Unavailable {
++            status: Some(404),
++            ..
++        }
++    ));
++
++    let temp = Temp::new("listing404");
++    let outcome = apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    assert_eq!(outcome.mode, ApplyMode::SaveOnly);
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    assert_eq!(loaded.config.models[0].id, "model-a");
++}
++
++#[derive(Default)]
++struct Script {
++    responses: VecDeque<(Step, Flow)>,
++    visited: Vec<Step>,
++}
++
++impl Script {
++    fn with(responses: impl IntoIterator<Item = (Step, Flow)>) -> Self {
++        Self {
++            responses: responses.into_iter().collect(),
++            visited: Vec::new(),
++        }
++    }
++}
++
++impl PromptIo for Script {
++    fn prompt(&mut self, step: Step, _draft: &SetupDraft) -> Result<Flow, llmgw::setup::Error> {
++        self.visited.push(step);
++        let (expected, answer) = self.responses.pop_front().expect("script answer");
++        assert_eq!(step, expected);
++        Ok(answer)
++    }
++}
++
++#[test]
++fn scripted_wizard_supports_back_and_cancel_without_writes() {
++    let temp = Temp::new("cancel");
++    let sentinel = temp.dir.join("existing.txt");
++    fs::write(&sentinel, "unchanged").unwrap();
++    let before: Vec<_> = fs::read_dir(&temp.dir)
++        .unwrap()
++        .map(|e| e.unwrap().file_name())
++        .collect();
++    let mut io = Script::with([
++        (
++            Step::Environment,
++            Flow::SetEnvironment(EnvironmentPreset::Corporate),
++        ),
++        (Step::Connection, Flow::Back),
++        (
++            Step::Environment,
++            Flow::SetEnvironment(EnvironmentPreset::LocalLlm),
++        ),
++        (Step::Connection, Flow::Cancel),
++    ]);
++
++    let outcome = run_wizard(&mut io, None).unwrap();
++    assert_eq!(outcome, SetupOutcome::Cancelled);
++    assert_eq!(fs::read_to_string(sentinel).unwrap(), "unchanged");
++    let after: Vec<_> = fs::read_dir(&temp.dir)
++        .unwrap()
++        .map(|e| e.unwrap().file_name())
++        .collect();
++    assert_eq!(before, after);
++}
++
++#[test]
++fn scripted_wizard_accepts_local_corporate_and_external_presets() {
++    for preset in [
++        EnvironmentPreset::LocalLlm,
++        EnvironmentPreset::Corporate,
++        EnvironmentPreset::ExternalApi,
++    ] {
++        let mut io = Script::with([
++            (Step::Environment, Flow::SetEnvironment(preset)),
++            (
++                Step::Connection,
++                Flow::SetConnection(ConnectionAnswers {
++                    api_base: "https://example.invalid/prefix/v1".into(),
++                    endpoints: vec![Endpoint::Responses],
++                    auth: Auth::None,
++                    proxy: None,
++                    ca_bundle: None,
++                }),
++            ),
++            (
++                Step::Models,
++                Flow::SetModels(ModelAnswers::manual("model-a", Some(64))),
++            ),
++            (
++                Step::Quota,
++                Flow::SetQuota(QuotaAnswers {
++                    rpm: LimitAnswer::Known(3.try_into().unwrap()),
++                    tpm: LimitAnswer::Unlimited,
++                    shared_with_other_pcs: false,
++                    separate_input_output: false,
++                    concurrency: 1,
++                }),
++            ),
++            (
++                Step::Run,
++                Flow::SetRun(RunAnswers {
++                    port: 4141,
++                    login_requested: false,
++                }),
++            ),
++            (Step::Tools, Flow::SetTools(ToolAnswers { clients: vec![] })),
++            (Step::Apply, Flow::Apply(ApplyMode::SaveOnly)),
++        ]);
++        assert!(matches!(
++            run_wizard(&mut io, None).unwrap(),
++            SetupOutcome::Ready {
++                mode: ApplyMode::SaveOnly,
++                ..
++            }
++        ));
++        assert_eq!(io.visited.len(), 7);
++    }
++}
++
++#[test]
++fn rerun_preserves_multiroot_models_retry_and_accounting_until_explicitly_changed() {
++    let temp = Temp::new("preserve");
++    let raw = r#"listen = "127.0.0.1:4200"
++concurrency = 3
++cancel_policy = "close"
++accounting = "actual"
++retry_transient_429 = true
++[upstream]
++api_base = "https://example.invalid/company/v1"
++[upstream.auth]
++mode = "forward"
++[quota.rpm]
++kind = "known"
++value = 7
++[quota.tpm]
++kind = "known"
++value = 800
++[[models]]
++id = "a"
++max_output_tokens = 20
++[[models]]
++id = "b"
++max_output_tokens = 30
++[[roots]]
++id = "pi"
++endpoints = ["responses"]
++models = ["a"]
++[[roots]]
++id = "claude"
++endpoints = ["messages"]
++models = ["b"]
++"#;
++    fs::write(temp.config(), raw).unwrap();
++    let existing = LoadedConfig::load(temp.config()).unwrap();
++    let rerun = SetupDraft::from_existing(&existing.config);
++    let rendered = rerun.render_config().unwrap();
++    let parsed = llmgw::config::parse(rendered.as_bytes()).unwrap();
++    assert_eq!(parsed, existing.config);
++    assert_eq!(parsed.accounting, Accounting::Actual);
++    assert!(parsed.retry_transient_429);
++    assert_eq!(parsed.cancel_policy, CancelPolicy::Close);
++    assert_eq!(parsed.models.len(), 2);
++    assert_eq!(parsed.roots.len(), 2);
++}
++
++#[test]
++fn rerun_noop_preserves_exact_bytes_and_scalar_edit_preserves_inline_comment() {
++    let temp = Temp::new("document-preserve");
++    let raw = r#"# user heading
++listen = "127.0.0.1:4200" # keep port comment
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++retry_transient_429 = false
++[upstream]
++api_base = "https://example.invalid/v1" # keep upstream comment
++[upstream.auth]
++mode = "none"
++[quota.rpm]
++kind = "unlimited"
++[quota.tpm]
++kind = "unknown"
++[[models]]
++id = "a"
++max_output_tokens = 20
++[[roots]]
++id = "pi"
++endpoints = ["responses"]
++models = ["a"]
++"#;
++    fs::write(temp.config(), raw).unwrap();
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let noop = SetupDraft::from_loaded(&loaded).unwrap();
++    assert_eq!(noop.render_config().unwrap().as_bytes(), raw.as_bytes());
++    let edited = SetupDraft::from_loaded(&loaded).unwrap().run(RunAnswers {
++        port: 4201,
++        login_requested: false,
++    });
++    let rendered = edited.render_config().unwrap();
++    assert!(rendered.contains("# user heading"));
++    assert!(rendered.contains("# keep port comment"));
++    assert!(rendered.contains("# keep upstream comment"));
++    assert_eq!(
++        llmgw::config::parse(rendered.as_bytes())
++            .unwrap()
++            .listen
++            .port(),
++        4201
++    );
++}
++
++#[test]
++fn scalar_edit_preserves_valid_inline_auth_and_quota_tables_without_panicking() {
++    let temp = Temp::new("inline-tables");
++    let raw = r#"listen = "127.0.0.1:4200"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++retry_transient_429 = false
++upstream = { api_base = "https://example.invalid/v1", auth = { mode = "none" } }
++quota = { rpm = { kind = "unlimited" }, tpm = { kind = "unknown" } }
++[[models]]
++id = "a"
++max_output_tokens = 20
++[[roots]]
++id = "pi"
++endpoints = ["responses"]
++models = ["a"]
++"#;
++    fs::write(temp.config(), raw).unwrap();
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let edited = SetupDraft::from_loaded(&loaded).unwrap().run(RunAnswers {
++        port: 4201,
++        login_requested: false,
++    });
++    let rendered = edited.render_config().unwrap();
++    let parsed = llmgw::config::parse(rendered.as_bytes()).unwrap();
++    assert_eq!(parsed.listen.port(), 4201);
++    assert!(rendered.contains("auth = { mode = \"none\" }"));
++    assert!(rendered.contains("rpm = { kind = \"unlimited\" }"));
++}
++
++#[test]
++fn save_and_rerun_preserve_minimal_pending_intents_without_credentials() {
++    let temp = Temp::new("pending-intents");
++    let configured = draft(4141)
++        .quota(QuotaAnswers {
++            rpm: LimitAnswer::Unlimited,
++            tpm: LimitAnswer::Unknown,
++            shared_with_other_pcs: true,
++            separate_input_output: true,
++            concurrency: 1,
++        })
++        .run(RunAnswers {
++            port: 4141,
++            login_requested: true,
++        })
++        .tools(ToolAnswers {
++            clients: vec![ClientIntent::ClaudeCode, ClientIntent::Codex],
++        });
++    let saved = apply(&temp.config(), &configured, ApplyMode::SaveOnly).unwrap();
++    let pending = fs::read_to_string(&saved.pending_path).unwrap();
++    assert!(pending.contains("shared_with_other_pcs"));
++    assert!(pending.contains("claude_code"));
++    assert!(!pending.contains("api_base"));
++    assert!(!pending.contains("authorization"));
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        assert_eq!(
++            fs::metadata(&saved.pending_path)
++                .unwrap()
++                .permissions()
++                .mode()
++                & 0o777,
++            0o600
++        );
++    }
++
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let restored = SetupDraft::from_loaded(&loaded).unwrap();
++    assert!(restored.shared_with_other_pcs());
++    assert!(restored.separate_input_output());
++    assert!(restored.login_requested());
++    assert_eq!(
++        restored.clients(),
++        &[ClientIntent::ClaudeCode, ClientIntent::Codex]
++    );
++}
++
++#[cfg(unix)]
++#[test]
++fn edited_existing_config_preserves_its_permissions() {
++    use std::os::unix::fs::PermissionsExt;
++    let temp = Temp::new("config-permissions");
++    apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    fs::set_permissions(temp.config(), fs::Permissions::from_mode(0o640)).unwrap();
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let edited = SetupDraft::from_loaded(&loaded).unwrap().run(RunAnswers {
++        port: 4142,
++        login_requested: false,
++    });
++    apply(&temp.config(), &edited, ApplyMode::SaveOnly).unwrap();
++    assert_eq!(
++        fs::metadata(temp.config()).unwrap().permissions().mode() & 0o777,
++        0o640
++    );
++}
++
++#[cfg(unix)]
++#[test]
++fn setup_refuses_a_config_symlink_even_when_target_bytes_are_unchanged() {
++    use std::os::unix::fs::symlink;
++    let temp = Temp::new("config-symlink");
++    let target = temp.dir.join("target.toml");
++    let configured = draft(4141);
++    let bytes = configured.render_config().unwrap();
++    fs::write(&target, &bytes).unwrap();
++    symlink(&target, temp.config()).unwrap();
++    let error = apply(&temp.config(), &configured, ApplyMode::SaveOnly)
++        .unwrap_err()
++        .to_string();
++    assert!(error.contains("regular file, not a link"), "{error}");
++    assert_eq!(fs::read_to_string(target).unwrap(), bytes);
++}
++
++#[test]
++fn summary_resolves_paths_and_joins_prefix_and_v1_exactly_once() {
++    let temp = Temp::new("summary");
++    let config = temp.config();
++    let summary = draft(4141).summary(&config).unwrap();
++    assert!(summary.contains(config.to_string_lossy().as_ref()));
++    assert!(summary.contains("pending, registration not applied"));
++    assert!(summary.contains("pending, client files not changed"));
++    assert!(summary.contains("quota: estimated"));
++    assert!(summary.contains("login requested: no"));
++    assert!(summary.contains("capabilities: unverified"));
++    assert!(summary.contains("user-supplied accounting fallback"));
++    assert!(summary.contains("not a verified provider limit"));
++    assert!(summary.contains("fingerprint impact:"));
++    assert!(!summary.contains("Bearer"));
++    let urls = example_urls("http://127.0.0.1:4141", "pi-work").unwrap();
++    assert_eq!(urls.openai, "http://127.0.0.1:4141/r/pi-work/v1");
++    assert_eq!(urls.messages, "http://127.0.0.1:4141/r/pi-work");
++    assert_eq!(
++        urls.messages_request,
++        "http://127.0.0.1:4141/r/pi-work/v1/messages"
++    );
++    assert!(example_urls("http://127.0.0.1:4141", "pi work").is_err());
++}
++
++#[test]
++fn non_tty_first_run_exits_two_without_waiting_or_creating_files() {
++    let temp = Temp::new("non-tty");
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .arg("--config")
++        .arg(temp.config())
++        .stdin(std::process::Stdio::null())
++        .output()
++        .unwrap();
++    assert_eq!(output.status.code(), Some(2));
++    let stderr = String::from_utf8_lossy(&output.stderr);
++    assert!(stderr.contains("llmgw setup"));
++    assert!(stderr.contains("sample"));
++    assert!(!temp.config().exists());
++}
++
++#[test]
++fn explicit_command_with_missing_config_is_unconfigured_exit_two() {
++    let temp = Temp::new("explicit-unconfigured");
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["status", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert_eq!(output.status.code(), Some(2));
++    assert!(String::from_utf8_lossy(&output.stderr).contains("llmgw setup"));
++    assert!(!temp.config().exists());
++}
++
++#[test]
++fn relative_config_is_fixed_from_invocation_directory() {
++    let temp = Temp::new("relative-config");
++    apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .current_dir(&temp.dir)
++        .args(["status", "--json", "--config", "gateway 설정.toml"])
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    assert_eq!(
++        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap()["state"],
++        "stopped"
++    );
++}
++
++#[test]
++fn bare_configured_command_means_on_and_reaches_authenticated_readiness() {
++    let temp = Temp::new("bare-on");
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    let port = listener.local_addr().unwrap().port();
++    drop(listener);
++    apply(&temp.config(), &draft(port), ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    let status = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["status", "--json", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    let status: serde_json::Value = serde_json::from_slice(&status.stdout).unwrap();
++    assert_eq!(status["state"], "running");
++    assert!(status["identity"]["fingerprint"].as_str().is_some());
++}
++
++#[test]
++fn save_only_starts_no_process_and_real_on_reaches_authenticated_readiness() {
++    let temp = Temp::new("apply");
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    let port = listener.local_addr().unwrap().port();
++    drop(listener);
++    let save = apply(&temp.config(), &draft(port), ApplyMode::SaveOnly).unwrap();
++    assert_eq!(save.runtime_state, "not_started");
++    assert_eq!(save.worker_processes_started, 0);
++    let stopped = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["status", "--json", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(stopped.status.success());
++    assert_eq!(
++        serde_json::from_slice::<serde_json::Value>(&stopped.stdout).unwrap()["state"],
++        "stopped"
++    );
++
++    let started = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["on", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(
++        started.status.success(),
++        "{}",
++        String::from_utf8_lossy(&started.stderr)
++    );
++    let running = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["status", "--json", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    let running: serde_json::Value = serde_json::from_slice(&running.stdout).unwrap();
++    assert_eq!(running["state"], "running");
++    assert!(running["identity"]["fingerprint"].as_str().is_some());
++}
++
++#[test]
++fn doctor_default_is_offline_and_reports_static_auth_availability() {
++    let temp = Temp::new("doctor-offline");
++    apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["doctor", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    let text = String::from_utf8_lossy(&output.stdout);
++    assert!(text.contains("network: not requested"));
++    assert!(text.contains("auth availability: not required"));
++    assert!(text.contains("port availability:"));
++    assert!(text.contains("worker readiness: not checked"));
++}
++
++#[test]
++fn doctor_missing_env_is_an_offline_operational_failure_without_value_disclosure() {
++    let temp = Temp::new("doctor-missing-env");
++    let name = format!("LLMGW_SETUP_DOCTOR_MISSING_{}", std::process::id());
++    let configured = draft(4141).connection(ConnectionAnswers {
++        api_base: "https://example.invalid/v1".into(),
++        endpoints: vec![Endpoint::Responses],
++        auth: Auth::Env {
++            header: "authorization".into(),
++            name: name.clone(),
++        },
++        proxy: None,
++        ca_bundle: None,
++    });
++    apply(&temp.config(), &configured, ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["doctor", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert_eq!(output.status.code(), Some(1));
++    let stdout = String::from_utf8_lossy(&output.stdout);
++    assert!(stdout.contains(&format!("environment reference {name} unavailable")));
++    assert!(stdout.contains("network: not requested"));
++    assert!(!stdout.contains("Bearer"));
++}
++
++fn one_http_response(
++    response: &'static [u8],
++) -> (std::net::SocketAddr, std::thread::JoinHandle<Vec<u8>>) {
++    use std::io::{Read, Write};
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    let address = listener.local_addr().unwrap();
++    let task = std::thread::spawn(move || {
++        let (mut socket, _) = listener.accept().unwrap();
++        socket
++            .set_read_timeout(Some(std::time::Duration::from_secs(3)))
++            .unwrap();
++        let mut bytes = Vec::new();
++        let mut part = [0u8; 1024];
++        loop {
++            let count = socket.read(&mut part).unwrap();
++            assert_ne!(count, 0);
++            bytes.extend_from_slice(&part[..count]);
++            if let Some(end) = bytes
++                .windows(4)
++                .position(|w| w == b"\r\n\r\n")
++                .map(|p| p + 4)
++            {
++                let head = String::from_utf8_lossy(&bytes[..end]);
++                let length = head
++                    .lines()
++                    .find_map(|line| {
++                        line.strip_prefix("content-length: ")
++                            .or_else(|| line.strip_prefix("Content-Length: "))
++                    })
++                    .and_then(|v| v.trim().parse::<usize>().ok())
++                    .unwrap_or(0);
++                if bytes.len() >= end + length {
++                    break;
++                }
++            }
++        }
++        socket.write_all(response).unwrap();
++        bytes
++    });
++    (address, task)
++}
++
++#[test]
++fn doctor_network_is_one_bounded_models_get_without_inference() {
++    let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 27\r\nConnection: close\r\n\r\n{\"data\":[{\"id\":\"model-a\"}]}";
++    let (address, request) = one_http_response(response);
++    let temp = Temp::new("doctor-network");
++    let configured = draft(4141).connection(ConnectionAnswers {
++        api_base: format!("http://{address}/prefix/v1"),
++        endpoints: vec![Endpoint::Responses],
++        auth: Auth::None,
++        proxy: None,
++        ca_bundle: None,
++    });
++    apply(&temp.config(), &configured, ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["doctor", "--network", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    let request = String::from_utf8(request.join().unwrap()).unwrap();
++    assert!(request.starts_with("GET /prefix/v1/models HTTP/1.1\r\n"));
++    assert!(!request.contains("model-a\""));
++    assert!(String::from_utf8_lossy(&output.stdout).contains("model-a"));
++}
++
++#[test]
++fn doctor_inference_is_one_explicit_bounded_call_and_no_listing() {
++    let body = br#"{"id":"response-fixture","status":"completed","error":null,"incomplete_details":null,"output":[{"type":"message","content":[{"type":"output_text","text":"OK"}]}]}"#;
++    let response = format!(
++        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
++        body.len(),
++        String::from_utf8_lossy(body)
++    );
++    let leaked: &'static [u8] = Box::leak(response.into_bytes().into_boxed_slice());
++    let (address, request) = one_http_response(leaked);
++    let temp = Temp::new("doctor-inference");
++    let configured = draft(4141).connection(ConnectionAnswers {
++        api_base: format!("http://{address}/prefix/v1"),
++        endpoints: vec![Endpoint::Responses],
++        auth: Auth::None,
++        proxy: None,
++        ca_bundle: None,
++    });
++    apply(&temp.config(), &configured, ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args([
++            "doctor",
++            "--inference",
++            "--model",
++            "model-a",
++            "--max-output-tokens",
++            "8",
++            "--config",
++        ])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    let request = String::from_utf8(request.join().unwrap()).unwrap();
++    assert!(request.starts_with("POST /prefix/v1/responses HTTP/1.1\r\n"));
++    assert!(request.contains("\"model\":\"model-a\""));
++    assert!(request.contains("\"max_output_tokens\":8"));
++    assert!(!request.contains("GET "));
++    let stdout = String::from_utf8_lossy(&output.stdout);
++    assert!(stdout.contains("inference calls: 1"));
++    assert!(stdout.contains("output bound: 8"));
++}
++
++fn run_inference_doctor_with_response(response_body: &'static [u8]) -> std::process::Output {
++    let response = format!(
++        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
++        response_body.len(),
++        String::from_utf8_lossy(response_body)
++    );
++    let leaked: &'static [u8] = Box::leak(response.into_bytes().into_boxed_slice());
++    let (address, request) = one_http_response(leaked);
++    let temp = Temp::new("doctor-inference-invalid");
++    let configured = draft(4141).connection(ConnectionAnswers {
++        api_base: format!("http://{address}/prefix/v1"),
++        endpoints: vec![Endpoint::Responses],
++        auth: Auth::None,
++        proxy: None,
++        ca_bundle: None,
++    });
++    apply(&temp.config(), &configured, ApplyMode::SaveOnly).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args([
++            "doctor",
++            "--inference",
++            "--model",
++            "model-a",
++            "--max-output-tokens",
++            "8",
++            "--config",
++        ])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    request.join().unwrap();
++    output
++}
++
++#[test]
++fn doctor_inference_rejects_http_200_without_generation_evidence() {
++    let output = run_inference_doctor_with_response(br#"{}"#);
++    assert_eq!(output.status.code(), Some(1));
++    assert!(String::from_utf8_lossy(&output.stderr).contains("generation evidence"));
++}
++
++#[test]
++fn doctor_inference_rejects_provider_failed_response() {
++    let output = run_inference_doctor_with_response(
++        br#"{"id":"response-fixture","status":"failed","error":{"message":"synthetic failure"}}"#,
++    );
++    assert_eq!(output.status.code(), Some(1));
++    assert!(String::from_utf8_lossy(&output.stderr).contains("provider reported failure"));
++}
++
++#[tokio::test]
++async fn explicit_proxy_is_used_for_non_loopback_upstream_without_environment_proxy() {
++    use tokio::io::{AsyncReadExt, AsyncWriteExt};
++    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
++    let proxy_address = listener.local_addr().unwrap();
++    let proxy = tokio::spawn(async move {
++        let (mut socket, _) = listener.accept().await.unwrap();
++        let mut bytes = Vec::new();
++        let mut part = [0u8; 1024];
++        loop {
++            let count = socket.read(&mut part).await.unwrap();
++            assert_ne!(count, 0);
++            bytes.extend_from_slice(&part[..count]);
++            if bytes.windows(4).any(|window| window == b"\r\n\r\n") {
++                break;
++            }
++        }
++        let head = String::from_utf8(bytes).unwrap();
++        assert!(
++            head.starts_with("GET http://upstream.invalid/prefix/v1/models HTTP/1.1\r\n"),
++            "{head}"
++        );
++        socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 12\r\nConnection: close\r\n\r\n{\"data\":[]}").await.unwrap();
++    });
++    let mut config = draft(4141).config().clone();
++    config.listen.set_port(0);
++    config.upstream.api_base = "http://upstream.invalid/prefix/v1".parse().unwrap();
++    config.upstream.proxy = Some(format!("http://{proxy_address}").parse().unwrap());
++    config.roots[0].endpoints.push(Endpoint::Models);
++    let gateway = llmgw::server::spawn(
++        config,
++        llmgw::server::RuntimeCredentials::new(b"data", b"control", None).unwrap(),
++    )
++    .await
++    .unwrap();
++    let request = b"GET /r/default/v1/models HTTP/1.1\r\nHost: localhost\r\nx-llmgw-token: data\r\nConnection: close\r\n\r\n";
++    let response = send_raw(gateway.address(), request).await;
++    assert_eq!(
++        status(&response),
++        200,
++        "{}",
++        String::from_utf8_lossy(response_body(&response))
++    );
++    proxy.await.unwrap();
++    gateway.shutdown().await.unwrap();
++}
++
++#[tokio::test]
++async fn explicit_proxy_bypasses_owned_loopback_upstream() {
++    let upstream = support::fixture::UpstreamFixture::start(
++        b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 12\r\nConnection: close\r\n\r\n{\"data\":[]}".to_vec(),
++    ).await;
++    let proxy = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
++    let mut config = draft(4141).config().clone();
++    config.listen.set_port(0);
++    config.upstream.api_base = format!("http://{}/prefix/v1", upstream.address())
++        .parse()
++        .unwrap();
++    config.upstream.proxy = Some(
++        format!("http://{}", proxy.local_addr().unwrap())
++            .parse()
++            .unwrap(),
++    );
++    config.roots[0].endpoints.push(Endpoint::Models);
++    let gateway = llmgw::server::spawn(
++        config,
++        llmgw::server::RuntimeCredentials::new(b"data", b"control", None).unwrap(),
++    )
++    .await
++    .unwrap();
++    let response = send_raw(gateway.address(), b"GET /r/default/v1/models HTTP/1.1\r\nHost: localhost\r\nx-llmgw-token: data\r\nConnection: close\r\n\r\n").await;
++    assert_eq!(status(&response), 200);
++    assert_eq!(upstream.attempts(), 1);
++    assert!(
++        tokio::time::timeout(std::time::Duration::from_millis(100), proxy.accept())
++            .await
++            .is_err()
++    );
++    gateway.shutdown().await.unwrap();
++}
++
++#[tokio::test]
++async fn explicit_ca_bundle_merges_with_system_trust_for_owned_tls_upstream() {
++    use rustls::pki_types::{CertificateDer, PrivateKeyDer, pem::PemObject};
++    use std::sync::Arc;
++    use tokio::io::{AsyncReadExt, AsyncWriteExt};
++    let certificate =
++        CertificateDer::from_pem_slice(include_bytes!("fixtures/setup-localhost-server.pem"))
++            .unwrap();
++    let key =
++        PrivateKeyDer::from_pem_slice(include_bytes!("fixtures/setup-localhost-key.pem")).unwrap();
++    let tls = rustls::ServerConfig::builder()
++        .with_no_client_auth()
++        .with_single_cert(vec![certificate], key)
++        .unwrap();
++    let acceptor = tokio_rustls::TlsAcceptor::from(Arc::new(tls));
++    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
++    let port = listener.local_addr().unwrap().port();
++    let server = tokio::spawn(async move {
++        let (socket, _) = listener.accept().await.unwrap();
++        let mut socket = acceptor.accept(socket).await.unwrap();
++        let mut received = Vec::new();
++        let mut part = [0u8; 1024];
++        loop {
++            let count = socket.read(&mut part).await.unwrap();
++            assert_ne!(count, 0);
++            received.extend_from_slice(&part[..count]);
++            if received.windows(4).any(|w| w == b"\r\n\r\n") {
++                break;
++            }
++        }
++        assert!(
++            String::from_utf8_lossy(&received).starts_with("GET /prefix/v1/models HTTP/1.1\r\n")
++        );
++        socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 12\r\nConnection: close\r\n\r\n{\"data\":[]}").await.unwrap();
++    });
++    let mut config = draft(4141).config().clone();
++    config.listen.set_port(0);
++    config.upstream.api_base = format!("https://localhost:{port}/prefix/v1")
++        .parse()
++        .unwrap();
++    config.upstream.ca_bundle = Some(
++        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/setup-localhost-cert.pem"),
++    );
++    config.roots[0].endpoints.push(Endpoint::Models);
++    let gateway = llmgw::server::spawn(
++        config,
++        llmgw::server::RuntimeCredentials::new(b"data", b"control", None).unwrap(),
++    )
++    .await
++    .unwrap();
++    let response = send_raw(gateway.address(), b"GET /r/default/v1/models HTTP/1.1\r\nHost: localhost\r\nx-llmgw-token: data\r\nConnection: close\r\n\r\n").await;
++    let server_result = server.await;
++    assert!(
++        server_result.is_ok(),
++        "TLS fixture failed: {server_result:?}"
++    );
++    assert_eq!(
++        status(&response),
++        200,
++        "{}",
++        String::from_utf8_lossy(response_body(&response))
++    );
++    gateway.shutdown().await.unwrap();
++}
+--- baseline/product/tests/stream_lifetime.rs
++++ product/tests/stream_lifetime.rs
+@@ -30,6 +30,8 @@
+                 .parse()
+                 .expect("fixture URL"),
+             auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,
+--- baseline/product/tests/task5_usage_contract.rs
++++ product/tests/task5_usage_contract.rs
+@@ -33,6 +33,8 @@
+         upstream: Upstream {
+             api_base: format!("http://{}/v1", upstream.address()).parse().unwrap(),
+             auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,
+--- baseline/product/tests/wire_contract.rs
++++ product/tests/wire_contract.rs
+@@ -49,6 +49,8 @@
+                 .parse()
+                 .expect("fixture URL"),
+             auth,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,
+@@ -82,6 +84,8 @@
+         upstream: Upstream {
+             api_base: "http://127.0.0.1:9/team/v1".parse().expect("fixture URL"),
+             auth: Auth::None,
++            proxy: None,
++            ca_bundle: None,
+         },
+         quota: Quota {
+             rpm: Limit::Unlimited,

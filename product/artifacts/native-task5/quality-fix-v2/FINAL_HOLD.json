@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "phase": "native-task5-quality-fix-v2-final",
+  "captured_at": "2026-09-13T06:12:34.844578+00:00",
+  "status": "DONE_WITH_CONCERNS",
+  "execution_finished": true,
+  "source_frozen": true,
+  "path_bases": {
+    "source_manifest_rows": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research",
+    "artifact_target_and_lock_rows": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product"
+  },
+  "changed_product_paths": [
+    "src/autostart/mod.rs",
+    "scripts/verify_native.py",
+    "tests/autostart_templates.rs",
+    "tests/test_verify_native.py"
+  ],
+  "source_manifest": {
+    "path": "artifacts/native-task5/quality-fix-v2/source-manifest-final.json",
+    "bytes": 16254,
+    "sha256": "8b281a41f48313a2d664d9f94737cbcba3794b10688904ec1e969d675296e304"
+  },
+  "source_archive": {
+    "path": "artifacts/native-task5/quality-fix-v2/source-final.tar.gz",
+    "bytes": 310515,
+    "sha256": "12f6c81a44d95879383ffb0883b2b7681dcc203c18c20dcca6cf2621cfe5c875"
+  },
+  "source_archive_members": 93,
+  "cargo_lock": {
+    "path": "Cargo.lock",
+    "bytes": 52949,
+    "sha256": "b216737fbfe2dc9946ffba69e34e26ce9902c6c87c90e974ab58ee850337e3e8"
+  },
+  "debug_binary": {
+    "path": "target/native-task5-quality-fix-v2/debug/llmgw",
+    "bytes": 30643560,
+    "sha256": "d01801d02719848a9d5e161a3d8bbc5b78c052a0b351bf6bcfc0ac48ab7d49cb"
+  },
+  "default_debug_rlib": {
+    "path": "target/native-task5-quality-fix-v2/debug/deps/libllmgw-1750bcafbc9dfb14.rlib",
+    "bytes": 50712616,
+    "sha256": "0c0bfaf27091f5bc10896015f6d99eaacce21efb11f98ed7c5a51950f409fea7"
+  },
+  "release_rlib": {
+    "path": "target/native-task5-quality-fix-v2/release/deps/libllmgw-fc099ad98d7d2eb1.rlib",
+    "bytes": 7864760,
+    "sha256": "c6f1aef7f8592bb03527944ffc5d4ed25ff9e94a4b5b1869af9142c68ea6655c"
+  },
+  "release_binary": {
+    "path": "target/native-task5-quality-fix-v2/release/llmgw",
+    "bytes": 10011264,
+    "sha256": "88c21502025b0bb0b77db2833845d64bb2c562e345e0c48bc5042651a4ee25a3"
+  },
+  "source_checks": {
+    "files": 92,
+    "drift": 0,
+    "archive_matches": true,
+    "all_binary_hashes_match": true,
+    "passed": true
+  },
+  "preservation": {
+    "files": 1521,
+    "drift": 0,
+    "provisional_v1_identities": 7,
+    "provisional_v1_drift": 0,
+    "passed": true,
+    "blanket_all_artifacts_unchanged_claim": false
+  },
+  "fresh_verification": {
+    "focused_q1_q2_q3_tdd": {
+      "passed": true,
+      "records": "artifacts/native-task5/quality-fix/commands-final.json"
+    },
+    "adjacent_backup_tdd": {
+      "red_failed": 1,
+      "green_passed": 1,
+      "red_log": "artifacts/native-task5/quality-fix-v2/rust-backup-collision-red.log",
+      "green_log": "artifacts/native-task5/quality-fix-v2/rust-backup-collision-green.log"
+    },
+    "fmt_check": {
+      "passed": true,
+      "log": "artifacts/native-task5/quality-fix-v2/fmt-final.log"
+    },
+    "cargo_check_locked": {
+      "passed": true,
+      "log": "artifacts/native-task5/quality-fix-v2/check-final.log"
+    },
+    "cargo_clippy_locked_all_targets_deny_warnings": {
+      "passed": true,
+      "log": "artifacts/native-task5/quality-fix-v2/clippy-final.log"
+    },
+    "autostart_templates": {
+      "passed": 15,
+      "failed": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/autostart-templates-final.log"
+    },
+    "python_verifier": {
+      "passed": 13,
+      "failed": 0,
+      "log": "artifacts/native-task5/quality-fix-v2/python-verifier-final.log"
+    },
+    "cargo_build_locked_release": {
+      "passed": true,
+      "log": "artifacts/native-task5/quality-fix-v2/release-final.log"
+    }
+  },
+  "current_runtime_fixture": {
+    "executed": true,
+    "passed": true,
+    "artifact": "artifacts/native-task5/quality-fix-v2/templates-only-release-final.json",
+    "release_sha256": "88c21502025b0bb0b77db2833845d64bb2c562e345e0c48bc5042651a4ee25a3",
+    "actual_user_registration_changed": false,
+    "actual_login_verified": false,
+    "manual_cleanup_state": "stopped",
+    "actual_windows_linux_manager_executed": false
+  },
+  "cleanup_and_privacy": {
+    "passed": true,
+    "artifact": "artifacts/native-task5/quality-fix-v2/cleanup-and-privacy-final-v2.json",
+    "superseded_failed_scope_check": "artifacts/native-task5/quality-fix-v2/cleanup-and-privacy-final.json"
+  },
+  "superseded_provisional_capture": {
+    "target": "target/native-task5-quality-fix",
+    "release_sha256": "a61417ee53c5d8ae91a67d90a4768c8d183c9efbc9eada7010da1730471cce8f",
+    "source_archive_sha256": "be4452f6e8175d8d44cb912d8501e00609af94af92e867294b73464aa40bc586",
+    "rebuilt_after_capture": false,
+    "identity_record": "artifacts/native-task5/quality-fix/provisional-identities-before-backup-fix.json"
+  },
+  "held_prior_evidence": {
+    "full_project_test": {
+      "passed": 362,
+      "failed": 0,
+      "current_binary": false,
+      "artifact": "artifacts/native-task5/residual-spec-fix/cargo-test-full-final.log"
+    }
+  },
+  "historical_gaps": {
+    "missing_diagnostics": 2,
+    "overwritten_provisional_debug_originals": 2,
+    "macos_acl_einval": "unresolved at exact prior syscall/phase/post-state",
+    "recovery": "unknown; no recovery or reconstruction claim"
+  },
+  "artifact_files": [
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/README.md",
+      "bytes": 6386,
+      "sha256": "28fe509eea8bf735598ad7fde0be6637f36b17a0dc526d726ff8d16490bd4c25"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/autostart-templates-final.log",
+      "bytes": 1409,
+      "sha256": "cf39ae5f04b80393d812a919fa9f2ed506e817b6c1a1bb3d2af0c6a08b698f27"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/check-final.log",
+      "bytes": 4446,
+      "sha256": "56fc6fbd6514495ef52e1a227097375a04f83fb3972a3fdd2de366247667a9dd"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/cleanup-and-privacy-final-v2.json",
+      "bytes": 1559,
+      "sha256": "6320c4b1bdc2c8ccbcaa83decc1b4464355693ffc9503fa1192c345b7a9db35c"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/cleanup-and-privacy-final.json",
+      "bytes": 822,
+      "sha256": "104299bd1e85c2e88f73b956d567d485da9212e944ece30cfb4c816d2dee8f2f"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/clippy-final.log",
+      "bytes": 561,
+      "sha256": "b695fd0a386ef91bf9ebda7c278afdf2b77e46a9e85d3894452f4df71e67d25d"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/commands-final.json",
+      "bytes": 3200,
+      "sha256": "85f58404be64f1f581d2d9434bcbb1a1f8686c747add4ffb894b77200d0e9940"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/fmt-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/identities-and-stability-final.json",
+      "bytes": 3472,
+      "sha256": "de36b52e47e8a8095b1c109545bea9678ea0ac78aa905f765790e606c86b7dec"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/preservation-before.json",
+      "bytes": 302859,
+      "sha256": "8fa2784a066ccad6adf67c40f000df80cfe184c367945574e06ae575361b8bc7"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/preservation-final.json",
+      "bytes": 296,
+      "sha256": "534bf2f18b6514dde130858e72b732986c191aa87f42c8e3700fb38dca360f3d"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/python-verifier-final.log",
+      "bytes": 727,
+      "sha256": "63b121fccb23a9330346b7a2aadf18897ba2d349aaf078cb1d416e3ec84866de"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/release-final.log",
+      "bytes": 5026,
+      "sha256": "fe9b9a4715795191d10beb3a7692a95db5cd814196ecef4531e55480b8ec5baf"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/rust-backup-collision-green.log",
+      "bytes": 469,
+      "sha256": "763166588ef169280dc1d28b260f4c3a27f2ecda50a8a048807c018145ce9e51"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/rust-backup-collision-red.log",
+      "bytes": 5793,
+      "sha256": "7f947314ac3672bc8eb53f0c685449409209ed28fd04665c86c18b9a2e3d018a"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/source-archive-final.log",
+      "bytes": 351,
+      "sha256": "7fcdf661348236c71d23c8bd89ba88f831be717069f2f299ad4204463bd549d8"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/source-final.tar.gz",
+      "bytes": 310515,
+      "sha256": "12f6c81a44d95879383ffb0883b2b7681dcc203c18c20dcca6cf2621cfe5c875"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/source-fingerprint-final.log",
+      "bytes": 308,
+      "sha256": "5e3ed1655cc3eff01b5c72b6162115fa1ccfb217a498a56f674ac5ab80508e25"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/source-manifest-final.json",
+      "bytes": 16254,
+      "sha256": "8b281a41f48313a2d664d9f94737cbcba3794b10688904ec1e969d675296e304"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/source-stability-final.json",
+      "bytes": 432,
+      "sha256": "7dd468af7a8c793ec5fabae3be45a7c131067ecbc7057fbe9ea72114987fff27"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/templates-only-release-final.json",
+      "bytes": 3859,
+      "sha256": "11077ebc0367d6132d5b50c7f17901cb07c88116c56fece334c11b5b075d1994"
+    },
+    {
+      "path": "artifacts/native-task5/quality-fix-v2/templates-only-release-final.log",
+      "bytes": 144,
+      "sha256": "1fb2d0b1ad585c91ef5ed148cb4717f700faa7a124f59829ebe07a83f15cd1b2"
+    }
+  ],
+  "ownership": {
+    "implementer": "/root/implement_native_autostart",
+    "released": true,
+    "released_for": "same Native Task5 QUALITY rereview",
+    "task6_started": false
+  },
+  "limitations": [
+    "No actual Windows or Linux manager was executed.",
+    "No actual login or temporary OS account flow was executed.",
+    "The earlier full project test belongs to a prior binary and was not rerun or relabeled.",
+    "Two historical diagnostic logs and two overwritten provisional debug originals remain unavailable; the prior macOS ACL EINVAL remains unresolved."
+  ]
+}

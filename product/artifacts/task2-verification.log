@@ -1,0 +1,90 @@
+^D    Checking llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.26s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running unittests src/lib.rs (target/debug/deps/llmgw-271f026be9b76f85)
+
+running 1 test
+test transport::body_budget::tests::permit_lives_until_the_last_bytes_clone ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/llmgw-44f427bec1d389e1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/config_contract.rs (target/debug/deps/config_contract-d462d55d5edee369)
+
+running 17 tests
+test config_debug_redacts_upstream_query_values ... ok
+test known_tpm_without_a_default_output_bound_is_valid ... ok
+test canonical_source_fingerprint_and_state_paths_share_the_explicit_location ... ok
+test actual_accounting_is_explicitly_supported ... ok
+test endpoints_are_an_explicit_method_and_path_allowlist ... ok
+test auth_modes_require_only_their_own_fields ... ok
+test quota_modes_are_distinct_and_known_zero_is_rejected ... ok
+test model_output_bound_is_optional_but_cannot_be_zero ... ok
+test listen_address_must_be_loopback ... ok
+test syntax_errors_report_a_safe_location_without_source_text ... ok
+test api_base_rejects_credentials_non_http_urls_and_fragments ... ok
+test unknown_fields_are_rejected_without_echoing_the_key_or_input ... ok
+test concurrency_defaults_to_one_and_is_bounded ... ok
+test valid_config_preserves_limits_auth_accounting_and_url ... ok
+test env_auth_rejects_transport_reserved_headers ... ok
+test invalid_scalar_values_are_redacted_from_display_and_debug ... ok
+test root_ids_must_be_unique_url_safe_and_limited_to_sixteen ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/wire_contract.rs (target/debug/deps/wire_contract-2cac15ca1d93cd5d)
+
+running 23 tests
+test duplicate_data_credentials_are_rejected ... ok
+test control_rejects_origin ... ok
+test control_rejects_data_token ... ok
+test data_token_is_stripped ... ok
+test forward_auth_is_unchanged ... ok
+test hop_by_hop_and_connection_nominated_headers_are_scrubbed_both_directions ... ok
+test body_is_unchanged ... ok
+test env_auth_removes_both_old_credentials ... ok
+test missing_token_is_rejected_before_body_read ... ok
+test local_control_reports_bounded_metrics_and_stops_without_upstream ... ok
+test model_allowlist_and_body_limit_are_enforced_before_upstream ... ok
+test many_small_chunked_frames_preserve_body_bytes ... ok
+test models_metadata_does_not_require_a_generation_body ... ok
+test reserved_env_auth_header_is_rejected_before_any_http_attempt ... ok
+test query_conflict_is_rejected ... ok
+test prefix_is_preserved ... ok
+test none_auth_strips_both_known_credentials ... ok
+test oversized_header_is_bounded_by_the_actual_http_receiver ... ok
+test unsupported_background_and_upgrade_never_reach_upstream ... ok
+test unknown_route_never_reaches_upstream ... ok
+test runtime_credentials_require_protected_preprovisioned_state_files ... ok
+test library_retry_is_disabled_on_response_failure ... ok
+test no_cross_host_redirect ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests llmgw
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running `target/debug/llmgw --help`
+Run or validate a local quota gateway
+
+Usage: llmgw <COMMAND>
+
+Commands:
+  run     Run the gateway in the foreground until Ctrl-C or a local control stop
+  doctor  Validate a configuration without network access or starting a gateway
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version

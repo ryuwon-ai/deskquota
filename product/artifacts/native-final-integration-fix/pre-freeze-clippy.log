@@ -1,0 +1,13 @@
+    Checking llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error: the borrowed expression implements the required traits
+    --> tests/setup_contract.rs:1137:37
+     |
+1137 |     let loaded = LoadedConfig::load(&temp.config()).unwrap();
+     |                                     ^^^^^^^^^^^^^^ help: change this to: `temp.config()`
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrows_for_generic_args
+     = note: `-D clippy::needless-borrows-for-generic-args` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::needless_borrows_for_generic_args)]`
+
+error: could not compile `llmgw` (test "setup_contract") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

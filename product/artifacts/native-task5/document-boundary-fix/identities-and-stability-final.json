@@ -1,0 +1,108 @@
+{
+  "captured_at": "2026-09-13T05:34:54.384871+00:00",
+  "path_base": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product",
+  "target_directory": "target/native-task5-document-boundary-fix",
+  "artifact_directory": "artifacts/native-task5/document-boundary-fix",
+  "identities": {
+    "cargo_lock": {
+      "path": "Cargo.lock",
+      "bytes": 52949,
+      "sha256": "b216737fbfe2dc9946ffba69e34e26ce9902c6c87c90e974ab58ee850337e3e8"
+    },
+    "debug_binary": {
+      "path": "target/native-task5-document-boundary-fix/debug/llmgw",
+      "bytes": 30632904,
+      "sha256": "df92dd0eccf458af31258f7e3b882ab13deecf0d8656015755758b210b9b5d86"
+    },
+    "default_rlib": {
+      "path": "target/native-task5-document-boundary-fix/debug/deps/libllmgw-1750bcafbc9dfb14.rlib",
+      "bytes": 50593880,
+      "sha256": "cfda152fdcdb24bc4f18f25538c944f45b2cf086df89e804af99b75c49d4e330"
+    },
+    "release_binary": {
+      "path": "target/native-task5-document-boundary-fix/release/llmgw",
+      "bytes": 10011952,
+      "sha256": "cae45cd6da245b00885b33a1e1e0df97647d9e518089724993d1c7e2e7f3107b"
+    },
+    "source_manifest": {
+      "path": "artifacts/native-task5/document-boundary-fix/source-manifest-final.json",
+      "bytes": 16015,
+      "sha256": "b0c0ade22ce352c278c4019f8420ef24d16b6870839a716af37bd9e7aee2f801"
+    },
+    "source_archive": {
+      "path": "artifacts/native-task5/document-boundary-fix/source-hold-final.tar.gz",
+      "bytes": 308304,
+      "sha256": "12919fe62ec6cc438ceb00b85bbd817f4e60aa19bd005576cc1b74efc5242282"
+    },
+    "source_stability": {
+      "path": "artifacts/native-task5/document-boundary-fix/source-stability-final.json",
+      "bytes": 195,
+      "sha256": "c8bc58bd9db67d2017bedc90226703de9e984193fa39d48c139813ca15074715"
+    },
+    "preservation_final": {
+      "path": "artifacts/native-task5/document-boundary-fix/preservation-final.json",
+      "bytes": 647,
+      "sha256": "c55b69d358f5aded70170f9bdbd133ac101354c976f8466297a4b6818efb39b4"
+    }
+  },
+  "toolchain": {
+    "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)\nbinary: rustc\ncommit-hash: 6b00bc3880198600130e1cf62b8f8a93494488cc\ncommit-date: 2025-06-23\nhost: aarch64-apple-darwin\nrelease: 1.88.0\nLLVM version: 20.1.5",
+    "cargo": "cargo 1.88.0 (873a06493 2025-05-10)",
+    "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O"
+  },
+  "verification": {
+    "focused_red": {
+      "passed": 0,
+      "failed": 1,
+      "log": "artifacts/native-task5/document-boundary-fix/red-document-boundary-attempt1.log"
+    },
+    "focused_final": {
+      "passed": 11,
+      "failed": 0,
+      "log": "artifacts/native-task5/document-boundary-fix/manager-snapshot-tests-final-v2.log"
+    },
+    "fmt_check": {
+      "passed": true,
+      "log": "artifacts/native-task5/document-boundary-fix/fmt-check-final-v2.log"
+    },
+    "cargo_check_locked_all_targets": {
+      "passed": true,
+      "log": "artifacts/native-task5/document-boundary-fix/cargo-check-final-v2.log"
+    },
+    "cargo_clippy_locked_all_targets_deny_warnings": {
+      "passed": true,
+      "log": "artifacts/native-task5/document-boundary-fix/cargo-clippy-final-v2.log"
+    },
+    "cargo_build_locked_release": {
+      "passed": true,
+      "log": "artifacts/native-task5/document-boundary-fix/cargo-build-release-final.log"
+    },
+    "held_prior_full_suite": {
+      "passed": 362,
+      "failed": 0,
+      "current_binary": false,
+      "artifact": "artifacts/native-task5/residual-spec-fix/cargo-test-full-final.log"
+    },
+    "held_prior_macos_fixture": {
+      "passed": true,
+      "current_binary": false,
+      "binary_sha256": "57d89c8e22bbc22f10bc16590dba5cf0b998fb463f18e9bad243e3fa37b6b957",
+      "artifact": "artifacts/native-task5/residual-spec-fix/templates-only-release-final.json"
+    }
+  },
+  "source_binary_binding": {
+    "manifest_binary_sha256": "cae45cd6da245b00885b33a1e1e0df97647d9e518089724993d1c7e2e7f3107b",
+    "release_binary_sha256": "cae45cd6da245b00885b33a1e1e0df97647d9e518089724993d1c7e2e7f3107b",
+    "equal": true,
+    "probe_checks": []
+  },
+  "changed_source_paths": [
+    "src/autostart/mod.rs"
+  ],
+  "limitations": [
+    "No actual Windows or Linux manager was executed.",
+    "No actual login was executed.",
+    "The held macOS fixture belongs to the prior release binary and was not rerun or relabeled.",
+    "Two historical diagnostic logs and two overwritten provisional debug originals remain unavailable; the earlier macOS ACL EINVAL remains unresolved."
+  ]
+}

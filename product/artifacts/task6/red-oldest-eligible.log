@@ -1,0 +1,22 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.52s
+     Running tests/fairness_contract.rs (target/debug/deps/fairness_contract-01c9cffd49df6b42)
+
+running 1 test
+test bypass_trigger_selects_oldest_valid_head_even_if_it_was_current_fit ... FAILED
+
+failures:
+
+---- bypass_trigger_selects_oldest_valid_head_even_if_it_was_current_fit stdout ----
+
+thread 'bypass_trigger_selects_oldest_valid_head_even_if_it_was_current_fit' panicked at tests/fairness_contract.rs:643:5:
+threshold trigger protects oldest eligible head across all roots
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    bypass_trigger_selects_oldest_valid_head_even_if_it_was_current_fit
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test fairness_contract`

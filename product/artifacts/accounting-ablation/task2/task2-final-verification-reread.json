@@ -1,0 +1,87 @@
+{
+  "captured_utc": "2026-09-12T16:53:05.117233+00:00",
+  "checks": {
+    "held_binary_exact": true,
+    "initial_failed_check_preserved": true,
+    "llmgw_listeners_absent": true,
+    "manifest_completed_accounting_matrix": true,
+    "matching_runtime_processes_absent": true,
+    "ordinary_binary_exact": true,
+    "parent_full_audit_passed": true,
+    "parent_runtime_hold_passed": true,
+    "prior_matrix_hold_preserved": true,
+    "prior_temp_cleanup_preserved": true,
+    "recorded_owned_pids_absent": true,
+    "report_contains_required_denominators": true,
+    "report_links_exist": true,
+    "source_archive_exact": true,
+    "source_manifest_exact": true,
+    "usage_basis_exact": true
+  },
+  "execution_finished": true,
+  "identity_hold": {
+    "binary_bytes": 8697040,
+    "both_binaries_executable": true,
+    "held_binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "ordinary_binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+    "source_archive_bytes": 174816,
+    "source_archive_sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4",
+    "source_errors": [],
+    "source_files_verified": 59,
+    "source_manifest_sha256": "f77ceac838cdf83fb5f7f0d7bd63536a3a9c62ecbecccf932c0a07c911a72304",
+    "usage_basis_errors": [],
+    "usage_basis_files_verified": 8
+  },
+  "measurement": {
+    "ingress": 1000,
+    "manifest_sha256": "bfe367592eae5953edf0f1bb64dc808c7864f78ce41b48137f47d9dc9901c41c",
+    "matrix_complete": true,
+    "pairs": 5,
+    "parent_audit_passed": true,
+    "parent_audit_sha256": "632c41e4e2365a9ec99b4f9f825dcd5893196bfc74cbaf04d354549257280241",
+    "runs": 10,
+    "status": "completed_accounting_matrix"
+  },
+  "notes": [
+    "The first final-verification artifact is retained unchanged. Its only failed check used an English success token while the report uses the Korean phrase final successful requests; this reread checks the actual phrase and repeats all filesystem, audit, identity, link, PID, process, and listener checks.",
+    "No product source, Rust, dependency, workload, configuration rule, measured binary, or prior gate evidence was edited.",
+    "No build, test, Pi, real API, model, user configuration, OS registration, Git, or Native wizard action was performed."
+  ],
+  "passed": true,
+  "preserved_evidence": {
+    "initial_final_verification_passed": false,
+    "initial_final_verification_sha256": "6d1de157d2988d74bc55595fdeaf6c58cdde13b8876a4fd70526599568ea9c69",
+    "matrix_hold_sha256": "12acbc530672861ff54f1322c9e227b80b8b6f0768cb293cdb1604f6036bdfd4",
+    "matrix_verification_sha256": "485bb9dd26c6961aec5f5336493ae6687b752143b31d4ba933479a5c8f4a095e"
+  },
+  "result_report": {
+    "bytes": 6812,
+    "links_checked": 8,
+    "missing_links": [],
+    "path": "research/reports/accounting-ablation-results.md",
+    "sha256": "361a340ef367dffba18da82449b5987bb6fcb3563b55bb0ac98bb62b683e9f4f"
+  },
+  "runtime_hold": {
+    "llmgw_listeners": [],
+    "matching_runtime_processes": [],
+    "matching_temp_directories_at_matrix_hold": 0,
+    "owned_runtime": 0,
+    "parent_runtime_hold_sha256": "4c6fefb46e8a464fd68fdbe2876b32165946362ba87153423b1381afbae5a033",
+    "recorded_owned_pids_alive": [],
+    "recorded_owned_pids_checked": [
+      35122,
+      35133,
+      37549,
+      41950,
+      41967,
+      44282,
+      46372,
+      48410,
+      50236,
+      52119,
+      54043,
+      55846
+    ]
+  },
+  "status": "TASK2_HOLD"
+}

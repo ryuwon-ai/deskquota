@@ -1,0 +1,27 @@
+Purpose: regression sensitivity with required behavior omitted.
+Command: cargo test --locked --lib unpolled_worker
+Original source SHA256: 0ceef605e03b46b2b37e12a17e3a7ddf8dc8676bf6496f1265d2183d51cef5a3
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.46s
+     Running unittests src/lib.rs (target/debug/deps/llmgw-9c3b429e0ed2c58e)
+
+running 1 test
+test admission::tests::unpolled_worker_future_still_owns_and_releases_admission ... FAILED
+
+failures:
+
+---- admission::tests::unpolled_worker_future_still_owns_and_releases_admission stdout ----
+
+thread 'admission::tests::unpolled_worker_future_still_owns_and_releases_admission' panicked at src/admission/mod.rs:216:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    admission::tests::unpolled_worker_future_still_owns_and_releases_admission
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

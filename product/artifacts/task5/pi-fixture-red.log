@@ -1,0 +1,25 @@
+test_absent_reference_clone_keeps_version_comparison_unknown (test_pi_probe.PiProbeRegressionTests.test_absent_reference_clone_keeps_version_comparison_unknown) ... ok
+test_keyboard_interrupt_reaps_owned_pi_process (test_pi_probe.PiProbeRegressionTests.test_keyboard_interrupt_reaps_owned_pi_process) ... ok
+test_normal_child_output_is_collected_and_reaped (test_pi_probe.PiProbeRegressionTests.test_normal_child_output_is_collected_and_reaped) ... ok
+test_timeout_terminates_and_reaps_owned_pi_process (test_pi_probe.PiProbeRegressionTests.test_timeout_terminates_and_reaps_owned_pi_process) ... ok
+test_transport_fixture_explicitly_uses_unlimited_rpm_and_unknown_tpm (test_pi_probe.PiProbeRegressionTests.test_transport_fixture_explicitly_uses_unlimited_rpm_and_unknown_tpm) ... FAIL
+
+======================================================================
+FAIL: test_transport_fixture_explicitly_uses_unlimited_rpm_and_unknown_tpm (test_pi_probe.PiProbeRegressionTests.test_transport_fixture_explicitly_uses_unlimited_rpm_and_unknown_tpm)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_pi_probe.py", line 28, in test_transport_fixture_explicitly_uses_unlimited_rpm_and_unknown_tpm
+    self.assertEqual(config["quota"], {"rpm": {"kind": "unlimited"}, "tpm": {"kind": "unknown"}})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'rpm': {'kind': 'known', 'value': 60}, 'tpm': {'kind': 'unknown'}} != {'rpm': {'kind': 'unlimited'}, 'tpm': {'kind': 'unknown'}}
+- {'rpm': {'kind': 'known', 'value': 60}, 'tpm': {'kind': 'unknown'}}
+?                   ^ ^^^ -------------
+
++ {'rpm': {'kind': 'unlimited'}, 'tpm': {'kind': 'unknown'}}
+?                   ^ ^^^^^^^
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.055s
+
+FAILED (failures=1)

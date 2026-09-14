@@ -1,0 +1,23 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.23s
+     Running tests/lifecycle_contract.rs (target/native/debug/deps/lifecycle_contract-816a0bd904765dcb)
+
+running 2 tests
+test malformed_stopped_config_never_provisions_tokens ... ok
+test malformed_running_config_requires_restart_without_replacing_worker ... FAILED
+
+failures:
+
+---- malformed_running_config_requires_restart_without_replacing_worker stdout ----
+
+thread 'malformed_running_config_requires_restart_without_replacing_worker' panicked at tests/lifecycle_contract.rs:149:5:
+assertion failed: String::from_utf8_lossy(&result.stderr).contains("restart_required")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    malformed_running_config_requires_restart_without_replacing_worker
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.77s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

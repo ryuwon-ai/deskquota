@@ -1,0 +1,31 @@
+{
+  "at": "2026-09-13T08:04:52.183108+00:00",
+  "passed": true,
+  "environment": "PYTHONDONTWRITEBYTECODE=1 and python3 -B",
+  "red": {
+    "log": "artifacts/native-task6/quality-fix/targeted-red.log",
+    "sha256": "933b2275854f68b82df486e0ef72df55ad94410542681204bf4a67393bd5f03d",
+    "tests": 2,
+    "failures": 2,
+    "note": "Q2 red included an automatic-copy expectation superseded by parent preference for preserve-and-report; its no-delete assertion still captured the defect"
+  },
+  "intermediate_green_preserved": {
+    "log": "artifacts/native-task6/quality-fix/targeted-green.log",
+    "sha256": "ccade577fc5a7028049e4b5e53a52242ae538fdf23862e3a98e985c3cfa253ce",
+    "tests": 2,
+    "note": "intermediate auto-copy implementation superseded before freeze"
+  },
+  "final_green_preserved": {
+    "log": "artifacts/native-task6/quality-fix/targeted-final-green.log",
+    "sha256": "b985ab4a4f314fedb1cf25e86cdc86008df04a8d713f470cc4661d97cc97eac1",
+    "tests": 5,
+    "note": "before removal of one unused PowerShell variable"
+  },
+  "authoritative_final_green": {
+    "log": "artifacts/native-task6/quality-fix/targeted-final-green-v2.log",
+    "sha256": "be3faa61d019405793be8c41f4be65e322f7d0c210f5654ad5cea4c5b89f7289",
+    "tests": 5,
+    "failures": 0
+  },
+  "full_suites_rerun": false
+}

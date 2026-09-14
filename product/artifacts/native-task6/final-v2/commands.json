@@ -1,0 +1,33 @@
+{
+  "at": "2026-09-13T07:18:50.148028+00:00",
+  "cargo_target_dir": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task6-final-v2",
+  "commands": [
+    "cargo fmt --check",
+    "CARGO_TARGET_DIR=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task6-final-v2 cargo check --all-targets --locked",
+    "CARGO_TARGET_DIR=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task6-final-v2 cargo clippy --all-targets --locked -- -D warnings",
+    "CARGO_TARGET_DIR=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task6-final-v2 cargo test --locked",
+    "CARGO_TARGET_DIR=/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native-task6-final-v2 cargo build --release --locked",
+    "python3 -m unittest -v tests/test_installers.py tests/test_package_native.py tests/test_measure_native.py tests/test_verify_clients.py tests/test_verify_native.py tests/test_pi_probe.py tests/test_benchmark_accounting.py",
+    "python3 scripts/package_native.py --binary artifacts/native-task6/final-v2/llmgw-macos-arm64 --output artifacts/native-task6/final-v2/llmgw-macos-arm64.tar.gz --identity-output artifacts/native-task6/final-v2/package-identity.json",
+    "python3 scripts/verify_clients.py --binary artifacts/native-task6/final-v2/llmgw-macos-arm64 --client <pi|claude|codex> --output artifacts/native-task6/final-v2/client-<client>.json",
+    "python3 scripts/measure_native.py --binary artifacts/native-task6/final-v2/llmgw-macos-arm64 --output artifacts/native-task6/final-v2/native-measurement.json --cycles 5",
+    "/bin/sh -n packaging/install.sh"
+  ],
+  "results": {
+    "cargo_quality": "PASS",
+    "rust_tests": 365,
+    "python_tests": 64,
+    "release_build": "PASS",
+    "posix_syntax": "PASS",
+    "powershell_runtime": "UNAVAILABLE"
+  },
+  "logs": {
+    "fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "check.log": "308adbcef85df5d94ef9518bf0957ef18ccbac520f7f4577b081b1b71401e239",
+    "clippy.log": "bbb96a77e2148605723b8835db3095dc82deb0961457dcefbf740914d4f64153",
+    "rust-test.log": "98842c8d2132de7b873024e830672abf734ae2be3e78531c9f385cba130734a2",
+    "release-build.log": "3c29a7f5f3cfb22fe1aeb9211d68b1c6a515116150bd64efd902fcd5ab46d8ce",
+    "python-tests.log": "ba308bfe2fcc3665812c75db754341dd6a5da829c356e0d64b0deb807fb1e0e6",
+    "static-installer-check.log": "8d9f405a9b7cdb5da8788e0819cc0c8e2a1af484654bf23c3b8210b6b5bb7073"
+  }
+}

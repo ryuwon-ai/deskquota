@@ -1,0 +1,21 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0432]: unresolved import `llmgw::config_patch::cooperating_lock_path`
+ --> tests/patch_contract.rs:3:5
+  |
+3 |     cooperating_lock_path, inspect_journal, preview, restore, snapshot_hash,
+  |     ^^^^^^^^^^^^^^^^^^^^^ no `cooperating_lock_path` in `config_patch`
+
+warning: a method with this name may be added to the standard library in the future
+   --> tests/patch_contract.rs:385:10
+    |
+385 |     lock.lock().unwrap();
+    |          ^^^^
+    |
+    = warning: once this associated item is added to the standard library, the ambiguity may cause an error or change in behavior!
+    = note: for more information, see issue #48919 <https://github.com/rust-lang/rust/issues/48919>
+    = help: call with fully qualified syntax `fs4::FileExt::lock(...)` to keep using the current method
+    = note: `#[warn(unstable_name_collisions)]` on by default
+
+For more information about this error, try `rustc --explain E0432`.
+warning: `llmgw` (test "patch_contract") generated 1 warning
+error: could not compile `llmgw` (test "patch_contract") due to 1 previous error; 1 warning emitted

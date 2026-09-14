@@ -1,0 +1,61 @@
+{
+  "at": "2026-09-13T07:58:08.655111+00:00",
+  "passed": true,
+  "review_hold_sha256": "c0b26468b3e94adf6ab801fb81b29ee04f8a250993e3a1f490e899676631205e",
+  "own_files_verified": 7,
+  "drift": 0,
+  "verdict": "changes_requested",
+  "findings": [
+    "Q1 package binary hash not bound to captured member",
+    "Q2 failed Windows recovery deletes concurrent target"
+  ],
+  "runtime_executed": false,
+  "preserve_quality_review": [
+    {
+      "path": "evidence/native-task6-quality-review/README.md",
+      "bytes": 4806,
+      "sha256": "2b7bae3e175f2e65e1fbe065d4b56fcf46506f137a1f58cc28862b0820d2ba0a"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/audit-summary.json",
+      "bytes": 2250,
+      "sha256": "b4b64580590e2d96d15e9b619738a07b8fa23f5850574e5aa273491014e4859d"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/findings.json",
+      "bytes": 3241,
+      "sha256": "074234656d43a282206f556aa216ff857253ad692ba1e60abc7a480094ff755b"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/identity-after.json",
+      "bytes": 1003,
+      "sha256": "cca408a6dbbdae2df8a1bb127a8e236eb957b1e4afc38aaeec00ac4cdc42fd7d"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/identity-before.json",
+      "bytes": 728,
+      "sha256": "32404f829036bf537f722a84e0947fba7cea666d825cbf7ad312304d755398f0"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/review-incident.json",
+      "bytes": 1248,
+      "sha256": "d0f23e993f64ce80e551a50682f5dbceb23103b6667ed77d4fe1c0e0cb784baf"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/review_probe.py",
+      "bytes": 9469,
+      "sha256": "c9dbf564c431615d32edeea70777d7d3c27e1f428404201a6c32258f9f6310e4"
+    },
+    {
+      "path": "evidence/native-task6-quality-review/FINAL_HOLD.json",
+      "bytes": 2925,
+      "sha256": "c0b26468b3e94adf6ab801fb81b29ee04f8a250993e3a1f490e899676631205e"
+    }
+  ],
+  "review_hold_correction": {
+    "earlier_announced_sha256": "ba0bc220d0b4e2d157cd1fef7f9f7b4271328c8e40b11bd63ceaaec08a28f8b6",
+    "current_sha256": "c0b26468b3e94adf6ab801fb81b29ee04f8a250993e3a1f490e899676631205e",
+    "reason": "Reviewer corrected product_read_only to disclose five ignored unheld pyc refreshes before root acceptance",
+    "earlier_raw_hold_retained": "not established; not reconstructed"
+  }
+}

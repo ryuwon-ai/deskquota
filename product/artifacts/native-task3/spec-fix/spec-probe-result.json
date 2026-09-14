@@ -1,0 +1,40 @@
+[
+  {
+    "case": "created_user_edit_reconnect_restore",
+    "file_exists": true,
+    "model_absent": true,
+    "preserved_created_files": 0,
+    "spec_pass": true,
+    "user_value": "preserve-me"
+  },
+  {
+    "bytes_unchanged_before_restore": true,
+    "case": "reconnect_overlap_refused",
+    "final_value": {
+      "provider": {
+        "model": "original",
+        "other": "keep"
+      }
+    },
+    "journal_status": "Restored",
+    "second_rejected": true,
+    "spec_pass": true
+  },
+  {
+    "apply_failed": true,
+    "case": "three_resources_second_fails",
+    "owned_key_counts": [
+      1,
+      0,
+      0
+    ],
+    "recorded_resources": 3,
+    "spec_pass": true,
+    "stages": [
+      "verified",
+      "failed",
+      "unstarted"
+    ],
+    "third_unchanged": true
+  }
+]

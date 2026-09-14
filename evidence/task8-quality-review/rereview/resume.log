@@ -1,0 +1,82 @@
+completed_no_wait_only
+[
+  {
+    "case": "valid",
+    "result": "PASS registered reuse, no dispatch"
+  },
+  {
+    "case": "original fresh orphan",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "unregistered or incomplete artifact no_wait-seed999-direct.json: preserve and inspect its owned process/journal; use an exclusive new output, never auto-adopt or duplicate"
+  },
+  {
+    "case": "original later orphan",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "unregistered or incomplete artifact no_wait-seed999-direct.json: preserve and inspect its owned process/journal; use an exclusive new output, never auto-adopt or duplicate"
+  },
+  {
+    "case": "later incomplete events.jsonl",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "unregistered or incomplete artifact no_wait-seed999-direct.events.jsonl: preserve and inspect its owned process/journal; use an exclusive new output, never auto-adopt or duplicate"
+  },
+  {
+    "case": "later incomplete failed.json",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "unregistered or incomplete artifact no_wait-seed999-direct.failed.json: preserve and inspect its owned process/journal; use an exclusive new output, never auto-adopt or duplicate"
+  },
+  {
+    "case": "later incomplete json.tmp",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "unregistered or incomplete artifact no_wait-seed999-direct.json.tmp: preserve and inspect its owned process/journal; use an exclusive new output, never auto-adopt or duplicate"
+  },
+  {
+    "case": "content id",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact content identity mismatch: no_wait-seed1-direct"
+  },
+  {
+    "case": "content phase",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact content identity mismatch: no_wait-seed1-direct"
+  },
+  {
+    "case": "content seed",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact content identity mismatch: no_wait-seed1-direct"
+  },
+  {
+    "case": "content arm",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact content identity mismatch: no_wait-seed1-direct"
+  },
+  {
+    "case": "stale hash",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact hash mismatch: no_wait-seed1-direct"
+  },
+  {
+    "case": "missing registered",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact hash mismatch: no_wait-seed1-direct"
+  },
+  {
+    "case": "duplicate registered",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "duplicate or unexpected completed artifact ID"
+  },
+  {
+    "case": "redirected path",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "completed artifact path mismatch"
+  },
+  {
+    "case": "old source identity",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "resume identity differs; use an exclusive new output path"
+  },
+  {
+    "case": "nonterminal outcome",
+    "result": "REJECTED before dispatch, inputs unchanged",
+    "error": "nonterminal outcome"
+  }
+]

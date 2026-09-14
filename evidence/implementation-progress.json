@@ -1,0 +1,3130 @@
+{
+  "updated_at": "2026-09-13T09:12:54.805044+00:00",
+  "plan": "docs/superpowers/plans/2026-09-12-gateway-core.md",
+  "tasks": [
+    {
+      "id": "core-task1",
+      "status": "done",
+      "scope": "Typed config and offline doctor only",
+      "direct_checks": {
+        "config_tests": 16,
+        "fmt": "passed",
+        "locked_check": "passed",
+        "clippy_warnings_denied": "passed",
+        "fixture_doctor": "passed"
+      },
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "findings": [
+            "raw malformed scalar/unknown-key values leaked in errors",
+            "fixture not loopback"
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "direct_probe_cases": 8
+        }
+      ],
+      "quality_review": {
+        "status": "passed",
+        "blocking_findings": 0
+      },
+      "evidence": [
+        "product/artifacts/task1-results.md",
+        "product/artifacts/task1-spec-fix-red.log",
+        "product/artifacts/task1-spec-fix-green.log",
+        "product/artifacts/task1-spec-fix-verification.log"
+      ]
+    },
+    {
+      "id": "core-task2",
+      "status": "done",
+      "scope": "Real socket HTTP forwarding, authentication, header/body/resource contracts",
+      "direct_checks": {
+        "wire_tests": 31,
+        "total_tests": 50,
+        "fmt": "passed",
+        "locked_check": "passed",
+        "clippy_warnings_denied": "passed",
+        "actual_cli_upstream_attempts": 1,
+        "actual_cli_control_stop": "passed",
+        "config_tests": 18,
+        "unit_tests": 1
+      },
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "direct_tests": 41,
+          "findings": [
+            "Literal apostrophe query is silently encoded as %27 by Url::set_query",
+            "Required gzip response wire fixture is absent; independent gzip probe passed"
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "direct_tests": 46,
+          "additional_checks": [
+            "CLI doctor query rejection/acceptance and redaction",
+            "Fixed gzip fixture independently decompressed"
+          ]
+        }
+      ],
+      "quality_review": {
+        "status": "passed",
+        "round": 3,
+        "remaining_findings": 0
+      },
+      "evidence": [
+        "product/artifacts/task2-results.md",
+        "product/artifacts/task2-http-red.raw.log",
+        "product/artifacts/task2-wire-hardening-red.raw.log",
+        "product/artifacts/task2-green.log",
+        "product/artifacts/task2-verification.log",
+        "scripts/probe-product-cli.py",
+        "evidence/product-cli-smoke.json",
+        "product/artifacts/task2-spec-fix-red.log",
+        "product/artifacts/task2-spec-fix-green.log",
+        "product/artifacts/task2-spec-fix-verification.log",
+        "evidence/product-cli-smoke-task2-initial.json",
+        "product/artifacts/task2-quality-fix-red.log",
+        "product/artifacts/task2-quality-fix-green.log",
+        "product/artifacts/task2-quality-fix-verification.log",
+        "evidence/product-cli-smoke-task2-spec-fix.json",
+        "product/artifacts/task2-utf8-fix-red.log",
+        "product/artifacts/task2-utf8-fix-green.log",
+        "product/artifacts/task2-utf8-fix-verification.log",
+        "evidence/product-cli-smoke-task2-quality-fix.json",
+        "evidence/product-task2-source-manifest.json"
+      ],
+      "decisions": [
+        {
+          "id": "task2-lossless-query-boundary",
+          "classification": "implementation_decision",
+          "reason": "Reqwest 0.13.5 public request conversions all use url::Url; changing the complete TLS/client stack would expand the minimal core.",
+          "contract": "Preserve accepted raw base/request query components, including encoding case and empty query presence. Reject input before upstream if URL serialization would change it. Validate raw configured query before initial parsing. Document unsupported literal representations and explicit percent encoding.",
+          "compatibility_impact": "A previously silently rewritten literal apostrophe query becomes an explicit rejection. Arbitrary raw-query support is not claimed.",
+          "source": [
+            "Cargo.lock reqwest 0.13.5 and url 2.5.8",
+            "reqwest/src/async_impl/request.rs:612-637",
+            "reqwest/src/into_url.rs:7-94"
+          ],
+          "verification": "Query and config regression tests plus independent spec rereview passed; unsupported empty query explicitly rejected."
+        }
+      ],
+      "quality_reviews": [
+        {
+          "status": "changes_requested",
+          "round": 1,
+          "direct_tests": 46,
+          "findings": [
+            {
+              "severity": "important",
+              "issue": "Duplicate top-level model/background keys can pass local policy with different upstream interpretation",
+              "evidence": "Actual foreground CLI and first-value-wins loopback mock; real provider parser unknown"
+            },
+            {
+              "severity": "important",
+              "issue": "Public server spawn does not enforce loopback for directly constructed Config",
+              "evidence": "Source inspection; no wildcard listener was opened"
+            }
+          ],
+          "not_a_finding": "Payload-byte budget is separate from allocator/JSON overhead; peak RSS is a later resource-suite obligation."
+        },
+        {
+          "round": 2,
+          "status": "changes_requested",
+          "direct_tests": 49,
+          "resolved": [
+            "Duplicate inspected JSON fields",
+            "Loopback guard before credential validation and bind"
+          ],
+          "findings": [
+            {
+              "severity": "important",
+              "issue": "IgnoredAny with from_slice skips UTF-8 validation in unknown strings and nested keys",
+              "evidence": "Two actual CLI/loopback requests forwarded invalid UTF-8 bytes"
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "status": "passed",
+          "direct_tests": 50,
+          "remaining_findings": 0
+        }
+      ]
+    },
+    {
+      "id": "core-task3",
+      "status": "done",
+      "scope": "Actual TCP SSE forwarding, bounded observer and backpressure, disconnect drain/close, EOF-owned execution permit and terminal cleanup",
+      "next_action": "Core Task4 isolated installed-Pi E2E underway.",
+      "implementer": "/root/implement_stream",
+      "reference_contract": "reports/stream-protocol-contracts.md",
+      "baseline": "Task2 source fingerprint verified unchanged (23 files) before Task3 implementation; previous turn classified progress.",
+      "red_evidence": {
+        "corrected_socket_suite": "product/artifacts/task3-stream-red-corrected.log",
+        "passed_existing_behaviors": 3,
+        "failed_missing_behaviors": 10,
+        "excluded_as_product_failures": [
+          "Initial fixture literal backslash-n event bytes",
+          "Initial tight polling causing AddrNotAvailable"
+        ],
+        "independent_cli_probe": "evidence/product-stream-preworker-probe.json",
+        "independent_cli_failed_cases": 3,
+        "fixture_self_check": "evidence/product-stream-fixture-self-check.json"
+      },
+      "first_green": {
+        "socket_tests": 13,
+        "artifact": "product/artifacts/task3-stream-green.log",
+        "independent_cli_cases": 3,
+        "independent_cli_upstream_attempts": 6,
+        "independent_cli_artifact": "evidence/product-stream-first-green-probe.json",
+        "status": "intermediate_only_before_full_regression_and_reviews"
+      },
+      "review_status": "spec_and_quality_passed",
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "direct_tests": 75,
+          "evidence": "evidence/task3-spec-review/README.md",
+          "findings": [
+            {
+              "priority": "P1",
+              "issue": "Saturated delivery deadline produces successful chunked EOF for truncated200",
+              "direct_evidence": "16MiB fixture,300msdeadline,598501 partial bytes and final0chunk, terminal_deadline1"
+            },
+            {
+              "priority": "P1",
+              "issue": "Observer retained Vec capacities exceed256KiB",
+              "direct_evidence": "Unchanged decoder source harness:331072 allocated capacity bytes, overflowfalse"
+            },
+            {
+              "priority": "P1",
+              "issue": "Constructed public Config bypasses concurrency1..16",
+              "direct_evidence": "Public spawn accepts0,17,255 on syntheticloopback"
+            },
+            {
+              "priority": "P2",
+              "issue": "Chat cache fields discarded and malformed/decreasing usage treatedknown",
+              "direct_evidence": "cached7->0;cached-7known;output10->2known"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "direct_tests": 83,
+          "evidence": "evidence/task3-spec-rereview/README.md",
+          "resolved": [
+            "Saturated payload queue deadline no longer ends with successful chunked framing",
+            "Current decoder retains exactly 262144 total buffer bytes under original attack",
+            "Constructed concurrency 0, 17, 255 rejected before bind",
+            "Chat cached subset preserved; invalid or decreasing usage remains Unknown"
+          ],
+          "additional_checks": [
+            "Current decoder framing across chunk sizes 1 through 102",
+            "Independent locked test suite",
+            "Original socket and usage probes linked to current library"
+          ]
+        }
+      ],
+      "independent_cli_evidence": [
+        "evidence/product-stream-smoke.json",
+        "evidence/product-cli-task3-smoke.json",
+        "evidence/product-stream-shutdown-corrected-probe.json",
+        "evidence/product-stream-spec-fix-smoke.json",
+        "evidence/product-cli-task3-spec-fix-smoke.json",
+        "evidence/product-stream-task3-final-debug.json",
+        "evidence/product-stream-task3-final-release.json",
+        "evidence/product-cli-task3-final-debug.json"
+      ],
+      "harness_corrections": [
+        "product-stream-shutdown-probe.json close startup failure came from duplicate cancel_policy in parent synthetic config; fixed in script and preserved original artifact. This is not a product regression."
+      ],
+      "pre_spec_fix_baseline": {
+        "source_manifest": "evidence/product-task3-pre-review-source-manifest.json",
+        "total_tests": 75,
+        "stream_tests": 24,
+        "independent_cli_stream_cases": 4,
+        "independent_cli_upstream_attempts": 7,
+        "independent_general_cli_attempts": 1,
+        "binary_sha256": "8c3278d1825e04bde01aab35c8b1d9e14f6f544174836b743144f7ef888387b7"
+      },
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "remaining_findings": 0,
+        "evidence": "evidence/task3-quality-rereview/README.md"
+      },
+      "parent_source_findings_verification": "Covered by final implementation tests and independent spec re-review; additional quality review remains in progress.",
+      "evidence": [
+        "product/artifacts/task3-spec-fix-red.log",
+        "product/artifacts/task3-spec-fix-green.log",
+        "product/artifacts/task3-spec-fix-verification.log",
+        "evidence/task3-spec-rereview/README.md",
+        "evidence/product-task3-spec-fix-source-manifest.json",
+        "product/artifacts/task3-quality-fix-green.log",
+        "product/artifacts/task3-quality-fix-verification.log",
+        "evidence/task3-quality-review/README.md",
+        "evidence/task3-quality-rereview/README.md",
+        "evidence/product-task3-final-debug-source-manifest.json",
+        "evidence/product-task3-final-release-source-manifest.json"
+      ],
+      "quality_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "evidence": "evidence/task3-quality-review/README.md",
+          "findings": [
+            {
+              "severity": "important",
+              "issue": "Release integration targets fail E0433 due to debug_assertions-only server::testing",
+              "direct_evidence": "release all-targets check exit101; production release lib/bins check passes with unused metrics warning"
+            },
+            {
+              "severity": "minor",
+              "issue": "Concurrency16 times per-response64KiB is not the global queued payload bound after completed responses retain delivery bytes",
+              "evidence_class": "source_supported; documentation correction"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "evidence": "evidence/task3-quality-rereview/README.md",
+          "direct_checks": [
+            "Independent optimized all-target check passed without warnings",
+            "Debug and optimized raw test results independently checked:83 each, no ignored or filtered tests",
+            "Verified both binary hashes and profile-independent test seam"
+          ],
+          "remaining_findings": 0
+        }
+      ],
+      "later_resource_obligation": "Task7 slow-reader resource checks must include upstream-completed responses retaining downstream delivery bytes; no process-wide1MiB assertion from execution concurrency alone.",
+      "spec_fix_baseline": {
+        "source_manifest": "evidence/product-task3-spec-fix-source-manifest.json",
+        "total_tests": 83,
+        "stream_tests": 31,
+        "config_tests": 19,
+        "wire_tests": 31,
+        "unit_tests": 2,
+        "independent_cli_stream_cases": 4,
+        "independent_cli_upstream_attempts": 7,
+        "independent_general_cli_attempts": 1,
+        "observed_forced_cli_stop_seconds": 10.004,
+        "binary_sha256": "6128b81969201b3bd4fb4b3af0b56e6f4da8ee5c085efdd411c73f520d6d15df"
+      },
+      "current_baseline": {
+        "source_manifest": "evidence/product-task3-final-debug-source-manifest.json",
+        "release_source_manifest": "evidence/product-task3-final-release-source-manifest.json",
+        "debug_tests": 83,
+        "release_tests": 83,
+        "unique_tests": 83,
+        "stream_tests": 31,
+        "config_tests": 19,
+        "wire_tests": 31,
+        "unit_tests": 2,
+        "debug_clippy": "passed_warnings_denied",
+        "release_clippy": "passed_warnings_denied",
+        "debug_cli_stream_cases": 4,
+        "release_cli_stream_cases": 4,
+        "upstream_attempts_per_stream_probe": 7,
+        "general_debug_cli_attempts": 1,
+        "debug_binary_sha256": "1149c72214dcb0121ef3dc92d023e424f9d9c8159b51bb0cc34fbd2bae51b771",
+        "release_binary_sha256": "66ba707dab96b1d1c4ae7eed5c6444b893eb1eee8961da874ed29f0ae72f4482",
+        "forced_stop_seconds": {
+          "debug": 10.006,
+          "release": 10.004
+        }
+      }
+    },
+    {
+      "id": "core-task4",
+      "status": "done",
+      "scope": "Installed Pi through native gateway and synthetic upstream: completion and one temporary-file read tool round trip",
+      "implementer": "/root/implement_pi_e2e",
+      "baseline": "evidence/product-task3-final-debug-source-manifest.json",
+      "preflight": "evidence/task4-pi-preflight.json",
+      "next_action": "Proceed to CoreTask5 quota ledger.",
+      "limitations": [
+        "No real LLM",
+        "No general Pi read-tool filesystem sandbox claim",
+        "No actual client settings or OS service changes"
+      ],
+      "review_status": "spec_and_quality_passed",
+      "spec_reviewer": "/root/pi_e2e_spec_review",
+      "first_green": {
+        "positive_flows": 2,
+        "positive_upstream_attempts": 3,
+        "completion_attempts": 1,
+        "read_tool_attempts": 2,
+        "negative_flows_failed": 2,
+        "negative_upstream_attempts": 0,
+        "negative_pi_exit_codes": [
+          0,
+          0
+        ],
+        "negative_assistant_failure_events_observed": true,
+        "probe_negative_exit": 1,
+        "installed_pi": "0.84.2",
+        "reference_pi": "0.85.1",
+        "protocol": "OpenAI Chat Completions SSE over HTTP/1.1",
+        "os_scope": "macOS arm64",
+        "status": "implementation_checks_passed; independent_reviews_pending"
+      },
+      "baseline_check": {
+        "existing_Task3_files_changed": [
+          "product/docs/runtime-contract.md"
+        ],
+        "rust_or_cargo_changes": false,
+        "script_sha256": "52a806e7c6da8417ec43353a3ebddd3164db9e5e8ac2b56fe9992ca64407cfa7",
+        "template_sha256": "44228610dac6b3dba5d86a5e9b8a04239ca051a4d5f2f840641cfae1ef5138ad",
+        "binary_sha256": "1149c72214dcb0121ef3dc92d023e424f9d9c8159b51bb0cc34fbd2bae51b771",
+        "artifact_script_template_hashes_match": true
+      },
+      "harness_corrections": [
+        "Initial negative experiment switched Pi text mode and forced failure from gateway_off flag. Parent rejected this as comparable RED. Final negative uses identical JSON mode and observed acceptance predicates; Pi JSON error exit0 is preserved as an observed client behavior."
+      ],
+      "evidence": [
+        "product/scripts/probe_pi.py",
+        "product/tests/fixtures/pi-models.json",
+        "product/artifacts/task4-results.md",
+        "product/artifacts/pi-e2e-gateway-off.json",
+        "product/artifacts/pi-e2e.json",
+        "evidence/product-task4-pre-review-source-manifest.json",
+        "evidence/task4-spec-review/README.md",
+        "evidence/task4-quality-review/README.md",
+        "product/tests/test_pi_probe.py",
+        "product/artifacts/task4-quality-fix-red.log",
+        "product/artifacts/task4-quality-fix-green.log",
+        "evidence/product-task4-final-source-manifest.json",
+        "evidence/task4-quality-rereview/README.md"
+      ],
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "passed",
+          "evidence": "evidence/task4-spec-review/README.md",
+          "direct_checks": {
+            "positive_probe_exit": 0,
+            "positive_upstream_attempts": [
+              1,
+              2
+            ],
+            "negative_probe_exit": 1,
+            "negative_pi_exit_codes": [
+              0,
+              0
+            ],
+            "negative_upstream_attempts": [
+              0,
+              0
+            ],
+            "tool_round_trip_verified": true,
+            "owned_live_processes_after_runs": 0,
+            "temporary_roots_empty": true,
+            "artifacts_no_raw_fields_or_values": true,
+            "source_hashes_unchanged": true
+          }
+        }
+      ],
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "remaining_findings": 0,
+        "evidence": "evidence/task4-quality-rereview/README.md"
+      },
+      "quality_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "evidence": "evidence/task4-quality-review/README.md",
+          "findings": [
+            {
+              "severity": "important",
+              "issue": "KeyboardInterrupt unwinds run_pi without terminating/reaping owned subprocess",
+              "evidence_class": "direct synthetic owned-child SIGINT reproduction; reviewer cleaned child afterwards"
+            },
+            {
+              "severity": "minor",
+              "issue": "Absent optional clone version is reported as different instead of unknown",
+              "evidence_class": "direct metadata probe"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "evidence": "evidence/task4-quality-rereview/README.md",
+          "direct_checks": [
+            "Four regression tests passed",
+            "Original actualSIGINT reproduction now propagatesinterrupt, terminates/reapschild andclosespipes",
+            "Zero ownedprocesses; no reviewercleanup required",
+            "Absentclonecomparisonnull",
+            "Script/test/binaryhashesmatchedandstable"
+          ],
+          "remaining_findings": 0
+        }
+      ],
+      "quality_fix_checks": {
+        "regression_red_failed": 2,
+        "regression_green_passed": 4,
+        "new_test": "product/tests/test_pi_probe.py",
+        "artifact_identity_checks": [
+          {
+            "artifact": "product/artifacts/pi-e2e.json",
+            "passed": true,
+            "script_matches": true,
+            "template_matches": true,
+            "binary_matches": true,
+            "attempts": [
+              1,
+              2
+            ],
+            "gateway_cleanup": [
+              "control_stop",
+              "control_stop"
+            ]
+          },
+          {
+            "artifact": "product/artifacts/pi-e2e-gateway-off.json",
+            "passed": false,
+            "script_matches": true,
+            "template_matches": true,
+            "binary_matches": true,
+            "attempts": [
+              0,
+              0
+            ],
+            "gateway_cleanup": [
+              "not_started",
+              "not_started"
+            ]
+          }
+        ],
+        "source_manifest": "evidence/product-task4-final-source-manifest.json",
+        "script_sha256": "3339124308fc5f589dc73260146f02ab9186fec6fb454163463b80542444ff68",
+        "test_sha256": "a57a770723dfbf5071fa1640584d97a5eaef58596b73dd3b0662e23f45bc9d11"
+      }
+    },
+    {
+      "id": "core-task5",
+      "status": "done",
+      "implementer": "/root/implement_quota",
+      "scope": "Single-owner joint quota/execution admission; exact local60sledger and separately labeled request-cost estimate",
+      "baseline": "evidence/product-task4-final-source-manifest.json",
+      "red_evidence": {
+        "artifact": "product/artifacts/task5/ledger-red.log",
+        "behavioral_failures": 8,
+        "compile_error_only": false,
+        "covers": [
+          "knownquota restart hold60s",
+          "RPM at actualHTTPstart",
+          "provisional joint holds",
+          "Reserved vsActual settlement",
+          "unknown usage and debt",
+          "late usage",
+          "monotonic resume"
+        ]
+      },
+      "design_decisions": [
+        {
+          "classification": "implementation_decision",
+          "decision": "Joint owner for quota and execution; committedwindoworigin is actualHTTPstart; provisionalresources remainhelduntilstart/cancel",
+          "reason": "Avoid charging unsent attempts or expiring a not-yet-started hold as if it had run"
+        }
+      ],
+      "parent_harness_change": {
+        "files": [
+          "scripts/probe-product-cli.py",
+          "scripts/probe-product-stream.py"
+        ],
+        "scope": "TemporarytransportfixtureRPM explicitlyUnlimited/TPMUnknown to isolate from real60srestarthold; productexampleKnown60unchanged",
+        "verification": "Actual general CLI and debug/release stream runs passed against held Task5 binaries; temporary quota modes recorded in artifacts."
+      },
+      "next_action": "Proceed to CoreTask6 root fair queue and bounded bypass on the accepted joint owner.",
+      "intermediate_progress": {
+        "ledger_same_tests_green": 8,
+        "wire_policy_status": "Implementer reports RED/GREEN for missing output bound, supported-endpoint media/file rejection, overestimate, malformed/ambiguous/escaped duplicate caps",
+        "startup_hold_wire_status": "Implementer reports actual production-spawn test preserves initial known-quota hold",
+        "verification_level": "Intermediate implementer report; independent spec and quality reviews not started",
+        "ledger_green_evidence": "product/artifacts/task5/ledger-green.log",
+        "ledger_green_verification": "Parent directly read successful build and 8 passed / 0 failed result; full independent review pending",
+        "joint_wire_tests": 39,
+        "joint_wire_status": "Implementer reports GREEN after joint admission integration; models/count_tokens shared RPM and TPM0, explicit cap raw preservation, Actual cache semantics, prestart hold through 500s with RST upstream0/cleanup1",
+        "remaining_implementation_checks": "Bounded state, deadline/stop/stream regression, final source cleanup and complete verification"
+      },
+      "intermediate_counterexamples": [
+        {
+          "issue": "Changing provisional hold to a started attempt must wake admission waiters so they can schedule the new expiry",
+          "red": "product/artifacts/task5/start-notify-red.log",
+          "green": "product/artifacts/task5/start-notify-green.log",
+          "verification": "Parent read behavioral failure then same named test pass; implementation and final review still pending"
+        },
+        {
+          "issue": "Protocol-specific opaque fields must be ignored while Responses tool-output media is detected",
+          "red": "product/artifacts/task5/parser-scope-red.log",
+          "green": "product/artifacts/task5/parser-scope-green.log",
+          "verification": "Parent read two behavioral failures then both pass; final review still pending"
+        }
+      ],
+      "harness_corrections": [
+        {
+          "issue": "Inherited parent summary incorrectly described product Pi fixture as Unlimited RPM; actual baseline gateway_config used Known60",
+          "observation": "Implementer reports positive Pi probe both flows timed out before initial production60s hold expired, upstream0",
+          "classification": "Harness fixture mismatch, not gateway warmup failure",
+          "action": "Preserve failed artifact; change only temporary Pi transport fixture to explicit Unlimited RPM with regression and artifact mode; keep product example and production warmup",
+          "failure_artifact": "product/artifacts/task5/pi-e2e-warmup-fixture-failure.json",
+          "original_task4_evidence": "Implementer confirmed product/artifacts/pi-e2e*.json unchanged"
+        }
+      ],
+      "implementation_status": "accepted",
+      "review_status": "spec_and_quality_passed",
+      "spec_reviewer": "/root/quota_spec_review",
+      "held_baseline": {
+        "source_manifest": "evidence/product-task5-pre-review-source-manifest.json",
+        "release_source_manifest": "evidence/product-task5-pre-review-release-source-manifest.json",
+        "source_files": 35,
+        "debug_binary_sha256": "a5edaa0c559a043272119e4b21493a2e6cd91889045df25e6f9eea816de47b76",
+        "release_binary_sha256": "392142c6c5fab00fe3ea3d1299717f03204de8bc5af9717c7a8cb1f60e2d9b80"
+      },
+      "implementation_checks": {
+        "evidence": "product/artifacts/task5/verification.json",
+        "rust_tests_per_profile": 111,
+        "unique_rust_tests": 111,
+        "lib_tests": 4,
+        "config_tests": 19,
+        "quota_tests": 12,
+        "stream_tests": 32,
+        "wire_tests": 44,
+        "python_tests": 5,
+        "fmt": "passed",
+        "locked_all_target_check": "passed",
+        "clippy_warnings_denied": "passed",
+        "pi_positive_attempts": [
+          1,
+          2
+        ],
+        "pi_negative_attempts": [
+          0,
+          0
+        ],
+        "pi_negative_expected_failure": true,
+        "parent_checked_logs_and_pi_identities": true
+      },
+      "parent_checks": {
+        "general_cli_debug_attempts": 1,
+        "stream_cases_per_profile": 4,
+        "stream_attempts_per_profile": 7,
+        "forced_stop_seconds": {
+          "debug": 10.004,
+          "release": 10.003
+        },
+        "debug_release_probes_match_held_binaries": true,
+        "source_stable_during_capture": true,
+        "evidence": [
+          "evidence/product-cli-task5-debug.json",
+          "evidence/product-stream-task5-debug.json",
+          "evidence/product-stream-task5-release.json"
+        ]
+      },
+      "evidence": [
+        "product/artifacts/task5-results.md",
+        "product/artifacts/task5/verification.json",
+        "product/artifacts/task5/held-source.json",
+        "product/artifacts/task5/changed-files.json",
+        "product/artifacts/task5/pi-e2e.json",
+        "product/artifacts/task5/pi-e2e-gateway-off.json",
+        "product/artifacts/task5/pi-e2e-warmup-fixture-failure.json",
+        "evidence/product-cli-task5-debug.json",
+        "evidence/product-stream-task5-debug.json",
+        "evidence/product-stream-task5-release.json",
+        "evidence/product-task5-pre-review-source-manifest.json",
+        "evidence/product-task5-pre-review-release-source-manifest.json",
+        "evidence/task5-spec-review/README.md",
+        "evidence/task5-spec-review/debug-locked-probes.log",
+        "evidence/task5-spec-review/release-probes.log",
+        "evidence/task5-spec-review/identity.json",
+        "product/artifacts/task5-results-initial.md",
+        "product/artifacts/task5-spec-fix/verification.json",
+        "product/artifacts/task5-spec-fix/pi-e2e.json",
+        "product/artifacts/task5-spec-fix/pi-e2e-gateway-off.json",
+        "evidence/product-cli-task5-spec-fix-debug.json",
+        "evidence/product-stream-task5-spec-fix-debug.json",
+        "evidence/product-stream-task5-spec-fix-release.json",
+        "evidence/product-task5-spec-fix-source-manifest.json",
+        "evidence/product-task5-spec-fix-release-source-manifest.json",
+        "evidence/task5-spec-rereview/README.md",
+        "evidence/task5-spec-rereview/debug-probes.log",
+        "evidence/task5-spec-rereview/release-probes.log",
+        "evidence/task5-spec-rereview/identity-after.json",
+        "evidence/task5-quality-review/README.md",
+        "evidence/task5-quality-review/debug-locked-probes.log",
+        "evidence/task5-quality-review/release-probes.log",
+        "evidence/task5-quality-review/identity-after.json",
+        "product/artifacts/task5-results-spec-fix.md",
+        "product/artifacts/task5-quality-fix/verification.json",
+        "product/artifacts/task5-quality-fix/usage-red.log",
+        "product/artifacts/task5-quality-fix/usage-green.log",
+        "product/artifacts/task5-quality-fix/pi-e2e.json",
+        "product/artifacts/task5-quality-fix/pi-e2e-gateway-off.json",
+        "evidence/product-cli-task5-quality-fix-debug.json",
+        "evidence/product-stream-task5-quality-fix-debug.json",
+        "evidence/product-stream-task5-quality-fix-release.json",
+        "evidence/product-task5-quality-fix-source-manifest.json",
+        "evidence/product-task5-quality-fix-release-source-manifest.json",
+        "evidence/task5-quality-rereview/README.md",
+        "evidence/task5-quality-rereview/debug-probes.log",
+        "evidence/task5-quality-rereview/release-probes.log",
+        "evidence/task5-quality-rereview/identity-after.json",
+        "evidence/product-task5-final-source-manifest.json",
+        "evidence/product-task5-final-release-source-manifest.json"
+      ],
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "evidence": "evidence/task5-spec-review/README.md",
+          "direct_checks": {
+            "independent_cases_per_profile": 6,
+            "passed_per_profile": 3,
+            "failed_per_profile": 3,
+            "profiles": [
+              "debug",
+              "release"
+            ],
+            "source_files_unchanged": 35,
+            "held_binaries_unchanged": true
+          },
+          "findings": [
+            {
+              "priority": "P2",
+              "issue": "Chat usage without supported final empty choices report incorrectly refunds Actual reservation",
+              "direct_evidence": "Nonempty or missing choices followed by DONE/EOF settles352to2 instead of retaining352"
+            },
+            {
+              "priority": "P2",
+              "issue": "Conflicting Responses completed and failed/incomplete outcomes can retain stale successful usage",
+              "direct_evidence": "Completed then failed settles365to2 instead of retaining365"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "evidence": "evidence/task5-spec-rereview/README.md",
+          "direct_checks": {
+            "tests_per_profile": 9,
+            "wire_cases_per_profile": 14,
+            "ledger_cases_per_profile": 1,
+            "profiles": [
+              "debug",
+              "release"
+            ],
+            "original_six_probe_functions_unchanged": true,
+            "source_files_unchanged": 36,
+            "held_binaries_unchanged": true
+          },
+          "resolved": [
+            "Missing/unsupported final Chat usage retains original reservation",
+            "Conflicting Responses terminal usage remains Unknown"
+          ],
+          "additional_checks": [
+            "Named error before and after successful reports across all three endpoints retains estimate",
+            "Ordinary named notice containing word error keeps valid23-token debit"
+          ]
+        }
+      ],
+      "spec_fix_progress": {
+        "scope": "Supported final usage and sticky explicit error/contradictory terminal invalidation across Chat, Responses and Messages; fixed-size SSE error-name classification",
+        "scope_decision": "Messages adjacent error case included only after actual wire RED proved incorrect Actual settlement; no general unknown-event rejection or protocol conversion",
+        "initial_focused_cases": 19,
+        "initial_failures": 15,
+        "initial_controls_passed": 4,
+        "initial_red_evidence": "product/artifacts/task5-spec-fix/usage-red.log",
+        "partial_fix_evidence": "product/artifacts/task5-spec-fix/usage-partial-fix-red.log",
+        "partial_fix_result": "18 passed, named-error case still failed; preserved",
+        "current_focused_cases": 21,
+        "current_focused_result": "21GREEN directly read in final full logs; complete132tests in each profile and final-binaryPi checked",
+        "independent_rereview": "passed"
+      },
+      "spec_fix_checks": {
+        "source_manifest": "evidence/product-task5-spec-fix-source-manifest.json",
+        "release_source_manifest": "evidence/product-task5-spec-fix-release-source-manifest.json",
+        "source_files": 36,
+        "rust_tests_per_profile": 132,
+        "unique_rust_tests": 132,
+        "new_usage_tests": 21,
+        "python_tests": 5,
+        "verification": "product/artifacts/task5-spec-fix/verification.json",
+        "debug_binary_sha256": "5fe45aca9910a31fb08e1d4dea4cadf7f1a53ba4a4f7b04410401d02e7b71713",
+        "release_binary_sha256": "3cfd0e778e2dab57d96b6fa2aeb0c05ea1ef71616e3ab7383514f98bcd98f562",
+        "parent_general_cli_attempts": 1,
+        "parent_stream_cases_per_profile": 4,
+        "parent_stream_attempts_per_profile": 7,
+        "parent_forced_stop_seconds": {
+          "debug": 10.004,
+          "release": 10.003
+        },
+        "parent_source_binary_and_pi_identity_checks": true,
+        "independent_rereview": "passed"
+      },
+      "quality_reviewer": "/root/quota_quality_review",
+      "current_review_baseline": {
+        "source_manifest": "evidence/product-task5-quality-fix-source-manifest.json",
+        "release_source_manifest": "evidence/product-task5-quality-fix-release-source-manifest.json",
+        "source_files": 36,
+        "debug_binary_sha256": "4578b4492177512d653b53bcd2a85a6fd71f35be686900d76d6706f1058b36da",
+        "release_binary_sha256": "8011efa55a45c3223353c484aba43d7889c8f18257656bbe606ce98226ae1c1d"
+      },
+      "quality_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "evidence": "evidence/task5-quality-review/README.md",
+          "direct_checks": {
+            "tests_per_profile": 5,
+            "passed_per_profile": 3,
+            "failed_per_profile": 2,
+            "profiles": [
+              "debug",
+              "release"
+            ],
+            "source_files_unchanged": 36,
+            "held_binaries_unchanged": true,
+            "controls": [
+              "Ordered Messages known2",
+              "20contenders with8prestartRSTcancellations:12attempts/20cleanups/0active",
+              "8192-entry saturation with late debt and active identity"
+            ]
+          },
+          "findings": [
+            {
+              "priority": "P2",
+              "issue": "Messages post-stop usage establishes or changes supported final usage and incorrectly refunds Actual reservation",
+              "direct_evidence": "START→STOP→DELTA and STOP→START→DELTA both settle352to2 instead of retaining352 at clean HTTP EOF"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "evidence": "evidence/task5-quality-rereview/README.md",
+          "remaining_findings": 0,
+          "direct_checks": {
+            "tests_per_profile": 7,
+            "profiles": [
+              "debug",
+              "release"
+            ],
+            "original_five_tests_byte_identical": true,
+            "wire_ingress_requests_per_profile": 26,
+            "upstream_attempts_per_profile": 18,
+            "prestart_cancellations_per_profile": 8,
+            "ledger_scenarios_per_profile": 1,
+            "source_files_unchanged": 36,
+            "held_binaries_unchanged": true
+          },
+          "resolved": [
+            "Messages post-stop usage cannot establish or change known final accounting; normal ordering and non-accounting event controls preserved"
+          ]
+        }
+      ],
+      "quality_fix_checks": {
+        "source_manifest": "evidence/product-task5-quality-fix-source-manifest.json",
+        "release_source_manifest": "evidence/product-task5-quality-fix-release-source-manifest.json",
+        "source_files": 36,
+        "rust_tests_per_profile": 138,
+        "unique_rust_tests": 138,
+        "usage_tests": 27,
+        "focused_red": {
+          "failed": 4,
+          "controls_passed": 2
+        },
+        "focused_green": 6,
+        "verification": "product/artifacts/task5-quality-fix/verification.json",
+        "debug_binary_sha256": "4578b4492177512d653b53bcd2a85a6fd71f35be686900d76d6706f1058b36da",
+        "release_binary_sha256": "8011efa55a45c3223353c484aba43d7889c8f18257656bbe606ce98226ae1c1d",
+        "python_tests": "Prior five-test pass retained; unchanged script/test hashes verified; not rerun this round",
+        "pi_final_positive_attempts": [
+          1,
+          2
+        ],
+        "pi_final_negative_attempts": [
+          0,
+          0
+        ],
+        "parent_general_cli_attempts": 1,
+        "parent_stream_cases_per_profile": 4,
+        "parent_stream_attempts_per_profile": 7,
+        "parent_forced_stop_seconds": {
+          "debug": 10.004,
+          "release": 10.005
+        },
+        "parent_source_binary_pi_identity_checks": true,
+        "independent_rereview": "passed"
+      },
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "remaining_findings": 0,
+        "evidence": "evidence/task5-quality-rereview/README.md"
+      },
+      "current_baseline": {
+        "source_manifest": "evidence/product-task5-final-source-manifest.json",
+        "release_source_manifest": "evidence/product-task5-final-release-source-manifest.json",
+        "source_files": 36,
+        "rust_tests_per_profile": 138,
+        "unique_rust_tests": 138,
+        "usage_tests": 27,
+        "focused_red": {
+          "failed": 4,
+          "controls_passed": 2
+        },
+        "focused_green": 6,
+        "verification": "product/artifacts/task5-quality-fix/verification.json",
+        "debug_binary_sha256": "4578b4492177512d653b53bcd2a85a6fd71f35be686900d76d6706f1058b36da",
+        "release_binary_sha256": "8011efa55a45c3223353c484aba43d7889c8f18257656bbe606ce98226ae1c1d",
+        "python_tests": "Prior five-test pass retained; unchanged script/test hashes verified; not rerun this round",
+        "pi_final_positive_attempts": [
+          1,
+          2
+        ],
+        "pi_final_negative_attempts": [
+          0,
+          0
+        ],
+        "parent_general_cli_attempts": 1,
+        "parent_stream_cases_per_profile": 4,
+        "parent_stream_attempts_per_profile": 7,
+        "parent_forced_stop_seconds": {
+          "debug": 10.004,
+          "release": 10.005
+        },
+        "parent_source_binary_pi_identity_checks": true,
+        "independent_rereview": "passed"
+      }
+    },
+    {
+      "id": "core-task6",
+      "status": "done",
+      "implementer": "/root/implement_fairness",
+      "scope": "Same-owner root FIFO/RR, bounded resource bypass and persistent oldest eligible barrier, cancellation and authenticated status",
+      "baseline": "evidence/product-task5-final-source-manifest.json",
+      "verification_level": "Accepted after parent matching-binary probes, independent spec8/profile andquality3/profile, with38source+2binaryidentities unchanged.",
+      "red_evidence": [
+        {
+          "artifact": "product/artifacts/task6/red-initial.log",
+          "behavioral_failures": 3
+        },
+        {
+          "artifact": "product/artifacts/task6/red-traces.log",
+          "behavioral_failures": 7,
+          "controls_passed": 3
+        },
+        {
+          "artifact": "product/artifacts/task6/red-normal-rr.log",
+          "behavioral_failures": 1,
+          "issue": "Fitting nonselected RR heads must not accrue resource bypass"
+        },
+        {
+          "artifact": "product/artifacts/task6/red-oldest-eligible.log",
+          "behavioral_failures": 1,
+          "issue": "Any threshold trigger protects the oldest valid total-capacity-fit root head"
+        },
+        {
+          "artifact": "product/artifacts/task6/red-sticky-barrier.log",
+          "behavioral_failures": 1,
+          "issue": "Chosen barrier persists until its own admission or removal"
+        }
+      ],
+      "parent_harness": {
+        "script": "scripts/probe-product-fairness.py",
+        "self_check": "evidence/product-fairness-fixture-self-check.json",
+        "self_check_passed": true,
+        "gateway_executed": true,
+        "scope": "Actual foreground socket probe prepared for held binary; root RR/FIFO, metadata, queued RST, 64 overflow/cancel/refill; all outcomes accounted",
+        "debug": "evidence/product-fairness-task6-debug.json",
+        "release": "evidence/product-fairness-task6-release.json",
+        "passed": true,
+        "cases_per_profile": 3,
+        "ingress_per_profile": 77,
+        "upstream_attempts_per_profile": 59,
+        "canceled_per_profile": 17,
+        "rejected_per_profile": 1,
+        "fixture_correction": "Serial actualenqueue observation avoids confusing client sendorder withFIFO; allRRattemptstarts must precedeagingthreshold."
+      },
+      "design_decisions": [
+        "Only a currently resource-blocked head skipped for another actual admission accrues bypass; scans/wakes and ordinary RR order do not.",
+        "Any 8 bypass or 5s trigger selects oldest original-wait valid total-capacity-fit root head, regardless of current residual fit; barrier persists until admitted or removed.",
+        "Authenticated control status JSON data in core Task6; identity-aware status CLI remains native Task1."
+      ],
+      "next_action": "Proceed CoreTask7 retry ownership/sharedcooldown/resource bounds on accepted same-owner fairqueue.",
+      "implementation_status": "accepted",
+      "review_status": "spec_and_quality_passed",
+      "spec_reviewer": "/root/fairness_spec_review",
+      "implementation_report": "product/artifacts/task6-results.md",
+      "rust_tests_per_profile": 161,
+      "current_baseline": {
+        "debug": "evidence/product-task6-final-source-manifest.json",
+        "release": "evidence/product-task6-final-release-source-manifest.json",
+        "source_files": 38
+      },
+      "parent_runtime_probes": [
+        "evidence/product-cli-task6-debug.json",
+        "evidence/product-stream-task6-debug.json",
+        "evidence/product-stream-task6-release.json"
+      ],
+      "spec_review": {
+        "status": "passed",
+        "reviewer": "/root/fairness_spec_review",
+        "report": "evidence/task6-spec-review/README.md",
+        "independent_tests_per_profile": 8,
+        "wire_attempts_per_profile": 2,
+        "source_files_unchanged": 38,
+        "held_binaries_unchanged": 2
+      },
+      "quality_reviewer": "/root/fairness_quality_review",
+      "quality_review": {
+        "status": "passed",
+        "reviewer": "/root/fairness_quality_review",
+        "report": "evidence/task6-quality-review/README.md",
+        "independent_tests_per_profile": 3,
+        "library_acquire_calls_per_profile": 8979,
+        "actual_http_attempts": 0,
+        "source_files_unchanged": 38,
+        "held_binaries_unchanged": 2
+      },
+      "source_archive": {
+        "path": "evidence/product-task6-held-source.tar.gz",
+        "bytes": 100625,
+        "sha256": "752625115dfc6d444c66ceb9d399006af4ad5f769aede9a0e48fe64bc35ff885",
+        "source_files": 38,
+        "matches_accepted_source": true,
+        "includes_binaries": false
+      }
+    },
+    {
+      "id": "core-task7",
+      "status": "done",
+      "implementer": "/root/implement_retry_bounds",
+      "baseline": "evidence/product-task6-final-source-manifest.json",
+      "baseline_source_archive": "evidence/product-task6-held-source.tar.gz",
+      "scope": "Default-off bounded transient429 retry through sameadmission,sharedcooldown,incrementalbody/connection/slowreaderresourcebounds",
+      "research_input": "reports/retry-classification-notes.md",
+      "verification_level": "Accepted after SPEC and same-reviewer QUALITY rechecks. Final 188 Rust tests each profile, final Pi positive/negative audit and independent native retry/stream/CLI observations match held identities. Performance remains unmeasured.",
+      "next_action": "Core Task 8 controlled performance harness and pilot.",
+      "decisions": [
+        "Immutable retry_transient_429 defaults false; explicit opt-in permits one additional qualified attempt.",
+        "Support strict nonnegative retry-after-ms as well as standard seconds/HTTP-date; maximum valid wait preserves server minimum.",
+        "Narrow rate_limit_exceeded/slow_down allowlist based on current official guide and pinned Codex HTTP tests; permanent/conflicting/duplicate markers deny replay.",
+        "Digits-only delay overflow saturates the shared cooldown instead of disappearing; strict replay eligibility still rejects unsupported numeric range."
+      ],
+      "intermediate_evidence": [
+        "product/artifacts/task7/red-initial.log",
+        "product/artifacts/task7/green-cooldown.log",
+        "product/artifacts/task7/red-opt-in.log",
+        "product/artifacts/task7/red-replay-wire.log",
+        "product/artifacts/task7/green-retry-first.log",
+        "reports/retry-classification-notes.md",
+        "evidence/retry-source-audit-verification-v2.json",
+        "product/artifacts/task7/red-delay-and-classification.log",
+        "product/artifacts/task7/red-ignored-utf8.log",
+        "product/artifacts/task7/red-ignored-utf8-v2.log",
+        "product/artifacts/task7/red-positive-overflow.log",
+        "product/artifacts/task7/green-positive-overflow.log"
+      ],
+      "harness_corrections": [
+        "First opt-in attempt had the wrong UnlimitedRPM counter expectation; preserved green-retry-first.log actually failed. Corrected fixture uses KnownRPM10 and the existing ManualClock restart-window seam. Parent corrected its initial progress text immediately after reading raw output."
+      ],
+      "parent_probe_preparation": {
+        "script": "scripts/probe-product-retry.py",
+        "self_check": "evidence/product-retry-fixture-self-check-v5.json",
+        "gateway_executed": false,
+        "planned_cases": 6,
+        "planned_ingress": 21,
+        "planned_actual_attempts": 24,
+        "scope": "Adds truncated429 ->502 with default-off/opt-in, same shared cooldown and fresh root progress. Fixture self-check passed; corrected product execution awaits HOLD."
+      },
+      "intermediate_green": {
+        "artifact": "product/artifacts/task7/expanded-resource-run.log",
+        "retry_tests": 11,
+        "resource_tests": 6,
+        "profile": "debug",
+        "scope": "Intermediate targets only; not final all-target acceptance. Parent read raw result lines."
+      },
+      "remaining_probe_candidate": "Both parent-raised candidates are fixed and covered by held tests; no unresolved parent candidate, independent review pending.",
+      "review_status": "accepted",
+      "spec_reviewer": "/root/task7_spec_review",
+      "current_baseline": {
+        "source_manifest": "evidence/product-task7-quality-parent-probed-source-manifest.json",
+        "release_source_manifest": "evidence/product-task7-quality-parent-probed-release-source-manifest.json",
+        "source_files": 41,
+        "full_tests_per_profile": 188,
+        "debug_binary_sha256": "ec3742d6eb0acd618cc1e1ce9d0ca1581e5a17d286a727b9c3267eeef276f2fc",
+        "release_binary_sha256": "48a9232ae5ffa012ddd4caeae90ee6f2e6094755b0815c68d472e7b69a8316d4",
+        "source_archive": {
+          "path": "evidence/product-task7-quality-held-source.tar.gz",
+          "bytes": 117072,
+          "sha256": "793a31d5f3bcf737f069065a789df365dc56a038d2ad3f7fce6b5039c307c3d7",
+          "verified_files": 41
+        },
+        "parent_verification": "evidence/product-task7-quality-parent-verification.json"
+      },
+      "evidence": [
+        "product/artifacts/task7-results.md",
+        "product/artifacts/task7/commands.md",
+        "product/artifacts/task7/identity.json",
+        "product/artifacts/task7/final-audit.json",
+        "evidence/product-task7-parent-verification.json",
+        "product/artifacts/task7-spec-fix/README.md",
+        "product/artifacts/task7-spec-fix/results.json",
+        "evidence/product-task7-spec-fixed-source-manifest.json",
+        "evidence/product-task7-spec-fixed-release-source-manifest.json",
+        "evidence/task7-spec-review/rereview/README.md",
+        "evidence/task7-spec-review/rereview/run-summary.json",
+        "evidence/task7-quality-review/README.md",
+        "evidence/task7-quality-review/summary.json",
+        "evidence/product-retry-fixture-self-check-v5.json",
+        "product/artifacts/task7-quality-fix/README.md",
+        "evidence/product-task7-quality-parent-verification.json",
+        "evidence/product-task7-quality-parent-probed-source-manifest.json",
+        "evidence/product-task7-quality-parent-probed-release-source-manifest.json",
+        "evidence/product-task7-quality-pi-audit.json",
+        "evidence/task7-quality-review/rereview/README.md",
+        "evidence/task7-quality-review/rereview/summary.json"
+      ],
+      "pre_review_source_archive": "evidence/product-task7-pre-review-source-archive.json",
+      "review_scope_clarifications": [
+        {
+          "topic": "optional JSON null",
+          "decision": "Optional null is absence only when required allowlisted code is a string and no conflicting/permanent marker exists; duplicate discriminator still rejects replay.",
+          "provenance": "Clarified during fresh SPEC review; not represented as earlier user approval.",
+          "research_note": "reports/retry-classification-notes.md"
+        }
+      ],
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "evidence": "evidence/task7-spec-review/README.md",
+          "independent_tests_per_profile": 4,
+          "independent_data_ingress_per_profile": 4,
+          "independent_upstream_http_per_profile": 6,
+          "parent_finding": "Original resource test fills32MiB with64 partial bodies but sends extra bytes from only one writer; simultaneous64-writer incremental memory demand remains untested. Reviewer confirmed the gap.",
+          "initial_report": "evidence/task7-spec-review/README-initial-pass.md"
+        },
+        {
+          "round": 2,
+          "status": "passed",
+          "scope": "Required real-socket 64-writer barrier and complete outcome accounting; runtime unchanged.",
+          "evidence": "evidence/task7-spec-review/rereview/README.md",
+          "independently_executed_product_tests_per_profile": 2,
+          "full_suite_rerun": false
+        }
+      ],
+      "pre_spec_fix_baseline": {
+        "source_manifest": "evidence/product-task7-parent-probed-source-manifest.json",
+        "release_source_manifest": "evidence/product-task7-parent-probed-release-source-manifest.json",
+        "source_files": 41,
+        "debug_tests": 186,
+        "release_tests": 186,
+        "unique_tests": 186,
+        "new_tests": 25,
+        "debug_binary_sha256": "4fb6c03938774b8ca756490ea6c3f624bc5c2bf9e72cdf54c9fb9fb7421609f0",
+        "release_binary_sha256": "9be8dcf3cb880b41d6662a41eb91d25c27df07e7be6f23d3fae62c81b374b36d",
+        "parent_verification": "evidence/product-task7-parent-verification.json"
+      },
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "reviewer": "/root/task7_quality_review",
+        "scope": "Q7-1 pre-header failure and adjacent transport regression on held correction",
+        "evidence": "evidence/task7-quality-review/rereview/README.md",
+        "independent_rust_tests_per_profile": 4,
+        "data_ingress_per_profile": 11,
+        "actual_upstream_http_per_profile": 11,
+        "remaining_findings": 0
+      },
+      "quality_reviews": [
+        {
+          "status": "changes_requested",
+          "reviewer": "/root/task7_quality_review",
+          "scope": "Fresh review of Task 7 delta against accepted Task 6 archive after SPEC PASS",
+          "evidence": "evidence/task7-quality-review/README.md",
+          "finding": "Q7-1: a truncated 429 body detected before response headers produces a zero-byte close instead of existing 502 envelope",
+          "independent_data_ingress": 4,
+          "independent_upstream_http": 4,
+          "profile": "debug"
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "reviewer": "/root/task7_quality_review",
+          "scope": "Q7-1 pre-header failure and adjacent transport regression on held correction",
+          "evidence": "evidence/task7-quality-review/rereview/README.md",
+          "independent_rust_tests_per_profile": 4,
+          "data_ingress_per_profile": 11,
+          "actual_upstream_http_per_profile": 11,
+          "remaining_findings": 0
+        }
+      ],
+      "pre_quality_fix_baseline": {
+        "source_manifest": "evidence/product-task7-spec-fixed-source-manifest.json",
+        "release_source_manifest": "evidence/product-task7-spec-fixed-release-source-manifest.json",
+        "source_files": 41,
+        "only_source_changed_since_previous_baseline": "product/tests/resource_bounds.rs",
+        "focused_tests_per_profile": 2,
+        "full_suite_rerun_after_test_append": false,
+        "unchanged_runtime_previous_full_suite_tests_per_profile": 186,
+        "debug_binary_sha256": "4fb6c03938774b8ca756490ea6c3f624bc5c2bf9e72cdf54c9fb9fb7421609f0",
+        "release_binary_sha256": "9be8dcf3cb880b41d6662a41eb91d25c27df07e7be6f23d3fae62c81b374b36d",
+        "supplement": "product/artifacts/task7-spec-fix/README.md"
+      }
+    },
+    {
+      "id": "core-task8",
+      "status": "done",
+      "implementer": "/root/implement_benchmark",
+      "baseline": "evidence/product-task7-quality-parent-probed-source-manifest.json",
+      "baseline_source_archive": "evidence/product-task7-quality-held-source.tar.gz",
+      "scope": "Feature-gated FIFO/RR ablation, deterministic cost traces, native HTTP harness and five-seed/five-window composite pilot",
+      "stage": "accepted",
+      "performance_experiment_started": true,
+      "verification_level": "Full40-run synthetic pilot, parent denominator/timestamp/hash audits, fresh SPEC and same QUALITY re-review passed. Performance advantage remains unproven.",
+      "research_input": [
+        "reports/benchmark-spec.md",
+        "reports/benchmark-pilot-preparation.md",
+        "reports/benchmark-reference-audit.md",
+        "reports/quota-contract-followup.md",
+        "reports/scheduler-utilization-followup.md"
+      ],
+      "decisions": [
+        "FIFO selection and FIFO comparison traces compile only with bench-harness; ordinary production remains RR.",
+        "Run both ordinary exact RR trace test and feature-enabled FIFO/RR comparison test.",
+        "First matrix is twenty arm/seed composite runs with four workload segments; retain carry-over state and per-workload outcomes. Do not claim five independent windows for each segment.",
+        "HTTP fixture/client helper scripts/benchmark_http.py approved as bounded responsibility split; no dependencies added.",
+        "Every real quota window contains burst8/mixed4/shared4/cancellation4 requests; 20 arm-seed runs total 2000 quota ingress. Separate 20 no-wait runs have 2000 measured and100 warmup ingress.",
+        "Separate completion within300s measurement from post-measurement drain outcomes. Detect truncated chunk trailer EOF with finite bounds.",
+        "Before full launch, choose mock TPM6000 instead of12000 so a long3222-unit request fits total quota but can fail current remaining budget. This is a designed synthetic contention fixture; no production window or quota logic change."
+      ],
+      "next_action": "Native Task1 implementation; separate future accounting ablation and competitive performance validation remain.",
+      "intermediate_evidence": [
+        "product/artifacts/task8-smoke1.json",
+        "evidence/product-task8-smoke1-parent-audit.json",
+        "product/artifacts/task8-smoke2.json",
+        "product/artifacts/task8-no-wait-preflight.json",
+        "evidence/product-task8-preflight-parent-audit.json",
+        "evidence/product-task8-no-wait-parent-audit.json",
+        "evidence/product-task8-quota-seed1-parent-audit.json",
+        "evidence/product-task8-queue-observation.json",
+        "evidence/scheduler-followup-source-links.json",
+        "evidence/product-task8-first-two-seeds-audit.json",
+        "evidence/product-task8-first-two-seeds-audit-v2.json",
+        "evidence/product-task8-first-three-seeds-audit.json",
+        "evidence/product-task8-cancellation-cohort-observation.json",
+        "evidence/task8-review-brief.md",
+        "evidence/product-task8-first-four-seeds-audit.json",
+        "evidence/product-task8-full-matrix-parent-audit.json",
+        "evidence/product-task8-full-quota-parent-audit.json",
+        "evidence/product-task8-quota-boundary-observations-partial.json",
+        "reports/benchmark-pilot-results.md",
+        "product/artifacts/task8-development/implementation-report.md",
+        "product/artifacts/task8-development/self-check-review-source.log",
+        "evidence/product-task8-final-review-parent-identity-audit.json",
+        "evidence/product-task8-final-review-source-manifest.json",
+        "evidence/task8-spec-review/README.md",
+        "evidence/task8-spec-review/summary.json",
+        "evidence/product-task8-aggregate-parent-audit.json"
+      ],
+      "full_matrix_started": true,
+      "full_matrix_session": 78413,
+      "harness_pid": 9443,
+      "full_matrix_manifest": "product/artifacts/pilot.json",
+      "full_matrix_source_hold": "product/artifacts/task8-development/full-matrix-source-hold.json",
+      "parent_review_candidates": [
+        {
+          "id": "P8-C1",
+          "status": "resolved_and_independently_reviewed",
+          "finding": "No-wait post-warmup/final retained is0 for all20runs. Current benchmark-method phrase warmup-populated ledger state is inaccurate. Known populated-ledger pure overhead remains unmeasured; quota mixed waiting samples cannot replace it.",
+          "evidence": "evidence/product-task8-no-wait-parent-audit.json",
+          "source_edits_during_matrix": false
+        },
+        {
+          "id": "P8-C2",
+          "status": "resolved_and_independently_reviewed",
+          "finding": "Resume existing completed run calls validate_run but does not compare file SHA to an existing manifest run entry before reusing it. Examine stale or modified completed artifact rejection after HOLD. Current uninterrupted dataset has been hash-audited; no corruption observed.",
+          "source": "product/scripts/benchmark.py main completed.exists branch",
+          "current_run_path": "Newly created runs; completed-file reuse branch not used in this uninterrupted execution."
+        }
+      ],
+      "measured_source_archive": "evidence/product-task8-measured-source.tar.gz",
+      "measured_source_archive_manifest": "evidence/product-task8-measured-source-archive.json",
+      "parent_auditor_correction": "The first independent script audit incorrectly expected boolean false for retry fields stored as integer0. Corrected the auditor to compare zero and rechecked all8 unchanged quota artifacts. Original failed audit preserved; this was not a product/matrix failure.",
+      "spec_reviewer": "/root/task8_spec_review",
+      "implementation_report": "product/artifacts/task8-development/implementation-report.md",
+      "final_review_source_manifest": "evidence/product-task8-final-review-source-manifest.json",
+      "final_review_source_archive": "evidence/product-task8-final-review-source.tar.gz",
+      "parent_identity_audit": "evidence/product-task8-final-review-parent-identity-audit.json",
+      "spec_review": {
+        "status": "passed",
+        "reviewer": "/root/task8_spec_review",
+        "report": "evidence/task8-spec-review/README.md",
+        "summary": "evidence/task8-spec-review/summary.json",
+        "fresh_execution": {
+          "default_exact_tests": 3,
+          "feature_exact_tests": 4,
+          "self_check_loopback_http": 5,
+          "independent_payload_http": 8,
+          "smoke_ingress": 80,
+          "smoke_completed": 68,
+          "smoke_cancelled": 12,
+          "smoke_mock_received": 77,
+          "smoke_gateway_starts": 60,
+          "cli_help_invocations": 2
+        },
+        "identity_unchanged": true
+      },
+      "quality_reviewer": "/root/task8_quality_review",
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "reviewer": "/root/task8_quality_review",
+        "report": "evidence/task8-quality-review/rereview/README.md",
+        "summary": "evidence/task8-quality-review/rereview/summary.json",
+        "remaining_findings": 0,
+        "fresh_execution": {
+          "exact_original_resume_counterexample": "rejected before manifest/dispatch",
+          "independent_resume_cases": 16,
+          "lifecycle_final_cases": 5,
+          "lifecycle_initial_setup_failure": true,
+          "gateway_child_processes_total": 8,
+          "data_gateway_ingress": 0,
+          "gateway_mock_upstream_attempts": 0,
+          "self_check_loopback_http": 5,
+          "real_control_helper_calls": 4,
+          "control_wire_count_instrumented": false,
+          "full_rust_suite_rerun": false,
+          "full_matrix_rerun": false,
+          "new_benchmark_arms": 0
+        },
+        "identity_unchanged": true,
+        "owned_processes_reaped_and_absent": true
+      },
+      "quality_reviews": [
+        {
+          "status": "changes_requested",
+          "reviewer": "/root/task8_quality_review",
+          "findings": [
+            {
+              "id": "Q8-1",
+              "severity": "important",
+              "description": "Existing completed JSON absent from manifest is adopted by filename without proving requested run/source identity.",
+              "evidence": "evidence/task8-quality-review/resume-orphan-result.json"
+            },
+            {
+              "id": "Q8-2",
+              "severity": "important",
+              "description": "Cancelling readiness before start_gateway returns leaves the spawned child outside outer run_arm cleanup ownership. Reviewer reproduced and cleaned only that child.",
+              "evidence": "evidence/task8-quality-review/startup-cancel-result.json"
+            }
+          ],
+          "original_matrix_affected": false,
+          "round": 1,
+          "report": "evidence/task8-quality-review/README.md",
+          "summary": "evidence/task8-quality-review/summary.json"
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "reviewer": "/root/task8_quality_review",
+          "report": "evidence/task8-quality-review/rereview/README.md",
+          "summary": "evidence/task8-quality-review/rereview/summary.json",
+          "remaining_findings": 0,
+          "fresh_execution": {
+            "exact_original_resume_counterexample": "rejected before manifest/dispatch",
+            "independent_resume_cases": 16,
+            "lifecycle_final_cases": 5,
+            "lifecycle_initial_setup_failure": true,
+            "gateway_child_processes_total": 8,
+            "data_gateway_ingress": 0,
+            "gateway_mock_upstream_attempts": 0,
+            "self_check_loopback_http": 5,
+            "real_control_helper_calls": 4,
+            "control_wire_count_instrumented": false,
+            "full_rust_suite_rerun": false,
+            "full_matrix_rerun": false,
+            "new_benchmark_arms": 0
+          },
+          "identity_unchanged": true,
+          "owned_processes_reaped_and_absent": true
+        }
+      ],
+      "quality_fixed_source_manifest": "evidence/product-task8-quality-fixed-source-manifest.json",
+      "quality_fixed_source_archive": "evidence/product-task8-quality-fixed-source.tar.gz",
+      "quality_fixed_parent_identity_audit": "evidence/product-task8-quality-fixed-parent-identity-audit.json",
+      "quality_fix_implementation_report": "product/artifacts/task8-quality-fix/REPORT.md"
+    },
+    {
+      "id": "native-task1",
+      "status": "done",
+      "stage": "spec_and_quality_passed",
+      "implementer": "/root/implement_native_lifecycle",
+      "scope": "Native lifecycle on/off/status/restart, config identity, lifetime lock, protected state, authenticated readiness and bounded stop",
+      "baseline": "evidence/product-task8-quality-fixed-source-manifest.json",
+      "baseline_source_archive": "evidence/product-task8-quality-fixed-source.tar.gz",
+      "build_target": "product/target/native",
+      "measured_binary_paths_preserved": true,
+      "next_action": "Accepted lifecycle; accounting Task1 harness next, then native wizard and later platform acceptance.",
+      "research_input": [
+        "reports/native-lifecycle-preflight.md",
+        "reports/native-platform-decision.md"
+      ],
+      "implementation_evidence_directory": "product/artifacts/native-task1/",
+      "decisions": [
+        {
+          "topic": "Windows native file protection",
+          "status": "implementation_approved_not_runtime_verified",
+          "decision": "Use existing locked windows-sys0.61.2 with a narrowly audited unsafe exception only in Windows protection module; deny elsewhere, no wrapper pointer glue or unsupported-success fallback.",
+          "evidence": "reports/native-platform-decision.md"
+        },
+        {
+          "topic": "Config identity",
+          "decision": "Canonical path hash identifies sibling state directory; config bytes fingerprint identifies immutable running config. Short command lock serializes lifecycle operations, worker holds distinct stable lifetime lock.",
+          "status": "implemented_pending_review"
+        }
+      ],
+      "implementer_status": "FINAL_HOLD",
+      "hold_manifest": "product/artifacts/native-task1/quality-fix/source-manifest.json",
+      "hold_archive": "product/artifacts/native-task1/quality-fix/source-hold.tar.gz",
+      "hold_summary": "product/artifacts/native-task1/quality-fix/summary.json",
+      "hold_archive_sha256": "d84f5b1ee94fc2a57a697b92007e2b2715168735a97ef33c2209f4e01f6d5c33",
+      "spec_review": {
+        "status": "passed",
+        "round": 2,
+        "evidence": "evidence/native-task1-spec-review/rereview/README.md"
+      },
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "reviewer": "/root/native_task1_quality_review",
+        "evidence": "evidence/native-task1-quality-review/rereview/README.md",
+        "direct_cases_passed": 3,
+        "remaining_findings": 0
+      },
+      "parent_checks": [
+        "evidence/native-task1-parent-hold-audit.json",
+        "evidence/native-task1-parent-footprint.json"
+      ],
+      "implementer_checks": {
+        "debug_tests": 211,
+        "release_tests": 211,
+        "native_tests": 20,
+        "evidence": "product/artifacts/native-task1/README.md",
+        "windows_full_build": "failed_missing_sdk_headers",
+        "windows_isolated_module_type_clippy": "passed_not_runtime"
+      },
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "reviewer": "/root/native_task1_spec_review",
+          "evidence": "evidence/native-task1-spec-review/README.md",
+          "findings": [
+            {
+              "id": "N1-S1",
+              "severity": "P2",
+              "evidence_class": "directly_verified",
+              "issue": "Running worker plus malformed edited config makes on return parse error instead of restart_required."
+            },
+            {
+              "id": "N1-S2",
+              "severity": "test_portability_gap",
+              "evidence_class": "source_supported_windows_runtime_unverified",
+              "issue": "Stale-PID fixture manually creates state without Windows protected DACL; must use public CLI provisioner."
+            }
+          ]
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "evidence": "evidence/native-task1-spec-review/rereview/README.md"
+        }
+      ],
+      "current_revision_checks": {
+        "lifecycle_debug": 25,
+        "lifecycle_release": 25,
+        "cli_upstream_attempts": 1,
+        "fmt_check_clippy": "passed",
+        "evidence": "product/artifacts/native-task1/quality-fix/README.md"
+      },
+      "quality_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "evidence": "evidence/native-task1-quality-review/README.md",
+          "findings": [
+            {
+              "severity": "P2",
+              "evidence_class": "directly_verified",
+              "issue": "Restart loaded config before operation lock; editing while waiting could stop old worker then fail child startup."
+            }
+          ]
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "reviewer": "/root/native_task1_quality_review",
+          "evidence": "evidence/native-task1-quality-review/rereview/README.md",
+          "direct_cases_passed": 3,
+          "remaining_findings": 0
+        }
+      ],
+      "evidence_classification": "macOS owned-loopback lifecycle accepted; Windows/Linux runtime remains unverified"
+    },
+    {
+      "id": "accounting-task1",
+      "status": "done",
+      "stage": "spec_and_quality_passed",
+      "implementer": "/root/implement_accounting_harness",
+      "scope": "Two-arm ordinary-binary accounting benchmark mode, numerical usage observation and paired provenance/resume validation; Rust unchanged",
+      "plan": "docs/superpowers/plans/2026-09-12-accounting-ablation.md",
+      "plan_review": "evidence/accounting-plan-review-round2.md",
+      "baseline": "product/artifacts/native-task1/quality-fix/source-manifest.json",
+      "binary": "product/target/native/release/llmgw",
+      "binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+      "next_action": "Accepted; Task2 first paired300sec quota experiment dispatched under unchanged source/binary HOLD.",
+      "implementer_status": "FINAL_HOLD",
+      "hold_manifest": "product/artifacts/accounting-ablation/quality-fix/source-manifest.json",
+      "hold_archive": "product/artifacts/accounting-ablation/quality-fix/source-hold.tar.gz",
+      "hold_archive_sha256": "e057f32e5eb37c44eaa489fe15ab0f9846fde283261b7f9c690a4eefb4d5c9c4",
+      "hold_summary": "product/artifacts/accounting-ablation/quality-fix/summary.json",
+      "spec_review": {
+        "status": "passed",
+        "round": 2,
+        "reviewer": "/root/accounting_task1_spec_review",
+        "evidence": "evidence/accounting-task1-spec-review/rereview/README.md",
+        "direct_unit_passed": 26,
+        "direct_self_check": "passed",
+        "direct_smoke_each_arm": {
+          "submitted": 20,
+          "completed": 17,
+          "cancelled": 3,
+          "attempts": 19
+        },
+        "original_findings_resolved": 4,
+        "remaining_findings": 0,
+        "execution_finished": true
+      },
+      "implementer_checks": {
+        "unit_passed": 19,
+        "self_check": "passed",
+        "smoke": "completed_smoke",
+        "arms": {
+          "production_rr": {
+            "submitted": 20,
+            "completed": 17,
+            "cancelled": 3,
+            "attempts": 19
+          },
+          "production_actual": {
+            "submitted": 20,
+            "completed": 17,
+            "cancelled": 3,
+            "attempts": 20
+          }
+        },
+        "evidence": "product/artifacts/accounting-ablation/task1/README.md",
+        "scope": "bounded_loopback_no_efficiency_conclusion"
+      },
+      "spec_reviews": [
+        {
+          "round": 1,
+          "status": "changes_requested",
+          "reviewer": "/root/accounting_task1_spec_review",
+          "evidence": "evidence/accounting-task1-spec-review/README.md",
+          "findings": [
+            {
+              "id": "A1-S1",
+              "severity": "P1",
+              "issue": "Actual written TOML and running accounting are not reconciled with recorded metadata; controlled reserved-text/actual-metadata mismatch accepted.",
+              "evidence_class": "fault_injection_real_owned_gateway"
+            },
+            {
+              "id": "A1-S2",
+              "severity": "P2",
+              "issue": "Rehashed completed usage with integer changed to equal float is accepted by resume preflight.",
+              "evidence_class": "direct_counterexample"
+            },
+            {
+              "id": "A1-S3",
+              "severity": "P2",
+              "issue": "Single-seed pilot writes matrix_complete true despite checkpoint contract.",
+              "evidence_class": "controlled_fast_main_fixture"
+            },
+            {
+              "id": "A1-S4",
+              "severity": "P2",
+              "issue": "Standalone paired_summary repeats one physical pair when planned seeds duplicate.",
+              "evidence_class": "direct_counterexample"
+            }
+          ]
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "reviewer": "/root/accounting_task1_spec_review",
+          "evidence": "evidence/accounting-task1-spec-review/rereview/README.md",
+          "direct_unit_passed": 26,
+          "direct_self_check": "passed",
+          "direct_smoke_each_arm": {
+            "submitted": 20,
+            "completed": 17,
+            "cancelled": 3,
+            "attempts": 19
+          },
+          "original_findings_resolved": 4,
+          "remaining_findings": 0,
+          "execution_finished": true
+        }
+      ],
+      "current_revision_checks": {
+        "unit_passed": 29,
+        "focused_tests": 3,
+        "self_check": "passed",
+        "smoke": "completed_smoke",
+        "each_arm_completed": 17,
+        "each_arm_cancelled": 3,
+        "reserved_attempts": 20,
+        "actual_attempts": 20,
+        "evidence": "product/artifacts/accounting-ablation/quality-fix/README.md",
+        "no_efficiency_conclusion": true
+      },
+      "quality_review": {
+        "status": "passed",
+        "round": 2,
+        "reviewer": "/root/accounting_task1_quality_review",
+        "evidence": "evidence/accounting-task1-quality-review/rereview/README.md",
+        "original_probe_cases": 7,
+        "adjacent_cases": 26,
+        "remaining_findings": 0,
+        "source_files_unchanged": 59,
+        "retained_files_unchanged": 161,
+        "runtime_executed": false,
+        "execution_finished": true
+      },
+      "quality_reviews": [
+        {
+          "status": "changes_requested",
+          "round": 1,
+          "reviewer": "/root/accounting_task1_quality_review",
+          "evidence": "evidence/accounting-task1-quality-review/README.md",
+          "findings": [
+            {
+              "id": "Q1",
+              "severity": "important",
+              "issue": "Saved initial/final worker accounting or fingerprint contradictions are accepted on resume.",
+              "evidence_class": "copied_artifact_counterexample_no_runtime"
+            },
+            {
+              "id": "Q2",
+              "severity": "minor",
+              "issue": "NaN terminal timestamp is accepted as drain completion.",
+              "evidence_class": "copied_artifact_counterexample_no_runtime"
+            }
+          ],
+          "execution_finished": true
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "reviewer": "/root/accounting_task1_quality_review",
+          "evidence": "evidence/accounting-task1-quality-review/rereview/README.md",
+          "original_probe_cases": 7,
+          "adjacent_cases": 26,
+          "remaining_findings": 0,
+          "source_files_unchanged": 59,
+          "retained_files_unchanged": 161,
+          "runtime_executed": false,
+          "execution_finished": true
+        }
+      ]
+    },
+    {
+      "id": "accounting-task2",
+      "status": "done",
+      "stage": "spec_and_quality_passed",
+      "implementer": "/root/run_accounting_ablation",
+      "scope": "Five-seed reserved/actual paired quota measurement with independent correctness gate; no product source changes",
+      "plan": "docs/superpowers/plans/2026-09-12-accounting-ablation.md",
+      "hold_manifest": "product/artifacts/accounting-ablation/quality-fix/source-manifest.json",
+      "hold_archive": "product/artifacts/accounting-ablation/quality-fix/source-hold.tar.gz",
+      "binary": "product/target/native/release/llmgw",
+      "binary_sha256": "e16ba39c54fcec9bc5ce4fb4039d551dccdd5cdfd3bec9e0a7c412e58bd4364f",
+      "manifest": "product/artifacts/accounting-ablation/pilot.json",
+      "independent_auditor": "scripts/audit-accounting-results.py",
+      "next_action": "Accepted. Preserve measured artifacts; Native Task2 wizard can now use a separate target directory. No default accounting switch or broad efficiency claim.",
+      "runtime_handle": "product/artifacts/accounting-ablation/task2/full-runtime-handle.json",
+      "preflight": "product/artifacts/accounting-ablation/task2/preflight.json",
+      "invocation": "product/artifacts/accounting-ablation/task2/invocation.txt",
+      "log": "product/artifacts/accounting-ablation/task2/pilot-stdout-stderr.log",
+      "first_pair_gate": {
+        "status": "passed",
+        "runtime": "product/artifacts/accounting-ablation/task2/first-pair-verification.json",
+        "parent_audit": "evidence/accounting-ablation-first-pair-audit.json",
+        "negative_cases": "evidence/accounting-ablation-auditor-negative/summary.json",
+        "checkpoint": "evidence/accounting-ablation-first-pair-manifest.json",
+        "checkpoint_sha256": "2d279742a59f4c113535b90b8dcd31170b84963871bbf96b0e62f231ea8f09e4",
+        "fixed_completed": {
+          "reserved": 57,
+          "actual": 58
+        },
+        "one_pair_only": true,
+        "favorable_result_required": false,
+        "owned_runtime_zero_at_gate": true
+      },
+      "partial_audit": "evidence/accounting-first-two-pairs-audit.json",
+      "first_pair_queue_observation": "evidence/accounting-first-pair-queue-observation.json",
+      "runtime_owner": "/root/run_accounting_ablation",
+      "full_tool_session": 9302,
+      "full_benchmark_pid": 41950,
+      "current_completed_runs_at_update": 10,
+      "pilot_runtime_handle": "product/artifacts/accounting-ablation/task2/runtime-handle.json",
+      "full_invocation": "product/artifacts/accounting-ablation/task2/full-invocation.txt",
+      "full_log": "product/artifacts/accounting-ablation/task2/full-stdout-stderr.log",
+      "progress_observed_utc": "2026-09-12T16:46:28.316738+00:00",
+      "runtime_finished": true,
+      "owned_runtime": 0,
+      "parent_full_audit": "evidence/accounting-ablation-parent-audit.json",
+      "parent_runtime_check": "evidence/accounting-ablation-parent-runtime-hold-check.json",
+      "matrix_hold": "product/artifacts/accounting-ablation/task2/MATRIX_HOLD.md",
+      "matrix_verification": "product/artifacts/accounting-ablation/task2/matrix-verification.json",
+      "held_binary": "product/artifacts/accounting-ablation/task2/held-llmgw",
+      "implementer_status": "FINAL_HOLD",
+      "report": "reports/accounting-ablation-results.md",
+      "report_sha256": "67c360ba0f31093b3b02bc1c1cd8bf1da43836926734788e977dbfe52e222a44",
+      "final_hold": "product/artifacts/accounting-ablation/task2/TASK2_HOLD.md",
+      "final_verification": "product/artifacts/accounting-ablation/task2/task2-final-verification-reread.json",
+      "spec_review": {
+        "status": "passed",
+        "round": 2,
+        "reviewer": "/root/accounting_task2_spec_review",
+        "evidence": "evidence/accounting-task2-spec-review/rereview/README.md",
+        "remaining_findings": 0
+      },
+      "spec_reviews": [
+        {
+          "status": "changes_requested",
+          "round": 1,
+          "reviewer": "/root/accounting_task2_spec_review",
+          "evidence": "evidence/accounting-task2-spec-review/README.md",
+          "findings": [
+            {
+              "id": "A2-S1",
+              "severity": "P2",
+              "issue": "Report omits required subgroup timeout breakdown; long timeouts15/15 vs short10/0 must be separated by cutoff/drain/final."
+            }
+          ]
+        },
+        {
+          "status": "passed",
+          "round": 2,
+          "reviewer": "/root/accounting_task2_spec_review",
+          "evidence": "evidence/accounting-task2-spec-review/rereview/README.md",
+          "remaining_findings": 0
+        }
+      ],
+      "quality_review": {
+        "status": "passed",
+        "reviewer": "/root/accounting_task2_quality_review",
+        "evidence": "evidence/accounting-task2-quality-review/README.md",
+        "remaining_findings": 0,
+        "review_files_preserved": 108,
+        "direct_auditor_source_files": 58,
+        "held_source_files": 59
+      },
+      "current_report_hold": "product/artifacts/accounting-ablation/task2/TASK2_SPEC_REPORT_FIX_HOLD.md"
+    },
+    {
+      "id": "native-task2",
+      "status": "done",
+      "stage": "spec_and_quality_passed",
+      "implementer": "/root/implement_native_setup",
+      "runtime_owner": null,
+      "scope": "First-run native setup, typed draft and preview, default config path/bare CLI, offline and explicit network/inference diagnostics; client/autostart intents pending until later tasks.",
+      "plan": "docs/superpowers/plans/2026-09-12-native-experience.md",
+      "baseline_source_manifest": "product/artifacts/accounting-ablation/quality-fix/source-manifest.json",
+      "baseline_archive": "product/artifacts/accounting-ablation/quality-fix/source-hold.tar.gz",
+      "preserved_measured_binary": "product/artifacts/accounting-ablation/task2/held-llmgw",
+      "build_target": "product/target/native-task2",
+      "artifact_directory": "product/artifacts/native-task2",
+      "next_action": "Native Task3 ConfigPatch implementation started with fresh implementer.",
+      "initial_red_log": "product/artifacts/native-task2/setup-contract-red.log",
+      "implementer_progress": {
+        "initial_contract_passed_once": 10,
+        "current_complete": true,
+        "current_work": [],
+        "basis": "implementer progress, final source/tests not accepted",
+        "reported_focused_results": [
+          "initial setup contract 10/10 once",
+          "document preservation focused GREEN",
+          "explicit proxy and loopback bypass RED/GREEN",
+          "setup_contract expanded to 21 cases; final suite pending",
+          "invalid 2xx inference payload RED 2/2 then focused GREEN 3/3",
+          "initial actual macOS PTY 5/5; harness freshness and failure cleanup follow-up pending"
+        ]
+      },
+      "parent_read_only_preflight": [
+        "reports/native-wizard-preflight.md",
+        "reports/native-config-patch-preflight.md",
+        "reports/native-client-adapter-preflight.md",
+        "evidence/native-client-adapter-preflight.json",
+        "reports/native-packaging-preflight.md",
+        "evidence/native-task2-parent-linkage.json"
+      ],
+      "parent_source_feedback": [
+        "reject invalid URL/proxy rather than replacing or dropping input",
+        "distinguish output reservation bound from upstream output enforcement",
+        "use resolved console behavior and distinguish explicit cancel from SIGINT in PTY evidence",
+        "2xx HTTP receipt is not sufficient generation success evidence",
+        "PTY expect must consume fresh output; teardown must precede removing worker control state"
+      ],
+      "implementation_hold": {
+        "path": "product/artifacts/native-task2/final-hold.json",
+        "source_files": 68,
+        "source_manifest_sha256": "8ffc043b2e1da422e2cbe638443d9d8bd19e4116674379d68b2ecd31f2329254",
+        "source_archive_sha256": "1b705ee53f6a488fe3fb27e6402bcff2db5ef71bee8ed1ae8abad13911a045a5",
+        "release_binary_sha256": "8b33e86bcc7a612316dfb37a686fa768d3371d8fdcd8da7a88919ed5bcf4d56b",
+        "release_binary_bytes": 9287392,
+        "reported_tests": {
+          "all_targets": 246,
+          "setup_contract": 30,
+          "pty_cases": 7
+        },
+        "review_accepted": false
+      },
+      "parent_hold_check": "evidence/native-task2-parent-hold-check.json",
+      "execution_incident": "product/artifacts/native-task2/execution-incident.json",
+      "spec_review": {
+        "reviewer": "/root/native_task2_spec_review",
+        "status": "passed",
+        "evidence_directory": "evidence/native-task2-spec-review",
+        "evidence": "evidence/native-task2-spec-review/README.md",
+        "findings": 7,
+        "p1": 4,
+        "p2": 3,
+        "fresh_tests_passed": 74,
+        "native_pty_sessions": 8,
+        "source_drift": 0,
+        "protected_drift": 0,
+        "execution_finished": true,
+        "rereview": {
+          "status": "changes_required",
+          "evidence_directory": "evidence/native-task2-spec-review/rereview",
+          "evidence": "evidence/native-task2-spec-review/rereview/README.md",
+          "original_findings_fixed": [
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "F7"
+          ],
+          "open_findings": [
+            "F8"
+          ],
+          "fresh_tests_passed": 89,
+          "native_pty_sessions": 17,
+          "protected_files": 148,
+          "source_drift": 0,
+          "protected_drift": 0,
+          "execution_finished": true
+        },
+        "final_readme_sha256": "3b0b0318b9d064ae0a94474895f717c5dcf054f0e2afe2c81cc8371f7f93c573",
+        "finalization_note": "Reviewer reconciled provisional825c... to final3b0...: four source file/line-reference corrections during original finalization; findings/results unchanged. Current original artifacts frozen; chronology recorded in rereview only.",
+        "f8_rereview": {
+          "status": "passed",
+          "reviewer": "/root/native_task2_spec_review",
+          "evidence_directory": "evidence/native-task2-spec-review/rereview-f8",
+          "evidence": "evidence/native-task2-spec-review/rereview-f8/README.md",
+          "fresh_tests_passed": 76,
+          "native_pty_sessions": 10,
+          "source_files": 70,
+          "protected_files": 271,
+          "source_drift": 0,
+          "protected_drift": 0,
+          "execution_finished": true,
+          "readme_sha256": "08fe5d12ab2fd204d3db0253f14239d813f10acdaa8fb9690c867af78d4d072f"
+        }
+      },
+      "spec_fix_artifact_directory": "product/artifacts/native-task2/spec-fix",
+      "spec_fix_build_target": "product/target/native-task2-spec-fix",
+      "spec_fix_progress": {
+        "status": "FINAL_HOLD",
+        "execution_finished": true,
+        "review_accepted": false
+      },
+      "spec_fix_hold": {
+        "path": "product/artifacts/native-task2/spec-fix/final-hold.json",
+        "source_files": 70,
+        "source_manifest_sha256": "1ad4bd171021f1249b3e5a6fbdfd4377b55c4f87c055e2cfe6fe3594d8d1b55f",
+        "source_archive_sha256": "7183f33d9c4eff60a31f61aa44b5b0cddb860788c385149c60ccbb2f97eb1955",
+        "release": {
+          "path": "target/native-task2-spec-fix/release/llmgw",
+          "bytes": 9298000,
+          "sha256": "821973c23b30b62270a08b19db3b73399275c06d44f2d0d81526c7426fb91530"
+        },
+        "reported_all_targets": 255,
+        "reported_setup": 36,
+        "reported_lifecycle": 25,
+        "reported_pty": 7,
+        "windows_host_failure_model": 3,
+        "parent_check": "evidence/native-task2-spec-fix-parent-hold-check.json"
+      },
+      "f8_fix": {
+        "artifact_directory": "product/artifacts/native-task2/f8-fix",
+        "build_target": "product/target/native-task2-f8-fix",
+        "status": "FINAL_HOLD",
+        "execution_finished": true,
+        "review_accepted": "spec_only",
+        "hold": "product/artifacts/native-task2/f8-fix/final-hold.json",
+        "source_manifest_sha256": "2107b93a752ebcbefbd9f2214c1688f6c527883ba6e061cbc1fbaa80781b11cb",
+        "source_archive_sha256": "682f1dde419f2fa35ea4adadf1816b889e9c2b927ce6820282733b10cbec0b89",
+        "release": {
+          "path": "target/native-task2-f8-fix/release/llmgw",
+          "bytes": 9316432,
+          "sha256": "c890b6a498095bdba572d19b921b1865e48927af6807b767156f2e2f3a9ef1ba"
+        },
+        "reported_all_targets": 261,
+        "reported_focused": 95,
+        "reported_pty_sessions": 4,
+        "parent_check": "evidence/native-task2-f8-parent-hold-check.json"
+      },
+      "quality_review": {
+        "status": "passed",
+        "reviewer": "/root/native_task2_quality_review",
+        "evidence_directory": "evidence/native-task2-quality-review",
+        "evidence": "evidence/native-task2-quality-review/README.md",
+        "readme_sha256": "55265cf113515d96cf280d6cbeb96840f2fcc7e8edd60eceee30b7624177e549",
+        "findings": [
+          "Q1",
+          "Q2"
+        ],
+        "important": 2,
+        "fresh_tests_passed": 95,
+        "source_files": 70,
+        "protected_files": 317,
+        "source_drift": 0,
+        "protected_drift": 0,
+        "execution_finished": true,
+        "rereview": {
+          "status": "passed",
+          "evidence_directory": "evidence/native-task2-quality-review/rereview",
+          "evidence": "evidence/native-task2-quality-review/rereview/README.md",
+          "fresh_tests_passed": 79,
+          "native_pty_sessions": 10,
+          "source_files": 71,
+          "protected_files": 426,
+          "source_drift": 0,
+          "protected_drift": 0,
+          "execution_finished": true,
+          "readme_sha256": "471bc4324499b0a5449868bd018114d1517bbc2fea3607099fb76a78bc2577ec"
+        }
+      },
+      "quality_fix": {
+        "status": "FINAL_HOLD",
+        "artifact_directory": "product/artifacts/native-task2/quality-fix",
+        "build_target": "product/target/native-task2-quality-fix",
+        "execution_finished": true,
+        "review_accepted": true,
+        "hold": "product/artifacts/native-task2/quality-fix/final-hold.json",
+        "source_manifest_sha256": "3495daf57907d5e4472513aaef5131cd6bf418fa58d369041b2d0484454ca603",
+        "source_archive_sha256": "b221562a379edbd6cfe1e6faad77a1176ac0622774936a479d7734a190a6cd99",
+        "release": {
+          "path": "target/native-task2-quality-fix/release/llmgw",
+          "bytes": 9335616,
+          "sha256": "aa4015d5b34426b5d8e502d8cfbb2f4af2757e16a7cd2094b43e219c974cb3a6"
+        },
+        "reported_all_targets": 264,
+        "reported_setup": 42,
+        "reported_lifecycle": 26,
+        "reported_pty_sessions": 8,
+        "parent_check": "evidence/native-task2-quality-fix-parent-hold-check.json"
+      },
+      "accepted_source_manifest": "product/artifacts/native-task2/quality-fix/source-manifest.json",
+      "accepted_hold": "product/artifacts/native-task2/quality-fix/final-hold.json",
+      "limitations": [
+        "Native Task2 acceptance is macOS owned fixtures and source scope; Windows/Linux real runtime unverified.",
+        "User client files and OS login registration untouched; adapters, ConfigPatch and installer are later tasks.",
+        "No new RSS/latency or performance superiority measurement."
+      ]
+    },
+    {
+      "id": "native-task3",
+      "status": "done",
+      "stage": "accepted",
+      "implementer": "/root/implement_native_patch",
+      "runtime_owner": null,
+      "scope": "Focused client ConfigPatch transaction, private before-images/journal, preview hash, owned-key restore and conflict preservation; adapter CLI wiring remains Task4.",
+      "plan": "docs/superpowers/plans/2026-09-12-native-experience.md",
+      "baseline_source_manifest": "product/artifacts/native-task2/quality-fix/source-manifest.json",
+      "baseline_archive": "product/artifacts/native-task2/quality-fix/source-hold.tar.gz",
+      "baseline_release_sha256": "aa4015d5b34426b5d8e502d8cfbb2f4af2757e16a7cd2094b43e219c974cb3a6",
+      "build_target": "product/target/native-task3-nonfinite-fix",
+      "artifact_directory": "product/artifacts/native-task3",
+      "next_action": "NativeTask4 implements typed adapters and actual installed-client fixtures on this accepted library.",
+      "preflight": [
+        "reports/native-config-patch-preflight.md",
+        "reports/native-client-adapter-preflight.md"
+      ],
+      "implementer_progress": {
+        "current_complete": false,
+        "basis": "Implementer update plus parent read-only inspection of intermediate logs; not final acceptance",
+        "intermediate_patch_tests_passed": 14,
+        "dependency_change": "jsonc-parser0.33.1 only; cst+serde_json features; existing retained dependencies unchanged at parent snapshot",
+        "reported_remaining": [
+          "Final token privacy snapshot/ACL check",
+          "Focused document/storage modules and shared Windows replacement helper",
+          "Interrupted journal and platform contract tests",
+          "Appropriate final regression/build checks and immutable HOLD"
+        ],
+        "parent_source_feedback": [
+          "Strict JSON oracle beyond CST ParseOptions",
+          "Retain applied ownership across failed repeated reconnect",
+          "Canonical cooperating resource lock across journals",
+          "Bind token privacy to final replacement snapshot",
+          "Separate concrete document/storage/transaction responsibilities"
+        ],
+        "historical_snapshot": true
+      },
+      "initial_hold": {
+        "status": "DONE_WITH_CONCERNS",
+        "review_accepted": false,
+        "source_files": 79,
+        "source_manifest_sha256": "6cdfbec0b41839689364345e4b973a2f6af9409234fc5e2189f77f4144873e9a",
+        "source_archive_sha256": "17c82d6aec084de464f4ae4b1eca850772c46f195d55997dcd534b0b15b4451d",
+        "hold": "product/artifacts/native-task3/final-hold.json",
+        "hold_sha256": "601a465a47c60418ef756edccaabc484e5afce9c1c8323e41fea754e03a22973",
+        "full_tests": 283,
+        "patch_debug": 19,
+        "patch_release": 19,
+        "parent_check": "evidence/native-task3-parent-hold-check.json"
+      },
+      "parent_correctness_findings": [
+        {
+          "id": "N3-C1",
+          "evidence_class": "direct_owned_library_driver",
+          "issue": "Same physical resource alias bypasses held llmgw lock; process temp directory changes lock namespace.",
+          "evidence": "evidence/native-task3-parent-lock-probe/result.json"
+        }
+      ],
+      "lock_fix_artifact_directory": "product/artifacts/native-task3/lock-fix",
+      "evidence_limitations": [
+        "An early provisional source capture and pre-ACL final logs were refreshed in place before final HOLD; original bytes unavailable for those snapshots. Current initial FINAL_HOLD and superseded/pre-acl are preserved."
+      ],
+      "lock_fix_progress": {
+        "basis": "implementer report, final HOLD and independent review pending",
+        "focused_contracts_passed": 25,
+        "reported_changed_paths": [
+          "src/config_patch/storage.rs",
+          "src/config_patch/apply.rs",
+          "src/config_patch/restore.rs",
+          "tests/patch_contract.rs"
+        ],
+        "behavior": "Normalized supported resource identity, stable adjacent fs4 lock independent of temp/journal dirs, consistent apply/restore/journal ownership; unresolved aliases through missing parents refused.",
+        "checks_in_progress": [
+          "fmt",
+          "locked check",
+          "clippy",
+          "full tests",
+          "release"
+        ]
+      },
+      "lock_fix": {
+        "status": "FINAL_HOLD",
+        "review_accepted": false,
+        "execution_finished": true,
+        "hold": "product/artifacts/native-task3/lock-fix/final-hold.json",
+        "hold_sha256": "903a07a420fc899e756d890703fad42264adca179d969094a288d598d6782f2d",
+        "source_manifest_sha256": "f73a434551c85776950dd76794a86e14f05846dc366609f827f28a204613060c",
+        "source_archive_sha256": "1b4b96aa32e2c4414eb52aaf87ed2382cb40d310974b01adef63c90b20bbbe2e",
+        "source_files": 79,
+        "full_tests": 289,
+        "patch_debug": 25,
+        "patch_release": 25,
+        "binaries": {
+          "release": {
+            "path": "target/native-task3-lock-fix/release/llmgw",
+            "bytes": 9314160,
+            "sha256": "6b7a35b2b340037891cdf77a7b1c50fadfcc0767677bfcf7ec1fb8595a7c0598"
+          },
+          "debug": {
+            "path": "target/native-task3-lock-fix/debug/llmgw",
+            "bytes": 28148632,
+            "sha256": "9a5fa1d6754c4cb88061434d253429e0b89586b5eedf212de0277fa83227da91"
+          }
+        },
+        "parent_check": "evidence/native-task3-lock-fix-parent-hold-check.json",
+        "parent_counterexample_rerun": "evidence/native-task3-parent-lock-rerun/result.json"
+      },
+      "spec_review": {
+        "status": "passed",
+        "agent": "/root/native_task3_spec_review",
+        "evidence_directory": "evidence/native-task3-spec-review",
+        "interim_findings": [
+          {
+            "id": "created_file_reconnect",
+            "basis": "reviewer direct held-library probe",
+            "issue": "Create, user adds unrelated field, reconnect then restore deletes the file."
+          },
+          {
+            "id": "overlapping_reconnect_ownership",
+            "basis": "reviewer direct held-library probe",
+            "issue": "Repeated descendant then ancestor edits leave gateway value but report restored without conflict."
+          },
+          {
+            "id": "unstarted_resource_omitted",
+            "basis": "reviewer direct held-library probe",
+            "issue": "Three-resource partial transaction omits never-started third resource."
+          }
+        ],
+        "interim_evidence": "evidence/native-task3-spec-review/probe-result.json",
+        "evidence": "evidence/native-task3-spec-review/README.md",
+        "hold": "evidence/native-task3-spec-review/FINAL_HOLD.json",
+        "execution_finished": true,
+        "findings_count": 4,
+        "behavior_counterexamples": 3,
+        "required_test_gaps": 1,
+        "existing_contracts_passed": 25,
+        "rereview": {
+          "status": "changes_requested",
+          "evidence_directory": "evidence/native-task3-spec-review/rereview",
+          "interim_findings": [
+            {
+              "severity": "P1",
+              "basis": "reviewer direct new held-library probe",
+              "issue": "Failed/no-write absent-file row retains created=true; user creates file, retry applies, restore deletes user file.",
+              "evidence": "evidence/native-task3-spec-review/rereview/probe-result.json"
+            }
+          ],
+          "resolved": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "open": [
+            "S5"
+          ],
+          "severity": "P1",
+          "evidence": "evidence/native-task3-spec-review/rereview/README.md",
+          "hold_sha256": "713aa191d0ab9ce471b86cde8f2b5dcb1d85137f492cb452e852064743c3a377",
+          "contracts_passed": 35,
+          "execution_finished": true
+        },
+        "rereview_s5": {
+          "status": "passed",
+          "evidence_directory": "evidence/native-task3-spec-review/rereview-s5",
+          "evidence": "evidence/native-task3-spec-review/rereview-s5/README.md",
+          "hold_sha256": "851e85d5091747d37c7b94c14d8ccec1807eb5ba90e7b7b459d94c7ee0fc7e09",
+          "readme_sha256": "d5d4e77b14db53c5fed4cc3255b0bd12afd04c4d7c957ae3992b25c9fb869435",
+          "contracts_passed": 38,
+          "independent_probes_passed": 4,
+          "source_files": 79,
+          "protected_files": 426,
+          "additional_protected": 206,
+          "execution_finished": true
+        },
+        "final_evidence": "evidence/native-task3-spec-review/final-confirmation/README.md",
+        "resolved_findings": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5"
+        ],
+        "final_confirmation": {
+          "status": "passed",
+          "agent": "/root/native_task3_spec_review",
+          "evidence_directory": "evidence/native-task3-spec-review/final-confirmation",
+          "execution_finished": true,
+          "independent_probes_passed": 4,
+          "source_files": 79,
+          "protected_files": 426,
+          "additional_protected": 357,
+          "evidence": "evidence/native-task3-spec-review/final-confirmation/README.md",
+          "hold_sha256": "2effc0f1adc2eef043b5f6a2519f04c87ecc1749656c8560ef2d66eaacf268d1",
+          "readme_sha256": "da05eec281a733735b1f1f7b17a1f76b573d4ddb268d77abae4a823f7438e5ee"
+        }
+      },
+      "spec_fix": {
+        "status": "FINAL_HOLD",
+        "artifact_directory": "product/artifacts/native-task3/spec-fix",
+        "build_target": "product/target/native-task3-spec-fix",
+        "intermediate_checks": {
+          "basis": "parent read-only inspection of implementer logs; no final HOLD or acceptance yet",
+          "focused_passed": 35,
+          "full_passed": 299,
+          "full_failed": 0,
+          "full_top_level_result_rows": 15,
+          "fmt": "passed",
+          "check_all_targets": "passed",
+          "clippy_all_targets": "passed",
+          "independent_spec_rereview": "pending",
+          "evidence_directory": "product/artifacts/native-task3/spec-fix"
+        },
+        "execution_finished": true,
+        "review_accepted": false,
+        "hold": "product/artifacts/native-task3/spec-fix/final-hold.json",
+        "hold_sha256": "7e549e645da2f86252a61b8d6223b586d213f3604a80494e885485e9f6ffe799",
+        "source_manifest_sha256": "3239733f0fda5ec89f6aff138a7cf4ceba92f915dcb472dbc6d70e2581967af0",
+        "source_archive_sha256": "c01ffa1ef1f3f7ba514b93a3a2cbe7ea2c67d92cfffdfbd8eced973f3fd055f3",
+        "binaries": {
+          "release": {
+            "path": "target/native-task3-spec-fix/release/llmgw",
+            "bytes": 9314064,
+            "sha256": "4472df4f3fb68000cf31d4eb33edc4fa9faf9176b0fb04b18db3a0d1184573e4"
+          },
+          "debug": {
+            "path": "target/native-task3-spec-fix/debug/llmgw",
+            "bytes": 28148600,
+            "sha256": "a0e5572d4010d338c858acc64d2ef20e3a9355a496efd988803eaa4b3429e706"
+          },
+          "debug_rlib": {
+            "path": "target/native-task3-spec-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+            "bytes": 47283208,
+            "sha256": "4cbd76271788fd41f9a0f2683c38a15171105cde5b0a0d456f8f231c42982b44"
+          }
+        },
+        "full_tests": 299,
+        "patch_debug": 35,
+        "patch_release": 35,
+        "adapted_probes": 3,
+        "parent_check": "evidence/native-task3-spec-fix-parent-hold-check.json",
+        "readme_sha256": "f208be381d30fb32cbf6ee16c5fe71ae2602cee2e10842c09a704895bf339b26"
+      },
+      "unowned_fix": {
+        "status": "FINAL_HOLD",
+        "artifact_directory": "product/artifacts/native-task3/unowned-fix",
+        "build_target": "product/target/native-task3-unowned-fix",
+        "scope": "Initialize truly unowned resource metadata from first actual protected preimage; preserve existing ownership.",
+        "execution_finished": true,
+        "review_accepted": false,
+        "hold": "product/artifacts/native-task3/unowned-fix/final-hold.json",
+        "hold_sha256": "863232acda87ca141cc2c4b62a44e31ff1f596eda4d049261aeb6b7b7b3d0e3f",
+        "source_manifest_sha256": "a73f9e5d7b587bce40ab7c6d4a70135540009c73cd657d0a3180bb8064a185bb",
+        "source_archive_sha256": "7fba05262ce872d1e845f8b9c32345ea71b13fdd6042077889354d858bb12f89",
+        "binaries": {
+          "release": {
+            "path": "target/native-task3-unowned-fix/release/llmgw",
+            "bytes": 9313936,
+            "sha256": "c325b5ce341626e6b57585a76f2d8cc026f5db3199b651b7c98cd0f6cc2c29a5"
+          },
+          "debug": {
+            "path": "target/native-task3-unowned-fix/debug/llmgw",
+            "bytes": 28150952,
+            "sha256": "f1252148b2efc1edd67bf51c7210a7f373ee9c30f035bbcf6448da5beb15acc2"
+          },
+          "debug_rlib": {
+            "path": "target/native-task3-unowned-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+            "bytes": 47284488,
+            "sha256": "0b05c38f6d2588af3899ff79c2afa31497b8f3d485421869fcde91fab755c612"
+          }
+        },
+        "full_tests": 302,
+        "patch_debug": 38,
+        "patch_release": 38,
+        "adapted_probes": 4,
+        "parent_check": "evidence/native-task3-unowned-fix-parent-hold-check.json"
+      },
+      "quality_review": {
+        "status": "passed",
+        "agent": "/root/native_task3_quality_review",
+        "evidence_directory": "evidence/native-task3-quality-review",
+        "evidence": "evidence/native-task3-quality-review/README.md",
+        "hold_sha256": "e3b1733d7f9589597b63f85b729572b59f34d281c45e31ea61425e40d18dfe8f",
+        "readme_sha256": "b09da38888f56d7f230bf8e7f86f629d3d898dd0056aad641ef827a7e156c847",
+        "findings": [
+          "Q1 absent case-equivalent paths have different hashed locks",
+          "Q2 owned TOML datetime restore changes native type"
+        ],
+        "independent_probes_passed": 2,
+        "independent_probes_failed": 2,
+        "existing_contracts_passed": 38,
+        "execution_finished": true,
+        "rereview": {
+          "status": "changes_requested",
+          "agent": "/root/native_task3_quality_review",
+          "evidence_directory": "evidence/native-task3-quality-review/rereview",
+          "execution_finished": true,
+          "resolved": [
+            "Q1",
+            "Q2"
+          ],
+          "findings": [
+            "Q3 owned TOML nan/+inf/-inf cannot restore after successful apply"
+          ],
+          "independent_probes_passed": 7,
+          "independent_probes_failed": 1,
+          "existing_contracts_passed": 46,
+          "readme_sha256": "f2971c917e7d575486c46443ad952fc71649394bc25e4c73eb9b7dea8c16f14d",
+          "hold_sha256": "1ab40f45d354bba2cc2afc9cf54c8325e9148293e0e7844de10fd72da5021f14"
+        },
+        "rereview_q3": {
+          "status": "passed",
+          "agent": "/root/native_task3_quality_review",
+          "evidence_directory": "evidence/native-task3-quality-review/rereview-q3",
+          "execution_finished": true,
+          "independent_probes_passed": 10,
+          "existing_contracts_passed": 49,
+          "source_files": 79,
+          "protected_files": 426,
+          "additional_protected": 357,
+          "readme_sha256": "8e6bafe074a25aeed5e0dc183fdc6c80a0cfc6735f295f30815ea0f19650fcb5",
+          "hold_sha256": "cd986ecd22743dc9e70fdc183887d32331e5a7925e08075696a2053719528548"
+        },
+        "final_evidence": "evidence/native-task3-quality-review/rereview-q3/README.md",
+        "resolved_findings": [
+          "Q1",
+          "Q2",
+          "Q3"
+        ]
+      },
+      "quality_fix": {
+        "status": "FINAL_HOLD",
+        "artifact_directory": "product/artifacts/native-task3/quality-fix",
+        "build_target": "product/target/native-task3-quality-fix",
+        "execution_finished": true,
+        "review_accepted": false,
+        "hold": "product/artifacts/native-task3/quality-fix/final-hold.json",
+        "hold_sha256": "3b7912899d00f9164f447fc293909f570d9a8c0f101c23d631bd5f930e8d86b9",
+        "source_manifest_sha256": "375024c646828619b8ddf5d40955db78f416fef69cc14be3b720c727fe2d4e41",
+        "source_archive_sha256": "32c628f0fceb06d3b731985d45137b27f6cd76b34a838e8a39611dc28131b135",
+        "binaries": {
+          "release": {
+            "path": "target/native-task3-quality-fix/release/llmgw",
+            "bytes": 9315184,
+            "sha256": "8b6fde7b380d00568b3ce6fbcc2ea21b577cfdc50d730a01955355d8ca16b233"
+          },
+          "debug": {
+            "path": "target/native-task3-quality-fix/debug/llmgw",
+            "bytes": 28150984,
+            "sha256": "15eac52098867407b4f06ed3c39e3fc87b69ecd67c063979da2852fac3682e65"
+          },
+          "debug_rlib": {
+            "path": "target/native-task3-quality-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+            "bytes": 47457624,
+            "sha256": "2dfb2de4ff95d0d4909dce3d342bf9ebd54422c2b4ad25c39eb46cf9c94d31a7"
+          }
+        },
+        "full_tests": 310,
+        "patch_debug": 46,
+        "patch_release": 46,
+        "adapted_probes": 4,
+        "parent_check": "evidence/native-task3-quality-fix-parent-hold-check.json"
+      },
+      "nonfinite_fix": {
+        "status": "FINAL_HOLD",
+        "artifact_directory": "product/artifacts/native-task3/nonfinite-fix",
+        "build_target": "product/target/native-task3-nonfinite-fix",
+        "execution_finished": true,
+        "review_accepted": true,
+        "hold": "product/artifacts/native-task3/nonfinite-fix/final-hold.json",
+        "hold_sha256": "4bec8201c2e0b02c08815a61a907d8dbcbe5a2f9140acf33fc296ecec83aa313",
+        "source_manifest_sha256": "68535b446b76c5f5f5fdf726f86232eb831b250340f3f5c5a9ccc58ac7e4c391",
+        "source_archive_sha256": "7fceb9632164aa4709791b98ecd114a0cf9ce624fb38ef784c6ca7354d98146a",
+        "binaries": {
+          "release": {
+            "path": "target/native-task3-nonfinite-fix/release/llmgw",
+            "bytes": 9315184,
+            "sha256": "8b6fde7b380d00568b3ce6fbcc2ea21b577cfdc50d730a01955355d8ca16b233"
+          },
+          "debug": {
+            "path": "target/native-task3-nonfinite-fix/debug/llmgw",
+            "bytes": 28152520,
+            "sha256": "861d143a9ec4f94f497bf1f611b9e00ab5134a8b40358d16dbbd40520309bece"
+          },
+          "debug_rlib": {
+            "path": "target/native-task3-nonfinite-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+            "bytes": 47394232,
+            "sha256": "7adb91e195f05aa349401d7ee1d36b3a984af664e0fb012ee5245880f01616f2"
+          }
+        },
+        "full_tests": 313,
+        "patch_debug": 49,
+        "patch_release": 49,
+        "adapted_probes": 8,
+        "parent_check": "evidence/native-task3-nonfinite-fix-parent-hold-check.json"
+      },
+      "accepted_at": "2026-09-12T23:25:15.034549+00:00"
+    },
+    {
+      "id": "native-task4",
+      "status": "done",
+      "stage": "accepted",
+      "implementer": "/root/implement_native_clients",
+      "runtime_owner": null,
+      "scope": "Thin Pi/Claude/Codex connect/disconnect adapters, setup/CLI integration, concrete previews, desired readiness before client changes and actual installed-client fixtures.",
+      "plan": "docs/superpowers/plans/2026-09-12-native-experience.md",
+      "baseline_source_manifest": "product/artifacts/native-task3/nonfinite-fix/source-manifest.json",
+      "baseline_archive": "product/artifacts/native-task3/nonfinite-fix/source-hold.tar.gz",
+      "build_target": "product/target/native-task4",
+      "artifact_directory": "product/artifacts/native-task4",
+      "preflight": [
+        "reports/native-client-adapter-preflight.md",
+        "reports/native-client-acceptance-map.md"
+      ],
+      "next_action": "Same implementer fixes Q1/Q2 in new target/phase, same QUALITY rereviews then same SPEC confirms final source before Task5.",
+      "implementer_progress": {
+        "basis": "Implementer progress report, not final HOLD or acceptance",
+        "reported_versions": {
+          "pi": "0.84.2",
+          "claude": "2.1.63",
+          "codex": "0.154.0"
+        },
+        "intermediate_client_tests": {
+          "passed": 8,
+          "failed": 1
+        },
+        "finding": "Pi leaf removal leaves an empty provider rejected by installed Pi.",
+        "approved_narrow_decisions": [
+          "LocalDataTokenObject typed object ownership with full local-token privacy/hash/redaction checks; no unrelated provider adoption",
+          "Successful first setup continues into the same concrete client-preview/apply flow in the same invocation; SaveOnly/cancel/unsupported/failure remains pending."
+        ]
+      },
+      "parent_integration_notes": {
+        "at": "2026-09-13T00:25:33.852400+00:00",
+        "status": "implementation in progress; not independent acceptance",
+        "reported_progress": [
+          "11 client contracts passed in an intermediate run",
+          "Pi installed driver attempt4 reported actual tool roundtrip and restored reload",
+          "desired gateway fingerprint plus client patch hash bound before activation",
+          "fixed route added via existing SetupDraft; auth forward refused"
+        ],
+        "decisions": [
+          "Codex dedicated whole-provider token object allowed under existing narrow type",
+          "No new parent-pruning flag or journal API; validate actual profile loading with negative control",
+          "Interactive preview confirmation uses internally retained exact hash; no manual 64-character transcription; noninteractive apply hash remains required"
+        ],
+        "pending": [
+          "final full regression/static checks",
+          "final frozen-binary installed driver checks and immutable capture",
+          "independent SPEC then QUALITY"
+        ],
+        "confirmed_red": {
+          "path": "product/artifacts/native-task4/integration-fix/reconnect-object-attempt1.log",
+          "result": "0 passed / 1 failed: reconnect accepted a user-modified owned provider object",
+          "boundary": "parent read raw test log; no parent runtime execution",
+          "next": "same implementer fixes before review"
+        },
+        "observed_focused_green": {
+          "path": "product/artifacts/native-task4/integration-fix/client-profiles-green-attempt4.log",
+          "passed": 17,
+          "failed": 0,
+          "source_status": "still mutable; not final HOLD"
+        },
+        "observed_codex_driver": {
+          "path": "product/artifacts/native-task4/integration-fix/codex-installed-wire-attempt3.json",
+          "installed_version": "0.154.0",
+          "passed": true,
+          "upstream_attempts": 2,
+          "named_profile_parse_negative_control": true,
+          "tool": "exec_command synthetic file read with exact result in followup",
+          "gateway_off": "bounded timeout expected failure; upstream 0; excluded from positive count",
+          "disconnect_reload": true,
+          "limitation": "intermediate driver artifact, not final frozen build or independent review",
+          "environment_limit": "Source inspection: temp HOME/CODEX_HOME and removal of two API-key variables for exec, but remaining parent env inherited; full auth/helper/proxy isolation not established for this intermediate attempt. No credential exposure is inferred."
+        },
+        "observed_python_green": {
+          "path": "product/artifacts/native-task4/integration-fix/python-focused-attempt1.log",
+          "passed": 7,
+          "failed": 0
+        },
+        "observed_latest_installed": [
+          {
+            "client": "Claude",
+            "version": "2.1.63",
+            "artifact": "product/artifacts/native-task4/integration-fix/claude-installed-wire-attempt1.json",
+            "passed": true,
+            "upstream_attempts": 2,
+            "scope": "allowlisted isolated synthetic fixture; exact Read result in followup; off bounded timeout/upstream0"
+          },
+          {
+            "client": "Codex",
+            "version": "0.154.0",
+            "artifact": "product/artifacts/native-task4/integration-fix/codex-installed-wire-attempt5.json",
+            "passed": true,
+            "upstream_attempts": 2,
+            "scope": "allowlisted isolated synthetic fixture; observed exec_command and exact result; off bounded timeout/upstream0"
+          }
+        ],
+        "final_self_review_questions": [
+          {
+            "basis": "source inspection, runtime reproduction pending",
+            "question": "Does first setup honor preexisting native config-dir env when accepting defaults, and disclose a deliberately different explicit location for later client launch?"
+          },
+          {
+            "basis": "driver injects synthetic ANTHROPIC_API_KEY outside generated Claude settings",
+            "question": "Can installed fresh Claude start from header-only generated profile, or does the product need an explicit reviewed placeholder/manual-auth pending step?"
+          }
+        ],
+        "observed_full_test": {
+          "path": "product/artifacts/native-task4/integration-fix/full-test-final.log",
+          "passed": 332,
+          "failed": 0,
+          "scope": "current pre-HOLD source; final self-review questions outstanding"
+        },
+        "final_self_review_resolution": {
+          "source": "implementer report plus parent raw artifact inspection",
+          "native_directory": "native-setup-env-default-attempt2.json selected_pi_save_and_start.native_environment_default_honored=true",
+          "claude_before": "claude-header-control-attempt1.json profile_load.header_only_without_placeholder: exit1, unsupported, upstream0",
+          "claude_after": "claude-generated-placeholder-attempt2.json: generated reviewed public placeholder, no driver auth env; exit0, two upstream requests, typed Read result and stripped upstream auth",
+          "state": "final checks will be repeated into new artifact names before HOLD"
+        }
+      },
+      "spec_reviewer": "/root/native_task4_spec_review",
+      "final_handoff": {
+        "path": "product/artifacts/native-task4/integration-fix/final-hold.json",
+        "sha256": "ffb41a4b4c170d9884092ec4bdcf5d040dd55b68d58bb1acab35cf69e88a9d54",
+        "source_count": 88,
+        "source_manifest_sha256": "b2318a335b58914eb3f44dac22f004ffa0e680e2889869047c3a4b520f6adbb1",
+        "source_archive_sha256": "3cf0aa370b05defa3d5cf8304bc6a1b9e7935a8bd13d21589573b4e601bb62c3",
+        "release_bytes": 9932352,
+        "release_sha256": "c7258f5109882596b90d33d479187093aa2ef47dd42fb64e47e7395ddfe06355",
+        "full_rust": 332,
+        "release_client_tests": 17,
+        "python_tests": 7,
+        "installed_clients": [
+          "Pi0.84.2",
+          "Claude2.1.63",
+          "Codex0.154.0"
+        ],
+        "all_three_synthetic_wire_roundtrips": true,
+        "selected_setup_native_environment_default": true,
+        "parent_audit": "evidence/native-task4-parent-hold-check.json",
+        "parent_audit_passed": true,
+        "accepted": false,
+        "limits": [
+          "Mac only; no new latency/RSS",
+          "Claude discovery unsupported; Codex catalog unverified",
+          "Claude/Codex off controls timed out at8s/upstream0, not positive successes"
+        ]
+      },
+      "spec_review_progress": {
+        "status": "FINAL_HOLD SPEC_FAIL; ownership released",
+        "reviewer": "/root/native_task4_spec_review",
+        "runtime_owner": null,
+        "evidence": "evidence/native-task4-spec-review/README.md",
+        "confirmed": "Native config-dir override writes local token into a Git-tracked project/.claude/settings.json in an owned synthetic fixture",
+        "source": "product/src/clients/claude.rs user-private fallback branch",
+        "additional_question": "Parent-directory symlink observation is being assessed against actual resolved scope and accepted generic ConfigPatch canonicalization; no blanket alias prohibition inferred",
+        "next": "Same implementer corrects actual native Claude target scope; preserve safe canonical aliases and created-file user-edit reporting.",
+        "final_hold": {
+          "path": "evidence/native-task4-spec-review/FINAL_HOLD.json",
+          "sha256": "4c78c18b3d9743ac887bd5b00cbf5261a9a9585e7347f0044653adcccb89fdb3",
+          "readme_sha256": "8279235f63750b3b3c2b82aebe60d39dae80ad5b09dc09904cd7dc82f46c87e7",
+          "confirmed_findings": [
+            "SPEC-1"
+          ],
+          "positive_unique_tests": 3,
+          "protected_entries": 1066,
+          "drift": 0,
+          "fresh_cli_or_installed_clients": false
+        },
+        "rereview": {
+          "status": "passed",
+          "agent": "/root/native_task4_spec_review",
+          "evidence_directory": "evidence/native-task4-spec-review/rereview-spec1",
+          "scope": "Original SPEC-1 plus bounded adjacent scope/state checks against new held source and binary",
+          "execution_finished": true,
+          "evidence": "evidence/native-task4-spec-review/rereview-spec1/README.md",
+          "readme_sha256": "ff61b3e5619edccb56c812bcd39fe4122d23a806f88ef8e233454190519161ea",
+          "hold_sha256": "65132189e7c31c6d0853cfe5583f680accc159a5c617b68794f27293371f84eb",
+          "independent_named_tests": 8,
+          "protected_entries": 1134,
+          "drift": 0
+        }
+      },
+      "spec_fix": {
+        "status": "FINAL_HOLD",
+        "build_target": "product/target/native-task4-spec-fix",
+        "artifact_directory": "product/artifacts/native-task4/spec-fix",
+        "scope": "Validate resolved native Claude config target against shared/tracked project restriction before activation or mutation.",
+        "checkpoint": {
+          "at": "2026-09-13T01:27:29.749671+00:00",
+          "basis": "Parent read raw RED and GREEN logs; source still mutable; no acceptance",
+          "red": "native-scope-red.log: tracked-target prepare unexpectedly accepted; 1 pass, 1 failed",
+          "green": "claude-scope-focused-green-attempt2.log: 9 passed, 0 failed",
+          "scope": "Native canonical target + tracked/ignore guards, repeated at pre-activation/pre-write; ordinary non-repo homes do not invoke Git; CLI tracked target leaves gateway/runtime/journal/client unchanged",
+          "next": "Final full/static/focused/Claude checks and immutable HOLD"
+        },
+        "unreproduced_concern": {
+          "observation": "One macOS ACL-path EINVAL during disconnect of the synthetic journal; exact cause unconfirmed",
+          "failed_log": "product/artifacts/native-task4/spec-fix/claude-scope-focused-final2.log",
+          "investigation_log": "product/artifacts/native-task4/spec-fix/claude-journal-einval-repro-attempt.log",
+          "implementer_report": "Same test passed isolation, 20 sequential repeats, focused9 and full suite. No runtime retry or masking added. Exact failing syscall unconfirmed.",
+          "disposition": "Retain concern for fresh QUALITY; not declared resolved solely from subsequent passes"
+        },
+        "execution_finished": true,
+        "review_accepted": false,
+        "hold": "product/artifacts/native-task4/spec-fix/final-hold-v2.json",
+        "hold_sha256": "703e0b6b4904890f6f3e3dbe873fce6ee31f9f108442718f397724d55ea67583",
+        "readme": "product/artifacts/native-task4/spec-fix/README-v2.md",
+        "source_manifest_sha256": "ffe2eaae543808401e51105cd948f071d7f73170e3c4b86c9253b7221c9a498f",
+        "source_archive_sha256": "a8282024113d4da65b07642df98f1a5b093fcc941689e40c158f13f1763a4e33",
+        "release_sha256": "4414957b603bc04d77cb55275d5ca335477645159c2509735ce84b3cd8013801",
+        "release_bytes": 9935696,
+        "full_rust": 336,
+        "release_profiles": 21,
+        "python_tests": 7,
+        "parent_audit": "evidence/native-task4-spec-fix-parent-hold-check.json"
+      },
+      "quality_review": {
+        "status": "changes_requested",
+        "agent": "/root/native_task4_quality_review",
+        "evidence_directory": "evidence/native-task4-quality-review",
+        "scope": "Full Task4 delta against accepted Task3; independent quality, targeted runtime checks, retained unreproduced ACL-path EINVAL concern",
+        "checkpoint": {
+          "at": "2026-09-13T01:58:36.057587+00:00",
+          "basis": "Independent reviewer progress report; review still owns runtime, final report pending",
+          "confirmed_findings": [
+            "Q1 cached authenticated readiness survives interactive confirmation even after owned off, so client apply reports success while stopped",
+            "Q2 retained Pi/Codex prepared reconnect survives journal retirement and can overwrite recreated provider despite fresh prepare refusing it"
+          ],
+          "reported_positive_controls": [
+            "normal reconnect/restore",
+            "bounded journal/resource-publication failure retries"
+          ],
+          "next": "Complete bounded review/HOLD and release; same implementer fixes in new immutable phase"
+        },
+        "execution_finished": true,
+        "confirmed_findings": [
+          "Q1 stale post-confirm readiness",
+          "Q2 retained Pi/Codex reconnect plan bypasses retired ownership"
+        ],
+        "evidence": "evidence/native-task4-quality-review/README.md",
+        "readme_sha256": "253ce91799a61028a40740a84f1a0a6c2b474a003a18760549ab30a935c1526f",
+        "hold_sha256": "f22ba79e87a3a5e5d87bf730340c7827e3637a9c5298ac03c4bf109658357103",
+        "fresh_pty_runs": 3,
+        "fresh_named_tests": {
+          "passed": 3,
+          "failed": 2
+        },
+        "protected_entries": 1151,
+        "drift": 0,
+        "rereview": {
+          "status": "passed",
+          "owner": "/root/native_task4_quality_review",
+          "directory": "evidence/native-task4-quality-review/rereview-q1-q2",
+          "execution_finished": true,
+          "hold_sha256": "d63cc9e3a1c063a91ad8a05ad5035991d66254ecf2f764834f08149e38f5a3b7",
+          "readme_sha256": "7222d8e82def17a7e37505d32903f051ef195fcfa907acf7e124465046d05098",
+          "fresh_named_tests": 7,
+          "fresh_pty_cases": 2,
+          "protected": 1221,
+          "drift": 0
+        }
+      },
+      "quality_fix": {
+        "status": "done_with_concerns",
+        "build_target": "product/target/native-task4-quality-fix",
+        "artifact_directory": "product/artifacts/native-task4/quality-fix",
+        "scope": "Fresh post-confirm authenticated readiness; retained provider ownership preconditions before activation and inside cooperating apply locks",
+        "review_accepted": true,
+        "checkpoint": {
+          "at": "2026-09-13T02:19:09.425406+00:00",
+          "basis": "Implementer checkpoint and parent raw PTY JSON inspection; mutable source, not review acceptance",
+          "q1_red": "q1-readiness-red.json shows stopped worker yet client apply",
+          "q2_red": "q2-retired-plan-red.log: 0 passed /2 failed",
+          "q1_green": "Stopped-after-confirm control: exit1/client not written/not_connected; healthy control: exit0/running/desiredfingerprint/client applied",
+          "implementation": "Fresh Ready/Start/Restart/Blocked comparison after user confirmation; narrow provider requirement checked against original journal under existing journal+resource locks before mutation",
+          "next": "Final full/static/focusedrelease and warranted installed-client checks; freeze/HOLD then same QUALITY review",
+          "q2_green": "Retired-plan2/2, legitimate reconnect controls3/3, cooperating lock race1/1 in new quality-fix logs"
+        },
+        "execution_finished": true,
+        "accepted": true,
+        "hold": "product/artifacts/native-task4/quality-fix/FINAL_HOLD.json",
+        "hold_sha256": "363fc08a5c3debf18d7ff7c6e68e6abe280e22bce9e4fd02896fd37f614a0fd7",
+        "parent_check": "evidence/native-task4-quality-fix-parent-hold-check.json",
+        "full_locked_passed": 339,
+        "release_client_profiles_passed": 24,
+        "installed_clients_same_release": [
+          "pi",
+          "codex",
+          "claude"
+        ]
+      },
+      "final_spec_confirmation": {
+        "status": "passed",
+        "owner": "/root/native_task4_spec_review",
+        "directory": "evidence/native-task4-spec-review/final-confirmation",
+        "execution_finished": true,
+        "fresh_named_tests": 8,
+        "protected_files": 1245,
+        "drift": 0,
+        "readme_sha256": "f7a44634522c7a934e4ff3579e529774d5f7a5cd36ff2eecadbb2ca4ca584d24",
+        "hold_sha256": "2a44455439414a7ea58a54315c757f7a922955e7db942a89837749c4822868a4"
+      },
+      "accepted_at": "2026-09-13T02:55:11.106420+00:00",
+      "acceptance": "evidence/native-task4-accepted.json"
+    },
+    {
+      "id": "native-task5",
+      "status": "done",
+      "stage": "accepted",
+      "runtime_owner": null,
+      "scope": "Native user-login autostart, one-shot state display, separate wizard registration stage, owned fixtures only",
+      "target_directory": "product/target/native-task5",
+      "artifact_directory": "product/artifacts/native-task5",
+      "preflight": [
+        "reports/native-autostart-preflight.md",
+        "reports/native-autostart-acceptance-map.md"
+      ],
+      "limitations": [
+        "Actual current-user OS registration forbidden in this automated phase; temporary-account/human login acceptance unverified",
+        "No OS manager query inside internal readiness polling or HTTP path",
+        "No Windows/Linux runtime claim from macOS templates"
+      ],
+      "checkpoint": {
+        "at": "2026-09-13T03:35:56.160117+00:00",
+        "basis": "Implementer HOLD and parent raw identity/execution/probe inspection; not independent acceptance",
+        "full_locked_passed": 350,
+        "release_autostart_passed": 11,
+        "python_passed": 5,
+        "release_sha256": "f3f64a801a629ef9ddcd2309e95b233a4fa70e6b78daf32ec3099c0454571b59",
+        "source_files": 92,
+        "source_frozen": true,
+        "actual_login_verified": false,
+        "next": "Historical first HOLD; seven SPEC gaps now being fixed in a new stage; same SPEC rereview then fresh QUALITY"
+      },
+      "evidence_correction": {
+        "status": "complete_with_preservation_gap",
+        "findings": [
+          "README Cargo.lock hash truncated at63 chars; machine identity is correct",
+          "Two diagnostic logs unavailable at original/exact known Trash paths; recoverability claim retracted, no reconstruction"
+        ],
+        "scope": "Preserve v1 and source/binaries. New erratum/v2 only; restore exact logs if found, no reconstruction or broad Trash access.",
+        "entrypoint": "product/artifacts/native-task5/README-v2-final.md",
+        "hold": "product/artifacts/native-task5/FINAL_HOLD-v2-final.json",
+        "missing_logs": [
+          "autostart-templates-red-attempt1.log",
+          "fmt-check-attempt1.log"
+        ],
+        "recoverability_claim_retracted": true,
+        "source_changed": false
+      },
+      "parent_check": "evidence/native-task5-parent-hold-check.json",
+      "spec_review": {
+        "status": "changes_requested",
+        "owner": "/root/native_task5_spec_review",
+        "directory": "evidence/native-task5-spec-review",
+        "scope": "Bounded implementation/fixture compliance, actualOSloginacceptance separately unverified",
+        "findings": [
+          "S1 current-user Windows trigger identity",
+          "S2 unknown login authentication",
+          "S3 templates-only manager isolation",
+          "S4 caller-controlled build target",
+          "S5 terminal auth environment and failure exit",
+          "S6 authoritative registration state and ownership",
+          "S7 Windows percent expansion"
+        ],
+        "report": "evidence/native-task5-spec-review/README.md",
+        "hold": "evidence/native-task5-spec-review/FINAL_HOLD.json",
+        "fresh_rust_passed": 3,
+        "fresh_rust_failed": 2,
+        "fresh_mac_assertions_passed": 15,
+        "mock_defects_reproduced": 5,
+        "available_files_preserved": 1346
+      },
+      "spec_fix": {
+        "status": "frozen",
+        "owner": "/root/implement_native_autostart",
+        "artifact_directory": "product/artifacts/native-task5/spec-fix",
+        "target_directory": "product/target/native-task5-spec-fix-v2",
+        "review_hold_parent_hash_check": {
+          "entries": 27,
+          "drift": 0
+        },
+        "actual_os_login_verified": false,
+        "checkpoint": {
+          "at": "2026-09-13T04:42:56.539622+00:00",
+          "basis": "Implementer checkpoint; not parent execution or independent acceptance",
+          "autostart_contracts_passed": 13,
+          "manager_parser_contracts_passed": 5,
+          "python_contracts_passed": 10,
+          "source_frozen": true,
+          "dependency_added": "quick-xml =0.42.0, default features disabled",
+          "remaining": "Same SPEC rereview then fresh QUALITY; Task6 next",
+          "actual_os_login_verified": false,
+          "full_tests_previous_target_passed": 357,
+          "full_locked_passed": 357,
+          "release_autostart_passed": 13,
+          "python_passed": 10,
+          "release_sha256": "7efe265894a0cc750990ae690c69a47b7b8e00ccaef92f7686f7e7b8b81e4339"
+        },
+        "preservation_concern": {
+          "status": "exact_gap_disclosed",
+          "details": "Provisional spec-fix debug binary and rlib were overwritten after their identities had been captured. Provisional release, source archive, manifest and logs reported unchanged. Separate from original Task5 missing two diagnostics.",
+          "recovery_claim": false,
+          "product_target_now": "product/target/native-task5-spec-fix-v2",
+          "record": "product/artifacts/native-task5/spec-fix/preservation-breach-debug-target.json"
+        },
+        "entrypoint": "product/artifacts/native-task5/spec-fix/README-final-v2.md",
+        "hold": "product/artifacts/native-task5/spec-fix/FINAL_HOLD-v2.json",
+        "parent_check": "evidence/native-task5-spec-fix-parent-hold-check.json"
+      },
+      "spec_rereview": {
+        "status": "changes_requested",
+        "owner": "/root/native_task5_spec_review",
+        "directory": "evidence/native-task5-spec-review/rereview-s1-s7",
+        "report": "evidence/native-task5-spec-review/rereview-s1-s7/README.md",
+        "hold": "evidence/native-task5-spec-review/rereview-s1-s7/FINAL_HOLD.json",
+        "residual_p2": [
+          "R1 XML numeric references",
+          "R2 additional unscoped trigger",
+          "R3 raw XML parser error text",
+          "R4 effective Linux definition and reload ordering"
+        ],
+        "documentation_followup": true,
+        "fresh_public_passed": 5,
+        "fresh_mac_assertions_passed": 15,
+        "fresh_mock_driver_passed": 10,
+        "fresh_private_passed": 4,
+        "fresh_private_failed": 3,
+        "fresh_linux_projection_passed": 1,
+        "fresh_linux_projection_failed": 1,
+        "available_preserved": 1446,
+        "parent_hold_entries_checked": 36,
+        "parent_hold_drift": 0
+      },
+      "residual_spec_fix": {
+        "status": "frozen",
+        "owner": "/root/implement_native_autostart",
+        "target_directory": "product/target/native-task5-residual-spec-fix",
+        "artifact_directory": "product/artifacts/native-task5/residual-spec-fix",
+        "scope": "Four manager interpretation findings plus runtime-contract consistency; no core/hot-path changes",
+        "root_followup": {
+          "at": "2026-09-13T05:12:49.585353+00:00",
+          "finding": "0x8004130F is SCHED_E_ACCOUNT_INFORMATION_NOT_SET, not task absent",
+          "basis": "Live source inspection plus Microsoft primary documentation; no Windows execution",
+          "source": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-error-and-success-constants",
+          "action": "Same implementer asked to fix shared failure classification and add regression before freeze"
+        },
+        "execution_finished": true,
+        "hold": "product/artifacts/native-task5/residual-spec-fix/FINAL_HOLD.json",
+        "parent_check": "evidence/native-task5-residual-fix-parent-hold-check.json",
+        "full_locked_passed": 362,
+        "python_passed": 10,
+        "release_templates_passed": 13,
+        "release_sha256": "57d89c8e22bbc22f10bc16590dba5cf0b998fb463f18e9bad243e3fa37b6b957"
+      },
+      "residual_spec_rereview": {
+        "status": "changes_requested",
+        "owner": "/root/native_task5_spec_review",
+        "directory": "evidence/native-task5-spec-review/rereview-residual",
+        "scope": "Original R1-R4 and shared HRESULT correction; targeted fresh checks only",
+        "execution_finished": true,
+        "fresh_passed": 8,
+        "fresh_failed": 2,
+        "remaining_finding": "R2 XML whole-document boundary",
+        "hold": "evidence/native-task5-spec-review/rereview-residual/FINAL_HOLD.json",
+        "parent_hold_entries": 14,
+        "parent_hold_drift": 0
+      },
+      "document_boundary_fix": {
+        "status": "frozen",
+        "owner": "/root/implement_native_autostart",
+        "target_directory": "product/target/native-task5-document-boundary-fix",
+        "artifact_directory": "product/artifacts/native-task5/document-boundary-fix",
+        "scope": "Reject second document root and content outside single Task; minimal shared guard",
+        "execution_finished": true,
+        "hold": "product/artifacts/native-task5/document-boundary-fix/FINAL_HOLD.json",
+        "parent_check": "evidence/native-task5-document-boundary-parent-hold-check.json",
+        "focused_passed": 11,
+        "release_sha256": "cae45cd6da245b00885b33a1e1e0df97647d9e518089724993d1c7e2e7f3107b",
+        "fresh_full_or_runtime": false
+      },
+      "document_boundary_spec_rereview": {
+        "status": "passed",
+        "owner": "/root/native_task5_spec_review",
+        "directory": "evidence/native-task5-spec-review/rereview-document-boundary",
+        "execution_finished": true,
+        "fresh_tests": 4,
+        "fresh_cases": 25,
+        "parent_hold_entries": 14,
+        "parent_hold_drift": 0,
+        "hold": "evidence/native-task5-spec-review/rereview-document-boundary/FINAL_HOLD.json"
+      },
+      "quality_review": {
+        "status": "changes_requested",
+        "owner": "/root/native_task5_quality_review",
+        "directory": "evidence/native-task5-quality-review",
+        "scope": "Full Task5 delta from acceptedTask4; bounded independent quality/runtime/ownership checks",
+        "execution_finished": true,
+        "findings": [
+          "Q1 temporary symlink write outside target",
+          "Q2 verifier exceptional cleanup before state deletion",
+          "Q3 false-success attested login observation"
+        ],
+        "hold": "evidence/native-task5-quality-review/FINAL_HOLD.json",
+        "parent_hold_entries": 15,
+        "parent_hold_drift": 0,
+        "fresh_rust": {
+          "passed": 2,
+          "failed": 1
+        },
+        "fresh_python_failure_records": 3
+      },
+      "quality_fix": {
+        "status": "frozen",
+        "owner": "/root/implement_native_autostart",
+        "target_directory": "product/target/native-task5-quality-fix-v2",
+        "artifact_directory": "product/artifacts/native-task5/quality-fix-v2",
+        "scope": "Reuse protected exclusive file creation; verifier finally cleanup and failed-observation exit",
+        "provisional_target_directory": "product/target/native-task5-quality-fix",
+        "provisional_artifact_directory": "product/artifacts/native-task5/quality-fix",
+        "root_followup": {
+          "at": "2026-09-13T06:05:37.726081+00:00",
+          "basis": "Source inspection, regression pending",
+          "finding": "Adjacent backup.exists follows dangling link; rename can replace unowned .previous entry",
+          "action": "No-follow collision guard, retain first captured phase; new target and pre-freeze source checkpoint",
+          "preservation_breach_reported": false
+        },
+        "execution_finished": true,
+        "hold": "product/artifacts/native-task5/quality-fix-v2/FINAL_HOLD.json",
+        "parent_check": "evidence/native-task5-quality-fix-parent-hold-check.json",
+        "release_sha256": "88c21502025b0bb0b77db2833845d64bb2c562e345e0c48bc5042651a4ee25a3",
+        "rust_templates_passed": 15,
+        "python_passed": 13,
+        "same_binary_mac_fixture_passed": true,
+        "actual_os_login_verified": false,
+        "provisional_preserved": true
+      },
+      "quality_rereview": {
+        "status": "passed",
+        "owner": "/root/native_task5_quality_review",
+        "directory": "evidence/native-task5-quality-review/rereview-q1-q3",
+        "execution_finished": true,
+        "fresh_tests": 8,
+        "fresh_cases": 14,
+        "hold": "evidence/native-task5-quality-review/rereview-q1-q3/FINAL_HOLD.json",
+        "parent_hold_entries": 13,
+        "parent_hold_drift": 0
+      },
+      "final_spec_confirmation": {
+        "status": "passed",
+        "owner": "/root/native_task5_spec_review",
+        "directory": "evidence/native-task5-spec-review/final-confirmation",
+        "scope": "Approved Task5 behavior after4path quality fix; no unchanged suites",
+        "execution_finished": true,
+        "fresh_tests": 2,
+        "fresh_cases": 2,
+        "failures": 0,
+        "held_files": 13,
+        "preservation_drift": 0
+      },
+      "accepted_at": "2026-09-13T06:35:30.116454+00:00",
+      "accepted_evidence": "evidence/native-task5-accepted.json"
+    },
+    {
+      "id": "native-task6",
+      "status": "done",
+      "stage": "accepted_with_platform_limits",
+      "runtime_owner": null,
+      "scope": "Native archive/checksum installers, docs, final packaged binary smoke/client/native footprint observations",
+      "target_directory": "product/target/native-final-integration-fix",
+      "artifact_directory": "product/artifacts/native-final-integration-package",
+      "preflight": [
+        "reports/native-installer-preflight.md",
+        "reports/native-installer-acceptance-map.md",
+        "evidence/native-packaging-host-preflight.json"
+      ],
+      "limitations": [
+        "No actual user install/profile/PATH/registry/login changes",
+        "Windows/Linux/clean OS account and low-end runtime remain unavailable",
+        "No superiority claim from native smoke or old synthetic experiment"
+      ],
+      "started_at": "2026-09-13T06:37:02.337243+00:00",
+      "checkpoint": {
+        "at": "2026-09-13T06:47:25.574876+00:00",
+        "evidence_class": "implementer_report_pending_frozen_evidence",
+        "implemented": [
+          "packaging/install.sh",
+          "packaging/install.ps1",
+          "tests/test_installers.py",
+          "src/cli.rs"
+        ],
+        "reported_checks": {
+          "installer_python": 8,
+          "targeted_rust_non_tty": 1
+        },
+        "scope_decision": "PATH preview/none with explicit manual path instruction, no automatic profile/registry edit",
+        "next": "Minimal package builder and measurement driver, docs, PRE_FREEZE, final tests/package/client observations"
+      },
+      "pre_freeze": {
+        "at": "2026-09-13T07:00:40.313169+00:00",
+        "source_paths_changed_reported": 15,
+        "implementer_reported_python": 30,
+        "implementer_reported_targeted_rust": 1,
+        "root_code_findings": [
+          "PATH preview still needs literal quoting and exact printed-line execution check",
+          "Two separate wizard invocations need distinct measurement scope and raw time output"
+        ],
+        "preservation_instruction": "Retain measured preliminary source/binary/output, use a fresh final target after any captured source change",
+        "runtime_owner": "/root/implement_native_installer",
+        "released_at": "2026-09-13T07:07:32.975921+00:00",
+        "root_adjacent_findings": "resolved_in_source; runtime verification remains implementer-owned",
+        "provisional_preserved": "product/artifacts/native-task6/pre-freeze-v1/identity.json",
+        "fresh_final_target_absent_confirmed": true
+      },
+      "checkpoint_final_build": {
+        "at": "2026-09-13T07:12:40.241869+00:00",
+        "evidence_class": "implementer_report_pending_parent_raw_audit",
+        "source_edited_since_freeze": false,
+        "cargo_target": "product/target/native-task6-final-v2",
+        "full_rust_tests": 365,
+        "fmt": true,
+        "check": true,
+        "clippy": true,
+        "release": true,
+        "next": "Frozen source and binary capture, package/install, same packaged binary client and memory observations"
+      },
+      "parent_check": "evidence/native-task6-parent-hold-check.json",
+      "spec_review": {
+        "status": "changes_requested",
+        "owner": "/root/native_task6_spec_review_fallback",
+        "directory": "evidence/native-task6-spec-review-fallback",
+        "previous_attempt": "native_task6_spec_review Astra capacity error before any work",
+        "findings": 1,
+        "severity": "P2",
+        "scope": "Windows recovery-only state documentation; runtime correctness otherwise passed",
+        "hold_sha256": "407c85c182ef95908f185692b2069676af2996e55fc864ee607995a7f71ea86a",
+        "parent_verified_review_files": 16
+      },
+      "spec_doc_fix": {
+        "status": "completed",
+        "directory": "product/artifacts/native-task6/spec-doc-fix",
+        "allowed_source_change": "product/docs/installation.md only",
+        "cargo_or_unchanged_runtime_retests": "not required; identical held binary and compiled inputs reused",
+        "parent_check": "evidence/native-task6-spec-doc-parent-check.json",
+        "source_paths_changed": 1,
+        "binary_changed": false
+      },
+      "spec_rereview": {
+        "status": "passed",
+        "owner": "/root/native_task6_spec_review_fallback",
+        "directory": "evidence/native-task6-spec-review-fallback/rereview-s1",
+        "hold_sha256": "c341cdc0424e6bf6c8915b6411f242ac1b6b2bbb9fe7b52cc320c257ad652fa9",
+        "parent_verified_review_files": 11,
+        "parent_drift": 0,
+        "runtime_or_cargo_rerun": false
+      },
+      "quality_review": {
+        "status": "changes_requested",
+        "owner": "/root/native_task6_quality_review",
+        "directory": "evidence/native-task6-quality-review",
+        "started_at": "2026-09-13T07:49:19.126405+00:00",
+        "scope": "Task6 quality after SPEC PASS; read-only product, targeted checks only, no unchanged matrices",
+        "hold_sha256": "c0b26468b3e94adf6ab801fb81b29ee04f8a250993e3a1f490e899676631205e",
+        "parent_check": "evidence/native-task6-quality-parent-check.json",
+        "findings": [
+          "Q1 package binary hash not bound to captured member",
+          "Q2 failed Windows recovery deletes concurrent target"
+        ],
+        "execution_finished": true
+      },
+      "quality_fix": {
+        "status": "completed",
+        "owner": "/root/implement_native_installer",
+        "directory": "product/artifacts/native-task6/quality-fix",
+        "scope": "Packaging identity from captured bytes; conservative Windows recovery; no runtime source change",
+        "cargo_or_runtime_matrix_required": false,
+        "hold_sha256": "79eb12f4184f37597baf0d7897b61fe8d6c0aaf89300acdff75faf4062276c2a",
+        "parent_check": "evidence/native-task6-quality-fix-parent-check.json",
+        "focused_tests": 5
+      },
+      "quality_rereview": {
+        "status": "passed",
+        "owner": "/root/native_task6_quality_review",
+        "directory": "evidence/native-task6-quality-review/rereview-q1-q2",
+        "hold_sha256": "682f13f1cedb9f88b42e30630c80ea0756a8a13672b5b91a032c78e283aa4fe4",
+        "parent_verified_own_files": 6,
+        "parent_drift": 0
+      },
+      "final_spec_confirmation": {
+        "status": "passed_with_root_p3_followup",
+        "owner": "/root/native_task6_spec_review_fallback",
+        "directory": "evidence/native-task6-spec-review-fallback/final-confirmation",
+        "hold_sha256": "2a918bfc17789e0e00ed62f3c93ceea40fefddd6ca16a87a0c2db6d78ad57f91",
+        "parent_verified_own_files": 4,
+        "parent_drift": 0,
+        "remaining_important_findings": 0,
+        "parent_audit_first_attempt": "read-only KeyError bytes: review rows intentionally store hashes only; corrected SHA verification passed before any file mutation"
+      },
+      "final_doc_fix": {
+        "status": "completed",
+        "owner": "/root/implement_native_installer",
+        "directory": "product/artifacts/native-task6/final-doc-fix",
+        "change": "One broken package-relative benchmark link becomes explicit source-checkout reference",
+        "tests_or_runtime_required": false,
+        "hold_sha256": "175c59c5b00beded5d07df96f8c9c03c823f637419b236f93c7601fdd7544640",
+        "parent_check": "evidence/native-task6-final-doc-parent-check.json",
+        "relative_links_checked": 5,
+        "broken_links": 0
+      },
+      "accepted_at": "2026-09-13T09:12:54.805044+00:00",
+      "acceptance": "evidence/native-task6-accepted.json",
+      "final_parent_check": "evidence/native-final-packaged-parent-check.json",
+      "final_source_build_check": "evidence/native-final-integration-fix-parent-check.json",
+      "final_integration_review": "evidence/native-final-integration-review/rereview-i1/README.md",
+      "fresh_rust_tests_passed": 370,
+      "fresh_installed_clients": [
+        "Pi 0.84.2",
+        "Claude 2.1.63",
+        "Codex 0.154.0"
+      ]
+    }
+  ],
+  "limitations": [
+    "Core synthetic pilot and accounting ablation accepted without demonstrated low-end-PC or competitor efficiency superiority.",
+    "No current user client/autostart/PATH/profile mutation; no Git initialization/commit/public release.",
+    "Native1–6 implementation and macOS arm64 isolated package/installed-client acceptance complete. Actual Windows/Linux/macOSx64, signing/quarantine, clean account, low-end hardware and human-login acceptance remain unverified.",
+    "Historical missing diagnostics/debug originals and prior macOS ACL EINVAL remain as disclosed in prior accepted evidence."
+  ],
+  "native_final_integration_review": {
+    "status": "pass_with_platform_limitations",
+    "owner": "/root/native_final_integration_review",
+    "directory": "evidence/native-final-integration-review",
+    "important_findings": 0,
+    "parent_check": "evidence/native-final-integration-review-parent-check.json",
+    "finding": "I1 fixed",
+    "runtime_ownership_released": true,
+    "rereview_directory": "evidence/native-final-integration-review/rereview-i1",
+    "rereview_parent_check": "evidence/native-final-integration-rereview-parent-check.json"
+  },
+  "native_integration_fix": {
+    "id": "I1",
+    "status": "accepted",
+    "owner": "/root/implement_native_setup",
+    "target_directory": "product/target/native-final-integration-fix",
+    "artifact_directory": "product/artifacts/native-final-integration-fix",
+    "decision": "Initialize protected local auth state on final config apply; SaveOnly retains worker0/client0 and immutablepreview hash; preserve preview/cancel zero writes; report partial config/state failure",
+    "reviews_remaining": [],
+    "stage": "complete",
+    "parent_review": "Eight-path production change reviewed; focused setup47 and three-client fresh SaveOnly flow verified. Narrow test fixture preservation gap required before final build.",
+    "runtime_owner": null,
+    "parent_check": "evidence/native-final-integration-fix-parent-check.json",
+    "source_manifest_sha256": "3f2c38648167168e2d9d22324cdae7850f1a839a791e42d65c4168e45269f8aa",
+    "release_sha256": "16de493ce1ec7f034d0fed31db111bd4ddcf2750c813e37fb12a8b2b74f10fa7",
+    "rust_tests_passed": 370,
+    "package_acceptance": "evidence/native-task6-accepted.json"
+  }
+}

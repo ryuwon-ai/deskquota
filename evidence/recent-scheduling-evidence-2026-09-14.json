@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-13T16:42:47.483173+00:00",
+  "verification_date_kst": "2026-09-14",
+  "task": "Verify one recent scheduling paper and its black-box HTTP quota proxy applicability",
+  "evidence_class": "primary_source_document_review; not runtime reproduction",
+  "paper": {
+    "title": "Beyond Prediction: Tail-Aware Scheduling for LLM Inference",
+    "system": "UniBoost",
+    "venue": "ICML 2026",
+    "status": "Official ICML poster listing confirmed; examined text is the arXiv v1 copy",
+    "arxiv_id": "2606.18431v1",
+    "arxiv_submitted_at_utc": "2026-06-16T19:25:37Z",
+    "openreview_decision_or_reviews_read": false,
+    "separate_pmlr_publisher_page_verified": false,
+    "pmlr_volume_printed_in_pdf": 306
+  },
+  "existing_review_read_first": {
+    "path": "reports/literature-review.md",
+    "bytes": 12887,
+    "sha256": "cc7a2e18b449277f94a34c6cbb7e9838e4bba6548c00e5ab6e2995b8cdd79eb6"
+  },
+  "primary_sources": [
+    {
+      "id": "microsoft",
+      "url": "https://www.microsoft.com/en-us/research/publication/beyond-prediction-tail-aware-scheduling-for-llm-inference/",
+      "verified": "Title, ICML 2026 label, actual conference and preprint outbound links",
+      "conference_link": "https://icml.cc/virtual/2026/poster/63644",
+      "preprint_link": "https://arxiv.org/pdf/2606.18431",
+      "access": "web tool read"
+    },
+    {
+      "id": "icml",
+      "url": "https://icml.cc/virtual/2026/poster/63644",
+      "verified": "Official poster title and conference; actual OpenReview link",
+      "access": "web tool failed; read-only Python urllib HTTP GET returned 200",
+      "http_status": 200,
+      "bytes": 88574,
+      "sha256_latest_read": "5c27d235df3ca73cda30223a95de728a4ff25eb7a1abd1bb322cb3d5623acc4f",
+      "response_body_retained": false,
+      "hash_scope": "Full HTML response; dynamic responses may differ",
+      "html_title": "ICML Poster Beyond Prediction: Tail-Aware Scheduling for LLM Inference",
+      "openreview_link": "https://openreview.net/forum?id=V40F5O5N85",
+      "structured_data_page_date_published": "2026-05-05",
+      "structured_data_page_date_modified": "2026-07-21",
+      "page_metadata_dates_are_not_paper_submission_or_presentation_dates": true
+    },
+    {
+      "id": "arxiv_metadata",
+      "url": "https://arxiv.org/abs/2606.18431",
+      "verified": "Title, version, submission timestamp, journal reference",
+      "access": "web tool read"
+    },
+    {
+      "id": "paper_pdf",
+      "url": "https://arxiv.org/pdf/2606.18431",
+      "version_observed": "2606.18431v1",
+      "http_status": 200,
+      "bytes": 919447,
+      "sha256": "2b6b71ca15709cc148b98d819073723c8a6a49543cad802bd52c80928762d5aa",
+      "page_count": 16,
+      "access": "Web PDF extracted text; independent read-only urllib fetch for hash",
+      "response_body_retained": false,
+      "reviewed_sections": [
+        "Abstract",
+        "2.4 theory applicability discussion",
+        "3.1-3.4 mechanisms",
+        "4 experimental setup and baselines",
+        "4.1 and Table 2",
+        "Appendix A.1 Algorithm 1",
+        "Appendix A.2 guarantee assumptions"
+      ],
+      "mechanism_locator": "Printed pages 5-7, 13",
+      "evaluation_locator": "Printed pages 7-8, section 4.1 and Table 2",
+      "theory_boundary_locator": "Printed pages 5, 12-13, Appendix A.2",
+      "percent_denominator_locator": "Printed page 7, section 4.1",
+      "screenshot_visual_verification": false,
+      "screenshot_limitation": "Web screenshot call reported screenshot not enabled; conclusions use extracted text, not a successful screenshot"
+    },
+    {
+      "id": "openreview",
+      "url": "https://openreview.net/forum?id=V40F5O5N85",
+      "access": "Redirected to browser verification challenge; reviews not read",
+      "used_as_acceptance_proof": false
+    },
+    {
+      "id": "author_project",
+      "url": "https://yl3469.github.io/uniboost-icml26/",
+      "bytes": 80221,
+      "sha256": "6bd69c4a8cc67cdc4bdb3ba09b2dcfdd4e2b0ba37f898f4cffaf8ebd9aae9a70",
+      "response_body_retained": false,
+      "access": "Web read and read-only urllib HTML anchor parsing",
+      "code_anchor_href": "#",
+      "paper_anchor_href": "assets/icml_paper.pdf",
+      "code_publication_judgment": "No repository exposed by this Code anchor; global absence of public code not established",
+      "interpretation_caution": "Project prose includes broad mean/tail improvement language; report follows the condition-specific Table 2 tradeoff instead"
+    }
+  ],
+  "design_inferences": {
+    "may_inform": [
+      "Tail metrics alongside completion and mean",
+      "Bounded admission bypass with head protection",
+      "Evaluation of heavy/light tradeoffs and upstream attempt costs"
+    ],
+    "not_directly_portable": [
+      "KV-aware victim selection",
+      "Token-step preemption and resumption",
+      "Engine scheduling guarantees under M/G/1 assumptions"
+    ],
+    "not_implemented": [
+      "Adaptive gamma tuning",
+      "Length prediction",
+      "Engine-specific KV adapters"
+    ],
+    "novelty_or_product_superiority_established": false
+  },
+  "actions": {
+    "builds": false,
+    "installs": false,
+    "runtime_tests": false,
+    "provider_api_calls": false,
+    "extra_clones": false,
+    "product_edits": false,
+    "existing_manifest_edits": false,
+    "git_commit_push_merge": false,
+    "written_files": [
+      "reports/recent-scheduling-evidence-2026-09-14.md",
+      "evidence/recent-scheduling-evidence-2026-09-14.json"
+    ]
+  },
+  "report": {
+    "path": "reports/recent-scheduling-evidence-2026-09-14.md",
+    "sha256": "e24d97f3d62711f2d219cee8a0c56b1817f9738eadefc7eab435fa41f57e50c6"
+  }
+}

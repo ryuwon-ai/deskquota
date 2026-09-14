@@ -1,0 +1,248 @@
+test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) ... 
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='start_monotonic_s', value=nan) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='start_monotonic_s', value=inf) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='start_monotonic_s', value=-inf) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='measurement_duration_s', value=nan) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='measurement_duration_s', value=inf) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='measurement_duration_s', value=-inf) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='ended_s', value=nan) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='ended_s', value=inf) ... FAIL
+  test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='ended_s', value=-inf) ... FAIL
+test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) ... 
+  test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='initial_status', case='missing') ... FAIL
+  test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='initial_status', case='accounting') ... FAIL
+  test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='initial_status', case='fingerprint') ... FAIL
+  test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='final_status', case='missing') ... FAIL
+  test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='final_status', case='accounting') ... FAIL
+  test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='final_status', case='fingerprint') ... FAIL
+test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) ... FAIL
+test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) ... START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+START quota-seed2-production_actual
+END quota-seed2-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed2-production_rr
+END quota-seed2-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+completed_accounting_matrix
+
+  test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='missing_initial') ... FAIL
+START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+START quota-seed2-production_actual
+END quota-seed2-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed2-production_rr
+END quota-seed2-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+completed_accounting_matrix
+  test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='mismatched_accounting') ... FAIL
+START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+START quota-seed2-production_actual
+END quota-seed2-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed2-production_rr
+END quota-seed2-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+completed_accounting_matrix
+  test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='mismatched_fingerprint') ... FAIL
+START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+START quota-seed2-production_actual
+END quota-seed2-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed2-production_rr
+END quota-seed2-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+completed_accounting_matrix
+  test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='relabel_reserved') ... FAIL
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='start_monotonic_s', value=nan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='start_monotonic_s', value=inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='start_monotonic_s', value=-inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='measurement_duration_s', value=nan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='measurement_duration_s', value=inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='measurement_duration_s', value=-inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='ended_s', value=nan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='ended_s', value=inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_nonfinite_measurement_timestamps_are_rejected (tests.test_benchmark_accounting.AccountingRunValidationTests.test_nonfinite_measurement_timestamps_are_rejected) (field='ended_s', value=-inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 388, in test_nonfinite_measurement_timestamps_are_rejected
+    with self.assertRaisesRegex(ValueError, "finite"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='initial_status', case='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 399, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, field):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='initial_status', case='accounting')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 404, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, field + ".*accounting"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='initial_status', case='fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 409, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, field + ".*fingerprint"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='final_status', case='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 399, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, field):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='final_status', case='accounting')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 404, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, field + ".*accounting"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config) (field='final_status', case='fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 409, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, field + ".*fingerprint"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_persisted_initial_and_final_worker_status_match_config (tests.test_benchmark_accounting.AccountingRunValidationTests.test_persisted_initial_and_final_worker_status_match_config)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 422, in test_persisted_initial_and_final_worker_status_match_config
+    with self.assertRaisesRegex(ValueError, "initial_status.*accounting"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='missing_initial')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 910, in test_rehashed_runtime_status_forgery_rejects_before_next_spawn
+    with self.assertRaisesRegex(ValueError, "status|accounting|fingerprint"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='mismatched_accounting')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 910, in test_rehashed_runtime_status_forgery_rejects_before_next_spawn
+    with self.assertRaisesRegex(ValueError, "status|accounting|fingerprint"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='mismatched_fingerprint')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 910, in test_rehashed_runtime_status_forgery_rejects_before_next_spawn
+    with self.assertRaisesRegex(ValueError, "status|accounting|fingerprint"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_rehashed_runtime_status_forgery_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_runtime_status_forgery_rejects_before_next_spawn) (name='relabel_reserved')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/test_benchmark_accounting.py", line 910, in test_rehashed_runtime_status_forgery_rejects_before_next_spawn
+    with self.assertRaisesRegex(ValueError, "status|accounting|fingerprint"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.663s
+
+FAILED (failures=20)

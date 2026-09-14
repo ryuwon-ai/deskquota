@@ -1,0 +1,32 @@
+# preserved user heading
+listen = "127.0.0.1:53751" # port comment
+concurrency = 3
+cancel_policy = "close"
+accounting = "actual"
+retry_transient_429 = true
+[upstream]
+api_base = "http://127.0.0.1:9/company/v1"
+auth = { mode = "none" }
+[quota]
+rpm = { kind = "unlimited" }
+tpm = { kind = "unlimited" }
+[[models]]
+id = "model-a"
+max_output_tokens = 64
+[[models]]
+id = "model-b"
+max_output_tokens = 32
+[[roots]]
+id = "pi"
+endpoints = ["responses", "chat/completions"] # first endpoint comment
+models = ["model-a"]
+[[roots]]
+id = "claude" # second route comment
+endpoints = [
+  # untouched endpoint array note
+  "messages",
+]
+models = [
+  # untouched models array note
+  "model-b",
+]

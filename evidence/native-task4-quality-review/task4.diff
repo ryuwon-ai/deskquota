@@ -1,0 +1,5070 @@
+--- Task3/product/docs/client-compatibility.md
++++ Task4/product/docs/client-compatibility.md
+@@ -0,0 +1,128 @@
++# Native client compatibility
++
++This phase supports three fixed, version-checked profile formats. `connect`
++does not discover providers, sign in, forward a chat
++subscription, or make a paid request. The selected root, model, and endpoint
++are a fixed gateway route. If missing, `connect` adds them through the same
++reviewed `SetupDraft` path used by setup; it never writes a second route format.
++Automatic connection is refused for upstream `auth = "forward"` because an
++existing client subscription credential or display placeholder could otherwise
++reach an arbitrary upstream.
++
++| Client | Verified profile version | File and scope | Protocol | Runtime result in this phase |
++|---|---:|---|---|---|
++| Pi | 0.84.2 | `<home>/.pi/agent/models.json`; optional strict-JSON `settings.json`, user-private | OpenAI Chat Completions | installed CLI picker/list, selection, inference, read-tool roundtrip, gateway-off failure, and reload after disconnect |
++| Claude Code | 2.1.63 | `<home>/.claude/settings.json`, or explicitly approved private and untracked `<project>/.claude/settings.local.json` | Anthropic Messages | installed selection, inference, Read-tool roundtrip, gateway-off failure, and reload after disconnect |
++| Codex | 0.154.0 | `<home>/.codex/llmgw.config.toml`, selected with `codex --profile llmgw` | OpenAI Responses; WebSocket disabled | installed named-profile load, selection, inference, `exec_command` read roundtrip, gateway-off failure, and reload after disconnect; catalog listing remains unverified |
++
++`connect` previews absolute target paths, scope, public URL, root, model,
++protocol, owned keys, redacted credential source, disconnect command, and one
++exact hash. The hash binds the client patch to the desired gateway config
++fingerprint, client, root, model, and protocol. Preview alone changes no gateway
++or client file. Noninteractive apply requires that exact hash:
++
++```sh
++llmgw --config /absolute/gateway/config.toml connect pi \
++  --client-executable /absolute/path/to/pi \
++  --client-home /absolute/synthetic-or-user-home \
++  --root shared-work --model example-model
++
++llmgw --config /absolute/gateway/config.toml connect pi \
++  --client-executable /absolute/path/to/pi \
++  --client-home /absolute/synthetic-or-user-home \
++  --root shared-work --model example-model \
++  --apply-hash <exact-preview-hash>
++```
++
++Client config location precedence is explicit: `--client-config-dir` selects the
++exact native directory, then `--client-home` derives the normal native
++subdirectory, then `PI_CODING_AGENT_DIR`, `CLAUDE_CONFIG_DIR`, or `CODEX_HOME`,
++then `HOME` (or `USERPROFILE` when HOME is unavailable). The resolved source and
++absolute native directory are part of the preview and the same directory is
++used by the installed-version probe and patch. Interactive setup defaults to
++that resolved native directory, including an existing client-specific
++environment override. If `--client-home`, `--client-config-dir`, or an edited
++setup path differs from the current native client environment, the preview
++prints the exact `PI_CODING_AGENT_DIR`, `CLAUDE_CONFIG_DIR`, or `CODEX_HOME`
++setting required when launching the client. llmgw does not change the user's
++future shell environment.
++
++If the worker is stopped or its authenticated fingerprint differs from the
++saved config, apply remains pending. After reviewing the printed runtime
++impact, repeat the command with `--restart`; llmgw starts or restarts through
++the existing lifecycle path, confirms authenticated readiness for the desired
++fingerprint, and only then applies the client patch. A failed activation leaves
++client bytes unchanged. A setup `SaveOnly` result also leaves selected clients
++pending. Interactive successful setup separately previews and confirms each
++selected client resource after the gateway reaches readiness. It applies the
++same in-memory reviewed plan after confirmation; the user does not retype its
++64-character hash.
++
++Pi receives one dedicated `providers.llmgw` object with `baseUrl`, explicit API
++type, explicit model metadata, and the native custom `X-LLMGW-Token` header.
++When the real upstream limits are unknown, the written 128000 context and 16384
++output values are labeled Pi client defaults, not verified provider limits.
++An unrelated existing `providers.llmgw` object is never adopted or overwritten.
++
++Claude preserves other `env` entries and custom-header lines. Its llmgw token
++is never written to shared `.claude/settings.json`. Project-local use requires
++both an explicit private-file confirmation and confirmation that the file is
++not Git-tracked or shared. llmgw also performs read-only `git ls-files` and
++`git check-ignore` checks and verifies an existing `.claude` directory or target
++is private. Unknown, tracked, unignored, shared, or symlinked target files are
++refused. A resolved native `settings.json` target is canonicalized before scope
++classification. Ordinary native homes outside a Git worktree do not require
++Git. If the canonical target is inside a worktree, it must be untracked and
++ignored; this state is checked during preview, before gateway activation, and
++again immediately before the client write. Safe parent-directory aliases remain
++supported, while aliases into tracked or shared targets are refused. Conflicting
++process environment or supplied managed policy blocks the patch. Discovery is
++opt-in and remains unsupported for the verified 2.1.63 profile. Claude 2.1.63
++also requires a nonempty API-key setting before it starts a headless request. The profile therefore owns the public literal
++`ANTHROPIC_API_KEY=llmgw-local-only` as a client-availability placeholder. It is
++not an upstream credential; automatic connect is limited to gateway auth modes
++that strip incoming client authentication. A previous value is protected and
++restored on disconnect, and a process environment or managed-policy conflict is
++refused.
++
++Codex receives a separate `llmgw.config.toml` profile. The model-provider
++`http_headers` table carries the local token; MCP server headers and global
++`config.toml` are untouched. The profile uses `wire_api = "responses"`,
++`requires_openai_auth = false`, and `supports_websockets = false`. The gateway
++model list is not treated as a Codex catalog. An unrelated existing
++`model_providers.llmgw` object is refused. Disconnect removes the whole managed
++provider; installed Codex profile loading verifies the restored file.
++
++The installed-client probes run with temporary HOME, USERPROFILE, XDG, native
++config, and working directories plus an allowlisted child environment. They use
++loopback fixtures, synthetic local tokens, and no login, subscription, keychain,
++or real API credential. Claude's generated placeholder API key is accepted only
++by the client and is stripped by gateway `auth = "none"`; it never reaches the fixture.
++Pi, Claude, and Codex each completed an exact synthetic file-read result followed
++by a second model request. The Codex model catalog remains unverified because a
++Responses endpoint is not its catalog. In the gateway-off controls, Claude and
++Codex were terminated at the bounded eight-second timeout with zero upstream
++fixture calls; those expected failures are not positive inference results.
++
++Disconnect uses the protected journal and restores only keys whose current
++value still equals a value written by llmgw:
++
++```sh
++llmgw --config /absolute/gateway/config.toml disconnect pi
++```
++
++Unrelated edits survive. User changes to an owned value are reported as a
++conflict and preserved. A newly created unchanged file can be removed; a
++user-changed created file is preserved. The local data token is shared gateway
++state and is not deleted by disconnect.
++
++`llmgw off` preserves client URLs and autostart intent. The client will fail
++until `llmgw on` or disconnect restores its prior values. `llmgw status` reports
++each client journal as a separate state. Listing, selection, inference, and
++tools are separate results; no unverified capability becomes true because a
++profile parsed or a list command exited successfully.
++
++The gateway controls its loopback routes and strips local control/data headers
++before upstream forwarding according to the runtime contract. It does not
++control every network operation, telemetry setting, or update behavior of Pi,
++Claude Code, or Codex.
+--- Task3/product/scripts/probe_native_setup.py
++++ Task4/product/scripts/probe_native_setup.py
+@@ -7,6 +7,7 @@
+ import json
+ import os
+ import pty
++import re
+ import select
+ import signal
+ import shutil
+@@ -25,7 +26,13 @@
+ 
+ 
+ class PtyRun:
+-    def __init__(self, binary: Path, config: Path, registry: list[PtyRun]):
++    def __init__(
++        self,
++        binary: Path,
++        config: Path,
++        registry: list[PtyRun],
++        environment: dict[str, str] | None = None,
++    ):
+         master, slave = pty.openpty()
+         self.master = master
+         self.buffer = b""
+@@ -43,6 +50,7 @@
+             stderr=slave,
+             close_fds=True,
+             preexec_fn=attach_controlling_terminal,
++            env=environment,
+         )
+         os.close(slave)
+         registry.append(self)
+@@ -117,8 +125,16 @@
+     run.send(keys)
+ 
+ 
+-def complete(binary: Path, config: Path, port: int, start: bool, registry: list[PtyRun]) -> str:
+-    run = PtyRun(binary, config, registry)
++def complete(
++    binary: Path,
++    config: Path,
++    port: int,
++    start: bool,
++    registry: list[PtyRun],
++    client_config_dir: Path | None = None,
++    client_environment: dict[str, str] | None = None,
++) -> str:
++    run = PtyRun(binary, config, registry, client_environment)
+     choose(run, "Setup: Environment")
+     choose(run, "Environment preset")
+     choose(run, "Setup: Connection")
+@@ -140,7 +156,7 @@
+     choose(run, "Local loopback port", f"{port}\r".encode())
+     choose(run, "Request start at next login")
+     choose(run, "Setup: Tools")
+-    choose(run, "Client intents")
++    choose(run, "Client intents", b" \r" if client_config_dir is not None else b"\r")
+     choose(run, "Setup: Apply")
+     run.expect("fingerprint impact:")
+     run.expect("Apply")
+@@ -152,6 +168,15 @@
+         run.send(b"\r")
+     else:
+         run.send(b"\r")
++    if client_config_dir is not None:
++        run.expect("Native config directory for pi")
++        run.send(b"\r")
++        run.expect("preview hash:")
++        run.expect("Apply the exact pi client preview with hash")
++        hashes = re.findall(rb"preview hash: ([0-9a-f]{64})", run.buffer)
++        if not hashes:
++            raise AssertionError("selected Pi setup did not print a preview hash")
++        run.send(b"y")
+     return run.finish(0)
+ 
+ 
+@@ -262,6 +287,67 @@
+             raise AssertionError({"state": state, "log_tail": start_log[-4000:]})
+         subprocess.run([args.binary, "off", "--config", start_config], check=True, capture_output=True)
+         evidence["cases"]["save_and_start"] = {"exit": 0, "state": "running", "authenticated_identity": True, "cleaned": True, "log_tail": start_log[-1200:]}
++
++        client_config = root / "selected pi" / "gateway 설정.toml"
++        possible_configs.append(client_config)
++        client_config.parent.mkdir()
++        client_home = root / "selected pi home"
++        client_home.mkdir(mode=0o700)
++        client_config_dir = root / "selected pi native override"
++        client_config_dir.mkdir(mode=0o700)
++        client_environment = {
++            "PATH": os.environ.get("PATH", "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"),
++            "LANG": "en_US.UTF-8",
++            "LC_ALL": "en_US.UTF-8",
++            "HOME": str(client_home),
++            "USERPROFILE": str(client_home),
++            "PI_CODING_AGENT_DIR": str(client_config_dir),
++            "NO_COLOR": "1",
++        }
++        client_log = complete(
++            args.binary,
++            client_config,
++            free_port(),
++            True,
++            runs,
++            client_config_dir=client_config_dir,
++            client_environment=client_environment,
++        )
++        status = subprocess.run(
++            [args.binary, "status", "--json", "--config", client_config],
++            check=True,
++            capture_output=True,
++            text=True,
++        )
++        state = json.loads(status.stdout)
++        models = client_config_dir / "models.json"
++        journal_state = state.get("clients", {}).get("pi", {}).get("state")
++        if state["state"] != "running" or journal_state != "applied" or not models.is_file():
++            raise AssertionError({"state": state, "models": models.is_file(), "log_tail": client_log[-4000:]})
++        if "llmgw" not in models.read_text(encoding="utf-8"):
++            raise AssertionError("selected Pi setup did not write the reviewed managed provider")
++        disconnected = subprocess.run(
++            [args.binary, "disconnect", "pi", "--config", client_config],
++            check=True,
++            capture_output=True,
++            text=True,
++        )
++        subprocess.run([args.binary, "off", "--config", client_config], check=True, capture_output=True)
++        readiness_index = client_log.find("authenticated readiness: true")
++        patch_index = client_log.find("client patch: applied")
++        if readiness_index < 0 or patch_index < 0 or readiness_index >= patch_index:
++            raise AssertionError("selected client patch did not follow authenticated gateway readiness")
++        if str(client_config_dir) not in client_log:
++            raise AssertionError("selected client setup did not honor PI_CODING_AGENT_DIR as its default")
++        evidence["cases"]["selected_pi_save_and_start"] = {
++            "exit": 0,
++            "gateway_ready_before_client_apply": True,
++            "separate_client_preview": "Apply the exact pi client preview with hash" in client_log,
++            "native_environment_default_honored": str(client_config_dir) in client_log,
++            "client_journal_applied": journal_state == "applied",
++            "disconnect_succeeded": disconnected.returncode == 0,
++            "cleaned": True,
++        }
+ 
+         failure_config = root / "intentional failure cleanup" / "gateway 설정.toml"
+         possible_configs.append(failure_config)
+--- Task3/product/scripts/probe_pi.py
++++ Task4/product/scripts/probe_pi.py
+@@ -140,6 +140,30 @@
+ def write_private(path: Path, contents: str) -> None:
+     path.write_text(contents, encoding="utf-8")
+     path.chmod(0o600)
++
++
++def isolated_pi_environment(temp: Path, home: Path, agent_dir: Path) -> dict[str, str]:
++    environment = {
++        "PATH": os.environ.get("PATH", "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"),
++        "LANG": "en_US.UTF-8",
++        "LC_ALL": "en_US.UTF-8",
++        "HOME": str(home),
++        "USERPROFILE": str(home),
++        "PI_CODING_AGENT_DIR": str(agent_dir),
++        "PI_OFFLINE": "1",
++        "PI_TELEMETRY": "0",
++        "NO_COLOR": "1",
++        "DO_NOT_TRACK": "1",
++        "OTEL_SDK_DISABLED": "true",
++    }
++    for name in ("SystemRoot", "WINDIR", "ComSpec", "PATHEXT"):
++        if name in os.environ:
++            environment[name] = os.environ[name]
++    for name in ("TMPDIR", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME"):
++        directory = temp / name.lower().replace("_home", "")
++        directory.mkdir(mode=0o700)
++        environment[name] = str(directory)
++    return environment
+ 
+ 
+ def sse(chunks: list[dict[str, Any]]) -> bytes:
+@@ -247,7 +271,10 @@
+             "body_within_cap": body_bytes <= MAX_REQUEST_BYTES,
+             "model_matches": object_body and payload.get("model") == MODEL_ID,
+             "stream_enabled": object_body and payload.get("stream") is True,
+-            "custom_header_received": handler.headers.get("x-synthetic-e2e") == E2E_HEADER_VALUE,
++            "custom_header_received": (
++                handler.headers.get("x-synthetic-e2e") == E2E_HEADER_VALUE
++                or handler.headers.get("x-llmgw-client") == "pi"
++            ),
+             "local_data_token_absent": handler.headers.get("x-llmgw-token") is None,
+             "local_control_token_absent": handler.headers.get("x-llmgw-control-token") is None,
+             "authorization_absent": handler.headers.get("authorization") is None,
+@@ -517,64 +544,158 @@
+     }
+ 
+ 
+-def run_flow(pi: Path, binary: Path, flow: str, gateway_off: bool) -> dict[str, Any]:
++def run_flow(
++    pi: Path,
++    binary: Path,
++    flow: str,
++    gateway_off: bool,
++    native_connect: bool = False,
++) -> dict[str, Any]:
+     with tempfile.TemporaryDirectory(prefix=f"llmgw-pi-{flow}-") as temporary:
+         temp = Path(temporary)
+-        agent_dir = temp / "agent"
++        client_home = temp / "client-home"
++        agent_dir = client_home / ".pi" / "agent" if native_connect else temp / "agent"
+         cwd = temp / "empty-work"
+         fixture_dir = temp / "fixture"
+         config_dir = temp / "gateway"
+         for directory in (agent_dir, cwd, fixture_dir, config_dir):
+             directory.mkdir(parents=True)
++        env = isolated_pi_environment(temp, client_home, agent_dir)
+         tool_path = fixture_dir / "synthetic-read.txt"
+         write_private(tool_path, TOOL_FILE_CONTENT)
+         fixture, fixture_thread, state = start_fixture(flow, tool_path)
+         gateway: subprocess.Popen[bytes] | None = None
+         gateway_cleanup = "not_started"
++        adapter = {
++            "native_connect": native_connect,
++            "preview_succeeded": False,
++            "apply_succeeded": False,
++            "connected_model_listed": False,
++            "disconnect_succeeded": False,
++            "actual_reload_succeeded": False,
++            "unrelated_user_addition_preserved": False,
++            "managed_provider_removed": False,
++        }
+         data_token = "task4-data-" + os.urandom(18).hex()
+         control_token = "task4-control-" + os.urandom(18).hex()
+         gateway_port = reserve_loopback_port()
+         try:
+             write_private(config_dir / "config.toml", gateway_config(gateway_port, fixture.server_port))
+-            state_dir = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config_dir / "config.toml"), "--json"], timeout=10))["state_directory"])
++            state_dir = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config_dir / "config.toml"), "--json"], cwd=cwd, env=env, timeout=10))["state_directory"])
+             state_dir.mkdir(mode=0o700)
+             write_private(state_dir / "data-token", data_token)
+             write_private(state_dir / "control-token", control_token)
+-            write_private(
+-                agent_dir / "models.json",
+-                render_models(f"http://127.0.0.1:{gateway_port}{LOCAL_PREFIX}", data_token),
+-            )
+-            write_private(
+-                agent_dir / "settings.json",
+-                json.dumps(
+-                    {
+-                        "enableInstallTelemetry": False,
+-                        "enableAnalytics": False,
+-                        "compaction": {"enabled": False},
+-                        "retry": {"enabled": False, "maxRetries": 0, "provider": {"maxRetries": 0}},
+-                        "defaultThinkingLevel": "off",
+-                        "quietStartup": True,
+-                    },
+-                    separators=(",", ":"),
+-                ),
+-            )
+-            if not gateway_off:
++            if native_connect:
++                write_private(
++                    agent_dir / "models.json",
++                    json.dumps(
++                        {
++                            "providers": {
++                                "other": {
++                                    "baseUrl": "https://example.invalid/v1",
++                                    "api": "openai-completions",
++                                    "apiKey": "placeholder",
++                                    "models": [],
++                                }
++                            },
++                            "userBefore": True,
++                        },
++                        separators=(",", ":"),
++                    ),
++                )
++                write_private(
++                    agent_dir / "settings.json",
++                    json.dumps({"quietStartup": True}, separators=(",", ":")),
++                )
++            else:
++                write_private(
++                    agent_dir / "models.json",
++                    render_models(f"http://127.0.0.1:{gateway_port}{LOCAL_PREFIX}", data_token),
++                )
++                write_private(
++                    agent_dir / "settings.json",
++                    json.dumps(
++                        {
++                            "enableInstallTelemetry": False,
++                            "enableAnalytics": False,
++                            "compaction": {"enabled": False},
++                            "retry": {"enabled": False, "maxRetries": 0, "provider": {"maxRetries": 0}},
++                            "defaultThinkingLevel": "off",
++                            "quietStartup": True,
++                        },
++                        separators=(",", ":"),
++                    ),
++                )
++            if not gateway_off or native_connect:
+                 gateway = subprocess.Popen(
+                     [str(binary), "run", "--config", str(config_dir / "config.toml")],
+                     cwd=cwd,
+-                    env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "LANG": "en_US.UTF-8"},
++                    env=env,
+                     stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL,
+                 )
+                 wait_for_gateway(gateway, gateway_port, control_token)
+-            env = {
+-                "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+-                "LANG": "en_US.UTF-8",
+-                "PI_CODING_AGENT_DIR": str(agent_dir),
+-                "PI_OFFLINE": "1",
+-                "PI_TELEMETRY": "0",
+-                "NO_COLOR": "1",
+-            }
++            if native_connect:
++                connect_command = [
++                    str(binary),
++                    "--config",
++                    str(config_dir / "config.toml"),
++                    "connect",
++                    "pi",
++                    "--client-executable",
++                    str(pi),
++                    "--client-home",
++                    str(client_home),
++                    "--root",
++                    ROOT_ID,
++                    "--model",
++                    MODEL_ID,
++                ]
++                preview = subprocess.run(connect_command, cwd=cwd, env=env, capture_output=True, text=True, timeout=10)
++                preview_hash = next(
++                    (
++                        line.removeprefix("preview hash: ")
++                        for line in preview.stdout.splitlines()
++                        if line.startswith("preview hash: ")
++                    ),
++                    None,
++                )
++                adapter["preview_succeeded"] = (
++                    preview.returncode == 0
++                    and preview_hash is not None
++                    and data_token not in preview.stdout
++                    and data_token not in preview.stderr
++                )
++                if not adapter["preview_succeeded"]:
++                    raise RuntimeError("native Pi connect preview failed or exposed the local token")
++                applied = subprocess.run(
++                    [*connect_command, "--apply-hash", str(preview_hash)],
++                    cwd=cwd,
++                    env=env,
++                    capture_output=True,
++                    text=True,
++                    timeout=10,
++                )
++                adapter["apply_succeeded"] = applied.returncode == 0
++                if not adapter["apply_succeeded"]:
++                    raise RuntimeError("native Pi connect apply failed")
++                if gateway_off and gateway is not None:
++                    gateway_cleanup = stop_gateway(gateway, gateway_port, control_token)
++                    gateway = None
++            if native_connect:
++                listed = subprocess.run(
++                    [str(pi), "--offline", "--no-extensions", "--list-models", "llmgw"],
++                    cwd=cwd,
++                    env=env,
++                    capture_output=True,
++                    timeout=10,
++                )
++                adapter["connected_model_listed"] = (
++                    listed.returncode == 0
++                    and MODEL_ID.encode() in listed.stdout
++                    and b"Invalid models.json" not in listed.stderr
++                    and b"Failed to load models.json" not in listed.stderr
++                )
+             command = [
+                 str(pi),
+                 "--offline",
+@@ -586,7 +707,7 @@
+                 "--no-context-files",
+                 "--no-session",
+                 "--provider",
+-                PROVIDER_NAME,
++                "llmgw" if native_connect else PROVIDER_NAME,
+                 "--model",
+                 MODEL_ID,
+                 "--thinking",
+@@ -668,7 +789,58 @@
+                 "gateway_root_route_exercised": common_wire,
+                 "wire_observations": observations,
+                 "tool_events": tool_events,
++                "adapter": adapter,
+             }
++            if native_connect:
++                current = json.loads((agent_dir / "models.json").read_text(encoding="utf-8"))
++                current["userAddedAfterConnect"] = True
++                write_private(agent_dir / "models.json", json.dumps(current, indent=2))
++                disconnected = subprocess.run(
++                    [
++                        str(binary),
++                        "--config",
++                        str(config_dir / "config.toml"),
++                        "disconnect",
++                        "pi",
++                    ],
++                    cwd=cwd,
++                    env=env,
++                    capture_output=True,
++                    text=True,
++                    timeout=10,
++                )
++                adapter["disconnect_succeeded"] = disconnected.returncode == 0
++                restored = json.loads((agent_dir / "models.json").read_text(encoding="utf-8"))
++                adapter["unrelated_user_addition_preserved"] = (
++                    restored.get("userBefore") is True
++                    and restored.get("userAddedAfterConnect") is True
++                )
++                adapter["managed_provider_removed"] = "llmgw" not in restored.get("providers", {})
++                reload_run = subprocess.run(
++                    [str(pi), "--offline", "--no-extensions", "--list-models", "llmgw"],
++                    cwd=cwd,
++                    env=env,
++                    capture_output=True,
++                    timeout=10,
++                )
++                adapter["actual_reload_succeeded"] = (
++                    reload_run.returncode == 0
++                    and MODEL_ID.encode() not in reload_run.stdout
++                    and b"Invalid models.json" not in reload_run.stderr
++                    and b"Failed to load models.json" not in reload_run.stderr
++                )
++                result["passed"] = result["passed"] and all(
++                    adapter[key]
++                    for key in (
++                        "preview_succeeded",
++                        "apply_succeeded",
++                        "connected_model_listed",
++                        "disconnect_succeeded",
++                        "actual_reload_succeeded",
++                        "unrelated_user_addition_preserved",
++                        "managed_provider_removed",
++                    )
++                )
+         finally:
+             if gateway is not None:
+                 gateway_cleanup = stop_gateway(gateway, gateway_port, control_token)
+--- Task3/product/scripts/verify_clients.py
++++ Task4/product/scripts/verify_clients.py
+@@ -0,0 +1,1186 @@
++#!/usr/bin/env python3
++"""Verify installed native clients through reviewed llmgw profiles.
++
++Every child runs with an allowlisted environment and isolated native config.
++Runtime fields become verified only after the installed client exercises the
++gateway wire fixture; parsing or a successful CLI exit is recorded separately.
++"""
++
++from __future__ import annotations
++
++import argparse
++import datetime as dt
++import json
++import os
++import re
++import shlex
++import subprocess
++import tempfile
++import threading
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from typing import Any
++
++import probe_pi
++
++
++ROOT = Path(__file__).resolve().parents[1]
++CODEX_COMPLETION_MARKER = "TASK4_CODEX_COMPLETION_OK"
++CODEX_TOOL_MARKER = "TASK4_CODEX_TOOL_OK"
++CODEX_TOOL_CONTENT = "TASK4_CODEX_SYNTHETIC_READ_RESULT"
++CODEX_TOOL_CALL_ID = "call_task4_codex_read"
++CLAUDE_TOOL_MARKER = "TASK4_CLAUDE_TOOL_OK"
++
++
++def now() -> str:
++    return dt.datetime.now(dt.timezone.utc).isoformat()
++
++
++def write(path: Path, value: dict[str, Any]) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
++
++
++def isolated_environment(
++    root: Path, home: Path, client: str, native_config: Path
++) -> dict[str, str]:
++    """Return a small child environment with no inherited auth/helper config."""
++    tmp = root / "tmp"
++    xdg_config = root / "xdg-config"
++    xdg_cache = root / "xdg-cache"
++    xdg_data = root / "xdg-data"
++    for directory in (tmp, xdg_config, xdg_cache, xdg_data):
++        directory.mkdir(parents=True, exist_ok=True, mode=0o700)
++    environment = {
++        "PATH": os.environ.get("PATH", "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"),
++        "LANG": "en_US.UTF-8",
++        "LC_ALL": "en_US.UTF-8",
++        "HOME": str(home),
++        "USERPROFILE": str(home),
++        "TMPDIR": str(tmp),
++        "XDG_CONFIG_HOME": str(xdg_config),
++        "XDG_CACHE_HOME": str(xdg_cache),
++        "XDG_DATA_HOME": str(xdg_data),
++        "NO_COLOR": "1",
++        "DO_NOT_TRACK": "1",
++        "OTEL_SDK_DISABLED": "true",
++    }
++    for name in ("SystemRoot", "WINDIR", "ComSpec", "PATHEXT"):
++        if name in os.environ:
++            environment[name] = os.environ[name]
++    environment[
++        {"pi": "PI_CODING_AGENT_DIR", "claude": "CLAUDE_CONFIG_DIR", "codex": "CODEX_HOME"}[
++            client
++        ]
++    ] = str(native_config)
++    return environment
++
++
++def responses_sse(events: list[dict[str, Any]]) -> bytes:
++    return "".join(
++        f"event: {event['type']}\ndata: {json.dumps(event, separators=(',', ':'))}\n\n"
++        for event in events
++    ).encode()
++
++
++def codex_tool_result_matches(payload: dict[str, Any]) -> bool:
++    for item in payload.get("input", []):
++        if not isinstance(item, dict):
++            continue
++        if item.get("type") != "function_call_output" or item.get("call_id") != CODEX_TOOL_CALL_ID:
++            continue
++        output = item.get("output")
++        if not isinstance(output, str) or "Process exited with code 0" not in output:
++            continue
++        return bool(output.splitlines()) and output.splitlines()[-1].strip() == CODEX_TOOL_CONTENT
++    return False
++
++
++def claude_tool_result_matches(payload: dict[str, Any]) -> bool:
++    for message in payload.get("messages", []):
++        if not isinstance(message, dict) or not isinstance(message.get("content"), list):
++            continue
++        for block in message["content"]:
++            if (
++                not isinstance(block, dict)
++                or block.get("type") != "tool_result"
++                or block.get("tool_use_id") != "toolu_task4_read"
++                or block.get("is_error") is True
++            ):
++                continue
++            content = block.get("content")
++            texts = [content] if isinstance(content, str) else [
++                part.get("text", "")
++                for part in content or []
++                if isinstance(part, dict) and part.get("type") == "text"
++            ]
++            for text_value in texts:
++                for line in text_value.splitlines():
++                    normalized = re.sub(r"^\s*\d+[→\t]\s?", "", line).strip()
++                    if normalized == CODEX_TOOL_CONTENT:
++                        return True
++    return False
++
++
++def json_lines_contain_tool_call(stdout: bytes, name: str, argument: str) -> bool:
++    def visit(value: Any) -> bool:
++        if isinstance(value, dict):
++            if value.get("name") == name:
++                tool_input = value.get("input") or value.get("arguments")
++                if isinstance(tool_input, dict) and argument in tool_input.values():
++                    return True
++                if isinstance(tool_input, str) and argument in tool_input:
++                    return True
++            if (
++                name == "exec_command"
++                and value.get("type") == "command_execution"
++                and isinstance(value.get("command"), str)
++                and argument in value["command"]
++            ):
++                return True
++            return any(visit(child) for child in value.values())
++        if isinstance(value, list):
++            return any(visit(child) for child in value)
++        return False
++
++    for line in stdout.splitlines():
++        try:
++            value = json.loads(line)
++        except (UnicodeDecodeError, json.JSONDecodeError):
++            continue
++        if visit(value):
++            return True
++    return False
++
++
++class CodexFixture:
++    def __init__(self, tool_path: Path):
++        self.tool_path = tool_path
++        self.observations: list[dict[str, Any]] = []
++        outer = self
++
++        class Handler(BaseHTTPRequestHandler):
++            protocol_version = "HTTP/1.1"
++
++            def log_message(self, *_args: Any) -> None:
++                pass
++
++            def do_POST(self) -> None:
++                length = int(self.headers.get("Content-Length", "0"))
++                body = self.rfile.read(length)
++                try:
++                    payload = json.loads(body)
++                except (UnicodeDecodeError, json.JSONDecodeError):
++                    self.send_error(400)
++                    return
++                attempt = len(outer.observations) + 1
++                observation = {
++                    "attempt": attempt,
++                    "path_matches": self.path.split("?", 1)[0] == "/team/v1/responses",
++                    "model_matches": payload.get("model") == "example-model",
++                    "stream_enabled": payload.get("stream") is True,
++                    "local_data_token_absent": self.headers.get("x-llmgw-token") is None,
++                    "authorization_absent": self.headers.get("authorization") is None,
++                    "tool_output_matches": codex_tool_result_matches(payload),
++                }
++                outer.observations.append(observation)
++                if attempt == 1:
++                    arguments = json.dumps(
++                        {"cmd": f"cat {shlex.quote(str(outer.tool_path))}"}, separators=(",", ":")
++                    )
++                    events = [
++                        {"type": "response.created", "response": {"id": "resp-task4-1"}},
++                        {
++                            "type": "response.output_item.done",
++                            "item": {
++                                "type": "function_call",
++                                "call_id": CODEX_TOOL_CALL_ID,
++                                "name": "exec_command",
++                                "arguments": arguments,
++                            },
++                        },
++                        {
++                            "type": "response.completed",
++                            "response": {
++                                "id": "resp-task4-1",
++                                "usage": {
++                                    "input_tokens": 1,
++                                    "input_tokens_details": None,
++                                    "output_tokens": 1,
++                                    "output_tokens_details": None,
++                                    "total_tokens": 2,
++                                },
++                            },
++                        },
++                    ]
++                else:
++                    events = [
++                        {"type": "response.created", "response": {"id": "resp-task4-2"}},
++                        {
++                            "type": "response.output_item.done",
++                            "item": {
++                                "type": "message",
++                                "role": "assistant",
++                                "id": "msg-task4-2",
++                                "content": [{"type": "output_text", "text": CODEX_TOOL_MARKER}],
++                            },
++                        },
++                        {
++                            "type": "response.completed",
++                            "response": {
++                                "id": "resp-task4-2",
++                                "usage": {
++                                    "input_tokens": 1,
++                                    "input_tokens_details": None,
++                                    "output_tokens": 1,
++                                    "output_tokens_details": None,
++                                    "total_tokens": 2,
++                                },
++                            },
++                        },
++                    ]
++                response = responses_sse(events)
++                self.send_response(200)
++                self.send_header("Content-Type", "text/event-stream")
++                self.send_header("Content-Length", str(len(response)))
++                self.end_headers()
++                self.wfile.write(response)
++
++        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
++        self.server.daemon_threads = True
++        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
++        self.thread.start()
++
++    @property
++    def port(self) -> int:
++        return int(self.server.server_address[1])
++
++    def close(self) -> None:
++        self.server.shutdown()
++        self.server.server_close()
++        self.thread.join(timeout=2)
++
++
++def claude_sse(events: list[dict[str, Any]]) -> bytes:
++    return "".join(
++        f"event: {event['type']}\ndata: {json.dumps(event, separators=(',', ':'))}\n\n"
++        for event in events
++    ).encode()
++
++
++class ClaudeFixture:
++    def __init__(self, tool_path: Path):
++        self.tool_path = tool_path
++        self.observations: list[dict[str, Any]] = []
++        outer = self
++
++        class Handler(BaseHTTPRequestHandler):
++            protocol_version = "HTTP/1.1"
++
++            def log_message(self, *_args: Any) -> None:
++                pass
++
++            def do_POST(self) -> None:
++                length = int(self.headers.get("Content-Length", "0"))
++                body = self.rfile.read(length)
++                try:
++                    payload = json.loads(body)
++                except (UnicodeDecodeError, json.JSONDecodeError):
++                    self.send_error(400)
++                    return
++                attempt = len(outer.observations) + 1
++                observation = {
++                    "attempt": attempt,
++                    "path_matches": self.path.split("?", 1)[0] == "/team/v1/messages",
++                    "model_matches": payload.get("model") == "example-model",
++                    "stream_enabled": payload.get("stream") is True,
++                    "local_data_token_absent": self.headers.get("x-llmgw-token") is None,
++                    "x_api_key_absent": self.headers.get("x-api-key") is None,
++                    "authorization_absent": self.headers.get("authorization") is None,
++                    "tool_result_matches": claude_tool_result_matches(payload),
++                }
++                outer.observations.append(observation)
++                start = {
++                    "type": "message_start",
++                    "message": {
++                        "id": f"msg-task4-{attempt}",
++                        "type": "message",
++                        "role": "assistant",
++                        "content": [],
++                        "model": "example-model",
++                        "stop_reason": None,
++                        "stop_sequence": None,
++                        "usage": {"input_tokens": 1, "output_tokens": 0},
++                    },
++                }
++                if attempt == 1:
++                    events = [
++                        start,
++                        {
++                            "type": "content_block_start",
++                            "index": 0,
++                            "content_block": {
++                                "type": "tool_use",
++                                "id": "toolu_task4_read",
++                                "name": "Read",
++                                "input": {},
++                            },
++                        },
++                        {
++                            "type": "content_block_delta",
++                            "index": 0,
++                            "delta": {
++                                "type": "input_json_delta",
++                                "partial_json": json.dumps({"file_path": str(outer.tool_path)}),
++                            },
++                        },
++                        {"type": "content_block_stop", "index": 0},
++                        {
++                            "type": "message_delta",
++                            "delta": {"stop_reason": "tool_use", "stop_sequence": None},
++                            "usage": {"output_tokens": 1},
++                        },
++                        {"type": "message_stop"},
++                    ]
++                else:
++                    events = [
++                        start,
++                        {
++                            "type": "content_block_start",
++                            "index": 0,
++                            "content_block": {"type": "text", "text": ""},
++                        },
++                        {
++                            "type": "content_block_delta",
++                            "index": 0,
++                            "delta": {"type": "text_delta", "text": "TASK4_CLAUDE_TOOL_OK"},
++                        },
++                        {"type": "content_block_stop", "index": 0},
++                        {
++                            "type": "message_delta",
++                            "delta": {"stop_reason": "end_turn", "stop_sequence": None},
++                            "usage": {"output_tokens": 1},
++                        },
++                        {"type": "message_stop"},
++                    ]
++                response = claude_sse(events)
++                self.send_response(200)
++                self.send_header("Content-Type", "text/event-stream")
++                self.send_header("Content-Length", str(len(response)))
++                self.end_headers()
++                self.wfile.write(response)
++
++        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
++        self.server.daemon_threads = True
++        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
++        self.thread.start()
++
++    @property
++    def port(self) -> int:
++        return int(self.server.server_address[1])
++
++    def close(self) -> None:
++        self.server.shutdown()
++        self.server.server_close()
++        self.thread.join(timeout=2)
++
++
++def installed_version(client: str, executable: Path) -> tuple[str | None, str | None]:
++    try:
++        with tempfile.TemporaryDirectory(prefix=f"llmgw-{client}-version-") as temporary:
++            root = Path(temporary)
++            home = root / "home"
++            cwd = root / "empty-work"
++            home.mkdir(mode=0o700)
++            cwd.mkdir(mode=0o700)
++            native = {
++                "pi": home / ".pi" / "agent",
++                "claude": home / ".claude",
++                "codex": home / ".codex",
++            }[client]
++            native.mkdir(parents=True, mode=0o700)
++            environment = isolated_environment(root, home, client, native)
++            completed = subprocess.run(
++                [str(executable), "--version"],
++                cwd=cwd,
++                env=environment,
++                capture_output=True,
++                text=True,
++                timeout=10,
++                check=False,
++            )
++    except (OSError, subprocess.TimeoutExpired) as error:
++        return None, str(error)
++    if completed.returncode != 0:
++        return None, f"--version exited {completed.returncode}"
++    words = completed.stdout.split()
++    version = next((word.strip("()") for word in words if word[:1].isdigit()), None)
++    return version, None if version else "--version output contained no version"
++
++
++def verify_pi(binary: Path, output: Path, executable: str | None) -> int:
++    pi, entry, package = probe_pi.resolve_pi(executable)
++    result: dict[str, Any] = {
++        "schema_version": 1,
++        "client": "pi",
++        "started_at": now(),
++        "binary": str(binary),
++        "binary_sha256": probe_pi.sha256(binary),
++        "installed_executable": str(pi),
++        "installed_entry": str(entry),
++        "installed_version": package["version"],
++        "override_scope": "temporary HOME with PI_CODING_AGENT_DIR under it",
++        "protocol": "OpenAI Chat Completions SSE",
++        "root": probe_pi.ROOT_ID,
++        "model": probe_pi.MODEL_ID,
++        "listing": {"status": "pending"},
++        "selection": {"status": "pending"},
++        "inference": {"status": "pending"},
++        "tools": {"status": "pending"},
++        "gateway_off": {"status": "pending"},
++        "passed": False,
++    }
++    write(output, result)
++    completion = probe_pi.run_flow(pi, binary, "completion", False, native_connect=True)
++    tool = probe_pi.run_flow(pi, binary, "read_tool", False, native_connect=True)
++    negative = probe_pi.run_flow(pi, binary, "completion", True, native_connect=True)
++    adapter_ok = all(
++        case["adapter"][key]
++        for case in (completion, tool, negative)
++        for key in (
++            "preview_succeeded",
++            "apply_succeeded",
++            "connected_model_listed",
++            "disconnect_succeeded",
++            "actual_reload_succeeded",
++            "unrelated_user_addition_preserved",
++            "managed_provider_removed",
++        )
++    )
++    negative_ok = (
++        negative["upstream_attempts"] == 0
++        and negative["assistant_failure_observed"]
++        and not negative["output_marker_observed"]
++    )
++    result.update(
++        {
++            "listing": {
++                "status": "verified" if adapter_ok else "failed",
++                "connected_model_listed": all(
++                    case["adapter"]["connected_model_listed"]
++                    for case in (completion, tool, negative)
++                ),
++                "installed_client_reload_after_disconnect": adapter_ok,
++            },
++            "selection": {
++                "status": "verified" if completion["gateway_root_route_exercised"] else "failed",
++                "selected_model": probe_pi.MODEL_ID,
++            },
++            "inference": {
++                "status": "verified" if completion["passed"] else "failed",
++                "upstream_attempts": completion["upstream_attempts"],
++            },
++            "tools": {
++                "status": "verified" if tool["passed"] else "failed",
++                "exact_read_call": tool["tool_events"]["exact_read_arguments"],
++                "exact_result": tool["tool_events"]["result_contains_exact_synthetic_content"],
++                "subsequent_model_request": tool["upstream_attempts"] == 2,
++            },
++            "wire": {
++                "local_header_accepted": all(
++                    observation["custom_header_received"]
++                    for case in (completion, tool)
++                    for observation in case["wire_observations"]
++                ),
++                "local_token_stripped_upstream": all(
++                    observation["local_data_token_absent"]
++                    for case in (completion, tool)
++                    for observation in case["wire_observations"]
++                ),
++                "authorization_stripped_upstream": all(
++                    observation["authorization_absent"]
++                    for case in (completion, tool)
++                    for observation in case["wire_observations"]
++                ),
++                "path": f"/r/{probe_pi.ROOT_ID}/v1/chat/completions -> {probe_pi.UPSTREAM_PATH}",
++            },
++            "disconnect": {
++                "status": "verified" if adapter_ok else "failed",
++                "unrelated_user_addition_preserved": adapter_ok,
++                "actual_client_reload": adapter_ok,
++            },
++            "gateway_off": {
++                "status": "expected_failure_verified" if negative_ok else "failed",
++                "upstream_attempts": negative["upstream_attempts"],
++                "counted_as_positive": False,
++            },
++            "cleanup": {
++                "completion_gateway": completion["gateway_cleanup"],
++                "tool_gateway": tool["gateway_cleanup"],
++                "negative_gateway": negative["gateway_cleanup"],
++                "temporary_directories": "TemporaryDirectory reaped",
++            },
++        }
++    )
++    result["passed"] = completion["passed"] and tool["passed"] and negative_ok and adapter_ok
++    result["finished_at"] = now()
++    write(output, result)
++    return 0 if result["passed"] else 1
++
++
++def verify_claude(binary: Path, output: Path, executable: Path) -> int:
++    version, version_error = installed_version("claude", executable)
++    result: dict[str, Any] = {
++        "schema_version": 1,
++        "client": "claude",
++        "started_at": now(),
++        "binary": str(binary),
++        "binary_sha256": probe_pi.sha256(binary),
++        "installed_executable": str(executable),
++        "installed_version": version,
++        "version_error": version_error,
++        "override_scope": "temporary HOME, USERPROFILE, XDG paths, CLAUDE_CONFIG_DIR, and cwd",
++        "protocol": "Anthropic Messages SSE",
++        "root": "claude-work",
++        "model": "example-model",
++        "listing": {"status": "not_requested"},
++        "selection": {"status": "pending"},
++        "inference": {"status": "pending"},
++        "tools": {"status": "pending"},
++        "gateway_off": {"status": "pending"},
++        "disconnect": {"status": "pending"},
++        "passed": False,
++    }
++    write(output, result)
++    if version != "2.1.63":
++        reason = "installed version does not match the supported Claude Code 2.1.63 profile"
++        for field in ("selection", "inference", "tools"):
++            result[field] = {"status": "unsupported", "reason": reason}
++        result["gateway_off"] = {"status": "not_run"}
++        result["disconnect"] = {"status": "not_run"}
++        result["finished_at"] = now()
++        write(output, result)
++        return 2
++
++    cleanup = "not_started"
++    with tempfile.TemporaryDirectory(prefix="llmgw-claude-wire-") as temporary:
++        root = Path(temporary)
++        home = root / "client-home"
++        claude_dir = home / ".claude"
++        gateway_dir = root / "gateway"
++        cwd = root / "empty-work"
++        for directory in (claude_dir, gateway_dir, cwd):
++            directory.mkdir(parents=True, mode=0o700)
++        environment = isolated_environment(root, home, "claude", claude_dir)
++        environment.update(
++            {
++                "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
++                "DISABLE_TELEMETRY": "1",
++                "DISABLE_ERROR_REPORTING": "1",
++                "DISABLE_AUTOUPDATER": "1",
++                "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
++                "CLAUDE_CODE_DISABLE_BUG_COMMAND": "1",
++            }
++        )
++        settings = claude_dir / "settings.json"
++        initial = {"env": {"KEEP": "yes"}, "permissions": {"allow": []}}
++        probe_pi.write_private(settings, json.dumps(initial, separators=(",", ":")))
++        tool_path = cwd / "synthetic-read.txt"
++        probe_pi.write_private(tool_path, CODEX_TOOL_CONTENT)
++        fixture = ClaudeFixture(tool_path)
++        gateway_port = probe_pi.reserve_loopback_port()
++        config = gateway_dir / "config.toml"
++        probe_pi.write_private(
++            config,
++            f'''listen = "127.0.0.1:{gateway_port}"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++
++[upstream]
++api_base = "http://127.0.0.1:{fixture.port}/team/v1"
++
++[upstream.auth]
++mode = "none"
++
++[quota.rpm]
++kind = "unlimited"
++
++[quota.tpm]
++kind = "unknown"
++
++[[models]]
++id = "example-model"
++
++[[roots]]
++id = "claude-work"
++endpoints = ["messages"]
++models = ["example-model"]
++''',
++        )
++        state_dir = Path(
++            json.loads(
++                subprocess.check_output(
++                    [str(binary), "doctor", "--config", str(config), "--json"],
++                    cwd=cwd,
++                    env=environment,
++                    timeout=10,
++                )
++            )["state_directory"]
++        )
++        state_dir.mkdir(mode=0o700)
++        data_token = "task4-claude-data-" + os.urandom(18).hex()
++        control_token = "task4-claude-control-" + os.urandom(18).hex()
++        probe_pi.write_private(state_dir / "data-token", data_token)
++        probe_pi.write_private(state_dir / "control-token", control_token)
++        gateway = subprocess.Popen(
++            [str(binary), "run", "--config", str(config)],
++            cwd=cwd,
++            env=environment,
++            stdout=subprocess.DEVNULL,
++            stderr=subprocess.DEVNULL,
++        )
++        try:
++            probe_pi.wait_for_gateway(gateway, gateway_port, control_token)
++            connect = [
++                str(binary),
++                "--config",
++                str(config),
++                "connect",
++                "claude",
++                "--client-executable",
++                str(executable),
++                "--client-home",
++                str(home),
++                "--root",
++                "claude-work",
++                "--model",
++                "example-model",
++            ]
++            preview = subprocess.run(
++                connect, cwd=cwd, env=environment, capture_output=True, text=True, timeout=10
++            )
++            reviewed_hash = next(
++                (
++                    line.removeprefix("preview hash: ")
++                    for line in preview.stdout.splitlines()
++                    if line.startswith("preview hash: ")
++                ),
++                None,
++            )
++            preview_ok = (
++                preview.returncode == 0
++                and reviewed_hash is not None
++                and data_token not in preview.stdout
++                and data_token not in preview.stderr
++            )
++            applied = (
++                subprocess.run(
++                    [*connect, "--apply-hash", str(reviewed_hash)],
++                    cwd=cwd,
++                    env=environment,
++                    capture_output=True,
++                    text=True,
++                    timeout=10,
++                )
++                if preview_ok
++                else None
++            )
++            command = [
++                str(executable),
++                "-p",
++                "--output-format",
++                "stream-json",
++                "--verbose",
++                "--no-session-persistence",
++                "--no-chrome",
++                "--disable-slash-commands",
++                "--strict-mcp-config",
++                "--mcp-config",
++                '{"mcpServers":{}}',
++                "--permission-mode",
++                "dontAsk",
++                "--tools",
++                "Read",
++                "--setting-sources",
++                "user",
++                "--model",
++                "example-model",
++                f"Read only the exact synthetic file {tool_path} and report the fixture result.",
++            ]
++            header_only_environment = environment.copy()
++            header_only_environment.pop("ANTHROPIC_API_KEY", None)
++            try:
++                header_only = subprocess.run(
++                    command,
++                    cwd=cwd,
++                    env=header_only_environment,
++                    capture_output=True,
++                    timeout=20,
++                )
++                header_only_timed_out = False
++                header_only_exit = header_only.returncode
++                header_only_ok = (
++                    header_only.returncode == 0
++                    and CLAUDE_TOOL_MARKER.encode() in header_only.stdout
++                    and len(fixture.observations) == 2
++                    and fixture.observations[1]["tool_result_matches"]
++                )
++            except subprocess.TimeoutExpired:
++                header_only_timed_out = True
++                header_only_exit = None
++                header_only_ok = False
++            header_only_calls = len(fixture.observations)
++            fixture.observations.clear()
++            active_environment = header_only_environment if header_only_ok else environment
++            inference = subprocess.run(
++                command, cwd=cwd, env=active_environment, capture_output=True, timeout=20
++            )
++            observed_read = json_lines_contain_tool_call(
++                inference.stdout, "Read", str(tool_path)
++            )
++            tool_ok = (
++                inference.returncode == 0
++                and CLAUDE_TOOL_MARKER.encode() in inference.stdout
++                and len(fixture.observations) == 2
++                and fixture.observations[1]["tool_result_matches"]
++                and observed_read
++            )
++            wire_ok = len(fixture.observations) == 2 and all(
++                observation[key]
++                for observation in fixture.observations
++                for key in (
++                    "path_matches",
++                    "model_matches",
++                    "stream_enabled",
++                    "local_data_token_absent",
++                    "x_api_key_absent",
++                    "authorization_absent",
++                )
++            )
++            cleanup = probe_pi.stop_gateway(gateway, gateway_port, control_token)
++            attempts_before = len(fixture.observations)
++            try:
++                negative = subprocess.run(
++                    command, cwd=cwd, env=active_environment, capture_output=True, timeout=8
++                )
++                negative_failed = negative.returncode != 0
++                negative_timed_out = False
++            except subprocess.TimeoutExpired:
++                negative_failed = True
++                negative_timed_out = True
++            negative_ok = negative_failed and len(fixture.observations) == attempts_before
++            current = json.loads(settings.read_text(encoding="utf-8"))
++            current["userAddedAfterConnect"] = True
++            probe_pi.write_private(settings, json.dumps(current, indent=2))
++            disconnected = subprocess.run(
++                [str(binary), "--config", str(config), "disconnect", "claude"],
++                cwd=cwd,
++                env=environment,
++                capture_output=True,
++                text=True,
++                timeout=10,
++            )
++            restored = json.loads(settings.read_text(encoding="utf-8"))
++            reloaded = subprocess.run(
++                [str(executable), "mcp", "list"],
++                cwd=cwd,
++                env=environment,
++                capture_output=True,
++                timeout=10,
++            )
++            disconnect_ok = (
++                disconnected.returncode == 0
++                and reloaded.returncode == 0
++                and restored.get("userAddedAfterConnect") is True
++                and restored.get("env") == {"KEEP": "yes"}
++                and restored.get("permissions") == {"allow": []}
++                and data_token not in settings.read_text(encoding="utf-8")
++            )
++            profile_ok = preview_ok and applied is not None and applied.returncode == 0
++            result["profile_load"] = {
++                "status": "verified" if profile_ok and wire_ok else "failed",
++                "reviewed_connect": preview_ok,
++                "installed_client_used_base_model_and_header": wire_ok,
++                "without_driver_auth_environment": {
++                    "status": "verified" if header_only_ok else "unsupported",
++                    "exit_code": header_only_exit,
++                    "timed_out": header_only_timed_out,
++                    "upstream_attempts": header_only_calls,
++                },
++            }
++            result["selection"] = {
++                "status": "verified" if wire_ok else "failed",
++                "selected_model": "example-model",
++                "root": "claude-work",
++            }
++            result["inference"] = {
++                "status": "verified" if inference.returncode == 0 and wire_ok else "failed",
++                "upstream_attempts": len(fixture.observations),
++            }
++            result["tools"] = {
++                "status": "verified" if tool_ok else "failed",
++                "observed_read_tool_call": observed_read,
++                "requested_path_matches": observed_read,
++                "successful_exact_synthetic_result_in_followup": (
++                    fixture.observations[1]["tool_result_matches"]
++                    if len(fixture.observations) > 1
++                    else False
++                ),
++                "subsequent_model_request": len(fixture.observations) == 2,
++            }
++            result["wire"] = {
++                "status": "verified" if wire_ok else "failed",
++                "path": "/r/claude-work/v1/messages -> /team/v1/messages",
++                "local_token_stripped_upstream": wire_ok,
++                "x_api_key_stripped_upstream": wire_ok,
++                "authorization_absent_upstream": wire_ok,
++            }
++            result["gateway_off"] = {
++                "status": "expected_failure_verified" if negative_ok else "failed",
++                "upstream_attempts": len(fixture.observations) - attempts_before,
++                "client_timed_out_after_gateway_off": negative_timed_out,
++                "counted_as_positive": False,
++            }
++            result["disconnect"] = {
++                "status": "verified" if disconnect_ok else "failed",
++                "unrelated_user_addition_preserved": restored.get("userAddedAfterConnect") is True,
++                "managed_env_removed": restored.get("env") == {"KEEP": "yes"},
++                "installed_client_reload": reloaded.returncode == 0,
++            }
++            result["passed"] = profile_ok and wire_ok and tool_ok and negative_ok and disconnect_ok
++        finally:
++            if gateway.poll() is None:
++                cleanup = probe_pi.stop_gateway(gateway, gateway_port, control_token)
++            fixture.close()
++    result["cleanup"] = {"gateway": cleanup, "temporary_directory": "TemporaryDirectory reaped"}
++    result["finished_at"] = now()
++    write(output, result)
++    return 0 if result["passed"] else 2
++
++
++def codex_profile_load(binary: Path, output: Path, executable: Path) -> int:
++    version, version_error = installed_version("codex", executable)
++    result: dict[str, Any] = {
++        "schema_version": 1,
++        "client": "codex",
++        "started_at": now(),
++        "binary": str(binary),
++        "binary_sha256": probe_pi.sha256(binary),
++        "installed_executable": str(executable),
++        "installed_version": version,
++        "version_error": version_error,
++        "override_scope": "temporary HOME and CODEX_HOME",
++        "protocol": "OpenAI Responses with WebSocket disabled",
++        "listing": {"status": "pending"},
++        "selection": {"status": "pending"},
++        "inference": {"status": "pending"},
++        "tools": {"status": "pending"},
++        "profile_load": {"status": "pending"},
++        "disconnect": {"status": "pending"},
++        "passed": False,
++        "supported_profile_only": True,
++    }
++    write(output, result)
++    if version != "0.154.0":
++        result["profile_load"] = {
++            "status": "unsupported",
++            "reason": "installed version does not match the supported 0.154.0 profile",
++        }
++        result["disconnect"] = {"status": "not_run"}
++        result["finished_at"] = now()
++        write(output, result)
++        return 2
++
++    cleanup = "not_started"
++    with tempfile.TemporaryDirectory(prefix="llmgw-codex-profile-") as temporary:
++        root = Path(temporary)
++        home = root / "client-home"
++        codex_home = home / ".codex"
++        gateway_dir = root / "gateway"
++        cwd = root / "empty-work"
++        for directory in (codex_home, gateway_dir, cwd):
++            directory.mkdir(parents=True, mode=0o700)
++        tool_path = cwd / "synthetic-read.txt"
++        probe_pi.write_private(tool_path, CODEX_TOOL_CONTENT)
++        fixture = CodexFixture(tool_path)
++        profile = codex_home / "llmgw.config.toml"
++        probe_pi.write_private(profile, "this is deliberately invalid = [\n")
++        control_environment = isolated_environment(root, home, "codex", codex_home)
++        malformed = subprocess.run(
++            [str(executable), "--profile", "llmgw", "mcp", "list"],
++            cwd=cwd,
++            env=control_environment,
++            capture_output=True,
++            timeout=10,
++        )
++        probe_pi.write_private(profile, 'notify = ["keep"]\n')
++        gateway_port = probe_pi.reserve_loopback_port()
++        config = gateway_dir / "config.toml"
++        probe_pi.write_private(
++            config,
++            f'''listen = "127.0.0.1:{gateway_port}"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++
++[upstream]
++api_base = "http://127.0.0.1:{fixture.port}/team/v1"
++
++[upstream.auth]
++mode = "none"
++
++[quota.rpm]
++kind = "unlimited"
++
++[quota.tpm]
++kind = "unknown"
++
++[[models]]
++id = "example-model"
++
++[[roots]]
++id = "codex-work"
++endpoints = ["responses"]
++models = ["example-model"]
++''',
++        )
++        state_dir = Path(
++            json.loads(
++                subprocess.check_output(
++                    [str(binary), "doctor", "--config", str(config), "--json"], timeout=10
++                )
++            )["state_directory"]
++        )
++        state_dir.mkdir(mode=0o700)
++        data_token = "task4-codex-data-" + os.urandom(18).hex()
++        control_token = "task4-codex-control-" + os.urandom(18).hex()
++        probe_pi.write_private(state_dir / "data-token", data_token)
++        probe_pi.write_private(state_dir / "control-token", control_token)
++        environment = isolated_environment(root, home, "codex", codex_home)
++        gateway = subprocess.Popen(
++            [str(binary), "run", "--config", str(config)],
++            cwd=cwd,
++            env=environment,
++            stdout=subprocess.DEVNULL,
++            stderr=subprocess.DEVNULL,
++        )
++        try:
++            probe_pi.wait_for_gateway(gateway, gateway_port, control_token)
++            connect = [
++                str(binary), "--config", str(config), "connect", "codex",
++                "--client-executable", str(executable), "--client-home", str(home),
++                "--root", "codex-work", "--model", "example-model",
++            ]
++            preview = subprocess.run(
++                connect, env=environment, capture_output=True, text=True, timeout=10
++            )
++            reviewed_hash = next(
++                (line.removeprefix("preview hash: ") for line in preview.stdout.splitlines()
++                 if line.startswith("preview hash: ")),
++                None,
++            )
++            preview_ok = (
++                preview.returncode == 0
++                and reviewed_hash is not None
++                and data_token not in preview.stdout
++                and data_token not in preview.stderr
++            )
++            applied = subprocess.run(
++                [*connect, "--apply-hash", str(reviewed_hash)],
++                env=environment,
++                capture_output=True,
++                text=True,
++                timeout=10,
++            ) if preview_ok else None
++            codex_environment = environment.copy()
++            loaded = subprocess.run(
++                [str(executable), "--profile", "llmgw", "mcp", "list"],
++                cwd=cwd,
++                env=codex_environment,
++                capture_output=True,
++                timeout=10,
++            )
++            exec_command = [
++                str(executable),
++                "--profile",
++                "llmgw",
++                "exec",
++                "--skip-git-repo-check",
++                "--ephemeral",
++                "--ignore-rules",
++                "--disable",
++                "plugins",
++                "--disable",
++                "remote_plugin",
++                "--disable",
++                "apps",
++                "--sandbox",
++                "read-only",
++                "--json",
++                "-C",
++                str(cwd),
++                f"Read only the exact synthetic file {tool_path} and report the fixture result.",
++            ]
++            inference = subprocess.run(
++                exec_command,
++                cwd=cwd,
++                env=codex_environment,
++                capture_output=True,
++                timeout=20,
++            )
++            tool_ok = (
++                inference.returncode == 0
++                and CODEX_TOOL_MARKER.encode() in inference.stdout
++                and len(fixture.observations) == 2
++                and fixture.observations[1]["tool_output_matches"]
++                and json_lines_contain_tool_call(
++                    inference.stdout,
++                    "exec_command",
++                    f"cat {shlex.quote(str(tool_path))}",
++                )
++            )
++            wire_ok = len(fixture.observations) == 2 and all(
++                observation[key]
++                for observation in fixture.observations
++                for key in (
++                    "path_matches",
++                    "model_matches",
++                    "stream_enabled",
++                    "local_data_token_absent",
++                    "authorization_absent",
++                )
++            )
++            cleanup = probe_pi.stop_gateway(gateway, gateway_port, control_token)
++            negative_attempts_before = len(fixture.observations)
++            try:
++                negative = subprocess.run(
++                    exec_command,
++                    cwd=cwd,
++                    env=codex_environment,
++                    capture_output=True,
++                    timeout=8,
++                )
++                negative_failed = negative.returncode != 0
++                negative_timed_out = False
++            except subprocess.TimeoutExpired:
++                negative_failed = True
++                negative_timed_out = True
++            negative_ok = (
++                negative_failed and len(fixture.observations) == negative_attempts_before
++            )
++            profile.write_text(
++                "user_added_after_connect = true\n" + profile.read_text(encoding="utf-8"),
++                encoding="utf-8",
++            )
++            profile.chmod(0o600)
++            disconnected = subprocess.run(
++                [str(binary), "--config", str(config), "disconnect", "codex"],
++                env=environment,
++                capture_output=True,
++                text=True,
++                timeout=10,
++            )
++            restored_text = profile.read_text(encoding="utf-8")
++            reloaded = subprocess.run(
++                [str(executable), "--profile", "llmgw", "mcp", "list"],
++                cwd=cwd,
++                env=codex_environment,
++                capture_output=True,
++                timeout=10,
++            )
++            profile_ok = (
++                malformed.returncode != 0
++                and preview_ok
++                and applied is not None
++                and applied.returncode == 0
++                and loaded.returncode == 0
++            )
++            disconnect_ok = (
++                disconnected.returncode == 0
++                and reloaded.returncode == 0
++                and "user_added_after_connect = true" in restored_text
++                and "llmgw" not in restored_text
++                and data_token not in restored_text
++            )
++            result["profile_load"] = {
++                "status": "verified" if profile_ok else "failed",
++                "named_profile_parse_control": malformed.returncode != 0,
++                "reviewed_connect": preview_ok,
++                "installed_client_load": loaded.returncode == 0,
++            }
++            result["listing"] = {
++                "status": "unverified",
++                "reason": "the gateway model list is not a Codex catalog",
++            }
++            result["selection"] = {
++                "status": "verified" if wire_ok else "failed",
++                "selected_model": "example-model",
++                "root": "codex-work",
++            }
++            result["inference"] = {
++                "status": "verified" if inference.returncode == 0 and wire_ok else "failed",
++                "upstream_attempts": len(fixture.observations),
++            }
++            result["tools"] = {
++                "status": "verified" if tool_ok else "failed",
++                "observed_exec_command_call": json_lines_contain_tool_call(
++                    inference.stdout,
++                    "exec_command",
++                    f"cat {shlex.quote(str(tool_path))}",
++                ),
++                "exact_synthetic_result_in_followup": fixture.observations[1]["tool_output_matches"]
++                if len(fixture.observations) > 1
++                else False,
++                "subsequent_model_request": len(fixture.observations) == 2,
++            }
++            result["wire"] = {
++                "status": "verified" if wire_ok else "failed",
++                "path": "/r/codex-work/v1/responses -> /team/v1/responses",
++                "local_token_stripped_upstream": wire_ok,
++                "authorization_absent_upstream": wire_ok,
++            }
++            result["gateway_off"] = {
++                "status": "expected_failure_verified" if negative_ok else "failed",
++                "upstream_attempts": len(fixture.observations) - negative_attempts_before,
++                "client_timed_out_after_gateway_off": negative_timed_out,
++                "counted_as_positive": False,
++            }
++            result["disconnect"] = {
++                "status": "verified" if disconnect_ok else "failed",
++                "unrelated_user_addition_preserved": "user_added_after_connect = true" in restored_text,
++                "managed_provider_removed": "llmgw" not in restored_text,
++                "installed_client_reload": reloaded.returncode == 0,
++            }
++            actual_ok = profile_ok and disconnect_ok and tool_ok and wire_ok and negative_ok
++            result["passed"] = actual_ok
++            result["supported_profile_only"] = not actual_ok
++        finally:
++            if gateway.poll() is None:
++                cleanup = probe_pi.stop_gateway(gateway, gateway_port, control_token)
++            fixture.close()
++    result["cleanup"] = {"gateway": cleanup, "temporary_directory": "TemporaryDirectory reaped"}
++    result["finished_at"] = now()
++    write(output, result)
++    return 0 if result["passed"] else 2
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--binary", type=Path, required=True)
++    parser.add_argument("--client", choices=("pi", "claude", "codex"), required=True)
++    parser.add_argument("--client-executable")
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    binary = args.binary.resolve(strict=True)
++    if args.client == "pi":
++        return verify_pi(binary, args.output, args.client_executable)
++    default = Path("/opt/homebrew/bin/claude" if args.client == "claude" else "/opt/homebrew/bin/codex")
++    executable = Path(args.client_executable).resolve() if args.client_executable else default
++    if args.client == "codex":
++        return codex_profile_load(binary, args.output, executable)
++    return verify_claude(binary, args.output, executable)
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- Task3/product/src/cli.rs
++++ Task4/product/src/cli.rs
+@@ -1,9 +1,10 @@
+ use crate::config::LoadedConfig;
+ use clap::{Parser, Subcommand};
+ use std::{
++    collections::BTreeMap,
+     io::IsTerminal,
+     path::{Path, PathBuf},
+-    process::ExitCode,
++    process::{Command as ProcessCommand, ExitCode},
+ };
+ #[derive(Debug, Parser)]
+ #[command(
+@@ -49,6 +50,46 @@
+         #[arg(long, requires = "inference", required_if_eq("inference", "true"), value_parser = clap::value_parser!(u64).range(1..))]
+         max_output_tokens: Option<u64>,
+     },
++    /// Preview or apply a reviewed native client profile.
++    Connect {
++        #[arg(value_parser = ["pi", "claude", "codex"])]
++        client: String,
++        #[arg(long, value_name = "PATH")]
++        client_executable: Option<PathBuf>,
++        #[arg(long, value_name = "DIR")]
++        client_home: Option<PathBuf>,
++        /// Exact native config directory; overrides --client-home and native environment variables.
++        #[arg(long, value_name = "DIR", conflicts_with = "client_home")]
++        client_config_dir: Option<PathBuf>,
++        #[arg(long)]
++        root: String,
++        #[arg(long)]
++        model: String,
++        #[arg(long)]
++        apply_hash: Option<String>,
++        /// Explicitly start or restart the saved gateway before applying the client patch.
++        #[arg(long, requires = "apply_hash")]
++        restart: bool,
++        #[arg(long)]
++        no_default: bool,
++        #[arg(long)]
++        discover_models: bool,
++        #[arg(long, value_name = "DIR")]
++        project_dir: Option<PathBuf>,
++        #[arg(long, requires = "project_dir")]
++        confirm_private_project: bool,
++        #[arg(long, requires = "project_dir")]
++        confirm_untracked: bool,
++        #[arg(long, value_name = "PATH")]
++        managed_settings: Vec<PathBuf>,
++    },
++    /// Restore only values still equal to the selected llmgw client profile.
++    Disconnect {
++        #[arg(value_parser = ["pi", "claude", "codex"])]
++        client: String,
++        #[arg(long, value_name = "PATH")]
++        journal: Option<PathBuf>,
++    },
+     #[command(hide = true)]
+     Worker {
+         #[arg(long)]
+@@ -83,12 +124,31 @@
+         return match crate::setup::run_wizard(&mut prompts, existing.as_ref())? {
+             crate::setup::SetupOutcome::Cancelled => Ok(crate::setup::cancelled_exit()),
+             crate::setup::SetupOutcome::Ready { draft, mode } => {
++                let selected_clients = draft.clients().to_vec();
++                let default_root = draft.config().roots.first().map(|root| root.id.clone());
++                let default_model = draft.config().models.first().map(|model| model.id.clone());
+                 let result = crate::setup::apply(&config, &draft, mode)?;
+                 println!(
+-                    "apply: {:?}; runtime: {}; authenticated readiness: {}",
++                    "gateway config stage: applied ({:?}); runtime: {}; authenticated readiness: {}",
+                     result.mode, result.runtime_state, result.authenticated_readiness
+                 );
+-                Ok(ExitCode::SUCCESS)
++                if !result.authenticated_readiness {
++                    for client in selected_clients {
++                        if !matches!(client, crate::setup::ClientIntent::Manual) {
++                            println!(
++                                "client stage {client:?}: pending; save-only never points clients at an unfinished route"
++                            );
++                        }
++                    }
++                    return Ok(ExitCode::SUCCESS);
++                }
++                let Some(root) = default_root else {
++                    return Err(std::io::Error::other("setup has no configured root").into());
++                };
++                let Some(model) = default_model else {
++                    return Err(std::io::Error::other("setup has no configured model").into());
++                };
++                setup_selected_clients(&config, &selected_clients, &root, &model)
+             }
+         };
+     }
+@@ -125,6 +185,45 @@
+             model.as_deref(),
+             max_output_tokens,
+         );
++    }
++    if let Command::Connect {
++        client,
++        client_executable,
++        client_home,
++        client_config_dir,
++        root,
++        model,
++        apply_hash,
++        restart,
++        no_default,
++        discover_models,
++        project_dir,
++        confirm_private_project,
++        confirm_untracked,
++        managed_settings,
++    } = command
++    {
++        return connect(ConnectArgs {
++            config,
++            client,
++            client_executable,
++            client_home,
++            client_config_dir,
++            root,
++            model,
++            apply_hash,
++            restart,
++            no_default,
++            discover_models,
++            project_dir,
++            confirm_private_project,
++            confirm_untracked,
++            managed_settings,
++            interactive_apply: false,
++        });
++    }
++    if let Command::Disconnect { client, journal } = command {
++        return disconnect(&config, &client, journal.as_deref());
+     }
+     if matches!(command, Command::Worker { .. }) {
+         crate::lifecycle::prepare_worker()?;
+@@ -164,8 +263,9 @@
+             }
+             Command::Status { .. } => crate::lifecycle::status(&config).await,
+             Command::Doctor { .. } => unreachable!(),
++            Command::Connect { .. } | Command::Disconnect { .. } => unreachable!(),
+         };
+-        let value = match result {
++        let mut value = match result {
+             Ok(value) => value,
+             Err(error) => {
+                 if json { println!("{}", serde_json::json!({"state":"failed", "error":error.to_string(), "autostart":"not_implemented", "clients":"not_implemented"})); }
+@@ -179,9 +279,438 @@
+                 return Err(error);
+             }
+         };
++        if matches!(command, Command::Status { .. }) {
++            if let Ok(clients) = client_statuses(&config) {
++                value["clients"] = clients;
++            }
++        }
+         if json { println!("{value}"); } else { display(&value, off); }
+         Ok(ExitCode::SUCCESS)
+     })
++}
++
++struct ConnectArgs {
++    config: PathBuf,
++    client: String,
++    client_executable: Option<PathBuf>,
++    client_home: Option<PathBuf>,
++    client_config_dir: Option<PathBuf>,
++    root: String,
++    model: String,
++    apply_hash: Option<String>,
++    restart: bool,
++    no_default: bool,
++    discover_models: bool,
++    project_dir: Option<PathBuf>,
++    confirm_private_project: bool,
++    confirm_untracked: bool,
++    managed_settings: Vec<PathBuf>,
++    interactive_apply: bool,
++}
++
++fn connect(args: ConnectArgs) -> Result<ExitCode, crate::lifecycle::Error> {
++    use crate::clients::{
++        ClientKind, ModelMetadata, ProfileRequest, ProjectLocalApproval, Protocol,
++    };
++    let loaded = LoadedConfig::load(&args.config)?;
++    if matches!(loaded.config.upstream.auth, crate::config::Auth::Forward) {
++        return Err(std::io::Error::other(
++            "automatic client connection is unsupported with upstream auth=forward because existing client subscription or placeholder credentials could reach an arbitrary upstream; configure the client manually",
++        )
++        .into());
++    }
++    let client: ClientKind = args.client.parse()?;
++    let protocol = match client {
++        ClientKind::Pi => Protocol::OpenAiCompletions,
++        ClientKind::Claude => Protocol::AnthropicMessages,
++        ClientKind::Codex => Protocol::OpenAiResponses,
++    };
++    let endpoint = match protocol {
++        Protocol::OpenAiCompletions => crate::config::Endpoint::ChatCompletions,
++        Protocol::AnthropicMessages => crate::config::Endpoint::Messages,
++        Protocol::OpenAiResponses => crate::config::Endpoint::Responses,
++    };
++    let draft = crate::setup::SetupDraft::from_loaded(&loaded)?.ensure_client_route(
++        &args.root,
++        &args.model,
++        endpoint,
++    )?;
++    let config_changed = draft.config() != &loaded.config;
++    let desired_config = draft.config().clone();
++    let desired_bytes = draft.render_config()?;
++    let desired_fingerprint =
++        crate::config::ConfigFingerprint::from_bytes(desired_bytes.as_bytes());
++    let route = desired_config
++        .roots
++        .iter()
++        .find(|route| route.id == args.root)
++        .expect("ensure_client_route creates the selected root");
++    if !route.endpoints.contains(&endpoint) {
++        return Err(std::io::Error::other(format!(
++            "selected root does not contain required {} endpoint; update and review gateway config first",
++            endpoint.path()
++        ))
++        .into());
++    }
++    if !route.models.iter().any(|model| model == &args.model)
++        || !desired_config
++            .models
++            .iter()
++            .any(|model| model.id == args.model)
++    {
++        return Err(std::io::Error::other(
++            "selected model is not present in both the configured root and model catalog",
++        )
++        .into());
++    }
++    let location = resolve_client_location(client, args.client_home, args.client_config_dir)?;
++    let executable = args
++        .client_executable
++        .unwrap_or_else(|| PathBuf::from(client.as_str()));
++    let version = installed_version(client, &executable, &location)?;
++    let token_bytes = crate::server::read_secret_file(&loaded.state_paths.data_token)?;
++    let local_data_token = String::from_utf8(token_bytes)
++        .map_err(|_| std::io::Error::other("gateway data token is not UTF-8"))?;
++    let local_data_token = local_data_token.trim().to_owned();
++    if local_data_token.is_empty() {
++        return Err(std::io::Error::other("gateway data token is empty").into());
++    }
++    let effective_environment = relevant_environment(client);
++    let project_local = args.project_dir.map(|directory| ProjectLocalApproval {
++        directory,
++        user_private_confirmed: args.confirm_private_project,
++        untracked_confirmed: args.confirm_untracked,
++    });
++    let request = ProfileRequest {
++        client,
++        installed_version: version,
++        config_dir: location.config_dir,
++        config_dir_source: location.source,
++        project_local,
++        gateway_origin: format!("http://{}", desired_config.listen),
++        gateway_fingerprint: desired_fingerprint.as_str().to_owned(),
++        root: args.root,
++        model: args.model,
++        protocol,
++        local_data_token,
++        token_source: loaded.state_paths.data_token.clone(),
++        journal_path: loaded
++            .state_paths
++            .directory
++            .join("clients")
++            .join(format!("{}.journal.json", client.as_str())),
++        set_default: !args.no_default,
++        discover_models: args.discover_models,
++        metadata: ModelMetadata {
++            context_window: None,
++            max_output_tokens: None,
++            reasoning: crate::clients::Verification::Unverified,
++            tools: crate::clients::Verification::Unverified,
++        },
++        effective_environment,
++        managed_settings: managed_settings(client, args.managed_settings),
++    };
++    let plan = crate::clients::prepare(&request)?;
++    let config_impact = crate::setup::runtime_impact(&loaded.source_path, &draft)?;
++    let runtime = tokio::runtime::Builder::new_multi_thread()
++        .enable_all()
++        .build()?;
++    let status = runtime.block_on(crate::lifecycle::status(&loaded.source_path))?;
++    if config_changed {
++        println!(
++            "gateway config stage preview:\n  config: {}\n  listen: {}\n  fixed route: root={} model={} endpoint={}\n  desired fingerprint: {}\n  runtime impact: {:?}",
++            loaded.source_path.display(),
++            desired_config.listen,
++            request.root,
++            request.model,
++            endpoint.path(),
++            desired_fingerprint.as_str(),
++            config_impact,
++        );
++    }
++    let runtime_impact = runtime_impact_label(&status, desired_fingerprint.as_str());
++    println!("{}", plan.preview().text);
++    println!("runtime impact: {runtime_impact}");
++    let reviewed_hash = if args.interactive_apply {
++        if !dialoguer::Confirm::new()
++            .with_prompt(format!(
++                "Apply the exact {} client preview with hash {}?",
++                client,
++                plan.preview().hash
++            ))
++            .default(false)
++            .interact()?
++        {
++            println!("client stage {client}: pending; client files were unchanged");
++            return Ok(ExitCode::from(2));
++        }
++        plan.preview().hash.clone()
++    } else {
++        let Some(reviewed_hash) = args.apply_hash else {
++            println!("preview only: gateway and client files were unchanged");
++            return Ok(ExitCode::SUCCESS);
++        };
++        reviewed_hash
++    };
++    crate::clients::validate_reviewed_hash(&plan, &reviewed_hash)?;
++    crate::clients::validate_current_snapshot(&plan)?;
++    if config_changed {
++        if !args.restart {
++            return Err(std::io::Error::other(
++                "gateway config stage is pending: apply requires the exact reviewed client hash and --restart before any client patch",
++            )
++            .into());
++        }
++        let applied = crate::setup::apply(
++            &loaded.source_path,
++            &draft,
++            config_impact.save_and_start_mode(),
++        )?;
++        if !applied.authenticated_readiness {
++            return Err(std::io::Error::other(
++                "gateway config was saved without authenticated readiness; client files are unchanged",
++            )
++            .into());
++        }
++        println!(
++            "gateway config stage: applied; authenticated fingerprint {}",
++            desired_fingerprint.as_str()
++        );
++    }
++    let ready = config_changed
++        || (status["state"] == "running"
++            && status["identity"]["fingerprint"].as_str() == Some(desired_fingerprint.as_str()));
++    if !ready {
++        if !args.restart {
++            return Err(std::io::Error::other(
++                "client patch is pending: run connect again with the exact reviewed hash and --restart after reviewing runtime impact",
++            )
++            .into());
++        }
++        let activated = if status["state"] == "running" {
++            runtime.block_on(crate::lifecycle::restart_expected(
++                &loaded.source_path,
++                desired_fingerprint.as_str(),
++            ))?
++        } else {
++            runtime.block_on(crate::lifecycle::on_expected(
++                &loaded.source_path,
++                desired_fingerprint.as_str(),
++            ))?
++        };
++        if activated["state"] != "running"
++            || activated["identity"]["fingerprint"].as_str() != Some(desired_fingerprint.as_str())
++        {
++            return Err(std::io::Error::other(
++                "authenticated readiness for the reviewed gateway config was not established; client files are unchanged",
++            )
++            .into());
++        }
++    }
++    let report = crate::clients::apply_reviewed(&plan, &reviewed_hash)?;
++    println!("client patch: applied; {}", report.summary);
++    Ok(ExitCode::SUCCESS)
++}
++
++fn installed_version(
++    client: crate::clients::ClientKind,
++    executable: &Path,
++    location: &ClientLocation,
++) -> Result<String, crate::lifecycle::Error> {
++    let mut command = ProcessCommand::new(executable);
++    command
++        .arg("--version")
++        .env("HOME", &location.base_home)
++        .env("USERPROFILE", &location.base_home);
++    match client {
++        crate::clients::ClientKind::Pi => {
++            command.env("PI_CODING_AGENT_DIR", &location.config_dir);
++        }
++        crate::clients::ClientKind::Claude => {
++            command.env("CLAUDE_CONFIG_DIR", &location.config_dir);
++        }
++        crate::clients::ClientKind::Codex => {
++            command.env("CODEX_HOME", &location.config_dir);
++        }
++    }
++    let output = command.output()?;
++    if !output.status.success() {
++        return Err(std::io::Error::other("client --version failed").into());
++    }
++    let stdout = String::from_utf8(output.stdout)
++        .map_err(|_| std::io::Error::other("client --version output is not UTF-8"))?;
++    stdout
++        .split_whitespace()
++        .find(|word| {
++            word.chars()
++                .next()
++                .is_some_and(|character| character.is_ascii_digit())
++        })
++        .map(|word| {
++            word.trim_matches(|character: char| !character.is_ascii_digit() && character != '.')
++                .to_owned()
++        })
++        .filter(|value| !value.is_empty())
++        .ok_or_else(|| std::io::Error::other("client --version did not contain a version").into())
++}
++
++struct ClientLocation {
++    base_home: PathBuf,
++    config_dir: PathBuf,
++    source: String,
++}
++
++fn resolve_client_location(
++    client: crate::clients::ClientKind,
++    explicit_home: Option<PathBuf>,
++    explicit_config_dir: Option<PathBuf>,
++) -> Result<ClientLocation, crate::lifecycle::Error> {
++    let environment_home = std::env::var_os("HOME")
++        .or_else(|| std::env::var_os("USERPROFILE"))
++        .map(PathBuf::from);
++    let native_name = match client {
++        crate::clients::ClientKind::Pi => "PI_CODING_AGENT_DIR",
++        crate::clients::ClientKind::Claude => "CLAUDE_CONFIG_DIR",
++        crate::clients::ClientKind::Codex => "CODEX_HOME",
++    };
++    let suffix = match client {
++        crate::clients::ClientKind::Pi => Path::new(".pi/agent"),
++        crate::clients::ClientKind::Claude => Path::new(".claude"),
++        crate::clients::ClientKind::Codex => Path::new(".codex"),
++    };
++    let current_config_dir = if let Some(path) = std::env::var_os(native_name) {
++        Some(std::path::absolute(PathBuf::from(path))?)
++    } else if let Some(home) = &environment_home {
++        Some(std::path::absolute(home)?.join(suffix))
++    } else {
++        None
++    };
++    let explicit_home = explicit_home.map(std::path::absolute).transpose()?;
++    let (config_dir, source) = if let Some(path) = explicit_config_dir {
++        (std::path::absolute(path)?, "--client-config-dir".to_owned())
++    } else if let Some(home) = &explicit_home {
++        (home.join(suffix), "--client-home".to_owned())
++    } else if let Some(path) = std::env::var_os(native_name) {
++        (
++            std::path::absolute(PathBuf::from(path))?,
++            format!("{native_name} environment"),
++        )
++    } else if let Some(home) = &environment_home {
++        (
++            std::path::absolute(home)?.join(suffix),
++            if std::env::var_os("HOME").is_some() {
++                "HOME default".to_owned()
++            } else {
++                "USERPROFILE default".to_owned()
++            },
++        )
++    } else {
++        return Err(std::io::Error::other(
++            "client location is unavailable; pass --client-home or --client-config-dir",
++        )
++        .into());
++    };
++    let base_home = explicit_home
++        .or(environment_home)
++        .unwrap_or_else(|| config_dir.clone());
++    let source = if current_config_dir.as_ref() == Some(&config_dir) {
++        source
++    } else {
++        format!(
++            "{source}; later client launches must set {native_name}={}",
++            config_dir.display()
++        )
++    };
++    Ok(ClientLocation {
++        base_home,
++        config_dir,
++        source,
++    })
++}
++
++fn relevant_environment(client: crate::clients::ClientKind) -> BTreeMap<String, String> {
++    let names: &[&str] = match client {
++        crate::clients::ClientKind::Pi => &[],
++        crate::clients::ClientKind::Claude => &[
++            "ANTHROPIC_BASE_URL",
++            "ANTHROPIC_MODEL",
++            "ANTHROPIC_CUSTOM_HEADERS",
++            "ANTHROPIC_API_KEY",
++            "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
++        ],
++        crate::clients::ClientKind::Codex => &[],
++    };
++    names
++        .iter()
++        .filter_map(|name| {
++            std::env::var(name)
++                .ok()
++                .map(|value| ((*name).to_owned(), value))
++        })
++        .collect()
++}
++
++fn managed_settings(
++    client: crate::clients::ClientKind,
++    mut supplied: Vec<PathBuf>,
++) -> Vec<PathBuf> {
++    if client != crate::clients::ClientKind::Claude {
++        return supplied;
++    }
++    #[cfg(target_os = "macos")]
++    supplied.push(PathBuf::from(
++        "/Library/Application Support/ClaudeCode/managed-settings.json",
++    ));
++    #[cfg(all(unix, not(target_os = "macos")))]
++    supplied.push(PathBuf::from("/etc/claude-code/managed-settings.json"));
++    #[cfg(windows)]
++    if let Some(program_data) = std::env::var_os("ProgramData") {
++        supplied.push(PathBuf::from(program_data).join("ClaudeCode/managed-settings.json"));
++    }
++    supplied.sort();
++    supplied.dedup();
++    supplied
++}
++
++fn runtime_impact_label(status: &serde_json::Value, fingerprint: &str) -> &'static str {
++    match status["state"].as_str() {
++        Some("running") if status["identity"]["fingerprint"].as_str() == Some(fingerprint) => {
++            "running with the reviewed config; no restart required"
++        }
++        Some("running") => {
++            "running with another config; explicit restart required before client patch"
++        }
++        Some("stopped") => "stopped; activation required before client patch",
++        _ => "unverified; client patch is blocked",
++    }
++}
++
++fn disconnect(
++    config: &Path,
++    client: &str,
++    journal: Option<&Path>,
++) -> Result<ExitCode, crate::lifecycle::Error> {
++    let client: crate::clients::ClientKind = client.parse()?;
++    let journal = match journal {
++        Some(path) => std::path::absolute(path)?,
++        None => LoadedConfig::load(config)?
++            .state_paths
++            .directory
++            .join("clients")
++            .join(format!("{}.journal.json", client.as_str())),
++    };
++    let report = crate::clients::disconnect(&journal)?;
++    println!("disconnect {}: {}", client, report.summary);
++    if !report.conflicts.is_empty() {
++        println!("conflicts preserved: {}", report.conflicts.len());
++    }
++    if !report.preserved_created_files.is_empty() {
++        println!(
++            "user-changed created files preserved: {}",
++            report.preserved_created_files.len()
++        );
++    }
++    Ok(ExitCode::SUCCESS)
+ }
+ 
+ fn invalid_config(error: &crate::config::ConfigError) -> bool {
+@@ -371,9 +900,112 @@
+             admission["active"]
+         );
+     }
++    if let Some(clients) = value.get("clients").and_then(serde_json::Value::as_object) {
++        for (client, state) in clients {
++            println!(
++                "client {client}: {}",
++                state["state"].as_str().unwrap_or("unknown")
++            );
++        }
++    }
+     if off {
+         println!(
+-            "Client URLs and next-login settings are preserved; use on to reconnect. Autostart and client adapters: not implemented; existing external settings: unknown."
++            "Client URLs remain configured while the gateway is off. Run `llmgw on` or `llmgw disconnect <client>`; autostart intent is preserved."
+         );
+     }
+ }
++
++fn setup_selected_clients(
++    config: &Path,
++    selected: &[crate::setup::ClientIntent],
++    root: &str,
++    model: &str,
++) -> Result<ExitCode, crate::lifecycle::Error> {
++    use dialoguer::Input;
++    let mut failed = false;
++    for intent in selected {
++        let client_kind = match intent {
++            crate::setup::ClientIntent::Pi => crate::clients::ClientKind::Pi,
++            crate::setup::ClientIntent::ClaudeCode => crate::clients::ClientKind::Claude,
++            crate::setup::ClientIntent::Codex => crate::clients::ClientKind::Codex,
++            crate::setup::ClientIntent::Manual => {
++                println!(
++                    "client stage manual: pending; use the reviewed public route and local data-token header"
++                );
++                continue;
++            }
++        };
++        let client = client_kind.as_str();
++        let default_location = resolve_client_location(client_kind, None, None)?;
++        let config_dir: String = Input::new()
++            .with_prompt(format!(
++                "Native config directory for {client}; this exact path will be previewed"
++            ))
++            .default(default_location.config_dir.display().to_string())
++            .interact_text()?;
++        let chosen_config_dir = std::path::absolute(PathBuf::from(config_dir))?;
++        let explicit_config_dir =
++            (chosen_config_dir != default_location.config_dir).then_some(chosen_config_dir);
++        let base = ConnectArgs {
++            config: config.to_owned(),
++            client: client.into(),
++            client_executable: None,
++            client_home: None,
++            client_config_dir: explicit_config_dir,
++            root: root.into(),
++            model: model.into(),
++            apply_hash: None,
++            restart: true,
++            no_default: false,
++            discover_models: false,
++            project_dir: None,
++            confirm_private_project: false,
++            confirm_untracked: false,
++            managed_settings: Vec::new(),
++            interactive_apply: true,
++        };
++        match connect(base) {
++            Ok(code) if code == ExitCode::SUCCESS => {
++                println!("client stage {client}: applied and independently journaled");
++            }
++            Ok(_) => {
++                println!("client stage {client}: pending; gateway config remains applied");
++            }
++            Err(error) => {
++                eprintln!("client stage {client}: failed; gateway config remains applied: {error}");
++                failed = true;
++            }
++        }
++    }
++    Ok(if failed {
++        ExitCode::FAILURE
++    } else {
++        ExitCode::SUCCESS
++    })
++}
++
++fn client_statuses(config: &Path) -> Result<serde_json::Value, crate::lifecycle::Error> {
++    let loaded = LoadedConfig::load(config)?;
++    let mut statuses = serde_json::Map::new();
++    for client in ["pi", "claude", "codex"] {
++        let path = loaded
++            .state_paths
++            .directory
++            .join("clients")
++            .join(format!("{client}.journal.json"));
++        let value = if !path.exists() {
++            serde_json::json!({"state":"not_connected"})
++        } else {
++            match crate::config_patch::inspect_journal(&path) {
++                Ok(journal) => serde_json::json!({
++                    "state": format!("{:?}", journal.status).to_ascii_lowercase(),
++                    "resources": journal.resources.len(),
++                    "journal": path,
++                }),
++                Err(_) => serde_json::json!({"state":"invalid_journal","journal":path}),
++            }
++        };
++        statuses.insert(client.into(), value);
++    }
++    Ok(serde_json::Value::Object(statuses))
++}
+--- Task3/product/src/clients/claude.rs
++++ Task4/product/src/clients/claude.rs
+@@ -0,0 +1,296 @@
++use super::*;
++use serde_json::json;
++use std::process::Command;
++
++const CLIENT_AUTH_PLACEHOLDER: &str = "llmgw-local-only";
++
++const OWNED_ENV: [&str; 5] = [
++    "ANTHROPIC_BASE_URL",
++    "ANTHROPIC_MODEL",
++    "ANTHROPIC_CUSTOM_HEADERS",
++    "ANTHROPIC_API_KEY",
++    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
++];
++
++pub(super) fn patches(
++    request: &ProfileRequest,
++    config_dir: &Path,
++) -> Result<AdapterPatches, Error> {
++    version_is(&request.installed_version, "2.1.63", "Claude Code")?;
++    if request.protocol != Protocol::AnthropicMessages {
++        return Err(Error::message(
++            "Claude Code 2.1.63 requires anthropic_messages",
++        ));
++    }
++    if request.discover_models {
++        return Err(Error::message(
++            "Claude Code 2.1.63 model discovery is not verified; leave discovery off",
++        ));
++    }
++    for name in OWNED_ENV {
++        if request.effective_environment.contains_key(name) {
++            return Err(Error::message(format!(
++                "higher-priority environment {name} conflicts with the reviewed Claude settings"
++            )));
++        }
++    }
++    for managed in &request.managed_settings {
++        if managed_conflicts(managed)? {
++            return Err(Error::message(format!(
++                "managed policy {} controls an llmgw-owned Claude setting; the policy was not bypassed",
++                absolute(managed)?.display()
++            )));
++        }
++    }
++    let (path, scope, scope_check) = if let Some(project) = &request.project_local {
++        if !project.user_private_confirmed || !project.untracked_confirmed {
++            return Err(Error::message(
++                "Claude project-local token config requires explicit user-private and untracked confirmations",
++            ));
++        }
++        let path = absolute(&project.directory)?.join(".claude/settings.local.json");
++        validate_project_target(&project.directory, &path)?;
++        (
++            path.clone(),
++            Scope::UserPrivate,
++            ScopeCheck::ClaudeProject {
++                project: project.directory.clone(),
++                target: path,
++            },
++        )
++    } else {
++        let path = config_dir.join("settings.json");
++        validate_native_target(&path)?;
++        (
++            path.clone(),
++            Scope::UserPrivate,
++            ScopeCheck::ClaudeNative { target: path },
++        )
++    };
++    let existing_headers = existing_custom_headers(&path)?;
++    let headers = replace_llmgw_header(&existing_headers, &request.local_data_token);
++    let base = format!(
++        "{}/r/{}",
++        request.gateway_origin.trim_end_matches('/'),
++        request.root
++    );
++    let edits = vec![
++        set_public(&["env", "ANTHROPIC_BASE_URL"], json!(base))?,
++        set_public(&["env", "ANTHROPIC_MODEL"], json!(request.model))?,
++        set_token(&["env", "ANTHROPIC_CUSTOM_HEADERS"], &headers)?,
++        set_public(
++            &["env", "ANTHROPIC_API_KEY"],
++            json!(CLIENT_AUTH_PLACEHOLDER),
++        )?,
++    ];
++    Ok((
++        vec![patch(path, Format::StrictJson, edits, Vec::new())?],
++        base,
++        scope,
++        vec![
++            format!(
++                "ANTHROPIC_API_KEY={CLIENT_AUTH_PLACEHOLDER} is a reviewed client-availability placeholder, not upstream authentication; gateway auth none/env strips it before upstream"
++            ),
++            "model listing was not requested; configured selection, inference, and tools remain separate runtime results".into(),
++        ],
++        vec![scope_check],
++    ))
++}
++
++pub(super) fn validate_native_target(target: &Path) -> Result<(), Error> {
++    crate::config_patch::validate_local_token_target(target, target.exists())?;
++    let canonical_target = crate::config_patch::normalize_resource_path(target)?;
++    let Some(repository_hint) = git_repository_ancestor(&canonical_target)? else {
++        return Ok(());
++    };
++    validate_git_nonshared(&repository_hint, &canonical_target)
++}
++
++pub(super) fn validate_project_target(project: &Path, target: &Path) -> Result<(), Error> {
++    let project = absolute(project)?;
++    let metadata = fs::metadata(&project)
++        .map_err(|_| Error::message("Claude project-local directory could not be inspected"))?;
++    if !metadata.is_dir() {
++        return Err(Error::message(
++            "Claude project-local directory must be an existing ordinary directory",
++        ));
++    }
++    if fs::symlink_metadata(target)
++        .ok()
++        .is_some_and(|metadata| metadata.file_type().is_symlink())
++    {
++        return Err(Error::message(
++            "Claude project-local settings target must not be a symlink",
++        ));
++    }
++    crate::config_patch::validate_local_token_target(target, target.exists())?;
++    if let Some(parent) = target.parent().filter(|parent| parent.exists()) {
++        validate_private_directory(parent)?;
++    }
++
++    let canonical_target = crate::config_patch::normalize_resource_path(target)?;
++    validate_git_nonshared(&project, &canonical_target)
++}
++
++fn git_repository_ancestor(target: &Path) -> Result<Option<PathBuf>, Error> {
++    let parent = target
++        .parent()
++        .ok_or_else(|| Error::message("Claude settings target has no parent directory"))?;
++    for ancestor in parent.ancestors() {
++        match fs::symlink_metadata(ancestor.join(".git")) {
++            Ok(_) => return Ok(Some(ancestor.to_owned())),
++            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
++            Err(_) => {
++                return Err(Error::message(
++                    "Claude native settings repository scope could not be inspected",
++                ));
++            }
++        }
++    }
++    Ok(None)
++}
++
++fn validate_git_nonshared(directory: &Path, canonical_target: &Path) -> Result<(), Error> {
++    let top = git_output(directory, &["rev-parse", "--show-toplevel"])?;
++    if !top.status.success() {
++        return Err(Error::message(
++            "Claude settings Git repository could not be established; shared/tracking state is unknown",
++        ));
++    }
++    let top_text = String::from_utf8(top.stdout)
++        .map_err(|_| Error::message("Claude settings Git root was not UTF-8"))?;
++    let top = fs::canonicalize(top_text.trim())
++        .map_err(|_| Error::message("Claude settings Git root could not be resolved"))?;
++    if !canonical_target.starts_with(&top) {
++        return Err(Error::message(
++            "Claude settings target is outside the detected Git worktree",
++        ));
++    }
++    let relative = canonical_target.strip_prefix(&top).expect("checked prefix");
++    let relative = relative
++        .to_str()
++        .ok_or_else(|| Error::message("Claude settings path is not UTF-8"))?;
++    let literal_relative = format!(":(literal){relative}");
++    let tracked = git_output(
++        &top,
++        &["ls-files", "--error-unmatch", "--", &literal_relative],
++    )?;
++    match tracked.status.code() {
++        Some(0) => {
++            return Err(Error::message(
++                "Claude settings target is Git-tracked and cannot contain the local token",
++            ));
++        }
++        Some(1) => {}
++        _ => {
++            return Err(Error::message(
++                "Claude settings Git tracking state could not be verified",
++            ));
++        }
++    }
++    let ignored = git_output(&top, &["check-ignore", "-q", "--no-index", "--", relative])?;
++    match ignored.status.code() {
++        Some(0) => Ok(()),
++        Some(1) => Err(Error::message(
++            "Claude settings target is not ignored by Git and is treated as shared",
++        )),
++        _ => Err(Error::message(
++            "Claude settings Git ignore state could not be verified",
++        )),
++    }
++}
++
++fn git_output(directory: &Path, args: &[&str]) -> Result<std::process::Output, Error> {
++    let mut command = Command::new("git");
++    command
++        .args(args)
++        .current_dir(directory)
++        .env("GIT_OPTIONAL_LOCKS", "0");
++    for name in [
++        "GIT_DIR",
++        "GIT_WORK_TREE",
++        "GIT_INDEX_FILE",
++        "GIT_COMMON_DIR",
++        "GIT_OBJECT_DIRECTORY",
++        "GIT_ALTERNATE_OBJECT_DIRECTORIES",
++        "GIT_CEILING_DIRECTORIES",
++        "GIT_CONFIG_GLOBAL",
++        "GIT_CONFIG_SYSTEM",
++        "GIT_CONFIG_NOSYSTEM",
++        "GIT_CONFIG_COUNT",
++        "GIT_CONFIG_PARAMETERS",
++        "GIT_PREFIX",
++    ] {
++        command.env_remove(name);
++    }
++    command
++        .output()
++        .map_err(|_| Error::message("Git is required to verify a Claude repository target"))
++}
++
++fn validate_private_directory(path: &Path) -> Result<(), Error> {
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::MetadataExt;
++        let metadata = fs::metadata(path).map_err(|_| {
++            Error::message("Claude project-local settings directory could not be inspected")
++        })?;
++        if metadata.uid() != rustix::process::geteuid().as_raw() || metadata.mode() & 0o077 != 0 {
++            return Err(Error::message(
++                "Claude project-local settings directory is accessible to other users",
++            ));
++        }
++        #[cfg(target_os = "macos")]
++        if !exacl::getfacl(path, exacl::AclOption::SYMLINK_ACL)
++            .map_err(|_| {
++                Error::message("Claude project-local settings directory ACL could not be inspected")
++            })?
++            .is_empty()
++        {
++            return Err(Error::message(
++                "Claude project-local settings directory has an extended ACL",
++            ));
++        }
++    }
++    Ok(())
++}
++
++fn existing_custom_headers(path: &Path) -> Result<String, Error> {
++    let (_, bytes) = snapshot(path)?;
++    let Some(bytes) = bytes else {
++        return Ok(String::new());
++    };
++    let value: serde_json::Value = serde_json::from_slice(&bytes)
++        .map_err(|_| Error::message("Claude settings must be strict JSON"))?;
++    Ok(value
++        .pointer("/env/ANTHROPIC_CUSTOM_HEADERS")
++        .and_then(serde_json::Value::as_str)
++        .unwrap_or_default()
++        .to_owned())
++}
++
++fn replace_llmgw_header(existing: &str, token: &str) -> String {
++    let mut lines = existing
++        .lines()
++        .filter(|line| {
++            line.split_once(':')
++                .is_none_or(|(name, _)| !name.trim().eq_ignore_ascii_case("x-llmgw-token"))
++        })
++        .map(str::to_owned)
++        .collect::<Vec<_>>();
++    lines.push(format!("X-LLMGW-Token: {token}"));
++    lines.join("\n")
++}
++
++fn managed_conflicts(path: &Path) -> Result<bool, Error> {
++    let bytes = match fs::read(path) {
++        Ok(bytes) => bytes,
++        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
++        Err(error) => return Err(error.into()),
++    };
++    let value: serde_json::Value = serde_json::from_slice(&bytes)
++        .map_err(|_| Error::message("Claude managed policy must be strict JSON"))?;
++    Ok(OWNED_ENV
++        .iter()
++        .any(|name| value.pointer(&format!("/env/{name}")).is_some()))
++}
+--- Task3/product/src/clients/codex.rs
++++ Task4/product/src/clients/codex.rs
+@@ -0,0 +1,75 @@
++use super::*;
++use serde_json::json;
++
++pub(super) fn patches(
++    request: &ProfileRequest,
++    config_dir: &Path,
++) -> Result<AdapterPatches, Error> {
++    version_is(&request.installed_version, "0.154.0", "Codex")?;
++    if request.protocol != Protocol::OpenAiResponses {
++        return Err(Error::message("Codex 0.154.0 requires openai_responses"));
++    }
++    if request.project_local.is_some() {
++        return Err(Error::message(
++            "Codex provider profiles are user-private and cannot be project-local",
++        ));
++    }
++    let base = format!(
++        "{}/r/{}/v1",
++        request.gateway_origin.trim_end_matches('/'),
++        request.root
++    );
++    let path = config_dir.join("llmgw.config.toml");
++    refuse_unowned_collision(request, &path)?;
++    let provider = json!({
++        "name": "llmgw",
++        "base_url": base,
++        "wire_api": "responses",
++        "requires_openai_auth": false,
++        "supports_websockets": false,
++        "http_headers": {"X-LLMGW-Token": request.local_data_token}
++    });
++    let edits = vec![
++        set_public(&["model"], json!(request.model))?,
++        set_public(&["model_provider"], json!("llmgw"))?,
++        Edit::Set {
++            key: key(&["model_providers", "llmgw"])?,
++            value: EditValue::LocalDataTokenObject(provider),
++        },
++    ];
++    Ok((
++        vec![patch(path, Format::Toml, edits, Vec::new())?],
++        base,
++        Scope::UserPrivate,
++        vec![
++            "use `codex --profile llmgw`; the global config and MCP headers are not changed".into(),
++        ],
++        Vec::new(),
++    ))
++}
++
++fn refuse_unowned_collision(request: &ProfileRequest, path: &Path) -> Result<(), Error> {
++    let (_, bytes) = snapshot(path)?;
++    let Some(bytes) = bytes else {
++        return Ok(());
++    };
++    let value = crate::config_patch::document::parse_document(Format::Toml, &bytes)?;
++    if value.pointer("/model_providers/llmgw").is_none() {
++        return Ok(());
++    }
++    let provider_key = key(&["model_providers", "llmgw"])?;
++    match crate::config_patch::journal::owned_key_current_matches(
++        &request.journal_path,
++        path,
++        Format::Toml,
++        &provider_key,
++    )? {
++        Some(true) => Ok(()),
++        Some(false) => Err(Error::message(
++            "existing llmgw provider changed after the reviewed connection; reconnect refused and disconnect will preserve it as a conflict",
++        )),
++        None => Err(Error::message(
++            "existing llmgw provider is not owned by this connection journal; disconnect the prior managed profile or choose another provider name",
++        )),
++    }
++}
+--- Task3/product/src/clients/mod.rs
++++ Task4/product/src/clients/mod.rs
+@@ -0,0 +1,476 @@
++//! Narrow, version-pinned native client profiles for Pi, Claude Code, and Codex.
++//!
++//! This module only prepares and applies reviewed `ConfigPatch` transactions.
++//! It never starts a client, performs login, resolves config helpers, or changes
++//! gateway routes.
++mod claude;
++mod codex;
++mod pi;
++
++use crate::config_patch::{
++    ApplyReport, Edit, EditValue, Format, KeyPath, Patch, RestoreReport, Scope, Transaction,
++};
++use serde::{Deserialize, Serialize};
++use sha2::{Digest, Sha256};
++use std::{
++    collections::BTreeMap,
++    fmt, fs,
++    path::{Path, PathBuf},
++};
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum ClientKind {
++    Pi,
++    Claude,
++    Codex,
++}
++
++impl ClientKind {
++    pub fn as_str(self) -> &'static str {
++        match self {
++            Self::Pi => "pi",
++            Self::Claude => "claude",
++            Self::Codex => "codex",
++        }
++    }
++}
++
++impl fmt::Display for ClientKind {
++    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
++        formatter.write_str(self.as_str())
++    }
++}
++
++impl std::str::FromStr for ClientKind {
++    type Err = Error;
++
++    fn from_str(value: &str) -> Result<Self, Self::Err> {
++        match value {
++            "pi" => Ok(Self::Pi),
++            "claude" | "claude-code" => Ok(Self::Claude),
++            "codex" => Ok(Self::Codex),
++            _ => Err(Error::message("client must be pi, claude, or codex")),
++        }
++    }
++}
++
++#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
++#[serde(rename_all = "snake_case")]
++pub enum Protocol {
++    OpenAiCompletions,
++    AnthropicMessages,
++    OpenAiResponses,
++}
++
++impl Protocol {
++    pub fn as_str(self) -> &'static str {
++        match self {
++            Self::OpenAiCompletions => "openai_completions",
++            Self::AnthropicMessages => "anthropic_messages",
++            Self::OpenAiResponses => "openai_responses",
++        }
++    }
++}
++
++#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
++#[serde(rename_all = "snake_case")]
++pub enum Verification {
++    NotRequested,
++    Configured,
++    Unverified,
++    Verified,
++    Unsupported,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ModelMetadata {
++    pub context_window: Option<u64>,
++    pub max_output_tokens: Option<u64>,
++    pub reasoning: Verification,
++    pub tools: Verification,
++}
++
++impl ModelMetadata {
++    pub fn unknown() -> Self {
++        Self {
++            context_window: None,
++            max_output_tokens: None,
++            reasoning: Verification::Unverified,
++            tools: Verification::Unverified,
++        }
++    }
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ProjectLocalApproval {
++    pub directory: PathBuf,
++    pub user_private_confirmed: bool,
++    pub untracked_confirmed: bool,
++}
++
++#[derive(Clone, Eq, PartialEq)]
++pub struct ProfileRequest {
++    pub client: ClientKind,
++    pub installed_version: String,
++    /// The already-resolved native client config directory. Adapters never
++    /// consult HOME or client-specific environment variables themselves.
++    pub config_dir: PathBuf,
++    pub config_dir_source: String,
++    pub project_local: Option<ProjectLocalApproval>,
++    pub gateway_origin: String,
++    pub gateway_fingerprint: String,
++    pub root: String,
++    pub model: String,
++    pub protocol: Protocol,
++    pub local_data_token: String,
++    pub token_source: PathBuf,
++    pub journal_path: PathBuf,
++    pub set_default: bool,
++    pub discover_models: bool,
++    pub metadata: ModelMetadata,
++    pub effective_environment: BTreeMap<String, String>,
++    pub managed_settings: Vec<PathBuf>,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct CapabilityResults {
++    pub listing: Verification,
++    pub selection: Verification,
++    pub inference: Verification,
++    pub tools: Verification,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ClientPreview {
++    pub hash: String,
++    pub text: String,
++}
++
++#[derive(Clone, Debug)]
++pub struct PreparedProfile {
++    client: ClientKind,
++    transaction: Transaction,
++    preview: ClientPreview,
++    config_patch_hash: String,
++    targets: Vec<PathBuf>,
++    capabilities: CapabilityResults,
++    scope_checks: Vec<ScopeCheck>,
++}
++
++#[derive(Clone, Debug)]
++enum ScopeCheck {
++    ClaudeNative { target: PathBuf },
++    ClaudeProject { project: PathBuf, target: PathBuf },
++}
++
++type AdapterPatches = (Vec<Patch>, String, Scope, Vec<String>, Vec<ScopeCheck>);
++
++impl ScopeCheck {
++    fn validate(&self) -> Result<(), Error> {
++        match self {
++            Self::ClaudeNative { target } => claude::validate_native_target(target),
++            Self::ClaudeProject { project, target } => {
++                claude::validate_project_target(project, target)
++            }
++        }
++    }
++}
++
++impl PreparedProfile {
++    pub fn client(&self) -> ClientKind {
++        self.client
++    }
++
++    pub fn preview(&self) -> &ClientPreview {
++        &self.preview
++    }
++
++    pub fn target_paths(&self) -> &[PathBuf] {
++        &self.targets
++    }
++
++    pub fn capabilities(&self) -> &CapabilityResults {
++        &self.capabilities
++    }
++
++    pub fn journal_path(&self) -> &Path {
++        &self.transaction.journal_path
++    }
++}
++
++#[derive(Debug)]
++pub struct Error(String);
++
++impl Error {
++    fn message(message: impl Into<String>) -> Self {
++        Self(message.into())
++    }
++}
++
++impl fmt::Display for Error {
++    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
++        formatter.write_str(&self.0)
++    }
++}
++
++impl std::error::Error for Error {}
++
++impl From<std::io::Error> for Error {
++    fn from(value: std::io::Error) -> Self {
++        Self(value.to_string())
++    }
++}
++
++impl From<crate::config_patch::Error> for Error {
++    fn from(value: crate::config_patch::Error) -> Self {
++        Self(value.to_string())
++    }
++}
++
++pub fn prepare(request: &ProfileRequest) -> Result<PreparedProfile, Error> {
++    validate_common(request)?;
++    let config_dir = absolute(&request.config_dir)?;
++    let journal_path = absolute(&request.journal_path)?;
++    let (patches, public_base, scope, warnings, scope_checks) = match request.client {
++        ClientKind::Pi => pi::patches(request, &config_dir)?,
++        ClientKind::Claude => claude::patches(request, &config_dir)?,
++        ClientKind::Codex => codex::patches(request, &config_dir)?,
++    };
++    let transaction = Transaction {
++        journal_path,
++        patches,
++    };
++    let generic = crate::config_patch::preview(&transaction)?;
++    let targets = transaction
++        .patches
++        .iter()
++        .map(|patch| patch.path.clone())
++        .collect::<Vec<_>>();
++    let target_lines = targets
++        .iter()
++        .map(|path| format!("  - {}", path.display()))
++        .collect::<Vec<_>>()
++        .join("\n");
++    let warning_lines = warnings
++        .iter()
++        .map(|warning| format!("warning: {warning}"))
++        .collect::<Vec<_>>()
++        .join("\n");
++    let token_source = absolute(&request.token_source)?;
++    let scope_label = match scope {
++        Scope::UserPrivate => "user-private",
++        Scope::ProjectShared => "project-shared",
++    };
++    if request.gateway_fingerprint.len() != 64
++        || !request
++            .gateway_fingerprint
++            .bytes()
++            .all(|byte| byte.is_ascii_hexdigit())
++    {
++        return Err(Error::message(
++            "gateway fingerprint must be a 64-character hex digest",
++        ));
++    }
++    let mut bound = Sha256::new();
++    bound.update(b"llmgw-client-connection-preview-v1\0");
++    bound.update(generic.hash.as_bytes());
++    bound.update(request.gateway_fingerprint.as_bytes());
++    bound.update(request.client.as_str().as_bytes());
++    bound.update(request.root.as_bytes());
++    bound.update(request.model.as_bytes());
++    bound.update(request.protocol.as_str().as_bytes());
++    let bound_hash = bound
++        .finalize()
++        .iter()
++        .map(|byte| format!("{byte:02x}"))
++        .collect::<String>();
++    let text = format!(
++        "client: {} {}\nscope: {}\nnative config directory: {} ({})\npublic URL: {}\ngateway config fingerprint: {}\nroot: {} (all clients on this root share one FIFO/fairness share)\nmodel: {}\nprotocol: {}\ntarget files:\n{}\nowned keys:\n{}\ncredential: local data token from {} [REDACTED]\npreview hash: {}\ndisconnect: llmgw disconnect {} --journal {}\nlisting: {}\nselection: configured\ninference: unverified\ntools: {}\n{}{}",
++        request.client,
++        request.installed_version,
++        scope_label,
++        config_dir.display(),
++        request.config_dir_source,
++        public_base,
++        request.gateway_fingerprint,
++        request.root,
++        request.model,
++        request.protocol.as_str(),
++        target_lines,
++        generic.summary,
++        token_source.display(),
++        bound_hash,
++        request.client,
++        transaction.journal_path.display(),
++        if request.discover_models {
++            "configured; runtime unverified"
++        } else {
++            "not requested"
++        },
++        verification_label(request.metadata.tools),
++        if warning_lines.is_empty() { "" } else { "\n" },
++        warning_lines,
++    );
++    Ok(PreparedProfile {
++        client: request.client,
++        transaction,
++        preview: ClientPreview {
++            hash: bound_hash,
++            text,
++        },
++        config_patch_hash: generic.hash,
++        targets,
++        capabilities: CapabilityResults {
++            listing: if request.discover_models {
++                Verification::Configured
++            } else {
++                Verification::NotRequested
++            },
++            selection: Verification::Configured,
++            inference: Verification::Unverified,
++            tools: request.metadata.tools,
++        },
++        scope_checks,
++    })
++}
++
++pub fn apply_reviewed(plan: &PreparedProfile, reviewed_hash: &str) -> Result<ApplyReport, Error> {
++    validate_reviewed_hash(plan, reviewed_hash)?;
++    validate_scope_checks(plan)?;
++    Ok(crate::config_patch::apply(
++        &plan.transaction,
++        &plan.config_patch_hash,
++    )?)
++}
++
++pub fn validate_reviewed_hash(plan: &PreparedProfile, reviewed_hash: &str) -> Result<(), Error> {
++    if plan.preview.hash == reviewed_hash {
++        Ok(())
++    } else {
++        Err(Error::message(
++            "preview hash does not match this exact client selection and gateway config fingerprint; review again before activation or client apply",
++        ))
++    }
++}
++
++pub fn validate_current_snapshot(plan: &PreparedProfile) -> Result<(), Error> {
++    validate_scope_checks(plan)?;
++    let current = crate::config_patch::preview(&plan.transaction)?;
++    if current.hash == plan.config_patch_hash {
++        Ok(())
++    } else {
++        Err(Error::message(
++            "client config changed after the reviewed preview; review again before gateway activation",
++        ))
++    }
++}
++
++fn validate_scope_checks(plan: &PreparedProfile) -> Result<(), Error> {
++    for check in &plan.scope_checks {
++        check.validate()?;
++    }
++    Ok(())
++}
++
++pub fn disconnect(journal_path: impl AsRef<Path>) -> Result<RestoreReport, Error> {
++    Ok(crate::config_patch::restore(journal_path)?)
++}
++
++fn validate_common(request: &ProfileRequest) -> Result<(), Error> {
++    if request.root.is_empty()
++        || request.model.is_empty()
++        || request.local_data_token.is_empty()
++        || request.root.contains('/')
++    {
++        return Err(Error::message(
++            "root, model, and local data token must be nonempty; root cannot contain '/'",
++        ));
++    }
++    let origin = url::Url::parse(&request.gateway_origin)
++        .map_err(|_| Error::message("gateway origin must be an absolute HTTP URL"))?;
++    if !matches!(origin.scheme(), "http" | "https")
++        || origin.host_str().is_none()
++        || origin.query().is_some()
++        || origin.fragment().is_some()
++        || origin.path() != "/"
++    {
++        return Err(Error::message(
++            "gateway origin must contain only an HTTP scheme, host, and optional port",
++        ));
++    }
++    Ok(())
++}
++
++fn absolute(path: &Path) -> Result<PathBuf, Error> {
++    Ok(std::path::absolute(path)?)
++}
++
++fn snapshot(path: &Path) -> Result<(String, Option<Vec<u8>>), Error> {
++    match fs::read(path) {
++        Ok(bytes) => Ok((
++            crate::config_patch::snapshot_hash(Some(&bytes)),
++            Some(bytes),
++        )),
++        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
++            Ok((crate::config_patch::snapshot_hash(None), None))
++        }
++        Err(error) => Err(error.into()),
++    }
++}
++
++fn key(parts: &[&str]) -> Result<KeyPath, Error> {
++    KeyPath::new(parts.iter().copied()).map_err(Error::from)
++}
++
++fn set_public(parts: &[&str], value: serde_json::Value) -> Result<Edit, Error> {
++    Ok(Edit::Set {
++        key: key(parts)?,
++        value: EditValue::Public(value),
++    })
++}
++
++fn set_token(parts: &[&str], token: &str) -> Result<Edit, Error> {
++    Ok(Edit::Set {
++        key: key(parts)?,
++        value: EditValue::LocalDataToken(token.to_owned()),
++    })
++}
++
++fn patch(
++    path: PathBuf,
++    format: Format,
++    edits: Vec<Edit>,
++    warnings: Vec<String>,
++) -> Result<Patch, Error> {
++    let (expected_hash, _) = snapshot(&path)?;
++    let owned_keys = edits.iter().map(|edit| edit.key().clone()).collect();
++    Ok(Patch {
++        path,
++        expected_hash,
++        format,
++        scope: Scope::UserPrivate,
++        edits,
++        owned_keys,
++        warnings,
++    })
++}
++
++fn version_is(value: &str, expected: &str, client: &str) -> Result<(), Error> {
++    if value == expected {
++        Ok(())
++    } else {
++        Err(Error::message(format!(
++            "unsupported {client} version {value}; this build only generates the format verified for {expected}"
++        )))
++    }
++}
++
++fn verification_label(value: Verification) -> &'static str {
++    match value {
++        Verification::NotRequested => "not requested",
++        Verification::Configured => "configured; runtime unverified",
++        Verification::Unverified => "unverified",
++        Verification::Verified => "verified",
++        Verification::Unsupported => "unsupported",
++    }
++}
+--- Task3/product/src/clients/pi.rs
++++ Task4/product/src/clients/pi.rs
+@@ -0,0 +1,97 @@
++use super::*;
++use serde_json::json;
++
++pub(super) fn patches(
++    request: &ProfileRequest,
++    config_dir: &Path,
++) -> Result<AdapterPatches, Error> {
++    version_is(&request.installed_version, "0.84.2", "Pi")?;
++    if request.protocol != Protocol::OpenAiCompletions {
++        return Err(Error::message("Pi 0.84.2 requires openai_completions"));
++    }
++    if request.project_local.is_some() {
++        return Err(Error::message("Pi project-local profile is unsupported"));
++    }
++    let agent = config_dir;
++    let models_path = agent.join("models.json");
++    refuse_unowned_collision(request, &models_path)?;
++    let base = format!(
++        "{}/r/{}/v1",
++        request.gateway_origin.trim_end_matches('/'),
++        request.root
++    );
++    let context_window = request.metadata.context_window.unwrap_or(128_000);
++    let max_tokens = request.metadata.max_output_tokens.unwrap_or(16_384);
++    let mut warnings = Vec::new();
++    if request.metadata.context_window.is_none() || request.metadata.max_output_tokens.is_none() {
++        warnings.push(
++            "Pi client defaults 128000/16384 were written because upstream limits are unverified; these are not verified provider capabilities"
++                .into(),
++        );
++    }
++    let model = json!({
++        "id": request.model,
++        "input": ["text"],
++        "contextWindow": context_window,
++        "maxTokens": max_tokens,
++        "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0}
++    });
++    let provider = json!({
++        "baseUrl": base,
++        "api": "openai-completions",
++        "apiKey": "llmgw-local-header",
++        "headers": {
++            "X-LLMGW-Token": request.local_data_token,
++            "X-LLMGW-Client": "pi"
++        },
++        "models": [model]
++    });
++    let model_edits = vec![Edit::Set {
++        key: key(&["providers", "llmgw"])?,
++        value: EditValue::LocalDataTokenObject(provider),
++    }];
++    let mut patches = vec![patch(
++        models_path,
++        Format::JsonWithComments,
++        model_edits,
++        warnings.clone(),
++    )?];
++    if request.set_default {
++        patches.push(patch(
++            agent.join("settings.json"),
++            Format::StrictJson,
++            vec![
++                set_public(&["defaultProvider"], json!("llmgw"))?,
++                set_public(&["defaultModel"], json!(request.model))?,
++            ],
++            Vec::new(),
++        )?);
++    }
++    Ok((patches, base, Scope::UserPrivate, warnings, Vec::new()))
++}
++
++fn refuse_unowned_collision(request: &ProfileRequest, path: &Path) -> Result<(), Error> {
++    let (_, bytes) = snapshot(path)?;
++    let Some(bytes) = bytes else {
++        return Ok(());
++    };
++    let value = crate::config_patch::document::parse_document(Format::JsonWithComments, &bytes)?;
++    if value.pointer("/providers/llmgw").is_none() {
++        return Ok(());
++    }
++    let provider_key = key(&["providers", "llmgw"])?;
++    match crate::config_patch::journal::owned_key_current_matches(
++        &request.journal_path,
++        path,
++        Format::JsonWithComments,
++        &provider_key,
++    )? {
++        Some(true) => Ok(()),
++        Some(false) => Err(Error::message(
++            "existing llmgw provider changed after the reviewed connection; reconnect refused and disconnect will preserve it as a conflict",
++        )),
++        None => Err(Error::message(
++            "existing llmgw provider is not owned by this connection journal; disconnect the prior managed profile or choose another provider name",
++        )),
++    }
++}
+--- Task3/product/src/config_patch/apply.rs
++++ Task4/product/src/config_patch/apply.rs
+@@ -155,7 +155,7 @@
+                 matches!(
+                     edit,
+                     Edit::Set {
+-                        value: EditValue::LocalDataToken(_),
++                        value: EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_),
+                         ..
+                     }
+                 )
+@@ -193,7 +193,7 @@
+             matches!(
+                 edit,
+                 Edit::Set {
+-                    value: EditValue::LocalDataToken(_),
++                    value: EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_),
+                     ..
+                 }
+             )
+@@ -408,7 +408,7 @@
+             matches!(
+                 edit,
+                 Edit::Set {
+-                    value: EditValue::LocalDataToken(_),
++                    value: EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_),
+                     ..
+                 }
+             )
+--- Task3/product/src/config_patch/journal.rs
++++ Task4/product/src/config_patch/journal.rs
+@@ -220,6 +220,47 @@
+             .collect(),
+         recovery,
+     })
++}
++
++pub(crate) fn owned_key_current_matches(
++    journal_path: &Path,
++    resource_path: &Path,
++    format: Format,
++    key: &KeyPath,
++) -> Result<Option<bool>, Error> {
++    if !journal_path.exists() {
++        return Ok(None);
++    }
++    let document = JournalDocument::load(journal_path)?;
++    let normalized = fs::canonicalize(resource_path).unwrap_or_else(|_| resource_path.to_owned());
++    let Some(resource) = document
++        .resources
++        .iter()
++        .find(|resource| resource.path == normalized && resource.format == format)
++    else {
++        return Ok(None);
++    };
++    let Some(owned) = resource.owned_keys.iter().find(|owned| &owned.key == key) else {
++        return Ok(None);
++    };
++    if !matches!(
++        document.status,
++        JournalStatus::Applying
++            | JournalStatus::Partial
++            | JournalStatus::Applied
++            | JournalStatus::Failed
++    ) || owned.stage != KeyStage::Owned
++    {
++        return Ok(None);
++    }
++    let current = super::storage::read_regular(resource_path, "client config")?
++        .ok_or_else(|| Error::message("owned client config is missing"))?;
++    let semantic = super::document::parse_document(format, &current.bytes)?;
++    let current_hash = super::value_hash(super::document::get_value(&semantic, key));
++    Ok(Some(
++        owned.written_value_hash.as_deref() == Some(current_hash.as_str())
++            || owned.pending_written_value_hash.as_deref() == Some(current_hash.as_str()),
++    ))
+ }
+ 
+ pub(crate) fn create_backup(
+--- Task3/product/src/config_patch/mod.rs
++++ Task4/product/src/config_patch/mod.rs
+@@ -3,7 +3,7 @@
+ //! Adapters construct reviewed patches. This module never runs config helpers,
+ //! shells, environment substitutions, client programs, or login flows.
+ mod apply;
+-mod document;
++pub(crate) mod document;
+ pub mod journal;
+ mod restore;
+ mod storage;
+@@ -12,6 +12,7 @@
+ pub use journal::{JournalStatus, inspect_journal};
+ pub use restore::restore;
+ pub use storage::cooperating_lock_path;
++pub(crate) use storage::{normalize_resource_path, validate_local_token_target};
+ 
+ use serde::{Deserialize, Serialize};
+ use sha2::{Digest, Sha256};
+@@ -79,6 +80,9 @@
+ pub enum EditValue {
+     Public(serde_json::Value),
+     LocalDataToken(String),
++    /// A dedicated provider object containing only the local data token and
++    /// reviewed public metadata. Its contents are always opaque in output.
++    LocalDataTokenObject(serde_json::Value),
+     UpstreamCredential(String),
+     ControlToken(String),
+ }
+@@ -88,6 +92,9 @@
+         match self {
+             Self::Public(value) => formatter.debug_tuple("Public").field(value).finish(),
+             Self::LocalDataToken(_) => formatter.write_str("LocalDataToken([REDACTED])"),
++            Self::LocalDataTokenObject(_) => {
++                formatter.write_str("LocalDataTokenObject([REDACTED])")
++            }
+             Self::UpstreamCredential(_) => formatter.write_str("UpstreamCredential([REDACTED])"),
+             Self::ControlToken(_) => formatter.write_str("ControlToken([REDACTED])"),
+         }
+@@ -99,6 +106,7 @@
+         match self {
+             Self::Public(value) => Some(value.clone()),
+             Self::LocalDataToken(value) => Some(serde_json::Value::String(value.clone())),
++            Self::LocalDataTokenObject(value) => Some(value.clone()),
+             Self::UpstreamCredential(_) | Self::ControlToken(_) => None,
+         }
+     }
+@@ -113,6 +121,10 @@
+                 hasher.update(b"local-data-token\0");
+                 hasher.update(value.as_bytes());
+             }
++            Self::LocalDataTokenObject(value) => {
++                hasher.update(b"local-data-token-object-v1\0");
++                hasher.update(serde_json::to_vec(value).expect("JSON value serializes"));
++            }
+             Self::UpstreamCredential(value) => {
+                 hasher.update(b"upstream-credential\0");
+                 hasher.update(value.as_bytes());
+@@ -125,7 +137,10 @@
+     }
+ 
+     fn is_local_data_token(&self) -> bool {
+-        matches!(self, Self::LocalDataToken(_))
++        matches!(
++            self,
++            Self::LocalDataToken(_) | Self::LocalDataTokenObject(_)
++        )
+     }
+ }
+ 
+@@ -274,12 +289,21 @@
+                         "control tokens cannot be copied into a client config",
+                     ));
+                 }
+-                EditValue::LocalDataToken(_) if patch.scope != Scope::UserPrivate => {
++                EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_)
++                    if patch.scope != Scope::UserPrivate =>
++                {
+                     return Err(Error::message(
+                         "local data tokens require a user-private client config",
+                     ));
+                 }
+-                EditValue::Public(_) | EditValue::LocalDataToken(_) => {}
++                EditValue::LocalDataTokenObject(value) if !value.is_object() => {
++                    return Err(Error::message(
++                        "local data token object must be a JSON object",
++                    ));
++                }
++                EditValue::Public(_)
++                | EditValue::LocalDataToken(_)
++                | EditValue::LocalDataTokenObject(_) => {}
+             }
+         }
+     }
+--- Task3/product/src/lib.rs
++++ Task4/product/src/lib.rs
+@@ -1,5 +1,6 @@
+ pub mod admission;
+ pub mod cli;
++pub mod clients;
+ pub mod config;
+ pub mod config_patch;
+ mod control;
+--- Task3/product/src/setup/mod.rs
++++ Task4/product/src/setup/mod.rs
+@@ -337,6 +337,41 @@
+         self
+     }
+ 
++    /// Add one reviewed fixed client route without replacing existing routes,
++    /// models, comments, or quota policy.
++    pub fn ensure_client_route(
++        mut self,
++        root_id: &str,
++        model_id: &str,
++        endpoint: Endpoint,
++    ) -> Result<Self, Error> {
++        if root_id.is_empty() || model_id.is_empty() {
++            return Err(Error::message("client root and model must be nonempty"));
++        }
++        if !self.config.models.iter().any(|model| model.id == model_id) {
++            self.config.models.push(Model {
++                id: model_id.to_owned(),
++                max_output_tokens: None,
++            });
++        }
++        if let Some(root) = self.config.roots.iter_mut().find(|root| root.id == root_id) {
++            if !root.endpoints.contains(&endpoint) {
++                root.endpoints.push(endpoint);
++            }
++            if !root.models.iter().any(|model| model == model_id) {
++                root.models.push(model_id.to_owned());
++            }
++        } else {
++            self.config.roots.push(Root {
++                id: root_id.to_owned(),
++                endpoints: vec![endpoint],
++                models: vec![model_id.to_owned()],
++            });
++        }
++        self.validate()?;
++        Ok(self)
++    }
++
+     pub fn concurrency(&self) -> u8 {
+         self.config.concurrency
+     }
+--- Task3/product/tests/client_profiles.rs
++++ Task4/product/tests/client_profiles.rs
+@@ -0,0 +1,1259 @@
++use llmgw::clients::{
++    ClientKind, ModelMetadata, ProfileRequest, ProjectLocalApproval, Protocol, Verification,
++    apply_reviewed, disconnect, prepare, validate_current_snapshot,
++};
++use std::{collections::BTreeMap, fs, net::TcpListener, path::PathBuf, process::Command};
++
++struct Fixture {
++    root: PathBuf,
++}
++
++impl Fixture {
++    fn new(name: &str) -> Self {
++        let root = std::env::temp_dir().join(format!(
++            "llmgw-client-profiles-{name}-{}-{:016x}",
++            std::process::id(),
++            rand::random::<u64>()
++        ));
++        fs::create_dir_all(&root).unwrap();
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::PermissionsExt;
++            fs::set_permissions(&root, fs::Permissions::from_mode(0o700)).unwrap();
++        }
++        Self { root }
++    }
++
++    fn path(&self, relative: &str) -> PathBuf {
++        self.root.join(relative)
++    }
++
++    fn private_file(&self, relative: &str, bytes: &[u8]) -> PathBuf {
++        let path = self.path(relative);
++        fs::create_dir_all(path.parent().unwrap()).unwrap();
++        fs::write(&path, bytes).unwrap();
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::PermissionsExt;
++            fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
++        }
++        path
++    }
++}
++
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        let _ = fs::remove_dir_all(&self.root);
++    }
++}
++
++fn minimal_git_repository(path: &std::path::Path, tracked_settings: bool) {
++    let git = path.join(".git");
++    for directory in ["objects", "refs/heads", "refs/tags"] {
++        fs::create_dir_all(git.join(directory)).unwrap();
++    }
++    fs::write(
++        git.join("config"),
++        b"[core]\nrepositoryformatversion = 0\nfilemode = true\nbare = false\nlogallrefupdates = true\n",
++    )
++    .unwrap();
++    fs::write(git.join("HEAD"), b"ref: refs/heads/main\n").unwrap();
++    fs::write(path.join(".gitignore"), b".claude/\n").unwrap();
++    if tracked_settings {
++        fs::write(
++            git.join("index"),
++            include_bytes!("fixtures/git-index-tracked-settings-local"),
++        )
++        .unwrap();
++    }
++}
++
++fn git_fixture(path: &std::path::Path, args: &[&str]) {
++    let output = Command::new("git")
++        .args(args)
++        .current_dir(path)
++        .env_clear()
++        .env("PATH", "/opt/homebrew/bin:/usr/bin:/bin")
++        .env("HOME", path)
++        .env("GIT_CONFIG_NOSYSTEM", "1")
++        .env("GIT_CONFIG_GLOBAL", "/dev/null")
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "git {:?}: {}",
++        args,
++        String::from_utf8_lossy(&output.stderr)
++    );
++}
++
++fn request(
++    fixture: &Fixture,
++    client: ClientKind,
++    version: &str,
++    protocol: Protocol,
++) -> ProfileRequest {
++    let config_dir = match client {
++        ClientKind::Pi => fixture.path("home/.pi/agent"),
++        ClientKind::Claude => fixture.path("home/.claude"),
++        ClientKind::Codex => fixture.path("home/.codex"),
++    };
++    ProfileRequest {
++        client,
++        installed_version: version.into(),
++        config_dir,
++        config_dir_source: "synthetic explicit client home".into(),
++        project_local: None,
++        gateway_origin: "http://127.0.0.1:4141".into(),
++        gateway_fingerprint: "a".repeat(64),
++        root: "shared-work".into(),
++        model: "example-model".into(),
++        protocol,
++        local_data_token: "synthetic-local-data-token".into(),
++        token_source: fixture.path("gateway-state/data-token"),
++        journal_path: fixture.path(&format!("gateway-state/clients/{}.json", client.as_str())),
++        set_default: true,
++        discover_models: false,
++        metadata: ModelMetadata::unknown(),
++        effective_environment: BTreeMap::new(),
++        managed_settings: Vec::new(),
++    }
++}
++
++#[test]
++fn pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventing_capabilities() {
++    let fixture = Fixture::new("pi");
++    let models = fixture.private_file(
++        "home/.pi/agent/models.json",
++        br#"{
++  // keep this provider
++  "providers": {"other": {"baseUrl":"https://example.invalid","models":[]}}
++}
++"#,
++    );
++    let settings = fixture.private_file(
++        "home/.pi/agent/settings.json",
++        br#"{"quietStartup":true,"defaultProvider":"other","defaultModel":"old"}"#,
++    );
++    let mut input = request(
++        &fixture,
++        ClientKind::Pi,
++        "0.84.2",
++        Protocol::OpenAiCompletions,
++    );
++    input.metadata = ModelMetadata {
++        context_window: Some(4096),
++        max_output_tokens: Some(32),
++        reasoning: Verification::Unverified,
++        tools: Verification::Unverified,
++    };
++
++    let plan = prepare(&input).unwrap();
++    assert_eq!(plan.target_paths(), &[models.clone(), settings.clone()]);
++    assert!(plan.target_paths().iter().all(|path| path.is_absolute()));
++    assert!(
++        plan.preview()
++            .text
++            .contains("http://127.0.0.1:4141/r/shared-work/v1")
++    );
++    assert!(plan.preview().text.contains("example-model"));
++    assert!(plan.preview().text.contains("openai_completions"));
++    assert!(
++        plan.preview()
++            .text
++            .contains("credential: local data token from")
++    );
++    assert!(!plan.preview().text.contains("synthetic-local-data-token"));
++    assert!(!format!("{plan:?}").contains("synthetic-local-data-token"));
++    assert_eq!(plan.capabilities().tools, Verification::Unverified);
++    assert_eq!(plan.capabilities().inference, Verification::Unverified);
++    assert!(!fs::read_to_string(&models).unwrap().contains("llmgw"));
++
++    apply_reviewed(&plan, &plan.preview().hash).unwrap();
++    let written = fs::read_to_string(&models).unwrap();
++    assert!(written.contains("// keep this provider"));
++    let semantic: serde_json::Value = serde_json::from_str(
++        &written
++            .lines()
++            .filter(|line| !line.trim_start().starts_with("//"))
++            .collect::<Vec<_>>()
++            .join("\n"),
++    )
++    .unwrap();
++    let provider = &semantic["providers"]["llmgw"];
++    assert_eq!(
++        provider["baseUrl"],
++        "http://127.0.0.1:4141/r/shared-work/v1"
++    );
++    assert_eq!(provider["api"], "openai-completions");
++    assert_eq!(
++        provider["headers"]["X-LLMGW-Token"],
++        "synthetic-local-data-token"
++    );
++    assert_eq!(provider["models"][0]["contextWindow"], 4096);
++    assert_eq!(provider["models"][0]["maxTokens"], 32);
++    let defaults: serde_json::Value =
++        serde_json::from_slice(&fs::read(&settings).unwrap()).unwrap();
++    assert_eq!(defaults["defaultProvider"], "llmgw");
++    assert_eq!(defaults["defaultModel"], "example-model");
++
++    let restored = disconnect(&input.journal_path).unwrap();
++    assert!(restored.conflicts.is_empty());
++    let restored_models = fs::read_to_string(models).unwrap();
++    let restored_models: serde_json::Value = serde_json::from_str(
++        &restored_models
++            .lines()
++            .filter(|line| !line.trim_start().starts_with("//"))
++            .collect::<Vec<_>>()
++            .join("\n"),
++    )
++    .unwrap();
++    assert!(restored_models["providers"].get("llmgw").is_none());
++    assert!(restored_models["providers"].get("other").is_some());
++    let defaults: serde_json::Value = serde_json::from_slice(&fs::read(settings).unwrap()).unwrap();
++    assert_eq!(defaults["defaultProvider"], "other");
++    assert_eq!(defaults["defaultModel"], "old");
++    assert_eq!(defaults["quietStartup"], true);
++}
++
++#[test]
++fn pi_override_home_and_optional_defaults_are_independent_resources() {
++    let fixture = Fixture::new("pi-no-default");
++    let mut input = request(
++        &fixture,
++        ClientKind::Pi,
++        "0.84.2",
++        Protocol::OpenAiCompletions,
++    );
++    input.set_default = false;
++    let plan = prepare(&input).unwrap();
++    assert_eq!(
++        plan.target_paths(),
++        &[fixture.path("home/.pi/agent/models.json")]
++    );
++    assert!(!plan.preview().text.contains("settings.json"));
++}
++
++#[test]
++fn pi_refuses_an_unowned_existing_llmgw_provider_collision() {
++    let fixture = Fixture::new("pi-collision");
++    fixture.private_file(
++        "home/.pi/agent/models.json",
++        br#"{"providers":{"llmgw":{"baseUrl":"https://user.invalid","models":[]}}}"#,
++    );
++    let input = request(
++        &fixture,
++        ClientKind::Pi,
++        "0.84.2",
++        Protocol::OpenAiCompletions,
++    );
++    let error = prepare(&input).unwrap_err().to_string();
++    assert!(error.contains("existing llmgw provider"));
++    assert!(error.contains("disconnect") || error.contains("choose another provider"));
++}
++
++#[test]
++fn claude_preserves_existing_env_and_headers_in_private_user_settings() {
++    let fixture = Fixture::new("claude");
++    let settings = fixture.private_file(
++        "home/.claude/settings.json",
++        br#"{"env":{"KEEP":"yes","ANTHROPIC_CUSTOM_HEADERS":"X-Existing: keep","ANTHROPIC_API_KEY":"opaque-existing-credential-sentinel"},"permissions":{"allow":[]}}"#,
++    );
++    let input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    let plan = prepare(&input).unwrap();
++    assert!(
++        !plan
++            .preview()
++            .text
++            .contains("opaque-existing-credential-sentinel")
++    );
++    assert!(
++        plan.preview()
++            .text
++            .contains("ANTHROPIC_API_KEY=llmgw-local-only")
++    );
++    assert_eq!(plan.target_paths(), &[settings.clone()]);
++    apply_reviewed(&plan, &plan.preview().hash).unwrap();
++    let value: serde_json::Value = serde_json::from_slice(&fs::read(&settings).unwrap()).unwrap();
++    assert_eq!(value["env"]["KEEP"], "yes");
++    assert_eq!(value["permissions"]["allow"], serde_json::json!([]));
++    assert_eq!(
++        value["env"]["ANTHROPIC_BASE_URL"],
++        "http://127.0.0.1:4141/r/shared-work"
++    );
++    assert_eq!(value["env"]["ANTHROPIC_MODEL"], "example-model");
++    assert_eq!(value["env"]["ANTHROPIC_API_KEY"], "llmgw-local-only");
++    assert_eq!(
++        value["env"]["ANTHROPIC_CUSTOM_HEADERS"],
++        "X-Existing: keep\nX-LLMGW-Token: synthetic-local-data-token"
++    );
++    disconnect(&input.journal_path).unwrap();
++    let restored: serde_json::Value = serde_json::from_slice(&fs::read(settings).unwrap()).unwrap();
++    assert_eq!(
++        restored["env"]["ANTHROPIC_API_KEY"],
++        "opaque-existing-credential-sentinel"
++    );
++}
++
++#[test]
++fn claude_native_directory_refuses_a_git_tracked_settings_file_before_writes() {
++    let fixture = Fixture::new("claude-native-tracked");
++    let target = fixture.private_file("project/.claude/settings.json", br#"{"keep":true}"#);
++    let project = fixture.path("project");
++    git_fixture(&project, &["init", "-q"]);
++    git_fixture(&project, &["add", "--", ".claude/settings.json"]);
++    fs::write(project.join(".gitignore"), b".claude/\n").unwrap();
++    let mut input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    input.config_dir = target.parent().unwrap().to_owned();
++    input.config_dir_source = "CLAUDE_CONFIG_DIR environment".into();
++
++    let error = prepare(&input).unwrap_err().to_string();
++    assert!(error.contains("Git-tracked"), "{error}");
++    assert_eq!(fs::read(&target).unwrap(), br#"{"keep":true}"#);
++    assert!(!input.journal_path.exists());
++}
++
++#[cfg(unix)]
++#[test]
++fn claude_native_directory_accepts_a_safe_canonical_parent_alias() {
++    use std::os::unix::fs::symlink;
++
++    let fixture = Fixture::new("claude-native-alias");
++    let target = fixture.private_file("private-native/settings.json", br#"{"keep":true}"#);
++    let alias = fixture.path("native-alias");
++    symlink(target.parent().unwrap(), &alias).unwrap();
++    let mut input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    input.config_dir = alias;
++
++    let plan = prepare(&input).unwrap();
++    apply_reviewed(&plan, &plan.preview().hash).unwrap();
++    assert!(
++        fs::read_to_string(target)
++            .unwrap()
++            .contains("X-LLMGW-Token")
++    );
++}
++
++#[test]
++fn claude_native_scope_is_rechecked_when_git_state_changes_after_preview() {
++    let fixture = Fixture::new("claude-native-git-drift");
++    let target = fixture.private_file("project/private-claude/settings.json", br#"{"keep":true}"#);
++    let project = fixture.path("project");
++    git_fixture(&project, &["init", "-q"]);
++    fs::write(
++        project.join(".gitignore"),
++        b"private-claude/settings.json\n",
++    )
++    .unwrap();
++    let mut input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    input.config_dir = target.parent().unwrap().to_owned();
++    let plan = prepare(&input).unwrap();
++
++    git_fixture(
++        &project,
++        &["add", "-f", "--", "private-claude/settings.json"],
++    );
++    assert!(
++        validate_current_snapshot(&plan)
++            .unwrap_err()
++            .to_string()
++            .contains("Git-tracked")
++    );
++    assert!(
++        apply_reviewed(&plan, &plan.preview().hash)
++            .unwrap_err()
++            .to_string()
++            .contains("Git-tracked")
++    );
++    assert_eq!(fs::read(&target).unwrap(), br#"{"keep":true}"#);
++    assert!(!input.journal_path.exists());
++}
++
++#[cfg(unix)]
++#[test]
++fn cli_tracked_native_claude_target_refuses_before_route_activation_or_client_write() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let fixture = Fixture::new("claude-native-cli-refusal");
++    let target = fixture.private_file("project/.claude/settings.json", br#"{"keep":true}"#);
++    let project = fixture.path("project");
++    git_fixture(&project, &["init", "-q"]);
++    git_fixture(&project, &["add", "--", ".claude/settings.json"]);
++    fs::write(project.join(".gitignore"), b".claude/\n").unwrap();
++    let config = fixture.private_file(
++        "gateway/config.toml",
++        br#"listen = "127.0.0.1:4141"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++[upstream]
++api_base = "http://127.0.0.1:9/v1"
++[upstream.auth]
++mode = "none"
++[quota.rpm]
++kind = "unlimited"
++[quota.tpm]
++kind = "unknown"
++[[models]]
++id = "example-model"
++[[roots]]
++id = "existing-work"
++endpoints = ["responses"]
++models = ["example-model"]
++"#,
++    );
++    let config_before = fs::read(&config).unwrap();
++    let loaded = llmgw::config::LoadedConfig::load(&config).unwrap();
++    fs::create_dir_all(&loaded.state_paths.directory).unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.directory,
++        fs::Permissions::from_mode(0o700),
++    )
++    .unwrap();
++    fs::write(&loaded.state_paths.data_token, b"synthetic-data-token").unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.data_token,
++        fs::Permissions::from_mode(0o600),
++    )
++    .unwrap();
++    let claude = fixture.private_file(
++        "bin/claude",
++        b"#!/bin/sh\nprintf '%s\\n' '2.1.63 (Claude Code)'\n",
++    );
++    fs::set_permissions(&claude, fs::Permissions::from_mode(0o700)).unwrap();
++    let wrong_hash = "0".repeat(64);
++
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args([
++            "--config",
++            config.to_str().unwrap(),
++            "connect",
++            "claude",
++            "--client-executable",
++            claude.to_str().unwrap(),
++            "--client-config-dir",
++            target.parent().unwrap().to_str().unwrap(),
++            "--root",
++            "claude-work",
++            "--model",
++            "example-model",
++            "--apply-hash",
++            &wrong_hash,
++            "--restart",
++        ])
++        .env_clear()
++        .env("PATH", "/opt/homebrew/bin:/usr/bin:/bin")
++        .env("HOME", fixture.path("isolated-home"))
++        .env("USERPROFILE", fixture.path("isolated-home"))
++        .env("GIT_INDEX_FILE", fixture.path("redirected-empty-index"))
++        .output()
++        .unwrap();
++    assert!(!output.status.success());
++    assert!(String::from_utf8_lossy(&output.stderr).contains("Git-tracked"));
++    assert_eq!(fs::read(&config).unwrap(), config_before);
++    assert_eq!(fs::read(&target).unwrap(), br#"{"keep":true}"#);
++    assert!(!loaded.state_paths.runtime_state.exists());
++    assert!(
++        !loaded
++            .state_paths
++            .directory
++            .join("clients/claude.journal.json")
++            .exists()
++    );
++}
++
++#[test]
++fn claude_project_local_requires_private_and_untracked_confirmation() {
++    let fixture = Fixture::new("claude-project");
++    let mut input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    input.project_local = Some(ProjectLocalApproval {
++        directory: fixture.path("work"),
++        user_private_confirmed: true,
++        untracked_confirmed: false,
++    });
++    let error = prepare(&input).unwrap_err().to_string();
++    assert!(error.contains("untracked confirmations"));
++    assert!(!fixture.path("work/.claude/settings.local.json").exists());
++}
++
++#[test]
++fn claude_project_local_uses_actual_git_ignore_tracking_and_private_path_checks() {
++    let fixture = Fixture::new("claude-project-git");
++    let project = fixture.path("ignored-project");
++    fs::create_dir_all(project.join(".claude")).unwrap();
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        fs::set_permissions(&project, fs::Permissions::from_mode(0o700)).unwrap();
++        fs::set_permissions(project.join(".claude"), fs::Permissions::from_mode(0o700)).unwrap();
++    }
++    minimal_git_repository(&project, false);
++    let mut input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    input.project_local = Some(ProjectLocalApproval {
++        directory: project.clone(),
++        user_private_confirmed: true,
++        untracked_confirmed: true,
++    });
++    let plan = prepare(&input).unwrap();
++    assert_eq!(
++        plan.target_paths(),
++        &[project.join(".claude/settings.local.json")]
++    );
++
++    let tracked = fixture.path("tracked-project");
++    fs::create_dir_all(tracked.join(".claude")).unwrap();
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        fs::set_permissions(&tracked, fs::Permissions::from_mode(0o700)).unwrap();
++        fs::set_permissions(tracked.join(".claude"), fs::Permissions::from_mode(0o700)).unwrap();
++    }
++    minimal_git_repository(&tracked, true);
++    input.project_local = Some(ProjectLocalApproval {
++        directory: tracked,
++        user_private_confirmed: true,
++        untracked_confirmed: true,
++    });
++    assert!(
++        prepare(&input)
++            .unwrap_err()
++            .to_string()
++            .contains("Git-tracked")
++    );
++
++    let shared = fixture.path("shared-project");
++    fs::create_dir_all(shared.join(".claude")).unwrap();
++    minimal_git_repository(&shared, false);
++    #[cfg(unix)]
++    {
++        use std::os::unix::fs::PermissionsExt;
++        fs::set_permissions(shared.join(".claude"), fs::Permissions::from_mode(0o755)).unwrap();
++        input.project_local = Some(ProjectLocalApproval {
++            directory: shared,
++            user_private_confirmed: true,
++            untracked_confirmed: true,
++        });
++        assert!(
++            prepare(&input)
++                .unwrap_err()
++                .to_string()
++                .contains("accessible to other users")
++        );
++    }
++}
++
++#[test]
++fn claude_refuses_higher_priority_environment_and_conflicting_managed_policy() {
++    let fixture = Fixture::new("claude-precedence");
++    let mut input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    input.effective_environment.insert(
++        "ANTHROPIC_BASE_URL".into(),
++        "https://managed.invalid".into(),
++    );
++    assert!(
++        prepare(&input)
++            .unwrap_err()
++            .to_string()
++            .contains("higher-priority environment")
++    );
++
++    input.effective_environment.clear();
++    input
++        .effective_environment
++        .insert("ANTHROPIC_API_KEY".into(), "opaque-process-value".into());
++    assert!(
++        prepare(&input)
++            .unwrap_err()
++            .to_string()
++            .contains("ANTHROPIC_API_KEY")
++    );
++
++    input.effective_environment.clear();
++    let managed = fixture.private_file(
++        "managed/settings.json",
++        br#"{"env":{"ANTHROPIC_API_KEY":"opaque-managed-value"}}"#,
++    );
++    input.managed_settings.push(managed);
++    assert!(
++        prepare(&input)
++            .unwrap_err()
++            .to_string()
++            .contains("managed policy")
++    );
++}
++
++#[test]
++fn claude_discovery_is_version_gated_and_never_implied() {
++    let fixture = Fixture::new("claude-discovery");
++    let mut old = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    old.discover_models = true;
++    assert!(
++        prepare(&old)
++            .unwrap_err()
++            .to_string()
++            .contains("model discovery")
++    );
++
++    let ordinary = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    let plan = prepare(&ordinary).unwrap();
++    assert_eq!(plan.capabilities().listing, Verification::NotRequested);
++    assert_eq!(plan.capabilities().selection, Verification::Configured);
++}
++
++#[test]
++fn codex_uses_a_separate_responses_profile_and_static_native_header() {
++    let fixture = Fixture::new("codex");
++    let existing = fixture.private_file("home/.codex/llmgw.config.toml", b"notify = [\"keep\"]\n");
++    let input = request(
++        &fixture,
++        ClientKind::Codex,
++        "0.154.0",
++        Protocol::OpenAiResponses,
++    );
++    let plan = prepare(&input).unwrap();
++    assert_eq!(plan.target_paths(), &[existing.clone()]);
++    apply_reviewed(&plan, &plan.preview().hash).unwrap();
++    let value: toml_edit::DocumentMut = fs::read_to_string(existing).unwrap().parse().unwrap();
++    assert_eq!(value["model"].as_str(), Some("example-model"));
++    assert_eq!(value["model_provider"].as_str(), Some("llmgw"));
++    assert_eq!(
++        value["model_providers"]["llmgw"]["wire_api"].as_str(),
++        Some("responses")
++    );
++    assert_eq!(
++        value["model_providers"]["llmgw"]["supports_websockets"].as_bool(),
++        Some(false)
++    );
++    assert_eq!(
++        value["model_providers"]["llmgw"]["http_headers"]["X-LLMGW-Token"].as_str(),
++        Some("synthetic-local-data-token")
++    );
++    assert_eq!(value["notify"][0].as_str(), Some("keep"));
++
++    let restored = disconnect(&input.journal_path).unwrap();
++    assert!(restored.conflicts.is_empty());
++    let restored: toml_edit::DocumentMut =
++        fs::read_to_string(fixture.path("home/.codex/llmgw.config.toml"))
++            .unwrap()
++            .parse()
++            .unwrap();
++    assert_eq!(restored["notify"][0].as_str(), Some("keep"));
++    assert!(restored.get("model_providers").is_some_and(|providers| {
++        providers
++            .as_table_like()
++            .is_some_and(|table| table.is_empty())
++    }));
++    assert!(restored.get("model").is_none());
++    assert!(restored.get("model_provider").is_none());
++}
++
++#[test]
++fn codex_refuses_an_unowned_existing_llmgw_provider_collision() {
++    let fixture = Fixture::new("codex-collision");
++    fixture.private_file(
++        "home/.codex/llmgw.config.toml",
++        br#"[model_providers.llmgw]
++name = "user-owned"
++base_url = "https://user.invalid/v1"
++"#,
++    );
++    let input = request(
++        &fixture,
++        ClientKind::Codex,
++        "0.154.0",
++        Protocol::OpenAiResponses,
++    );
++    let error = prepare(&input).unwrap_err().to_string();
++    assert!(error.contains("existing llmgw provider"));
++    assert!(error.contains("disconnect") || error.contains("choose another provider"));
++}
++
++#[test]
++fn unsupported_version_or_protocol_is_refused_before_any_write() {
++    let fixture = Fixture::new("unsupported");
++    let old = request(
++        &fixture,
++        ClientKind::Pi,
++        "0.83.0",
++        Protocol::OpenAiCompletions,
++    );
++    assert!(
++        prepare(&old)
++            .unwrap_err()
++            .to_string()
++            .contains("unsupported Pi version")
++    );
++    let wrong = request(
++        &fixture,
++        ClientKind::Codex,
++        "0.154.0",
++        Protocol::OpenAiCompletions,
++    );
++    assert!(
++        prepare(&wrong)
++            .unwrap_err()
++            .to_string()
++            .contains("requires openai_responses")
++    );
++    assert!(!fixture.path("home").exists());
++}
++
++#[test]
++fn reviewed_hash_is_required_and_reconnect_disconnect_preserves_user_conflicts() {
++    let fixture = Fixture::new("hash-conflict");
++    let settings = fixture.private_file("home/.claude/settings.json", br#"{"env":{},"keep":1}"#);
++    let input = request(
++        &fixture,
++        ClientKind::Claude,
++        "2.1.63",
++        Protocol::AnthropicMessages,
++    );
++    let first = prepare(&input).unwrap();
++    assert!(apply_reviewed(&first, "wrong-hash").is_err());
++    assert_eq!(fs::read(&settings).unwrap(), br#"{"env":{},"keep":1}"#);
++    apply_reviewed(&first, &first.preview().hash).unwrap();
++
++    let mut value: serde_json::Value =
++        serde_json::from_slice(&fs::read(&settings).unwrap()).unwrap();
++    value["env"]["ANTHROPIC_MODEL"] = serde_json::json!("user-model");
++    value["keep"] = serde_json::json!(2);
++    fs::write(&settings, serde_json::to_vec(&value).unwrap()).unwrap();
++    let restored = disconnect(&input.journal_path).unwrap();
++    assert_eq!(restored.conflicts.len(), 1);
++    let value: serde_json::Value = serde_json::from_slice(&fs::read(settings).unwrap()).unwrap();
++    assert_eq!(value["env"]["ANTHROPIC_MODEL"], "user-model");
++    assert_eq!(value["keep"], 2);
++    assert!(value["env"].get("ANTHROPIC_BASE_URL").is_none());
++}
++
++#[test]
++fn reconnect_never_adopts_user_changed_pi_or_codex_provider_objects() {
++    for (client, version, protocol, relative, pointer) in [
++        (
++            ClientKind::Pi,
++            "0.84.2",
++            Protocol::OpenAiCompletions,
++            "home/.pi/agent/models.json",
++            "/providers/llmgw/baseUrl",
++        ),
++        (
++            ClientKind::Codex,
++            "0.154.0",
++            Protocol::OpenAiResponses,
++            "home/.codex/llmgw.config.toml",
++            "/model_providers/llmgw/base_url",
++        ),
++    ] {
++        let fixture = Fixture::new(&format!("reconnect-object-{}", client.as_str()));
++        match client {
++            ClientKind::Pi => {
++                fixture.private_file(relative, br#"{"userBefore":true}"#);
++            }
++            ClientKind::Codex => {
++                fixture.private_file(relative, b"notify = [\"keep\"]\n");
++            }
++            ClientKind::Claude => unreachable!(),
++        }
++        let mut input = request(&fixture, client, version, protocol);
++        input.set_default = false;
++        let first = prepare(&input).unwrap();
++        apply_reviewed(&first, &first.preview().hash).unwrap();
++        let path = fixture.path(relative);
++        let changed = match client {
++            ClientKind::Pi => {
++                let mut value: serde_json::Value =
++                    serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
++                *value.pointer_mut(pointer).unwrap() = serde_json::json!("https://user.invalid/v1");
++                value["userAdded"] = serde_json::json!(true);
++                serde_json::to_vec_pretty(&value).unwrap()
++            }
++            ClientKind::Codex => {
++                let mut value: toml_edit::DocumentMut =
++                    fs::read_to_string(&path).unwrap().parse().unwrap();
++                value["model_providers"]["llmgw"]["base_url"] =
++                    toml_edit::value("https://user.invalid/v1");
++                value["user_added"] = toml_edit::value(true);
++                value.to_string().into_bytes()
++            }
++            ClientKind::Claude => unreachable!(),
++        };
++        fs::write(&path, &changed).unwrap();
++        let reconnect = prepare(&input).unwrap_err().to_string();
++        assert!(reconnect.contains("changed after the reviewed connection"));
++        assert_eq!(fs::read(&path).unwrap(), changed);
++        let restored = disconnect(&input.journal_path).unwrap();
++        assert_eq!(restored.conflicts.len(), 1);
++        match client {
++            ClientKind::Pi => {
++                let value: serde_json::Value =
++                    serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
++                assert_eq!(value.pointer(pointer).unwrap(), "https://user.invalid/v1");
++                assert_eq!(value["userAdded"], true);
++            }
++            ClientKind::Codex => {
++                let value: toml_edit::DocumentMut =
++                    fs::read_to_string(&path).unwrap().parse().unwrap();
++                assert_eq!(
++                    value["model_providers"]["llmgw"]["base_url"].as_str(),
++                    Some("https://user.invalid/v1")
++                );
++                assert_eq!(value["user_added"].as_bool(), Some(true));
++                assert!(value.get("model").is_none());
++                assert!(value.get("model_provider").is_none());
++            }
++            ClientKind::Claude => unreachable!(),
++        }
++    }
++}
++
++#[test]
++fn restored_journal_never_reauthorizes_a_recreated_provider_object() {
++    for (client, version, protocol, relative) in [
++        (
++            ClientKind::Pi,
++            "0.84.2",
++            Protocol::OpenAiCompletions,
++            "home/.pi/agent/models.json",
++        ),
++        (
++            ClientKind::Codex,
++            "0.154.0",
++            Protocol::OpenAiResponses,
++            "home/.codex/llmgw.config.toml",
++        ),
++    ] {
++        let fixture = Fixture::new(&format!("restored-recreated-{}", client.as_str()));
++        let mut input = request(&fixture, client, version, protocol);
++        input.set_default = false;
++        let plan = prepare(&input).unwrap();
++        apply_reviewed(&plan, &plan.preview().hash).unwrap();
++        let path = fixture.path(relative);
++        let managed_bytes = fs::read(&path).unwrap();
++        disconnect(&input.journal_path).unwrap();
++        assert!(!path.exists());
++        fixture.private_file(relative, &managed_bytes);
++        let error = prepare(&input).unwrap_err().to_string();
++        assert!(error.contains("not owned by this connection journal"));
++    }
++}
++
++#[cfg(unix)]
++#[test]
++fn cli_resolves_native_config_directory_and_explicit_home_precedence() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let fixture = Fixture::new("native-config-dir");
++    let config = fixture.private_file(
++        "gateway/config.toml",
++        br#"listen = "127.0.0.1:4141"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++[upstream]
++api_base = "http://127.0.0.1:9/v1"
++[upstream.auth]
++mode = "none"
++[quota.rpm]
++kind = "unlimited"
++[quota.tpm]
++kind = "unknown"
++[[models]]
++id = "example-model"
++[[roots]]
++id = "shared-work"
++endpoints = ["chat/completions"]
++models = ["example-model"]
++"#,
++    );
++    let loaded = llmgw::config::LoadedConfig::load(&config).unwrap();
++    fs::create_dir_all(&loaded.state_paths.directory).unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.directory,
++        fs::Permissions::from_mode(0o700),
++    )
++    .unwrap();
++    fs::write(
++        &loaded.state_paths.data_token,
++        b"synthetic-local-data-token",
++    )
++    .unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.data_token,
++        fs::Permissions::from_mode(0o600),
++    )
++    .unwrap();
++    let pi = fixture.private_file("bin/pi", b"#!/bin/sh\nprintf '%s\\n' '0.84.2'\n");
++    fs::set_permissions(&pi, fs::Permissions::from_mode(0o700)).unwrap();
++    let native = fixture.path("native-pi-agent");
++    let default_home = fixture.path("default-home");
++    let explicit_home = fixture.path("explicit-home");
++    let args = [
++        "--config",
++        config.to_str().unwrap(),
++        "connect",
++        "pi",
++        "--client-executable",
++        pi.to_str().unwrap(),
++        "--root",
++        "shared-work",
++        "--model",
++        "example-model",
++    ];
++    let native_preview = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(args)
++        .env("HOME", &default_home)
++        .env("PI_CODING_AGENT_DIR", &native)
++        .output()
++        .unwrap();
++    let native_stdout = String::from_utf8(native_preview.stdout).unwrap();
++    assert!(native_preview.status.success());
++    assert!(native_stdout.contains(native.join("models.json").to_str().unwrap()));
++    assert!(native_stdout.contains("PI_CODING_AGENT_DIR environment"));
++
++    let explicit_preview = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(args)
++        .args(["--client-home", explicit_home.to_str().unwrap()])
++        .env("HOME", &default_home)
++        .env("PI_CODING_AGENT_DIR", &native)
++        .output()
++        .unwrap();
++    let explicit_stdout = String::from_utf8(explicit_preview.stdout).unwrap();
++    assert!(explicit_preview.status.success());
++    assert!(
++        explicit_stdout.contains(
++            explicit_home
++                .join(".pi/agent/models.json")
++                .to_str()
++                .unwrap()
++        )
++    );
++    assert!(
++        explicit_stdout
++            .contains("--client-home; later client launches must set PI_CODING_AGENT_DIR=")
++    );
++    assert!(explicit_stdout.contains(explicit_home.join(".pi/agent").to_str().unwrap()));
++    assert!(!explicit_stdout.contains(native.to_str().unwrap()));
++
++    let exact = fixture.path("exact-agent-dir");
++    let exact_preview = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(args)
++        .args(["--client-config-dir", exact.to_str().unwrap()])
++        .env("HOME", &default_home)
++        .env("PI_CODING_AGENT_DIR", &native)
++        .output()
++        .unwrap();
++    let exact_stdout = String::from_utf8(exact_preview.stdout).unwrap();
++    assert!(exact_preview.status.success());
++    assert!(exact_stdout.contains(exact.join("models.json").to_str().unwrap()));
++    assert!(
++        exact_stdout
++            .contains("--client-config-dir; later client launches must set PI_CODING_AGENT_DIR=")
++    );
++
++    let userprofile = fixture.path("userprofile-home");
++    let userprofile_preview = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(args)
++        .env_remove("HOME")
++        .env_remove("PI_CODING_AGENT_DIR")
++        .env("USERPROFILE", &userprofile)
++        .output()
++        .unwrap();
++    let userprofile_stdout = String::from_utf8(userprofile_preview.stdout).unwrap();
++    assert!(userprofile_preview.status.success());
++    assert!(
++        userprofile_stdout.contains(userprofile.join(".pi/agent/models.json").to_str().unwrap())
++    );
++    assert!(userprofile_stdout.contains("(USERPROFILE default)"));
++}
++
++#[cfg(unix)]
++#[test]
++fn cli_failed_activation_keeps_reviewed_client_bytes_unchanged() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let fixture = Fixture::new("cli-failed-activation");
++    let occupied = TcpListener::bind("127.0.0.1:0").unwrap();
++    let port = occupied.local_addr().unwrap().port();
++    let config = fixture.private_file(
++        "gateway/config.toml",
++        format!(
++            r#"listen = "127.0.0.1:{port}"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++
++[upstream]
++api_base = "http://127.0.0.1:9/v1"
++
++[upstream.auth]
++mode = "none"
++
++[quota.rpm]
++kind = "unlimited"
++
++[quota.tpm]
++kind = "unknown"
++
++[[models]]
++id = "example-model"
++max_output_tokens = 32
++
++[[roots]]
++id = "existing-work"
++endpoints = ["chat/completions"]
++models = ["example-model"]
++"#
++        )
++        .as_bytes(),
++    );
++    let loaded = llmgw::config::LoadedConfig::load(&config).unwrap();
++    fs::create_dir_all(&loaded.state_paths.directory).unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.directory,
++        fs::Permissions::from_mode(0o700),
++    )
++    .unwrap();
++    fs::write(
++        &loaded.state_paths.data_token,
++        b"synthetic-local-data-token",
++    )
++    .unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.data_token,
++        fs::Permissions::from_mode(0o600),
++    )
++    .unwrap();
++    let pi = fixture.private_file("bin/pi", b"#!/bin/sh\nprintf '%s\\n' '0.84.2'\n");
++    fs::set_permissions(&pi, fs::Permissions::from_mode(0o700)).unwrap();
++    let home = fixture.path("client-home");
++    let binary = env!("CARGO_BIN_EXE_llmgw");
++    let base_args = [
++        "--config",
++        config.to_str().unwrap(),
++        "connect",
++        "pi",
++        "--client-executable",
++        pi.to_str().unwrap(),
++        "--client-home",
++        home.to_str().unwrap(),
++        "--root",
++        "shared-work",
++        "--model",
++        "example-model",
++    ];
++    let preview = Command::new(binary).args(base_args).output().unwrap();
++    assert!(
++        preview.status.success(),
++        "{}",
++        String::from_utf8_lossy(&preview.stderr)
++    );
++    let stdout = String::from_utf8(preview.stdout).unwrap();
++    assert!(stdout.contains("runtime impact: stopped; activation required before client patch"));
++    let hash = stdout
++        .lines()
++        .find_map(|line| line.strip_prefix("preview hash: "))
++        .unwrap();
++    let models = home.join(".pi/agent/models.json");
++    assert!(!models.exists());
++
++    let mut changed_config = fs::read_to_string(&config).unwrap();
++    changed_config.push_str("\n# user edit changes the reviewed gateway fingerprint\n");
++    fs::write(&config, &changed_config).unwrap();
++    let stale = Command::new(binary)
++        .args(base_args)
++        .args(["--apply-hash", hash, "--restart"])
++        .output()
++        .unwrap();
++    assert!(!stale.status.success());
++    assert!(String::from_utf8_lossy(&stale.stderr).contains("preview hash does not match"));
++    assert!(!loaded.state_paths.runtime_state.exists());
++    assert_eq!(fs::read_to_string(&config).unwrap(), changed_config);
++    assert!(!models.exists());
++
++    let reviewed_again = Command::new(binary).args(base_args).output().unwrap();
++    assert!(reviewed_again.status.success());
++    let reviewed_again_stdout = String::from_utf8(reviewed_again.stdout).unwrap();
++    let reviewed_again_hash = reviewed_again_stdout
++        .lines()
++        .find_map(|line| line.strip_prefix("preview hash: "))
++        .unwrap();
++
++    let failed = Command::new(binary)
++        .args(base_args)
++        .args(["--apply-hash", reviewed_again_hash, "--restart"])
++        .output()
++        .unwrap();
++    assert!(!failed.status.success());
++    assert!(
++        !models.exists(),
++        "client patch must follow authenticated readiness"
++    );
++    let applied_gateway = fs::read_to_string(config).unwrap();
++    assert!(applied_gateway.contains("shared-work"));
++    assert!(applied_gateway.contains("chat/completions"));
++}
++
++#[cfg(unix)]
++#[test]
++fn cli_wrong_hash_does_not_restart_a_running_worker_with_pending_route() {
++    use std::os::unix::fs::PermissionsExt;
++
++    let fixture = Fixture::new("cli-wrong-hash-running");
++    let reserved = TcpListener::bind("127.0.0.1:0").unwrap();
++    let port = reserved.local_addr().unwrap().port();
++    drop(reserved);
++    let config = fixture.private_file(
++        "gateway/config.toml",
++        format!(
++            r#"listen = "127.0.0.1:{port}"
++concurrency = 1
++cancel_policy = "drain"
++accounting = "reserved"
++
++[upstream]
++api_base = "http://127.0.0.1:9/v1"
++
++[upstream.auth]
++mode = "none"
++
++[quota.rpm]
++kind = "unlimited"
++
++[quota.tpm]
++kind = "unknown"
++
++[[models]]
++id = "example-model"
++
++[[roots]]
++id = "existing-work"
++endpoints = ["responses"]
++models = ["example-model"]
++"#
++        )
++        .as_bytes(),
++    );
++    let loaded = llmgw::config::LoadedConfig::load(&config).unwrap();
++    fs::create_dir_all(&loaded.state_paths.directory).unwrap();
++    fs::set_permissions(
++        &loaded.state_paths.directory,
++        fs::Permissions::from_mode(0o700),
++    )
++    .unwrap();
++    for (path, value) in [
++        (&loaded.state_paths.data_token, b"synthetic-data".as_slice()),
++        (
++            &loaded.state_paths.control_token,
++            b"synthetic-control".as_slice(),
++        ),
++    ] {
++        fs::write(path, value).unwrap();
++        fs::set_permissions(path, fs::Permissions::from_mode(0o600)).unwrap();
++    }
++    let pi = fixture.private_file("bin/pi", b"#!/bin/sh\nprintf '%s\\n' '0.84.2'\n");
++    fs::set_permissions(&pi, fs::Permissions::from_mode(0o700)).unwrap();
++    let home = fixture.path("client-home");
++    let binary = env!("CARGO_BIN_EXE_llmgw");
++    let on = Command::new(binary)
++        .args(["--config", config.to_str().unwrap(), "on"])
++        .output()
++        .unwrap();
++    assert!(
++        on.status.success(),
++        "{}",
++        String::from_utf8_lossy(&on.stderr)
++    );
++    let status_before = Command::new(binary)
++        .args(["--config", config.to_str().unwrap(), "status", "--json"])
++        .output()
++        .unwrap();
++    let before: serde_json::Value = serde_json::from_slice(&status_before.stdout).unwrap();
++    assert_eq!(before["state"], "running");
++
++    let connect_args = [
++        "--config",
++        config.to_str().unwrap(),
++        "connect",
++        "pi",
++        "--client-executable",
++        pi.to_str().unwrap(),
++        "--client-home",
++        home.to_str().unwrap(),
++        "--root",
++        "pi-work",
++        "--model",
++        "example-model",
++    ];
++    let preview = Command::new(binary).args(connect_args).output().unwrap();
++    assert!(preview.status.success());
++    assert!(String::from_utf8_lossy(&preview.stdout).contains("explicit restart required"));
++    let refused = Command::new(binary)
++        .args(connect_args)
++        .args(["--apply-hash", &"0".repeat(64), "--restart"])
++        .output()
++        .unwrap();
++    assert!(!refused.status.success());
++    assert!(String::from_utf8_lossy(&refused.stderr).contains("preview hash does not match"));
++    let status_after = Command::new(binary)
++        .args(["--config", config.to_str().unwrap(), "status", "--json"])
++        .output()
++        .unwrap();
++    let after: serde_json::Value = serde_json::from_slice(&status_after.stdout).unwrap();
++    assert_eq!(after["state"], "running");
++    assert_eq!(after["identity"]["pid"], before["identity"]["pid"]);
++    assert_eq!(
++        after["identity"]["fingerprint"],
++        before["identity"]["fingerprint"]
++    );
++    assert!(!home.join(".pi/agent/models.json").exists());
++    let off = Command::new(binary)
++        .args(["--config", config.to_str().unwrap(), "off"])
++        .output()
++        .unwrap();
++    assert!(off.status.success());
++}
+--- Task3/product/tests/fixtures/git-index-tracked-settings-local
++++ Task4/product/tests/fixtures/git-index-tracked-settings-local
+@@ -0,0 +1 @@
++DIRC                                ��                                 .claude/settings.local.json       ����e�CV���X?v�W--- Task3/product/tests/patch_contract.rs
++++ Task4/product/tests/patch_contract.rs
+@@ -2089,3 +2089,59 @@
+     );
+     assert_eq!(fs::read(changed_path).unwrap(), user_changed.as_bytes());
+ }
++
++#[test]
++fn local_data_token_object_is_private_opaque_and_restores_as_one_owned_value() {
++    let fixture = Fixture::new("local-token-object");
++    let path = fixture.path("client/models.json");
++    let before = br#"{"providers":{"other":{"models":[]}}}"#;
++    write_private(&path, before);
++    let provider = json!({
++        "baseUrl": "http://127.0.0.1:4141/r/pi/v1",
++        "headers": {"X-LLMGW-Token": DATA_SENTINEL},
++        "models": [{"id":"fixture"}]
++    });
++    let tx = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(before),
++            vec![set(
++                key(&["providers", "llmgw"]),
++                EditValue::LocalDataTokenObject(provider),
++            )],
++        )],
++    );
++    let shown = preview(&tx).unwrap();
++    assert!(!shown.summary.contains(DATA_SENTINEL));
++    assert!(!format!("{:?}", tx.patches[0].edits[0]).contains(DATA_SENTINEL));
++    let alternate_provider = json!({
++        "baseUrl": "http://127.0.0.1:4141/r/pi/v1",
++        "headers": {"X-LLMGW-Token": "different-local-token"},
++        "models": [{"id":"fixture"}]
++    });
++    let alternate = transaction(
++        fixture.journal(),
++        vec![patch(
++            &path,
++            Format::StrictJson,
++            Scope::UserPrivate,
++            Some(before),
++            vec![set(
++                key(&["providers", "llmgw"]),
++                EditValue::LocalDataTokenObject(alternate_provider),
++            )],
++        )],
++    );
++    let alternate_preview = preview(&alternate).unwrap();
++    assert_ne!(shown.hash, alternate_preview.hash);
++    assert!(!alternate_preview.summary.contains("different-local-token"));
++    apply(&tx, &shown.hash).unwrap();
++    assert!(fs::read_to_string(&path).unwrap().contains(DATA_SENTINEL));
++    restore(fixture.journal()).unwrap();
++    let restored: serde_json::Value = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
++    let original: serde_json::Value = serde_json::from_slice(before).unwrap();
++    assert_eq!(restored, original);
++}
+--- Task3/product/tests/setup_contract.rs
++++ Task4/product/tests/setup_contract.rs
+@@ -78,6 +78,36 @@
+         .tools(ToolAnswers {
+             clients: vec![ClientIntent::Pi, ClientIntent::Manual],
+         })
++}
++
++#[test]
++fn client_route_is_added_without_rewriting_existing_routes_or_models() {
++    let original = draft(4141);
++    let original_root = original.config().roots[0].clone();
++    let updated = original
++        .ensure_client_route(
++            "codex-work",
++            "responses-model",
++            llmgw::config::Endpoint::Responses,
++        )
++        .unwrap();
++    assert_eq!(updated.config().roots[0], original_root);
++    assert!(
++        updated
++            .config()
++            .roots
++            .iter()
++            .any(|root| root.id == "codex-work"
++                && root.endpoints == [llmgw::config::Endpoint::Responses]
++                && root.models == ["responses-model"])
++    );
++    assert!(
++        updated
++            .config()
++            .models
++            .iter()
++            .any(|model| model.id == "responses-model" && model.max_output_tokens.is_none())
++    );
+ }
+ 
+ fn gateway_status(config: &std::path::Path) -> serde_json::Value {
+--- Task3/product/tests/test_verify_clients.py
++++ Task4/product/tests/test_verify_clients.py
+@@ -0,0 +1,46 @@
++#!/usr/bin/env python3
++import importlib.util
++import sys
++import unittest
++from pathlib import Path
++
++
++SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
++sys.path.insert(0, str(SCRIPTS))
++SPEC = importlib.util.spec_from_file_location("verify_clients", SCRIPTS / "verify_clients.py")
++assert SPEC and SPEC.loader
++verify_clients = importlib.util.module_from_spec(SPEC)
++SPEC.loader.exec_module(verify_clients)
++
++
++class ToolResultBoundaryTests(unittest.TestCase):
++    def test_codex_rejects_markers_in_unrelated_text(self) -> None:
++        payload = {
++            "input": [
++                {
++                    "type": "message",
++                    "content": (
++                        f"{verify_clients.CODEX_TOOL_CALL_ID} "
++                        f"{verify_clients.CODEX_TOOL_CONTENT} Process exited with code 0"
++                    ),
++                }
++            ]
++        }
++        self.assertFalse(verify_clients.codex_tool_result_matches(payload))
++
++    def test_claude_rejects_markers_in_unrelated_text(self) -> None:
++        payload = {
++            "messages": [
++                {
++                    "role": "user",
++                    "content": (
++                        "toolu_task4_read " + verify_clients.CODEX_TOOL_CONTENT
++                    ),
++                }
++            ]
++        }
++        self.assertFalse(verify_clients.claude_tool_result_matches(payload))
++
++
++if __name__ == "__main__":
++    unittest.main()

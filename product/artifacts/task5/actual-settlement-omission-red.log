@@ -1,0 +1,27 @@
+Purpose: regression sensitivity with required behavior omitted.
+Command: cargo test --locked --test wire_contract actual_wire_usage
+Original source SHA256: 73c8ddddfbfce6e5e23d230c86aa725134470cac074d97a4704472c24bd91fc4
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.96s
+     Running tests/wire_contract.rs (target/debug/deps/wire_contract-fbfe5999aa2293b0)
+
+running 1 test
+test actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits ... FAILED
+
+failures:
+
+---- actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits stdout ----
+
+thread 'actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits' panicked at tests/wire_contract.rs:1283:9:
+assertion `left == right` failed
+  left: 49
+ right: 23
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test wire_contract`

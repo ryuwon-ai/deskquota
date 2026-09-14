@@ -1,0 +1,57 @@
+{
+  "check": "foreground_fair_admission_loopback_only",
+  "passed": true,
+  "timestamp": "2026-09-12T13:00:02.305582+00:00",
+  "binary": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/native/release/llmgw",
+  "binary_sha256": "3823b32f355bc9f52204ccf1fd4bf30a7f2c668ae31ee2747f78f10f9f336c70",
+  "binary_unchanged": true,
+  "os": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "script_sha256": "8094ccdad1504fb7faa4641e408a4e8924668d5faeb535c98a8a5631fd6df0e5",
+  "quota_fixture": {
+    "rpm": "unlimited",
+    "tpm": "unknown"
+  },
+  "cases": [
+    {
+      "case": "root_rr_fifo_and_metadata",
+      "passed": true,
+      "ingress": 6,
+      "upstream_attempts": 6,
+      "trace": [
+        "A0",
+        "B1",
+        "A1",
+        "B2",
+        "A2",
+        "A3"
+      ]
+    },
+    {
+      "case": "queued_rst",
+      "passed": true,
+      "ingress": 4,
+      "canceled_before_upstream": 1,
+      "upstream_attempts": 3,
+      "trace": [
+        "A0",
+        "B1",
+        "A2"
+      ]
+    },
+    {
+      "case": "shared_queue64_cancel_and_refill",
+      "passed": true,
+      "ingress": 67,
+      "rejected": 1,
+      "canceled_before_upstream": 16,
+      "upstream_attempts": 50,
+      "all_outcomes_accounted": true
+    }
+  ],
+  "limitations": [
+    "Synthetic native HTTP, no real agent or model",
+    "No token-budget, bypass-barrier, latency, RSS or Windows proof",
+    "RR setup and all attempt starts must precede the5-second aging threshold",
+    "Candidate port is released before spawn; bind failure fails the probe"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "scope": "actual PTY SaveOnly -> Pi preview/hash restart/apply -> disconnect/off",
+  "setup": {
+    "exit": 0,
+    "state": "stopped",
+    "worker_count": 0,
+    "tokens": {
+      "data_bytes": 64,
+      "control_bytes": 64,
+      "distinct": true,
+      "directory_mode": "0700",
+      "file_modes": [
+        "0600",
+        "0600"
+      ]
+    }
+  },
+  "preview": {
+    "exit": 0,
+    "hash_present": true,
+    "client_bytes_unchanged": true,
+    "tokens_unchanged": true
+  },
+  "apply": {
+    "exit": 0,
+    "reviewed_hash_reused": true,
+    "restart_requested": true,
+    "state": "running",
+    "desired_fingerprint": true,
+    "pending_restart": false,
+    "client_patch_applied": true,
+    "client_credential_matches_setup_token": true,
+    "unrelated_client_value_preserved": true
+  },
+  "cleanup": {
+    "disconnect_exit": 0,
+    "client_user_values_restored": true,
+    "owned_llmgw_provider_removed": true,
+    "off_exit": 0,
+    "final_state": "stopped",
+    "worker_count": 0,
+    "tokens_unchanged": true
+  },
+  "security": {
+    "protected_token_in_outputs": false
+  },
+  "upstream_calls": 0,
+  "client_execution_scope": "actual llmgw CLI with a synthetic Pi --version executable; installed Pi was not executed",
+  "all_pty_waited": true,
+  "owned_workers_remaining": 0,
+  "scratch_removed": true
+}

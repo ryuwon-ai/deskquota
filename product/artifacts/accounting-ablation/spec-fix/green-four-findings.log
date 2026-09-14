@@ -1,0 +1,25 @@
+test_arm_profiles_and_alternating_pair_schedule (tests.test_benchmark_accounting.AccountingRulesTests.test_arm_profiles_and_alternating_pair_schedule) ... ok
+test_completed_generation_usage_is_linked_to_submitted_and_attempt (tests.test_benchmark_accounting.AccountingRunValidationTests.test_completed_generation_usage_is_linked_to_submitted_and_attempt) ... ok
+test_paired_summary_separates_fixed_cutoff_drain_and_latency (tests.test_benchmark_accounting.AccountingRunValidationTests.test_paired_summary_separates_fixed_cutoff_drain_and_latency) ... ok
+test_duplicate_accounting_seeds_reject_before_output_creation (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_duplicate_accounting_seeds_reject_before_output_creation) ... ok
+test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_single_seed_pilot_is_checkpoint_then_full_resume_reuses_pair) ... START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+completed_accounting_matrix
+ok
+test_rehashed_equal_float_usage_rejects_before_next_spawn (tests.test_benchmark_accounting.AccountingCliBoundaryTests.test_rehashed_equal_float_usage_rejects_before_next_spawn) ... START quota-seed1-production_rr
+END quota-seed1-production_rr {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+START quota-seed1-production_actual
+END quota-seed1-production_actual {"submitted": 100, "within_measurement_terminal": {"completed": 100}, "within_measurement_completed": 100, "post_measurement_drain_outcomes": {}, "outcomes": {"completed": 100}, "completion_ms_success_only": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "terminal_ms_all_outcomes": {"n": 100, "p50": 1, "p95": 1, "p99": 1, "max": 1}, "first_output_delta_ms_success_only": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "send_to_mock_receive_ms_mixed_ingress_queue_network": {"n": 0, "p50": null, "p95": null, "p99": null, "max": null}, "scheduling_lag_ms": {"n": 100, "p50": 0, "p95": 0, "p99": 0, "max": 0}}
+accounting_pilot_completed
+ok
+test_builder_toml_metadata_mismatch_rejects_before_spawn (tests.test_benchmark_accounting.StartupCancellationTests.test_builder_toml_metadata_mismatch_rejects_before_spawn) ... ok
+test_written_toml_mutation_rejects_before_spawn (tests.test_benchmark_accounting.StartupCancellationTests.test_written_toml_mutation_rejects_before_spawn) ... ok
+test_runtime_accounting_mismatch_reaps_owned_child (tests.test_benchmark_accounting.StartupCancellationTests.test_runtime_accounting_mismatch_reaps_owned_child) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.162s
+
+OK

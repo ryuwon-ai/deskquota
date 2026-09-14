@@ -1,0 +1,80 @@
+{
+  "noop": {
+    "exit": 0,
+    "same_bytes": true,
+    "before_sha": "5a0e618b45eb2be39a98d3eb54c5a58b65c3327504f32090563753b50547c744",
+    "after_sha": "5a0e618b45eb2be39a98d3eb54c5a58b65c3327504f32090563753b50547c744"
+  },
+  "auth_defaults": {
+    "exit": 0,
+    "same_bytes": true,
+    "before_sha": "9daf713423cbde33ef666aad0cd3d937973637d50be2f311ea7019f398dc5586",
+    "after_sha": "9daf713423cbde33ef666aad0cd3d937973637d50be2f311ea7019f398dc5586",
+    "old_reference_preserved": true,
+    "old_header_preserved": true,
+    "new_default_reference": false
+  },
+  "pending_defaults": {
+    "exit": 0,
+    "before": {
+      "version": 1,
+      "shared_with_other_pcs": true,
+      "separate_input_output": true,
+      "login_requested": true,
+      "clients": [
+        "pi",
+        "codex"
+      ]
+    },
+    "after": {
+      "version": 1,
+      "shared_with_other_pcs": true,
+      "separate_input_output": true,
+      "login_requested": true,
+      "clients": [
+        "pi",
+        "codex"
+      ]
+    }
+  },
+  "endpoint_defaults": {
+    "exit": 0,
+    "same_bytes": true,
+    "before_sha": "36054abb155e6933c32733d12159837c0d57a0d98d6cc76e68b419ca6f96218c",
+    "after_sha": "36054abb155e6933c32733d12159837c0d57a0d98d6cc76e68b419ca6f96218c",
+    "models_endpoint_preserved": true,
+    "count_tokens_preserved": true
+  },
+  "request_bounded": {
+    "doctor_exit": 0,
+    "setup_exit": 0,
+    "same_bytes": true,
+    "error": false
+  },
+  "concurrent_edit": {
+    "exit": 1,
+    "external_edit_preserved": true,
+    "stale_value_restored": false
+  },
+  "partial_write": {
+    "exit": -25,
+    "before_bytes": 417,
+    "after_bytes": 417,
+    "same_bytes": true,
+    "signal_name": "SIGXFSZ"
+  },
+  "invalid_cli": {
+    "doctor": {
+      "exit": 2,
+      "stderr": "error: invalid configuration syntax or shape at line 1, column 5"
+    },
+    "on": {
+      "exit": 2,
+      "stderr": "error: invalid configuration syntax or shape at line 1, column 5"
+    }
+  },
+  "missing_inference_args": {
+    "exit": 2,
+    "stderr": "error: the following required arguments were not provided:\n  --model <MODEL>\n  --max-output-tokens <MAX_OUTPUT_TOKENS>\n\nUsage: llmgw doctor --inference --config <PATH> --model <MODEL> --max-output-tokens <MAX_OUTPUT_TOKENS>\n\nFor more information, try '--help'."
+  }
+}

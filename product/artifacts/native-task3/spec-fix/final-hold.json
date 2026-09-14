@@ -1,0 +1,143 @@
+{
+  "phase": "FINAL_HOLD",
+  "fix": "native-task3 fresh SPEC findings",
+  "execution_finished": true,
+  "writer_runtime_ownership_released": true,
+  "source_stable_after_capture": true,
+  "source_drift": [],
+  "source_files": 79,
+  "changed_files_from_task2": 12,
+  "changed_files_from_lock_fix": 4,
+  "source_manifest_sha256": "3239733f0fda5ec89f6aff138a7cf4ceba92f915dcb472dbc6d70e2581967af0",
+  "changed_files_manifest_sha256": "d48131ee287b301b71ecbfdb6cd954820ab938c4bcec439c865b2974df953687",
+  "spec_fix_changed_files_manifest_sha256": "d3b65129c98e2c4e1c78694c0532eb863bcc3084f21eeeac9ca03fa76463f19f",
+  "source_archive_sha256": "c01ffa1ef1f3f7ba514b93a3a2cbe7ea2c67d92cfffdfbd8eced973f3fd055f3",
+  "source_archive_bytes": 238142,
+  "binaries": {
+    "release": {
+      "path": "target/native-task3-spec-fix/release/llmgw",
+      "bytes": 9314064,
+      "sha256": "4472df4f3fb68000cf31d4eb33edc4fa9faf9176b0fb04b18db3a0d1184573e4"
+    },
+    "debug": {
+      "path": "target/native-task3-spec-fix/debug/llmgw",
+      "bytes": 28148600,
+      "sha256": "a0e5572d4010d338c858acc64d2ef20e3a9355a496efd988803eaa4b3429e706"
+    },
+    "debug_rlib": {
+      "path": "target/native-task3-spec-fix/debug/deps/libllmgw-eba4665eb2ddaf45.rlib",
+      "bytes": 47283208,
+      "sha256": "4cbd76271788fd41f9a0f2683c38a15171105cde5b0a0d456f8f231c42982b44"
+    }
+  },
+  "probe": {
+    "source": {
+      "path": "artifacts/native-task3/spec-fix/spec_probe.rs",
+      "bytes": 5308,
+      "sha256": "5c66d8f7f41c8870603436e1d6860e65b58ceb3b7403f723caa5241dac92b7c5"
+    },
+    "binary": {
+      "path": "artifacts/native-task3/spec-fix/spec-probe",
+      "bytes": 5555352,
+      "sha256": "072a5d31d45057c14de7f261a2dbf8d827547d4e673513f46dd27f863ff50c35"
+    },
+    "result": {
+      "path": "artifacts/native-task3/spec-fix/spec-probe-result.json",
+      "bytes": 784,
+      "sha256": "3cd2f6d7aa371eaece7c86fc472cbfdac68811a21a71f41d0ef94fdb0cf9fad5"
+    },
+    "all_cases_passed": true
+  },
+  "lockfile": {
+    "path": "Cargo.lock",
+    "bytes": 52711,
+    "sha256": "c82e9357a135eb84f0d1be70d0a5f16d2a6c0f7a520cc140562306418a0d3e1c"
+  },
+  "toolchain_file": {
+    "path": "rust-toolchain.toml",
+    "bytes": 52,
+    "sha256": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b"
+  },
+  "verification": {
+    "full_debug": {
+      "passed": 299,
+      "failed": 0,
+      "rows": [
+        11,
+        0,
+        3,
+        19,
+        22,
+        26,
+        35,
+        12,
+        7,
+        19,
+        42,
+        32,
+        27,
+        44,
+        0
+      ]
+    },
+    "patch_debug": {
+      "passed": 35,
+      "failed": 0
+    },
+    "patch_release": {
+      "passed": 35,
+      "failed": 0
+    },
+    "adapted_spec_probe": {
+      "passed": 3,
+      "failed": 0
+    },
+    "static": {
+      "rustfmt": "passed",
+      "check_all_targets": "passed",
+      "clippy_all_targets_deny_warnings": "passed",
+      "debug_build": "passed",
+      "release_build": "passed"
+    }
+  },
+  "red_green": {
+    "red": "patch-contract-spec-red.log: 29 passed, 4 failed",
+    "failed_intermediate": "patch-contract-spec-green-attempt-1.log: 32 passed, 1 failed due byte-format assertion corrected to semantic equality",
+    "green": "patch-contract-final.log: 35 passed, 0 failed",
+    "release_green": "patch-contract-release-final.log: 35 passed, 0 failed"
+  },
+  "finding_resolution": {
+    "S1": "created file remains whole-file removable only while its preimage matches a committed or pending llmgw-created byte hash; any detected user byte change permanently switches restore to owned-key semantics",
+    "S2": "new ancestor or descendant ownership overlap with an existing journal key is rejected under the journal lock before any client write; equal and disjoint repeat ownership remains supported",
+    "S3": "all reviewed targets are journaled before the first resource write; failed and unstarted rows have no fabricated keys/backups and restore skips unowned rows",
+    "S4": "tests exercise actual typed local-data, upstream, and control sentinel values across Debug, preview/diff, apply, inspect summary, errors, subprocess stdout/stderr, and raw journal surfaces"
+  },
+  "platform_evidence": {
+    "macos_runtime": "focused/full tests and adapted probe, including ACL/privacy, lock identity, created reconnect interruption, partial recovery and redaction subprocess",
+    "windows": "static cfg only; no Windows runtime claim",
+    "linux": "static cfg only; no Linux runtime claim"
+  },
+  "protected": {
+    "accepted_task2": 426,
+    "task3_extra": 90,
+    "benchmark_raws": 40,
+    "accounting_raws": 10,
+    "drift": [],
+    "parent_lock_rerun": {
+      "path": "evidence/native-task3-parent-lock-rerun/result.json",
+      "bytes": 693,
+      "sha256": "254303156115ac6878065412c4c23ad2052687b4c2523b1e1d64e75a3667e3d3"
+    }
+  },
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)\nbinary: rustc\ncommit-hash: 6b00bc3880198600130e1cf62b8f8a93494488cc\ncommit-date: 2025-06-23\nhost: aarch64-apple-darwin\nrelease: 1.88.0\nLLVM version: 20.1.5",
+  "cargo": "cargo 1.88.0 (873a06493 2025-05-10)\nrelease: 1.88.0\ncommit-hash: 873a0649350c486caf67be772828a4f36bb4734c\ncommit-date: 2025-05-10\nhost: aarch64-apple-darwin\nlibgit2: 1.9.0 (sys:0.20.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.80+curl-8.12.1 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.4.1 11 Feb 2025\nos: Mac OS 26.5.1 [64-bit]",
+  "cleanup": "artifacts/native-task3/spec-fix/cleanup-final.json",
+  "limits": [
+    "initial Task3 and lock-fix holds remain immutable and are superseded only by this hold for the SPEC findings",
+    "the earlier unavailable pre-redaction capture remains unavailable and was not reconstructed",
+    "external-editor final-check to rename filesystem CAS is not claimed",
+    "Windows and Linux runtime remain unverified",
+    "Task4 adapters and CLI wiring remain out of scope"
+  ]
+}

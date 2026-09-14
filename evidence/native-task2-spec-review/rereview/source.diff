@@ -1,0 +1,2090 @@
+--- initial/product/Cargo.toml
++++ product/Cargo.toml
+@@ -36,7 +36,7 @@
+ url = "=2.5.8"
+ 
+ [target.'cfg(unix)'.dependencies]
+-rustix = { version = "=1.1.4", features = ["process"] }
++rustix = { version = "=1.1.4", features = ["fs", "process"] }
+ 
+ [target.'cfg(target_os = "macos")'.dependencies]
+ exacl = { version = "=0.13.0", default-features = false }
+--- initial/product/docs/runtime-contract.md
++++ product/docs/runtime-contract.md
+@@ -21,9 +21,9 @@
+ `doctor [--json]` remain available. First-run setup requires terminal input. A
+ pipe or other non-terminal first run exits 2 immediately, creates nothing, and
+ prints the explicit setup command plus `examples/fixture.toml` guidance. Normal
+-or idempotent operations exit 0, operational failures exit 1, invalid arguments
+-and unconfigured non-terminal use exit 2, and an explicit wizard cancel exits
+-130. Ctrl-C while Dialoguer is reading an input follows the terminal's SIGINT
++or idempotent operations exit 0, operational failures exit 1, invalid arguments,
++invalid configuration, and unconfigured non-terminal use exit 2, and an explicit
++wizard cancel exits 130. Ctrl-C while Dialoguer is reading an input follows the terminal's SIGINT
+ path, whose shell status is also 130.
+ 
+ ### Setup boundary
+@@ -34,7 +34,9 @@
+ only a set of defaults: it does not start or download a local model and does not
+ infer a verified provider protocol. The connection step requires the user to
+ select the Completions, Responses, or Messages formats the upstream actually
+-supports. The gateway performs no API format translation.
++supports. Existing Models and Messages count_tokens routes remain selected when
++generation choices are accepted unchanged, including a valid metadata-only
++route. The gateway performs no API format translation.
+ 
+ Upstream authentication can forward the incoming client header, read a complete
+ header value from a named environment variable, or send no auth. The environment
+@@ -67,11 +69,13 @@
+ accounting, retry, cancel, multi-root, and multi-model settings are preserved
+ during reconfiguration unless the user explicitly replaces them.
+ 
+-The model `max_output_tokens` value collected by setup is a user-supplied
+-reservation fallback for local accounting when a request omits its own cap. It
+-is not a verified provider limit. The gateway does not insert it into the body
+-or enforce it upstream. The summary keeps listing verification and capability
+-verification separate and leaves unknown capabilities unverified.
++The optional model `max_output_tokens` value collected by setup is a
++user-supplied reservation fallback for local accounting when a request omits its
++own cap. It is not a verified provider limit. The gateway does not insert it
++into the body or enforce it upstream. Without a fallback, request-provided caps
++remain valid; known-TPM generation admission requires such a request cap. The
++summary keeps listing verification and capability verification separate and
++leaves unknown capabilities unverified.
+ 
+ Setup listens on loopback port 4141 by default. Pi, Claude Code, Codex, and manual
+ client choices are pending intents only: Task 2 never edits their files or
+@@ -91,14 +95,33 @@
+ 
+ Save only writes the config and preserves any running worker and all client
+ files. A changed file then remains pending for an explicit restart. Save and
+-start calls the authenticated lifecycle: it starts a stopped config or explicitly
+-restarts a running one and claims success only after fingerprint/nonce/address
+-readiness. That readiness is separate from the known-quota admission hold, which
+-can still last 60 seconds.
++start calls authenticated `on` for a new, stopped, or byte-unchanged config; an
++already-running unchanged worker keeps its PID, nonce, and start identity. For a
++changed running config it explicitly restarts, cancels queued requests, drains
++active requests for up to ten seconds, and claims success only after
++fingerprint/nonce/address readiness. That readiness is separate from the
++known-quota admission hold, which can still last 60 seconds.
+ 
+ New config directories are created privately on Unix and new config and pending
+-files use mode 0600. Existing regular non-symlink files are updated without
+-silently changing their permissions or ACL. A no-op reconfiguration preserves
++files use mode 0600. Final apply takes a persistent private
++`.<config-name>.setup.lock`, then compares the config and pending sidecar with
++the exact bytes loaded for the preview. A cooperating second writer is rejected,
++and a detected external edit requires a fresh setup preview. Changed files are
++fully written and synced in the destination directory before publication. On
++macOS and Linux, interruption before the final rename leaves the existing
++destination intact. The last snapshot/path check and atomic rename are adjacent,
++but do not claim an external-editor filesystem CAS primitive.
++
++Existing regular non-symlink files are updated without silently changing their
++owner, group, permissions, or ACL. macOS copies and verifies the extended ACL.
++On Windows, setup validates the current-user-only protected ACL, then retains
++protected copies of both the reviewed original and replacement candidate around
++`ReplaceFileW`. It removes those copies only after the destination is verified;
++an ambiguous failure reports both recovery paths without their contents.
++Linux uses native xattr inspection and refuses a source or inherited POSIX ACL
++that this setup path cannot preserve; it does not add a libacl dependency. Other
++Unix systems explicitly refuse changed existing files because this package has
++no verified ACL-preserving replacement there. A no-op reconfiguration preserves
+ the exact config source bytes, including comments, and edited scalar values
+ preserve TOML decor and inline comments. Setup refuses a link or non-regular
+ config or pending target.
+--- initial/product/scripts/probe_native_setup.py
++++ product/scripts/probe_native_setup.py
+@@ -72,6 +72,13 @@
+     def send(self, value: bytes) -> None:
+         os.write(self.master, value)
+ 
++    def wait_raw(self, timeout: float = 2.0) -> None:
++        deadline = time.monotonic() + timeout
++        while termios.tcgetattr(self.master)[3] & termios.ICANON:
++            if time.monotonic() >= deadline:
++                raise AssertionError("PTY did not enter raw input mode")
++            time.sleep(0.01)
++
+     def finish(self, expected: int) -> str:
+         deadline = time.monotonic() + 10
+         while self.process.poll() is None and time.monotonic() < deadline:
+@@ -121,7 +128,8 @@
+     choose(run, "Setup: Models")
+     choose(run, "Try one bounded GET")
+     choose(run, "Manual model ID", "모델 with space\r".encode())
+-    choose(run, "Nonzero reservation bound")
++    choose(run, "Set a user-chosen reservation fallback", b"y")
++    choose(run, "Nonzero reservation fallback")
+     choose(run, "Setup: Quota")
+     choose(run, "RPM")
+     choose(run, "TPM")
+@@ -134,7 +142,16 @@
+     choose(run, "Setup: Tools")
+     choose(run, "Client intents")
+     choose(run, "Setup: Apply")
+-    choose(run, "Apply", b"\x1b[A\r" if start else b"\r")
++    run.expect("fingerprint impact:")
++    run.expect("Apply")
++    run.expect("Cancel")
++    run.wait_raw()
++    if start:
++        run.send(b"\x1b[A")
++        run.expect("❯ Save and start")
++        run.send(b"\r")
++    else:
++        run.send(b"\r")
+     return run.finish(0)
+ 
+ 
+@@ -242,7 +259,7 @@
+         status = subprocess.run([args.binary, "status", "--json", "--config", start_config], check=True, capture_output=True, text=True)
+         state = json.loads(status.stdout)
+         if state["state"] != "running" or not state.get("identity", {}).get("fingerprint"):
+-            raise AssertionError(state)
++            raise AssertionError({"state": state, "log_tail": start_log[-4000:]})
+         subprocess.run([args.binary, "off", "--config", start_config], check=True, capture_output=True)
+         evidence["cases"]["save_and_start"] = {"exit": 0, "state": "running", "authenticated_identity": True, "cleaned": True, "log_tail": start_log[-1200:]}
+ 
+--- initial/product/src/cli.rs
++++ product/src/cli.rs
+@@ -44,9 +44,9 @@
+         /// Perform one explicit paid-capable generation smoke. Never runs as part of --network.
+         #[arg(long)]
+         inference: bool,
+-        #[arg(long, requires = "inference")]
++        #[arg(long, requires = "inference", required_if_eq("inference", "true"))]
+         model: Option<String>,
+-        #[arg(long, requires = "inference", value_parser = clap::value_parser!(u64).range(1..))]
++        #[arg(long, requires = "inference", required_if_eq("inference", "true"), value_parser = clap::value_parser!(u64).range(1..))]
+         max_output_tokens: Option<u64>,
+     },
+     #[command(hide = true)]
+@@ -68,7 +68,14 @@
+             return Ok(ExitCode::from(2));
+         }
+         let existing = if config.exists() {
+-            Some(LoadedConfig::load(&config)?)
++            match LoadedConfig::load(&config) {
++                Ok(loaded) => Some(loaded),
++                Err(error) if invalid_config(&error) => {
++                    eprintln!("error: {error}");
++                    return Ok(ExitCode::from(2));
++                }
++                Err(error) => return Err(error.into()),
++            }
+         } else {
+             None
+         };
+@@ -103,7 +110,14 @@
+         max_output_tokens,
+     } = command
+     {
+-        let loaded = LoadedConfig::load(&config)?;
++        let loaded = match LoadedConfig::load(&config) {
++            Ok(loaded) => loaded,
++            Err(error) if invalid_config(&error) => {
++                eprintln!("error: {error}");
++                return Ok(ExitCode::from(2));
++            }
++            Err(error) => return Err(error.into()),
++        };
+         return doctor(
+             loaded,
+             json,
+@@ -124,7 +138,19 @@
+         let off = matches!(command, Command::Off);
+         let result = match command {
+             Command::Setup => unreachable!(),
+-            Command::Run => return crate::lifecycle::worker(&config, None).await.map(|()| ExitCode::SUCCESS),
++            Command::Run => {
++                return match crate::lifecycle::worker(&config, None).await {
++                    Err(error)
++                        if error
++                            .downcast_ref::<crate::config::ConfigError>()
++                            .is_some_and(invalid_config) =>
++                    {
++                        eprintln!("error: {error}");
++                        Ok(ExitCode::from(2))
++                    }
++                    result => result.map(|()| ExitCode::SUCCESS),
++                };
++            }
+             Command::Worker { fingerprint } => {
+                 return match crate::lifecycle::worker(&config, Some(&fingerprint)).await {
+                     Err(error) if matches!(error.downcast_ref::<crate::server::StartError>(), Some(crate::server::StartError::Bind(e)) if e.kind() == std::io::ErrorKind::AddrInUse) => Ok(ExitCode::from(crate::lifecycle::WORKER_PORT_IN_USE_EXIT)),
+@@ -144,12 +170,26 @@
+             Ok(value) => value,
+             Err(error) => {
+                 if json { println!("{}", serde_json::json!({"state":"failed", "error":error.to_string(), "autostart":"not_implemented", "clients":"not_implemented"})); }
++                if error
++                    .downcast_ref::<crate::config::ConfigError>()
++                    .is_some_and(invalid_config)
++                {
++                    eprintln!("error: {error}");
++                    return Ok(ExitCode::from(2));
++                }
+                 return Err(error);
+             }
+         };
+         if json { println!("{value}"); } else { display(&value, off); }
+         Ok(ExitCode::SUCCESS)
+     })
++}
++
++fn invalid_config(error: &crate::config::ConfigError) -> bool {
++    matches!(
++        error,
++        crate::config::ConfigError::Parse { .. } | crate::config::ConfigError::Validation(_)
++    )
+ }
+ 
+ fn doctor(
+--- initial/product/src/lifecycle/platform/windows.rs
++++ product/src/lifecycle/platform/windows.rs
+@@ -364,3 +364,22 @@
+     validate(&file, false, &user)?;
+     Ok(file)
+ }
++
++/// Replace an existing file after the caller has retained protected original
++/// and replacement recovery paths for every ambiguous failure outcome.
++pub fn replace_file(replacement: &Path, destination: &Path) -> io::Result<()> {
++    let replacement = wide(replacement)?;
++    let destination = wide(destination)?;
++    // SAFETY: both path buffers are NUL-terminated and live through the call.
++    // Recovery files are owned by the caller; no Win32 backup path is requested.
++    unsafe {
++        check(ReplaceFileW(
++            destination.as_ptr(),
++            replacement.as_ptr(),
++            null(),
++            0,
++            null_mut(),
++            null_mut(),
++        ))
++    }
++}
+--- initial/product/src/setup/mod.rs
++++ product/src/setup/mod.rs
+@@ -1,7 +1,14 @@
+ //! First-run configuration. Prompt collection is separate from the typed draft and apply step.
++mod network;
++mod persist;
+ pub mod prompts;
+ pub mod summary;
+ pub mod validate;
++pub use network::{
++    InferenceResult, ListRequest, ModelListing, fetch_models, list_models, smoke_inference,
++};
++pub use persist::{ApplyMode, ApplyResult, absolute, apply};
++use persist::{PendingSetup, pending_path};
+ 
+ use crate::config::{
+     Accounting, Auth, CancelPolicy, Config, Endpoint, Limit, LoadedConfig, Model, Quota, Root,
+@@ -9,10 +16,7 @@
+ };
+ use serde::{Deserialize, Serialize};
+ use std::{
+-    ffi::OsString,
+-    fmt,
+-    fs::{self, OpenOptions},
+-    io::Write,
++    fmt, fs,
+     net::{IpAddr, Ipv4Addr, SocketAddr},
+     num::NonZeroU64,
+     path::{Path, PathBuf},
+@@ -164,6 +168,7 @@
+     capabilities_verified: bool,
+     connection_error: Option<String>,
+     original: Option<(Config, Vec<u8>)>,
++    original_pending: Option<Option<Vec<u8>>>,
+ }
+ 
+ impl SetupDraft {
+@@ -197,6 +202,7 @@
+             capabilities_verified: false,
+             connection_error: None,
+             original: None,
++            original_pending: None,
+         }
+     }
+ 
+@@ -209,6 +215,7 @@
+             loaded.config.clone(),
+             Some((loaded.config.clone(), loaded.source_bytes.clone())),
+         );
++        draft.original_pending = Some(None);
+         let path = pending_path(&loaded.source_path)?;
+         match fs::symlink_metadata(&path) {
+             Ok(metadata) => {
+@@ -232,6 +239,7 @@
+                 draft.separate_input_output = pending.separate_input_output;
+                 draft.login_requested = pending.login_requested;
+                 draft.clients = pending.clients;
++                draft.original_pending = Some(Some(bytes));
+             }
+             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+             Err(error) => return Err(error.into()),
+@@ -251,6 +259,7 @@
+             capabilities_verified: false,
+             connection_error: None,
+             original,
++            original_pending: None,
+         }
+     }
+ 
+@@ -377,14 +386,6 @@
+             return Err(Error::message(
+                 "at least one supported endpoint must be selected",
+             ));
+-        }
+-        if self
+-            .config
+-            .models
+-            .iter()
+-            .any(|model| model.max_output_tokens.is_none())
+-        {
+-            return Err(Error::message("each model requires a nonzero output bound"));
+         }
+         if !(crate::config::MIN_CONCURRENCY..=crate::config::MAX_CONCURRENCY)
+             .contains(&self.config.concurrency)
+@@ -522,471 +523,6 @@
+             }
+         }
+     }
+-}
+-
+-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+-pub enum ApplyMode {
+-    SaveOnly,
+-    SaveAndStart,
+-}
+-
+-#[derive(Clone, Debug, Eq, PartialEq)]
+-pub struct ApplyResult {
+-    pub mode: ApplyMode,
+-    pub runtime_state: &'static str,
+-    pub worker_processes_started: u8,
+-    pub authenticated_readiness: bool,
+-    pub config_path: PathBuf,
+-    pub pending_path: PathBuf,
+-}
+-
+-#[derive(Debug, Deserialize, Serialize)]
+-#[serde(deny_unknown_fields)]
+-struct PendingSetup {
+-    version: u8,
+-    shared_with_other_pcs: bool,
+-    separate_input_output: bool,
+-    login_requested: bool,
+-    clients: Vec<ClientIntent>,
+-}
+-
+-fn pending_path(config_path: &Path) -> Result<PathBuf, Error> {
+-    let file_name = config_path
+-        .file_name()
+-        .ok_or_else(|| Error::message("config path has no file name"))?;
+-    let mut name = OsString::from(".");
+-    name.push(file_name);
+-    name.push(".setup-pending.json");
+-    Ok(config_path.with_file_name(name))
+-}
+-
+-fn render_pending(draft: &SetupDraft) -> Result<Vec<u8>, Error> {
+-    serde_json::to_vec_pretty(&PendingSetup {
+-        version: 1,
+-        shared_with_other_pcs: draft.shared_with_other_pcs,
+-        separate_input_output: draft.separate_input_output,
+-        login_requested: draft.login_requested,
+-        clients: draft.clients.clone(),
+-    })
+-    .map_err(|_| Error::message("setup pending metadata could not be serialized"))
+-}
+-
+-pub fn apply(path: &Path, draft: &SetupDraft, mode: ApplyMode) -> Result<ApplyResult, Error> {
+-    let path = absolute(path)?;
+-    let bytes = draft.render_config()?;
+-    let pending_path = pending_path(&path)?;
+-    let pending = render_pending(draft)?;
+-    let existed = path.exists();
+-    let was_running = if existed {
+-        let runtime = tokio::runtime::Builder::new_current_thread()
+-            .enable_all()
+-            .build()?;
+-        runtime
+-            .block_on(crate::lifecycle::status(&path))
+-            .ok()
+-            .is_some_and(|v| v["state"] != "stopped")
+-    } else {
+-        false
+-    };
+-    write_protected_file(&path, bytes.as_bytes(), "config")?;
+-    write_protected_file(&pending_path, &pending, "setup pending metadata")?;
+-    if mode == ApplyMode::SaveOnly {
+-        return Ok(ApplyResult {
+-            mode,
+-            runtime_state: "not_started",
+-            worker_processes_started: 0,
+-            authenticated_readiness: false,
+-            config_path: path,
+-            pending_path,
+-        });
+-    }
+-    let runtime = tokio::runtime::Builder::new_multi_thread()
+-        .enable_all()
+-        .build()?;
+-    let status = if was_running {
+-        runtime.block_on(crate::lifecycle::restart(&path))?
+-    } else {
+-        runtime.block_on(crate::lifecycle::on(&path))?
+-    };
+-    if status["state"] != "running" || status["identity"]["fingerprint"].as_str().is_none() {
+-        return Err(Error::message(
+-            "authenticated lifecycle readiness was not established",
+-        ));
+-    }
+-    Ok(ApplyResult {
+-        mode,
+-        runtime_state: "running",
+-        worker_processes_started: u8::from(!was_running),
+-        authenticated_readiness: true,
+-        config_path: path,
+-        pending_path,
+-    })
+-}
+-
+-pub fn absolute(path: &Path) -> Result<PathBuf, Error> {
+-    Ok(std::path::absolute(path)?)
+-}
+-
+-fn write_protected_file(path: &Path, bytes: &[u8], kind: &str) -> Result<(), Error> {
+-    let parent = path
+-        .parent()
+-        .ok_or_else(|| Error::message("config path has no parent"))?;
+-    if !parent.exists() {
+-        #[cfg(unix)]
+-        {
+-            use std::os::unix::fs::DirBuilderExt;
+-            fs::DirBuilder::new()
+-                .recursive(true)
+-                .mode(0o700)
+-                .create(parent)?;
+-        }
+-        #[cfg(not(unix))]
+-        fs::create_dir_all(parent)?;
+-    }
+-    let existing = match fs::symlink_metadata(path) {
+-        Ok(metadata) => Some(metadata),
+-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+-        Err(error) => return Err(error.into()),
+-    };
+-    if let Some(metadata) = existing {
+-        if !metadata.is_file() || metadata.file_type().is_symlink() {
+-            return Err(Error::message(format!(
+-                "existing {kind} must be a regular file, not a link"
+-            )));
+-        }
+-        if fs::read(path)? == bytes {
+-            return Ok(());
+-        }
+-        #[cfg(unix)]
+-        let mut file = {
+-            use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
+-            let file = OpenOptions::new()
+-                .write(true)
+-                .custom_flags(libc::O_NOFOLLOW)
+-                .open(path)?;
+-            let opened = file.metadata()?;
+-            if opened.dev() != metadata.dev() || opened.ino() != metadata.ino() {
+-                return Err(Error::message(format!(
+-                    "existing {kind} changed while setup was opening it"
+-                )));
+-            }
+-            file
+-        };
+-        #[cfg(not(unix))]
+-        let mut file = OpenOptions::new().write(true).open(path)?;
+-        file.set_len(0)?;
+-        file.write_all(bytes)?;
+-        file.sync_all()?;
+-        #[cfg(unix)]
+-        {
+-            use std::os::unix::fs::MetadataExt;
+-            let current = fs::symlink_metadata(path)?;
+-            let opened = file.metadata()?;
+-            if current.dev() != opened.dev() || current.ino() != opened.ino() {
+-                return Err(Error::message(format!(
+-                    "existing {kind} changed while setup was writing it"
+-                )));
+-            }
+-        }
+-        return Ok(());
+-    }
+-    let temporary = parent.join(format!(
+-        ".llmgw-config-{}-{:016x}.tmp",
+-        std::process::id(),
+-        rand::random::<u64>()
+-    ));
+-    let result = (|| -> std::io::Result<()> {
+-        #[cfg(unix)]
+-        let mut file = {
+-            use std::os::unix::fs::OpenOptionsExt;
+-            OpenOptions::new()
+-                .create_new(true)
+-                .write(true)
+-                .mode(0o600)
+-                .open(&temporary)?
+-        };
+-        #[cfg(not(unix))]
+-        let mut file = OpenOptions::new()
+-            .create_new(true)
+-            .write(true)
+-            .open(&temporary)?;
+-        file.write_all(bytes)?;
+-        file.sync_all()?;
+-        drop(file);
+-        fs::rename(&temporary, path)?;
+-        #[cfg(unix)]
+-        fs::File::open(parent)?.sync_all()?;
+-        Ok(())
+-    })();
+-    if result.is_err() {
+-        let _ = fs::remove_file(&temporary);
+-    }
+-    result.map_err(Error::from)
+-}
+-
+-#[derive(Debug)]
+-pub struct ListRequest {
+-    pub url: url::Url,
+-    pub header: Option<(String, String)>,
+-}
+-
+-#[derive(Clone, Debug, Eq, PartialEq)]
+-pub enum ModelListing {
+-    Available(Vec<String>),
+-    Unavailable { status: Option<u16>, reason: String },
+-}
+-
+-pub fn list_models<F>(base: &str, auth: &Auth, send: F) -> Result<ModelListing, Error>
+-where
+-    F: FnOnce(ListRequest) -> Result<(u16, Vec<u8>), Error>,
+-{
+-    let base = validate::api_base(base)?;
+-    let mut url = base.clone();
+-    url.set_path(&format!("{}/models", base.path().trim_end_matches('/')));
+-    let header = validate::auth_header(auth)?;
+-    let (status, body) = send(ListRequest { url, header })?;
+-    parse_listing_response(status, body)
+-}
+-
+-fn parse_listing_response(status: u16, body: Vec<u8>) -> Result<ModelListing, Error> {
+-    if status != 200 {
+-        return Ok(ModelListing::Unavailable {
+-            status: Some(status),
+-            reason: format!("model listing returned HTTP {status}; enter a model ID manually"),
+-        });
+-    }
+-    if body.len() > 65_536 {
+-        return Ok(ModelListing::Unavailable {
+-            status: Some(status),
+-            reason: "model listing exceeded 65536 bytes".into(),
+-        });
+-    }
+-    #[derive(serde::Deserialize)]
+-    struct Response {
+-        data: Vec<Item>,
+-    }
+-    #[derive(serde::Deserialize)]
+-    struct Item {
+-        id: String,
+-    }
+-    let parsed: Response = match serde_json::from_slice(&body) {
+-        Ok(value) => value,
+-        Err(_) => {
+-            return Ok(ModelListing::Unavailable {
+-                status: Some(status),
+-                reason: "model listing response was not the supported JSON shape".into(),
+-            });
+-        }
+-    };
+-    let mut ids: Vec<_> = parsed
+-        .data
+-        .into_iter()
+-        .map(|item| item.id)
+-        .filter(|id| !id.is_empty())
+-        .take(256)
+-        .collect();
+-    ids.sort();
+-    ids.dedup();
+-    Ok(ModelListing::Available(ids))
+-}
+-
+-pub async fn fetch_models(upstream: &Upstream) -> Result<ModelListing, Error> {
+-    let client =
+-        crate::transport::upstream::build_client(std::time::Duration::from_secs(10), upstream)
+-            .map_err(|error| Error::message(error.to_string()))?;
+-    let mut url = upstream.api_base.clone();
+-    url.set_path(&format!(
+-        "{}/models",
+-        upstream.api_base.path().trim_end_matches('/')
+-    ));
+-    let mut request = client.get(url);
+-    let Some((header, value)) = validate::auth_header(&upstream.auth).map_err(|error| {
+-        Error::message(format!(
+-            "model listing unavailable: {error}; enter a model ID manually"
+-        ))
+-    })?
+-    else {
+-        let mut response = request.send().await.map_err(|_| {
+-            Error::message("model listing network request failed; enter a model ID manually")
+-        })?;
+-        return bounded_listing_response(&mut response).await;
+-    };
+-    request = request.header(header, value);
+-    let mut response = request.send().await.map_err(|_| {
+-        Error::message("model listing network request failed; enter a model ID manually")
+-    })?;
+-    bounded_listing_response(&mut response).await
+-}
+-
+-async fn bounded_listing_response(response: &mut reqwest::Response) -> Result<ModelListing, Error> {
+-    let status = response.status().as_u16();
+-    let mut body = Vec::new();
+-    while let Some(chunk) = response
+-        .chunk()
+-        .await
+-        .map_err(|_| Error::message("model listing response read failed"))?
+-    {
+-        if body.len() + chunk.len() > 65_536 {
+-            return Ok(ModelListing::Unavailable {
+-                status: Some(status),
+-                reason: "model listing exceeded 65536 bytes".into(),
+-            });
+-        }
+-        body.extend_from_slice(&chunk);
+-    }
+-    parse_listing_response(status, body)
+-}
+-
+-#[derive(Clone, Debug, Eq, PartialEq)]
+-pub struct InferenceResult {
+-    pub status: u16,
+-}
+-
+-pub async fn smoke_inference(
+-    config: &Config,
+-    model: &str,
+-    max_output_tokens: u64,
+-) -> Result<InferenceResult, Error> {
+-    if max_output_tokens == 0 {
+-        return Err(Error::message("inference output bound must be nonzero"));
+-    }
+-    if !config
+-        .models
+-        .iter()
+-        .any(|configured| configured.id == model)
+-    {
+-        return Err(Error::message("inference model is not configured"));
+-    }
+-    let endpoint = config
+-        .roots
+-        .iter()
+-        .filter(|root| root.models.iter().any(|configured| configured == model))
+-        .flat_map(|root| root.endpoints.iter().copied())
+-        .find(|endpoint| {
+-            matches!(
+-                endpoint,
+-                Endpoint::Responses | Endpoint::Messages | Endpoint::ChatCompletions
+-            )
+-        })
+-        .ok_or_else(|| Error::message("configured model has no generation endpoint"))?;
+-    let client = crate::transport::upstream::build_client(
+-        std::time::Duration::from_secs(15),
+-        &config.upstream,
+-    )
+-    .map_err(|error| Error::message(error.to_string()))?;
+-    let mut url = config.upstream.api_base.clone();
+-    url.set_path(&format!(
+-        "{}/{}",
+-        config.upstream.api_base.path().trim_end_matches('/'),
+-        endpoint.path()
+-    ));
+-    let body = match endpoint {
+-        Endpoint::Responses => {
+-            serde_json::json!({"model":model,"max_output_tokens":max_output_tokens,"input":"Reply with OK."})
+-        }
+-        Endpoint::Messages => {
+-            serde_json::json!({"model":model,"max_tokens":max_output_tokens,"messages":[{"role":"user","content":"Reply with OK."}]})
+-        }
+-        Endpoint::ChatCompletions => {
+-            serde_json::json!({"model":model,"max_tokens":max_output_tokens,"messages":[{"role":"user","content":"Reply with OK."}]})
+-        }
+-        Endpoint::CountTokens | Endpoint::Models => unreachable!(),
+-    };
+-    let mut request = client
+-        .post(url)
+-        .header("content-type", "application/json")
+-        .body(body.to_string());
+-    if let Some((header, value)) = validate::auth_header(&config.upstream.auth)? {
+-        request = request.header(header, value);
+-    }
+-    let mut response = request
+-        .send()
+-        .await
+-        .map_err(|_| Error::message("inference network request failed"))?;
+-    let status = response.status().as_u16();
+-    let mut body = Vec::new();
+-    while let Some(chunk) = response
+-        .chunk()
+-        .await
+-        .map_err(|_| Error::message("inference response read failed"))?
+-    {
+-        let size = body
+-            .len()
+-            .checked_add(chunk.len())
+-            .ok_or_else(|| Error::message("inference response size overflow"))?;
+-        if size > 65_536 {
+-            return Err(Error::message("inference response exceeded 65536 bytes"));
+-        }
+-        body.extend_from_slice(&chunk);
+-    }
+-    if !(200..300).contains(&status) {
+-        return Err(Error::message(format!("inference returned HTTP {status}")));
+-    }
+-    validate_generation_response(endpoint, &body)?;
+-    Ok(InferenceResult { status })
+-}
+-
+-fn validate_generation_response(endpoint: Endpoint, body: &[u8]) -> Result<(), Error> {
+-    let value: serde_json::Value = serde_json::from_slice(body)
+-        .map_err(|_| Error::message("inference response lacked valid JSON generation evidence"))?;
+-    if value.get("error").is_some_and(|error| !error.is_null())
+-        || matches!(
+-            value.get("status").and_then(|status| status.as_str()),
+-            Some("failed" | "cancelled" | "incomplete")
+-        )
+-    {
+-        return Err(Error::message("inference provider reported failure"));
+-    }
+-    let nonempty =
+-        |value: &serde_json::Value| value.as_str().is_some_and(|text| !text.trim().is_empty());
+-    let generated = match endpoint {
+-        Endpoint::Responses => {
+-            value.get("status").and_then(|status| status.as_str()) == Some("completed")
+-                && value
+-                    .get("output")
+-                    .and_then(|output| output.as_array())
+-                    .is_some_and(|items| {
+-                        items.iter().any(|item| {
+-                            item.get("content")
+-                                .and_then(|content| content.as_array())
+-                                .is_some_and(|content| {
+-                                    content.iter().any(|part| {
+-                                        part.get("type").and_then(|kind| kind.as_str())
+-                                            == Some("output_text")
+-                                            && part.get("text").is_some_and(nonempty)
+-                                    })
+-                                })
+-                        })
+-                    })
+-        }
+-        Endpoint::Messages => {
+-            value.get("type").and_then(|kind| kind.as_str()) == Some("message")
+-                && value
+-                    .get("content")
+-                    .and_then(|content| content.as_array())
+-                    .is_some_and(|content| {
+-                        content.iter().any(|part| {
+-                            part.get("type").and_then(|kind| kind.as_str()) == Some("text")
+-                                && part.get("text").is_some_and(nonempty)
+-                        })
+-                    })
+-        }
+-        Endpoint::ChatCompletions => value
+-            .get("choices")
+-            .and_then(|choices| choices.as_array())
+-            .is_some_and(|choices| {
+-                choices
+-                    .iter()
+-                    .any(|choice| choice.pointer("/message/content").is_some_and(nonempty))
+-            }),
+-        Endpoint::CountTokens | Endpoint::Models => false,
+-    };
+-    if !generated {
+-        return Err(Error::message(
+-            "inference response lacked protocol-specific generation evidence",
+-        ));
+-    }
+-    Ok(())
+ }
+ 
+ #[derive(Serialize)]
+--- initial/product/src/setup/network.rs
++++ product/src/setup/network.rs
+@@ -0,0 +1,267 @@
++//! Explicit bounded model-listing and one-call inference doctor operations.
++use super::*;
++
++#[derive(Debug)]
++pub struct ListRequest {
++    pub url: url::Url,
++    pub header: Option<(String, String)>,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub enum ModelListing {
++    Available(Vec<String>),
++    Unavailable { status: Option<u16>, reason: String },
++}
++
++pub fn list_models<F>(base: &str, auth: &Auth, send: F) -> Result<ModelListing, Error>
++where
++    F: FnOnce(ListRequest) -> Result<(u16, Vec<u8>), Error>,
++{
++    let base = validate::api_base(base)?;
++    let mut url = base.clone();
++    url.set_path(&format!("{}/models", base.path().trim_end_matches('/')));
++    let header = validate::auth_header(auth)?;
++    let (status, body) = send(ListRequest { url, header })?;
++    parse_listing_response(status, body)
++}
++
++fn parse_listing_response(status: u16, body: Vec<u8>) -> Result<ModelListing, Error> {
++    if status != 200 {
++        return Ok(ModelListing::Unavailable {
++            status: Some(status),
++            reason: format!("model listing returned HTTP {status}; enter a model ID manually"),
++        });
++    }
++    if body.len() > 65_536 {
++        return Ok(ModelListing::Unavailable {
++            status: Some(status),
++            reason: "model listing exceeded 65536 bytes".into(),
++        });
++    }
++    #[derive(serde::Deserialize)]
++    struct Response {
++        data: Vec<Item>,
++    }
++    #[derive(serde::Deserialize)]
++    struct Item {
++        id: String,
++    }
++    let parsed: Response = match serde_json::from_slice(&body) {
++        Ok(value) => value,
++        Err(_) => {
++            return Ok(ModelListing::Unavailable {
++                status: Some(status),
++                reason: "model listing response was not the supported JSON shape".into(),
++            });
++        }
++    };
++    let mut ids: Vec<_> = parsed
++        .data
++        .into_iter()
++        .map(|item| item.id)
++        .filter(|id| !id.is_empty())
++        .take(256)
++        .collect();
++    ids.sort();
++    ids.dedup();
++    Ok(ModelListing::Available(ids))
++}
++
++pub async fn fetch_models(upstream: &Upstream) -> Result<ModelListing, Error> {
++    let client =
++        crate::transport::upstream::build_client(std::time::Duration::from_secs(10), upstream)
++            .map_err(|error| Error::message(error.to_string()))?;
++    let mut url = upstream.api_base.clone();
++    url.set_path(&format!(
++        "{}/models",
++        upstream.api_base.path().trim_end_matches('/')
++    ));
++    let mut request = client.get(url);
++    let Some((header, value)) = validate::auth_header(&upstream.auth).map_err(|error| {
++        Error::message(format!(
++            "model listing unavailable: {error}; enter a model ID manually"
++        ))
++    })?
++    else {
++        let mut response = request.send().await.map_err(|_| {
++            Error::message("model listing network request failed; enter a model ID manually")
++        })?;
++        return bounded_listing_response(&mut response).await;
++    };
++    request = request.header(header, value);
++    let mut response = request.send().await.map_err(|_| {
++        Error::message("model listing network request failed; enter a model ID manually")
++    })?;
++    bounded_listing_response(&mut response).await
++}
++
++async fn bounded_listing_response(response: &mut reqwest::Response) -> Result<ModelListing, Error> {
++    let status = response.status().as_u16();
++    let mut body = Vec::new();
++    while let Some(chunk) = response
++        .chunk()
++        .await
++        .map_err(|_| Error::message("model listing response read failed"))?
++    {
++        if body.len() + chunk.len() > 65_536 {
++            return Ok(ModelListing::Unavailable {
++                status: Some(status),
++                reason: "model listing exceeded 65536 bytes".into(),
++            });
++        }
++        body.extend_from_slice(&chunk);
++    }
++    parse_listing_response(status, body)
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct InferenceResult {
++    pub status: u16,
++}
++
++pub async fn smoke_inference(
++    config: &Config,
++    model: &str,
++    max_output_tokens: u64,
++) -> Result<InferenceResult, Error> {
++    if max_output_tokens == 0 {
++        return Err(Error::message("inference output bound must be nonzero"));
++    }
++    if !config
++        .models
++        .iter()
++        .any(|configured| configured.id == model)
++    {
++        return Err(Error::message("inference model is not configured"));
++    }
++    let endpoint = config
++        .roots
++        .iter()
++        .filter(|root| root.models.iter().any(|configured| configured == model))
++        .flat_map(|root| root.endpoints.iter().copied())
++        .find(|endpoint| {
++            matches!(
++                endpoint,
++                Endpoint::Responses | Endpoint::Messages | Endpoint::ChatCompletions
++            )
++        })
++        .ok_or_else(|| Error::message("configured model has no generation endpoint"))?;
++    let client = crate::transport::upstream::build_client(
++        std::time::Duration::from_secs(15),
++        &config.upstream,
++    )
++    .map_err(|error| Error::message(error.to_string()))?;
++    let mut url = config.upstream.api_base.clone();
++    url.set_path(&format!(
++        "{}/{}",
++        config.upstream.api_base.path().trim_end_matches('/'),
++        endpoint.path()
++    ));
++    let body = match endpoint {
++        Endpoint::Responses => {
++            serde_json::json!({"model":model,"max_output_tokens":max_output_tokens,"input":"Reply with OK."})
++        }
++        Endpoint::Messages => {
++            serde_json::json!({"model":model,"max_tokens":max_output_tokens,"messages":[{"role":"user","content":"Reply with OK."}]})
++        }
++        Endpoint::ChatCompletions => {
++            serde_json::json!({"model":model,"max_tokens":max_output_tokens,"messages":[{"role":"user","content":"Reply with OK."}]})
++        }
++        Endpoint::CountTokens | Endpoint::Models => unreachable!(),
++    };
++    let mut request = client
++        .post(url)
++        .header("content-type", "application/json")
++        .body(body.to_string());
++    if let Some((header, value)) = validate::auth_header(&config.upstream.auth)? {
++        request = request.header(header, value);
++    }
++    let mut response = request
++        .send()
++        .await
++        .map_err(|_| Error::message("inference network request failed"))?;
++    let status = response.status().as_u16();
++    let mut body = Vec::new();
++    while let Some(chunk) = response
++        .chunk()
++        .await
++        .map_err(|_| Error::message("inference response read failed"))?
++    {
++        let size = body
++            .len()
++            .checked_add(chunk.len())
++            .ok_or_else(|| Error::message("inference response size overflow"))?;
++        if size > 65_536 {
++            return Err(Error::message("inference response exceeded 65536 bytes"));
++        }
++        body.extend_from_slice(&chunk);
++    }
++    if !(200..300).contains(&status) {
++        return Err(Error::message(format!("inference returned HTTP {status}")));
++    }
++    validate_generation_response(endpoint, &body)?;
++    Ok(InferenceResult { status })
++}
++
++fn validate_generation_response(endpoint: Endpoint, body: &[u8]) -> Result<(), Error> {
++    let value: serde_json::Value = serde_json::from_slice(body)
++        .map_err(|_| Error::message("inference response lacked valid JSON generation evidence"))?;
++    if value.get("error").is_some_and(|error| !error.is_null())
++        || matches!(
++            value.get("status").and_then(|status| status.as_str()),
++            Some("failed" | "cancelled" | "incomplete")
++        )
++    {
++        return Err(Error::message("inference provider reported failure"));
++    }
++    let nonempty =
++        |value: &serde_json::Value| value.as_str().is_some_and(|text| !text.trim().is_empty());
++    let generated = match endpoint {
++        Endpoint::Responses => {
++            value.get("status").and_then(|status| status.as_str()) == Some("completed")
++                && value
++                    .get("output")
++                    .and_then(|output| output.as_array())
++                    .is_some_and(|items| {
++                        items.iter().any(|item| {
++                            item.get("content")
++                                .and_then(|content| content.as_array())
++                                .is_some_and(|content| {
++                                    content.iter().any(|part| {
++                                        part.get("type").and_then(|kind| kind.as_str())
++                                            == Some("output_text")
++                                            && part.get("text").is_some_and(nonempty)
++                                    })
++                                })
++                        })
++                    })
++        }
++        Endpoint::Messages => {
++            value.get("type").and_then(|kind| kind.as_str()) == Some("message")
++                && value
++                    .get("content")
++                    .and_then(|content| content.as_array())
++                    .is_some_and(|content| {
++                        content.iter().any(|part| {
++                            part.get("type").and_then(|kind| kind.as_str()) == Some("text")
++                                && part.get("text").is_some_and(nonempty)
++                        })
++                    })
++        }
++        Endpoint::ChatCompletions => value
++            .get("choices")
++            .and_then(|choices| choices.as_array())
++            .is_some_and(|choices| {
++                choices
++                    .iter()
++                    .any(|choice| choice.pointer("/message/content").is_some_and(nonempty))
++            }),
++        Endpoint::CountTokens | Endpoint::Models => false,
++    };
++    if !generated {
++        return Err(Error::message(
++            "inference response lacked protocol-specific generation evidence",
++        ));
++    }
++    Ok(())
++}
+--- initial/product/src/setup/persist.rs
++++ product/src/setup/persist.rs
+@@ -0,0 +1,613 @@
++//! Final setup apply: snapshot conflicts, cooperating-writer lock, and protected atomic publication.
++use super::*;
++use fs4::FileExt;
++use serde::{Deserialize, Serialize};
++use std::{
++    ffi::OsString,
++    fs::{self, OpenOptions},
++    io::{Read, Write},
++    path::{Path, PathBuf},
++};
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub enum ApplyMode {
++    SaveOnly,
++    SaveAndStart,
++}
++
++#[derive(Clone, Debug, Eq, PartialEq)]
++pub struct ApplyResult {
++    pub mode: ApplyMode,
++    pub runtime_state: &'static str,
++    pub worker_processes_started: u8,
++    pub authenticated_readiness: bool,
++    pub config_path: PathBuf,
++    pub pending_path: PathBuf,
++}
++
++#[derive(Debug, Deserialize, Serialize)]
++#[serde(deny_unknown_fields)]
++pub(super) struct PendingSetup {
++    pub(super) version: u8,
++    pub(super) shared_with_other_pcs: bool,
++    pub(super) separate_input_output: bool,
++    pub(super) login_requested: bool,
++    pub(super) clients: Vec<ClientIntent>,
++}
++
++pub(super) fn pending_path(config_path: &Path) -> Result<PathBuf, Error> {
++    let file_name = config_path
++        .file_name()
++        .ok_or_else(|| Error::message("config path has no file name"))?;
++    let mut name = OsString::from(".");
++    name.push(file_name);
++    name.push(".setup-pending.json");
++    Ok(config_path.with_file_name(name))
++}
++
++fn render_pending(draft: &SetupDraft) -> Result<Vec<u8>, Error> {
++    serde_json::to_vec_pretty(&PendingSetup {
++        version: 1,
++        shared_with_other_pcs: draft.shared_with_other_pcs,
++        separate_input_output: draft.separate_input_output,
++        login_requested: draft.login_requested,
++        clients: draft.clients.clone(),
++    })
++    .map_err(|_| Error::message("setup pending metadata could not be serialized"))
++}
++
++pub fn apply(path: &Path, draft: &SetupDraft, mode: ApplyMode) -> Result<ApplyResult, Error> {
++    let path = absolute(path)?;
++    let bytes = draft.render_config()?;
++    let pending_path = pending_path(&path)?;
++    let pending = render_pending(draft)?;
++    ensure_parent(&path)?;
++    let _lock = setup_lock(&path)?;
++    verify_snapshot(
++        &path,
++        draft.original.as_ref().map(|(_, bytes)| bytes.as_slice()),
++        "config",
++    )?;
++    if let Some(expected) = &draft.original_pending {
++        verify_snapshot(&pending_path, expected.as_deref(), "setup pending metadata")?;
++    }
++    let existed = draft.original.is_some();
++    let config_changed = draft
++        .original
++        .as_ref()
++        .is_none_or(|(_, original)| original.as_slice() != bytes.as_bytes());
++    let was_running = if existed {
++        let runtime = tokio::runtime::Builder::new_current_thread()
++            .enable_all()
++            .build()?;
++        runtime
++            .block_on(crate::lifecycle::status(&path))
++            .ok()
++            .is_some_and(|v| v["state"] != "stopped")
++    } else {
++        false
++    };
++    write_protected_file(
++        &path,
++        bytes.as_bytes(),
++        "config",
++        draft.original.as_ref().map(|(_, bytes)| bytes.as_slice()),
++    )?;
++    write_protected_file(
++        &pending_path,
++        &pending,
++        "setup pending metadata",
++        draft
++            .original_pending
++            .as_ref()
++            .and_then(|bytes| bytes.as_deref()),
++    )?;
++    if mode == ApplyMode::SaveOnly {
++        return Ok(ApplyResult {
++            mode,
++            runtime_state: "not_started",
++            worker_processes_started: 0,
++            authenticated_readiness: false,
++            config_path: path,
++            pending_path,
++        });
++    }
++    let runtime = tokio::runtime::Builder::new_multi_thread()
++        .enable_all()
++        .build()?;
++    let status = if was_running && config_changed {
++        runtime.block_on(crate::lifecycle::restart(&path))?
++    } else {
++        runtime.block_on(crate::lifecycle::on(&path))?
++    };
++    if status["state"] != "running" || status["identity"]["fingerprint"].as_str().is_none() {
++        return Err(Error::message(
++            "authenticated lifecycle readiness was not established",
++        ));
++    }
++    Ok(ApplyResult {
++        mode,
++        runtime_state: "running",
++        worker_processes_started: u8::from(!was_running || config_changed),
++        authenticated_readiness: true,
++        config_path: path,
++        pending_path,
++    })
++}
++
++pub fn absolute(path: &Path) -> Result<PathBuf, Error> {
++    Ok(std::path::absolute(path)?)
++}
++
++fn ensure_parent(path: &Path) -> Result<(), Error> {
++    let parent = path
++        .parent()
++        .ok_or_else(|| Error::message("config path has no parent"))?;
++    if !parent.exists() {
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::DirBuilderExt;
++            fs::DirBuilder::new()
++                .recursive(true)
++                .mode(0o700)
++                .create(parent)?;
++        }
++        #[cfg(not(unix))]
++        fs::create_dir_all(parent)?;
++    }
++    Ok(())
++}
++
++fn setup_lock(path: &Path) -> Result<fs::File, Error> {
++    let file_name = path
++        .file_name()
++        .ok_or_else(|| Error::message("config path has no file name"))?;
++    let mut name = OsString::from(".");
++    name.push(file_name);
++    name.push(".setup.lock");
++    let lock_path = path.with_file_name(name);
++    let file = crate::lifecycle::platform::open(&lock_path, true, false)?;
++    match FileExt::try_lock(&file) {
++        Ok(()) => Ok(file),
++        Err(fs4::TryLockError::WouldBlock) => Err(Error::message(
++            "another setup apply is in progress; retry after it finishes",
++        )),
++        Err(fs4::TryLockError::Error(error)) => Err(error.into()),
++    }
++}
++
++fn read_regular(path: &Path, kind: &str) -> Result<Option<(fs::Metadata, Vec<u8>)>, Error> {
++    let metadata = match fs::symlink_metadata(path) {
++        Ok(metadata) => metadata,
++        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
++        Err(error) => return Err(error.into()),
++    };
++    if !metadata.is_file() || metadata.file_type().is_symlink() {
++        return Err(Error::message(format!(
++            "existing {kind} must be a regular file, not a link"
++        )));
++    }
++    #[cfg(unix)]
++    let mut file = {
++        use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
++        let file = OpenOptions::new()
++            .read(true)
++            .custom_flags(libc::O_NOFOLLOW)
++            .open(path)?;
++        let opened = file.metadata()?;
++        if opened.dev() != metadata.dev() || opened.ino() != metadata.ino() {
++            return Err(Error::message(format!(
++                "existing {kind} changed while setup was opening it"
++            )));
++        }
++        file
++    };
++    #[cfg(not(unix))]
++    let mut file = OpenOptions::new().read(true).open(path)?;
++    let mut bytes = Vec::new();
++    file.read_to_end(&mut bytes)?;
++    Ok(Some((metadata, bytes)))
++}
++
++fn verify_snapshot(path: &Path, expected: Option<&[u8]>, kind: &str) -> Result<(), Error> {
++    match (read_regular(path, kind)?, expected) {
++        (None, None) => Ok(()),
++        (Some((_, current)), Some(expected)) if current == expected => Ok(()),
++        _ => Err(Error::message(format!(
++            "{kind} changed since setup loaded it; rerun setup to review the latest file"
++        ))),
++    }
++}
++
++fn write_protected_file(
++    path: &Path,
++    bytes: &[u8],
++    kind: &str,
++    expected: Option<&[u8]>,
++) -> Result<(), Error> {
++    ensure_parent(path)?;
++    let parent = path
++        .parent()
++        .ok_or_else(|| Error::message("config path has no parent"))?;
++    let existing = read_regular(path, kind)?;
++    match (&existing, expected) {
++        (None, None) => {}
++        (Some((_, current)), Some(expected)) if current == expected => {}
++        _ => {
++            return Err(Error::message(format!(
++                "{kind} changed since setup loaded it; rerun setup to review the latest file"
++            )));
++        }
++    }
++    if existing
++        .as_ref()
++        .is_some_and(|(_, current)| current == bytes)
++    {
++        return Ok(());
++    }
++    #[cfg(unix)]
++    if let Some((metadata, _)) = &existing {
++        use std::os::unix::fs::MetadataExt;
++        if metadata.uid() != rustix::process::geteuid().as_raw() {
++            return Err(Error::message(format!(
++                "existing {kind} is not owned by the current user; refusing to replace it"
++            )));
++        }
++    }
++    let temporary = parent.join(format!(
++        ".llmgw-setup-{}-{:016x}.tmp",
++        std::process::id(),
++        rand::random::<u64>()
++    ));
++    let result = (|| -> std::io::Result<()> {
++        let mut file = crate::lifecycle::platform::open(&temporary, true, true)?;
++        #[cfg(target_os = "linux")]
++        refuse_linux_posix_acl(&temporary, kind)?;
++        file.write_all(bytes)?;
++        file.sync_all()?;
++        drop(file);
++        if let Some((metadata, _)) = &existing {
++            #[cfg(unix)]
++            fs::set_permissions(&temporary, metadata.permissions())?;
++            #[cfg(unix)]
++            {
++                use std::os::unix::fs::MetadataExt;
++                let temporary_metadata = fs::metadata(&temporary)?;
++                if temporary_metadata.uid() != metadata.uid()
++                    || temporary_metadata.gid() != metadata.gid()
++                {
++                    return Err(std::io::Error::other(format!(
++                        "existing {kind} ownership could not be preserved"
++                    )));
++                }
++            }
++            #[cfg(target_os = "linux")]
++            {
++                refuse_linux_posix_acl(path, kind)?;
++                refuse_linux_posix_acl(&temporary, kind)?;
++            }
++            #[cfg(all(unix, not(any(target_os = "macos", target_os = "linux"))))]
++            return Err(std::io::Error::other(format!(
++                "existing {kind} ACL preservation is unsupported on this operating system"
++            )));
++            #[cfg(target_os = "macos")]
++            {
++                use std::os::unix::fs::MetadataExt;
++                let acl = read_acl(path)?;
++                let current = fs::symlink_metadata(path)?;
++                if current.dev() != metadata.dev() || current.ino() != metadata.ino() {
++                    return Err(std::io::Error::other(format!(
++                        "existing {kind} changed while setup copied its ACL"
++                    )));
++                }
++                exacl::setfacl(&[&temporary], &acl, None)?;
++                if read_acl(&temporary)? != acl
++                    || fs::metadata(&temporary)?.permissions() != metadata.permissions()
++                {
++                    return Err(std::io::Error::other(format!(
++                        "existing {kind} permissions or ACL could not be preserved"
++                    )));
++                }
++            }
++            fs::File::open(&temporary)?.sync_all()?;
++            let Some((current_metadata, current)) = read_regular(path, kind)
++                .map_err(|error| std::io::Error::other(error.to_string()))?
++            else {
++                return Err(std::io::Error::other(format!(
++                    "existing {kind} changed before setup could replace it"
++                )));
++            };
++            #[cfg(unix)]
++            {
++                use std::os::unix::fs::MetadataExt;
++                if current_metadata.dev() != metadata.dev()
++                    || current_metadata.ino() != metadata.ino()
++                    || current_metadata.uid() != metadata.uid()
++                    || current_metadata.gid() != metadata.gid()
++                    || current_metadata.permissions() != metadata.permissions()
++                    || current.as_slice() != expected.expect("existing file has snapshot")
++                {
++                    return Err(std::io::Error::other(format!(
++                        "existing {kind} changed before setup could replace it"
++                    )));
++                }
++            }
++            #[cfg(target_os = "linux")]
++            refuse_linux_posix_acl(path, kind)?;
++            #[cfg(target_os = "macos")]
++            if read_acl(path)? != read_acl(&temporary)? {
++                return Err(std::io::Error::other(format!(
++                    "existing {kind} ACL changed before setup could replace it"
++                )));
++            }
++            #[cfg(not(unix))]
++            if current.as_slice() != expected.expect("existing file has snapshot") {
++                return Err(std::io::Error::other(format!(
++                    "existing {kind} changed before setup could replace it"
++                )));
++            }
++            #[cfg(unix)]
++            fs::rename(&temporary, path)?;
++            #[cfg(windows)]
++            replace_existing_with_recovery(
++                &temporary,
++                path,
++                expected.expect("existing file has snapshot"),
++                bytes,
++                kind,
++                crate::lifecycle::platform::replace_file,
++            )?;
++        } else {
++            fs::hard_link(&temporary, path)?;
++            fs::remove_file(&temporary)?;
++        }
++        #[cfg(unix)]
++        fs::File::open(parent)?.sync_all()?;
++        Ok(())
++    })();
++    if result.is_err() {
++        let _ = fs::remove_file(&temporary);
++    }
++    result.map_err(Error::from)
++}
++
++#[cfg(any(windows, test))]
++fn replace_existing_with_recovery<F>(
++    replacement: &Path,
++    destination: &Path,
++    expected_original: &[u8],
++    expected_replacement: &[u8],
++    kind: &str,
++    replace: F,
++) -> std::io::Result<()>
++where
++    F: FnOnce(&Path, &Path) -> std::io::Result<()>,
++{
++    fn suffixed(path: &Path, suffix: &str) -> PathBuf {
++        let mut name = path.as_os_str().to_owned();
++        name.push(suffix);
++        PathBuf::from(name)
++    }
++
++    fn read_protected(path: &Path) -> std::io::Result<Vec<u8>> {
++        let mut file = crate::lifecycle::platform::read(path)?;
++        let mut bytes = Vec::new();
++        file.read_to_end(&mut bytes)?;
++        Ok(bytes)
++    }
++
++    fn retained(
++        error: std::io::Error,
++        kind: &str,
++        recovery: &Path,
++        candidate: &Path,
++    ) -> std::io::Error {
++        std::io::Error::new(
++            error.kind(),
++            format!(
++                "{kind} replacement was not verified; original recovery is at {} and replacement candidate is at {}: {error}",
++                recovery.display(),
++                candidate.display()
++            ),
++        )
++    }
++
++    if read_protected(destination)? != expected_original {
++        return Err(std::io::Error::other(format!(
++            "existing {kind} changed before setup could prepare its recovery"
++        )));
++    }
++    if read_protected(replacement)? != expected_replacement {
++        return Err(std::io::Error::other(format!(
++            "temporary {kind} changed before setup could publish it"
++        )));
++    }
++
++    let recovery = suffixed(replacement, ".recovery");
++    let candidate = suffixed(replacement, ".candidate");
++    let prepared = (|| -> std::io::Result<()> {
++        let mut file = crate::lifecycle::platform::open(&recovery, true, true)?;
++        file.write_all(expected_original)?;
++        file.sync_all()?;
++        drop(file);
++        let mut file = crate::lifecycle::platform::open(&candidate, true, true)?;
++        file.write_all(expected_replacement)?;
++        file.sync_all()?;
++        drop(file);
++        if read_protected(&recovery)? != expected_original
++            || read_protected(&candidate)? != expected_replacement
++            || read_protected(destination)? != expected_original
++        {
++            return Err(std::io::Error::other(format!(
++                "{kind} changed before setup could replace it"
++            )));
++        }
++        Ok(())
++    })();
++    if let Err(error) = prepared {
++        let _ = fs::remove_file(&candidate);
++        let _ = fs::remove_file(&recovery);
++        return Err(error);
++    }
++
++    if let Err(error) = replace(replacement, destination) {
++        return Err(retained(error, kind, &recovery, &candidate));
++    }
++    match read_protected(destination) {
++        Ok(current) if current == expected_replacement => {}
++        Ok(_) => {
++            return Err(retained(
++                std::io::Error::other("published content does not match the reviewed setup"),
++                kind,
++                &recovery,
++                &candidate,
++            ));
++        }
++        Err(error) => return Err(retained(error, kind, &recovery, &candidate)),
++    }
++
++    if let Err(error) = fs::remove_file(&candidate) {
++        return Err(retained(error, kind, &recovery, &candidate));
++    }
++    fs::remove_file(&recovery).map_err(|error| {
++        std::io::Error::new(
++            error.kind(),
++            format!(
++                "{kind} was replaced and verified, but original recovery cleanup failed at {}: {error}",
++                recovery.display()
++            ),
++        )
++    })
++}
++
++#[cfg(target_os = "macos")]
++fn read_acl(path: &Path) -> std::io::Result<Vec<exacl::AclEntry>> {
++    exacl::getfacl(path, exacl::AclOption::SYMLINK_ACL)
++}
++
++#[cfg(target_os = "linux")]
++fn refuse_linux_posix_acl(path: &Path, kind: &str) -> std::io::Result<()> {
++    match rustix::fs::lgetxattr(path, "system.posix_acl_access", Vec::with_capacity(65_536)) {
++        Ok(_) => Err(std::io::Error::new(
++            std::io::ErrorKind::Unsupported,
++            format!("existing {kind} has a POSIX ACL that setup cannot preserve; edit it manually"),
++        )),
++        Err(rustix::io::Errno::NODATA | rustix::io::Errno::NOTSUP) => Ok(()),
++        Err(error) => Err(error.into()),
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::replace_existing_with_recovery;
++    use std::{cell::Cell, fs, io::Write, path::Path};
++
++    fn protected_write(path: &Path, bytes: &[u8]) {
++        let mut file = crate::lifecycle::platform::open(path, true, true).unwrap();
++        file.write_all(bytes).unwrap();
++        file.sync_all().unwrap();
++    }
++
++    #[test]
++    fn ambiguous_windows_replace_keeps_original_and_candidate_recovery() {
++        let parent = std::env::temp_dir().join(format!(
++            "llmgw-windows-recovery-{}-{:016x}",
++            std::process::id(),
++            rand::random::<u64>()
++        ));
++        fs::create_dir(&parent).unwrap();
++        let destination = parent.join("config.toml");
++        let replacement = parent.join("replacement.tmp");
++        protected_write(&destination, b"original");
++        protected_write(&replacement, b"replacement");
++
++        let error = replace_existing_with_recovery(
++            &replacement,
++            &destination,
++            b"original",
++            b"replacement",
++            "config",
++            |_, destination| {
++                fs::remove_file(destination)?;
++                Err(std::io::Error::from_raw_os_error(1176))
++            },
++        )
++        .unwrap_err();
++        let entries = fs::read_dir(&parent)
++            .unwrap()
++            .map(|entry| entry.unwrap().path())
++            .collect::<Vec<_>>();
++        let recovery = entries
++            .iter()
++            .find(|path| path.to_string_lossy().ends_with(".recovery"))
++            .unwrap();
++        let candidate = entries
++            .iter()
++            .find(|path| path.to_string_lossy().ends_with(".candidate"))
++            .unwrap();
++        assert_eq!(fs::read(recovery).unwrap(), b"original");
++        assert_eq!(fs::read(candidate).unwrap(), b"replacement");
++        assert!(error.to_string().contains(&recovery.display().to_string()));
++        assert!(error.to_string().contains(&candidate.display().to_string()));
++        fs::remove_dir_all(parent).unwrap();
++    }
++
++    #[test]
++    fn windows_recovery_refuses_stale_source_before_replace() {
++        let parent = std::env::temp_dir().join(format!(
++            "llmgw-windows-preflight-{}-{:016x}",
++            std::process::id(),
++            rand::random::<u64>()
++        ));
++        fs::create_dir(&parent).unwrap();
++        let destination = parent.join("config.toml");
++        let replacement = parent.join("replacement.tmp");
++        protected_write(&destination, b"external edit");
++        protected_write(&replacement, b"replacement");
++        let called = Cell::new(false);
++
++        let result = replace_existing_with_recovery(
++            &replacement,
++            &destination,
++            b"stale original",
++            b"replacement",
++            "config",
++            |_, _| {
++                called.set(true);
++                Ok(())
++            },
++        );
++        assert!(result.is_err());
++        assert!(!called.get());
++        assert_eq!(fs::read(&destination).unwrap(), b"external edit");
++        assert_eq!(fs::read_dir(&parent).unwrap().count(), 2);
++        fs::remove_dir_all(parent).unwrap();
++    }
++
++    #[test]
++    fn verified_windows_replace_removes_recovery_copies() {
++        let parent = std::env::temp_dir().join(format!(
++            "llmgw-windows-success-{}-{:016x}",
++            std::process::id(),
++            rand::random::<u64>()
++        ));
++        fs::create_dir(&parent).unwrap();
++        let destination = parent.join("config.toml");
++        let replacement = parent.join("replacement.tmp");
++        protected_write(&destination, b"original");
++        protected_write(&replacement, b"replacement");
++
++        replace_existing_with_recovery(
++            &replacement,
++            &destination,
++            b"original",
++            b"replacement",
++            "config",
++            |from, to| fs::rename(from, to),
++        )
++        .unwrap();
++        assert_eq!(fs::read(&destination).unwrap(), b"replacement");
++        assert_eq!(fs::read_dir(&parent).unwrap().count(), 1);
++        fs::remove_dir_all(parent).unwrap();
++    }
++}
+--- initial/product/src/setup/prompts.rs
++++ product/src/setup/prompts.rs
+@@ -139,13 +139,13 @@
+                     draft.config.upstream.api_base.to_string(),
+                     |value| validate::api_base(value).map(|_| ()),
+                 )?;
+-                let choices = ["Completions", "Responses", "Messages"];
+-                let defaults = [
++                let generation_endpoints = [
+                     Endpoint::ChatCompletions,
+                     Endpoint::Responses,
+                     Endpoint::Messages,
+-                ]
+-                .map(|e| draft.endpoints().contains(&e));
++                ];
++                let choices = ["Completions", "Responses", "Messages"];
++                let defaults = generation_endpoints.map(|e| draft.endpoints().contains(&e));
+                 let selected = MultiSelect::with_theme(&self.theme)
+                     .with_prompt("Actually supported endpoint formats; unknown is never enabled")
+                     .items(choices)
+@@ -153,21 +153,29 @@
+                     .interact_on_opt(&self.term)
+                     .map_err(|e| Error::message(e.to_string()))?
+                     .ok_or_else(|| Error::message("cancel"))?;
+-                if selected.is_empty() {
++                let selected_generation = selected
++                    .into_iter()
++                    .map(|i| generation_endpoints[i])
++                    .collect::<Vec<_>>();
++                let mut endpoints = draft
++                    .endpoints()
++                    .iter()
++                    .copied()
++                    .filter(|endpoint| {
++                        !generation_endpoints.contains(endpoint)
++                            || selected_generation.contains(endpoint)
++                    })
++                    .collect::<Vec<_>>();
++                for endpoint in selected_generation {
++                    if !endpoints.contains(&endpoint) {
++                        endpoints.push(endpoint);
++                    }
++                }
++                if endpoints.is_empty() {
+                     return Err(Error::message(
+                         "select at least one actually supported endpoint",
+                     ));
+                 }
+-                let endpoints = selected
+-                    .into_iter()
+-                    .map(|i| {
+-                        [
+-                            Endpoint::ChatCompletions,
+-                            Endpoint::Responses,
+-                            Endpoint::Messages,
+-                        ][i]
+-                    })
+-                    .collect();
+                 let auth_choice = Select::with_theme(&self.theme)
+                     .with_prompt("Upstream auth")
+                     .items(["Forward incoming header", "Environment reference", "None"])
+@@ -179,13 +187,17 @@
+                     .interact_on_opt(&self.term)
+                     .map_err(|e| Error::message(e.to_string()))?
+                     .ok_or_else(|| Error::message("cancel"))?;
++                let (header_default, name_default) = match &draft.config.upstream.auth {
++                    Auth::Env { header, name } => (header.clone(), name.clone()),
++                    _ => ("authorization".into(), "LLMGW_UPSTREAM_AUTH".into()),
++                };
+                 let auth = match auth_choice {
+                     0 => Auth::Forward,
+                     1 => Auth::Env {
+-                        header: self.text("Header name", "authorization".into())?,
++                        header: self.text("Header name", header_default)?,
+                         name: self.text(
+                             "Environment variable (complete header value; secret is never copied)",
+-                            "LLMGW_UPSTREAM_AUTH".into(),
++                            name_default,
+                         )?,
+                     },
+                     _ => Auth::None,
+@@ -318,17 +330,38 @@
+                             .map_or_else(|| "model-id".into(), |m| m.id.clone()),
+                     )?
+                 };
+-                let cap = self.validated_text(
+-                    "Nonzero reservation bound used when a request omits an output cap (the gateway does not inject or enforce it upstream)",
+-                    draft.config.models.first().and_then(|m| m.max_output_tokens).map_or(1024, NonZeroU64::get).to_string(),
+-                    |value| match value.parse::<u64>() {
+-                        Ok(value) if value > 0 => Ok(()),
+-                        _ => Err(Error::message("reservation output bound must be a nonzero number")),
+-                    },
+-                )?.parse::<u64>().expect("validated number");
++                let current_cap = draft
++                    .config
++                    .models
++                    .first()
++                    .and_then(|model| model.max_output_tokens);
++                let set_fallback = Confirm::with_theme(&self.theme)
++                    .with_prompt("Set a user-chosen reservation fallback for requests that omit an output cap? This is not a verified provider limit")
++                    .default(current_cap.is_some())
++                    .interact_on_opt(&self.term)
++                    .map_err(|e| Error::message(e.to_string()))?
++                    .ok_or_else(|| Error::message("cancel"))?;
++                let cap = if set_fallback {
++                    Some(
++                        self.validated_text(
++                            "Nonzero reservation fallback (the gateway does not inject or enforce it upstream)",
++                            current_cap.map_or(1024, NonZeroU64::get).to_string(),
++                            |value| match value.parse::<u64>() {
++                                Ok(value) if value > 0 => Ok(()),
++                                _ => Err(Error::message(
++                                    "reservation output fallback must be a nonzero number",
++                                )),
++                            },
++                        )?
++                        .parse::<u64>()
++                        .expect("validated number"),
++                    )
++                } else {
++                    None
++                };
+                 Ok(Flow::SetModels(ModelAnswers {
+                     id,
+-                    max_output_tokens: Some(cap),
++                    max_output_tokens: cap,
+                     listing_verified,
+                     capabilities_verified: false,
+                 }))
+@@ -380,16 +413,24 @@
+                         .write_line("Invalid value: listen port must be between 1 and 65535")
+                         .map_err(|e| Error::message(e.to_string()))?;
+                 };
+-                let login_requested = Confirm::with_theme(&self.theme).with_prompt("Request start at next login? (recorded pending; registration is a later task)").default(false).interact_on_opt(&self.term).map_err(|e| Error::message(e.to_string()))?.ok_or_else(|| Error::message("cancel"))?;
++                let login_requested = Confirm::with_theme(&self.theme).with_prompt("Request start at next login? (recorded pending; registration is a later task)").default(draft.login_requested).interact_on_opt(&self.term).map_err(|e| Error::message(e.to_string()))?.ok_or_else(|| Error::message("cancel"))?;
+                 Ok(Flow::SetRun(RunAnswers {
+                     port,
+                     login_requested,
+                 }))
+             }
+             Step::Tools => {
++                let defaults = [
++                    ClientIntent::Pi,
++                    ClientIntent::ClaudeCode,
++                    ClientIntent::Codex,
++                    ClientIntent::Manual,
++                ]
++                .map(|client| draft.clients.contains(&client));
+                 let selected = MultiSelect::with_theme(&self.theme)
+                     .with_prompt("Client intents (pending only; no client file is changed)")
+                     .items(["Pi", "Claude Code", "Codex", "Manual"])
++                    .defaults(&defaults)
+                     .interact_on_opt(&self.term)
+                     .map_err(|e| Error::message(e.to_string()))?
+                     .ok_or_else(|| Error::message("cancel"))?;
+--- initial/product/src/setup/summary.rs
++++ product/src/setup/summary.rs
+@@ -86,10 +86,14 @@
+     let fingerprint_impact = match &draft.original {
+         None => "new config fingerprint; no existing worker is adopted".to_owned(),
+         Some((_, bytes)) if draft.render_config()?.as_bytes() == bytes => {
+-            "unchanged config fingerprint; no restart required by setup edits".to_owned()
++            "unchanged config fingerprint; no restart required by setup edits; Save and start uses authenticated idempotent on and preserves a running worker identity".to_owned()
+         }
+-        Some(_) => "changed config fingerprint; Save only preserves any running worker and leaves restart pending; Save and start explicitly restarts it and verifies authenticated readiness".to_owned(),
++        Some(_) => "changed config fingerprint; Save only preserves any running worker and leaves restart pending; Save and start explicitly restarts, cancels queued requests, drains active requests for up to 10 seconds, and verifies authenticated readiness".to_owned(),
+     };
++    let output_bound = draft.config.models[0].max_output_tokens.map_or_else(
++        || "none; request-supplied caps are used when present, and known TPM generation admission requires one because the gateway does not invent or inject a cap".to_owned(),
++        |value| format!("{}; user-supplied accounting fallback used only when a request omits its cap, not a verified provider limit, and not injected or enforced upstream", value.get()),
++    );
+     let transport = format!(
+         "proxy: {}; TLS: system roots{}; verification remains enabled",
+         if draft.config.upstream.proxy.is_some() {
+@@ -108,7 +112,7 @@
+             )),
+     );
+     Ok(format!(
+-        "config: {}\nstate: {}\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {} (user-supplied accounting fallback used only when a request omits its cap; not a verified provider limit; not injected or enforced upstream); listing: {}; capabilities: {}\nquota: {quota}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness\nlogin requested: {}; pending, registration not applied\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
++        "config: {}\nstate: {}\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness\nlogin requested: {}; pending, registration not applied\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
+         config_path.display(),
+         state.directory.display(),
+         pending.display(),
+@@ -120,9 +124,7 @@
+         urls.messages_request,
+         root.endpoints,
+         draft.config.models[0].id,
+-        draft.config.models[0]
+-            .max_output_tokens
+-            .expect("validated output bound"),
++        output_bound,
+         if draft.listing_verified {
+             "verified GET only"
+         } else {
+--- initial/product/tests/lifecycle_contract.rs
++++ product/tests/lifecycle_contract.rs
+@@ -171,7 +171,7 @@
+         .state_paths;
+     fs::write(&f.config, "invalid = [").unwrap();
+     for _ in 0..2 {
+-        assert_eq!(f.call("on").status.code(), Some(1));
++        assert_eq!(f.call("on").status.code(), Some(2));
+         assert!(!paths.data_token.exists());
+         assert!(!paths.control_token.exists());
+         assert_eq!(f.ok("status")["state"], "stopped");
+@@ -630,7 +630,7 @@
+     let result = child.wait_with_output().unwrap();
+     fs::write(&f.config, &f.original).unwrap();
+     let error = String::from_utf8_lossy(&result.stderr);
+-    assert_eq!(result.status.code(), Some(1));
++    assert_eq!(result.status.code(), Some(2));
+     assert!(
+         error.contains("invalid configuration"),
+         "expected new config validation failure, got {error}"
+@@ -690,7 +690,7 @@
+         );
+         assert_eq!(after["pending_restart"], false);
+     } else {
+-        assert_eq!(result.status.code(), Some(1));
++        assert_eq!(result.status.code(), Some(2));
+         assert!(String::from_utf8_lossy(&result.stderr).contains("invalid configuration"));
+         assert_eq!(after["state"], "running");
+         assert_eq!(after["identity"], before["identity"]);
+--- initial/product/tests/setup_contract.rs
++++ product/tests/setup_contract.rs
+@@ -78,6 +78,16 @@
+         .tools(ToolAnswers {
+             clients: vec![ClientIntent::Pi, ClientIntent::Manual],
+         })
++}
++
++fn gateway_status(config: &std::path::Path) -> serde_json::Value {
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["status", "--json", "--config"])
++        .arg(config)
++        .output()
++        .unwrap();
++    assert!(output.status.success(), "{output:?}");
++    serde_json::from_slice(&output.stdout).unwrap()
+ }
+ 
+ #[test]
+@@ -397,6 +407,137 @@
+ }
+ 
+ #[test]
++fn valid_request_bounded_model_needs_no_invented_fallback() {
++    let temp = Temp::new("request-bounded");
++    let configured = draft(4141).models(ModelAnswers::manual("model-a", None));
++    let summary = configured.summary(&temp.config()).unwrap();
++    assert!(summary.contains("reservation output bound: none"));
++    assert!(summary.contains("known TPM generation admission requires one"));
++    apply(&temp.config(), &configured, ApplyMode::SaveOnly).unwrap();
++    assert_eq!(
++        LoadedConfig::load(temp.config()).unwrap().config.models[0].max_output_tokens,
++        None
++    );
++}
++
++#[test]
++fn apply_rejects_a_stale_preview_and_preserves_the_concurrent_edit() {
++    let temp = Temp::new("stale-preview");
++    apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let edited = SetupDraft::from_loaded(&loaded).unwrap().run(RunAnswers {
++        port: 4142,
++        login_requested: false,
++    });
++    let concurrent = String::from_utf8(loaded.source_bytes)
++        .unwrap()
++        .replace("concurrency = 1", "concurrency = 2");
++    fs::write(temp.config(), &concurrent).unwrap();
++    let error = apply(&temp.config(), &edited, ApplyMode::SaveOnly)
++        .unwrap_err()
++        .to_string();
++    assert!(error.contains("changed since setup loaded"), "{error}");
++    assert_eq!(fs::read_to_string(temp.config()).unwrap(), concurrent);
++}
++
++#[test]
++fn setup_writer_lock_rejects_a_second_cooperating_apply() {
++    use fs4::FileExt;
++    let temp = Temp::new("writer-lock");
++    apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    let lock_path = temp.dir.join(".gateway 설정.toml.setup.lock");
++    let lock = fs::OpenOptions::new()
++        .read(true)
++        .write(true)
++        .open(lock_path)
++        .unwrap();
++    FileExt::lock(&lock).unwrap();
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let error = apply(
++        &temp.config(),
++        &SetupDraft::from_loaded(&loaded).unwrap(),
++        ApplyMode::SaveOnly,
++    )
++    .unwrap_err()
++    .to_string();
++    assert!(
++        error.contains("another setup apply is in progress"),
++        "{error}"
++    );
++}
++
++#[test]
++fn unchanged_save_and_start_keeps_the_authenticated_worker_identity() {
++    let temp = Temp::new("unchanged-running");
++    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
++    let port = listener.local_addr().unwrap().port();
++    drop(listener);
++    apply(&temp.config(), &draft(port), ApplyMode::SaveOnly).unwrap();
++    let started = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["on", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert!(started.status.success(), "{started:?}");
++    let before = gateway_status(&temp.config());
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let result = apply(
++        &temp.config(),
++        &SetupDraft::from_loaded(&loaded).unwrap(),
++        ApplyMode::SaveAndStart,
++    )
++    .unwrap();
++    let after = gateway_status(&temp.config());
++    assert_eq!(result.worker_processes_started, 0);
++    assert_eq!(before["identity"], after["identity"]);
++}
++
++#[cfg(target_os = "macos")]
++#[test]
++fn edited_existing_config_preserves_its_extended_acl() {
++    let temp = Temp::new("config-acl");
++    apply(&temp.config(), &draft(4141), ApplyMode::SaveOnly).unwrap();
++    assert!(
++        Command::new("/bin/chmod")
++            .args(["+a", "everyone allow read"])
++            .arg(temp.config())
++            .status()
++            .unwrap()
++            .success()
++    );
++    let before = exacl::getfacl(temp.config(), None).unwrap();
++    let loaded = LoadedConfig::load(temp.config()).unwrap();
++    let edited = SetupDraft::from_loaded(&loaded).unwrap().run(RunAnswers {
++        port: 4142,
++        login_requested: false,
++    });
++    apply(&temp.config(), &edited, ApplyMode::SaveOnly).unwrap();
++    assert_eq!(exacl::getfacl(temp.config(), None).unwrap(), before);
++}
++
++#[test]
++fn invalid_config_and_missing_inference_arguments_exit_two() {
++    let temp = Temp::new("invalid-cli");
++    fs::write(temp.config(), "not valid toml").unwrap();
++    for command in ["doctor", "on", "run"] {
++        let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++            .arg(command)
++            .args(["--config"])
++            .arg(temp.config())
++            .output()
++            .unwrap();
++        assert_eq!(output.status.code(), Some(2), "{command}: {output:?}");
++    }
++    fs::write(temp.config(), draft(4141).render_config().unwrap()).unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_llmgw"))
++        .args(["doctor", "--inference", "--config"])
++        .arg(temp.config())
++        .output()
++        .unwrap();
++    assert_eq!(output.status.code(), Some(2), "{output:?}");
++}
++
++#[test]
+ fn scalar_edit_preserves_valid_inline_auth_and_quota_tables_without_panicking() {
+     let temp = Temp::new("inline-tables");
+     let raw = r#"listen = "127.0.0.1:4200"

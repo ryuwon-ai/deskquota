@@ -1,0 +1,2691 @@
+{
+  "evaluation": {
+    "budgets_tentative": {
+      "idle_rss_mib": 50,
+      "paired_proxy_latency_difference_p95_ms": 2
+    },
+    "comparisons": [
+      {
+        "arm": "production_rr",
+        "p95_across_seed_range_ms": null,
+        "pairing": "same seed and request index from separate sequential runs; negative differences retained; not internal CPU overhead",
+        "seeds": [],
+        "tentative_idle_rss_budget_observation": "insufficient",
+        "tentative_latency_budget_observation": "insufficient",
+        "uncertainty": "empirical seed range, not confidence interval; differences smaller than this variability do not establish superiority"
+      },
+      {
+        "arm": "benchmark_fifo",
+        "p95_across_seed_range_ms": null,
+        "pairing": "same seed and request index from separate sequential runs; negative differences retained; not internal CPU overhead",
+        "seeds": [],
+        "tentative_idle_rss_budget_observation": "insufficient",
+        "tentative_latency_budget_observation": "insufficient",
+        "uncertainty": "empirical seed range, not confidence interval; differences smaller than this variability do not establish superiority"
+      },
+      {
+        "arm": "benchmark_rr",
+        "p95_across_seed_range_ms": null,
+        "pairing": "same seed and request index from separate sequential runs; negative differences retained; not internal CPU overhead",
+        "seeds": [],
+        "tentative_idle_rss_budget_observation": "insufficient",
+        "tentative_latency_budget_observation": "insufficient",
+        "uncertainty": "empirical seed range, not confidence interval; differences smaller than this variability do not establish superiority"
+      }
+    ],
+    "quota_arms": {}
+  },
+  "host": {
+    "clock": {
+      "adjustable": false,
+      "implementation": "mach_absolute_time()",
+      "monotonic": true,
+      "resolution": 4.166666666666666e-08
+    },
+    "cpu_model": "Apple M4",
+    "cpus": 10,
+    "machine": "arm64",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "python": "3.14.6",
+    "ram_bytes": 34359738368
+  },
+  "identity": {
+    "benchmark": {
+      "features": [
+        "bench-harness"
+      ],
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/bench/release/examples/bench_gateway",
+      "sha256": "38b24b2934448716c74bad2dceaa91492e1bbc168b351e1f61460b90572c5faa"
+    },
+    "production": {
+      "features": [],
+      "path": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/target/release/llmgw",
+      "sha256": "410645600d70a69e69d9558420ea1cda61bf127a878497a6b8a0e88b17ba342e"
+    },
+    "sources": {
+      "Cargo.lock": "ff22fdface767d6007181387456522ed03e558ef53b060996c630992f59f850f",
+      "Cargo.toml": "e09244a7b88b42f6f18c9727bb5e254fac6d44c79e4f9f517d4fbe5d3f453205",
+      "docs/benchmark-method.md": "5ec47a40fb1973ca7d902007243a5567a32c9e5932b5efc71bfb86daa989606f",
+      "docs/runtime-contract.md": "65241c5a74693079fd6c6b08d1fccacfb1718ac843fd9b62201d7b7fc373da42",
+      "examples/bench_gateway.rs": "99344c7216ec3b02f206484efaca957f4af6be03d7e541c2a2709c915feb1fc9",
+      "examples/fixture.toml": "ec6320b0b628f69dfae2bd05ec0e0cc4f51bac5a8174f1e6f6d4881f696e1f0c",
+      "fixtures/workloads/burst.json": "27bf05c16d892ac312100b4e92bebd485ebeb4b8f33f5b7beed568c9b4962ab9",
+      "fixtures/workloads/cancellation.json": "e43eac74c2bc7e527f08e45e7208180e7949e5c160db52ff3cc8781268df20a6",
+      "fixtures/workloads/mixed_lengths.json": "3c8658afec81e87ce0ace04c1f983b6a6d2a1edd9ec65bb0c4d65d6f4c3fb43f",
+      "fixtures/workloads/shared_quota.json": "acd4955d490170e8f0903190516983f0725b122f45f7147703c042104e8eb468",
+      "rust-toolchain.toml": "a016e82d3b7986387adf4d7d9d88e1581f87bb2a9cfb91ecec4914411b07634b",
+      "scripts/benchmark.py": "fa6d33daf209ddc281a4a01ddee686a621f945609ae0a8549e572bb77f0fe26e",
+      "scripts/benchmark_http.py": "989f061bb60f3ca00011315c7f8d4fea378d7676a75d20899f97b5f735ce97eb",
+      "scripts/probe_pi.py": "c3c5246d89016a033e44fb86e5c33a6fc62181f9b961d7d664e3231d18d81df9",
+      "src/admission/mod.rs": "ef0585f786010633cb53216a321549e7bb0bac3e5aaaefdc102c9d7da24a1d87",
+      "src/admission/queue.rs": "e4ffbe330650276163e60bf104f87f7701912a553507dd30d008ec629dab101a",
+      "src/admission/quota.rs": "e5e4ec57ad45375a8302920ded25a7f887b51a4b030be4f2cbfe096e8fb56d95",
+      "src/admission/retry.rs": "ae4d88f93cafe4f34fa7744d33f1025e0816e361ca30ea0547fa30c2f9c343f9",
+      "src/cli.rs": "f8bdd577de79aaf0956ed58a46318fff84dea71e6a08d5c6dcbab9546914415f",
+      "src/config.rs": "1ef8bdac1a884e3e2d1658506b05a459ab568054f1abb99902e5d886067b7a2b",
+      "src/config/validate.rs": "abc726d9b7c4ea724e800c26d8a1abf0f8caa3e4dc41c214e3b6f2e3e3e8eab1",
+      "src/control.rs": "0f9d364224677fdf0432916836fbd4e36fef8a136e1b595175cb3b869aaadf11",
+      "src/lib.rs": "c6f2a094f11281b76b33d715ac9a3ea52e0762f9dee1c081bb4d30771486d6b3",
+      "src/main.rs": "1938906c6f329017b0c5ead9fe28884a6947e9868a251979698e10ef86c1d37b",
+      "src/metrics.rs": "ca9bf5228b68468b70d2b9e101232ed3a894d6bb9127bcb13892e626af1c859d",
+      "src/protocol/completions.rs": "9e3db2ee1f8a6ae5db942828bd8b77437a6d2736de40d9fe7156bd821347fd77",
+      "src/protocol/messages.rs": "26f0f21a2ed236c3feb1f9717bec59781a9ab41a6cfce7e498d4063154110146",
+      "src/protocol/mod.rs": "9d6629537cdb5122d800c0924971ed5fde8ac3b5103d0318ba25e74935a7e424",
+      "src/protocol/request.rs": "52347e595a26bbde48a75793a90d3d45f40dcddc7cf666a5922ec63b899795ef",
+      "src/protocol/responses.rs": "613cd7a54d03b8a6990e3f46943f25d1495d770cbf024a68c4e9106295f7bb69",
+      "src/server.rs": "6fada7849b22c3531a5b31bf879a69baef2da455873e570a25fae1cfd4b3b38c",
+      "src/transport/body_budget.rs": "3bf44dfa9b0627559b0eba5a6d4381c48d26ab07ebee25ebdb4584930f751320",
+      "src/transport/headers.rs": "4c24a899c71eb8472a3c559869881fb054b1d11f4d859fac28efdcf3ccdbbf25",
+      "src/transport/mod.rs": "0695c3f5edd7fb66960beee5f01abd473a5fcc86ac8086d9c454144961f8b9ce",
+      "src/transport/stream.rs": "cb88ec7085d09b72a2b31c483ce626d0e44aa7560e85f4c1941563f82cedf8f3",
+      "src/transport/upstream.rs": "d7d62f9aa065614c3ea16b5d7027c996e6504ae6fed097a3c626bbfe76b44d02",
+      "tests/benchmark_trace.rs": "cae498c48612eb5f1d52abbe941afb937cb8e3e8b410f35109f9ec5dc482983e",
+      "tests/config_contract.rs": "e30769334e85757c896e2146393a446e30b92758a784bfb0149a8930f27d150c",
+      "tests/fairness_contract.rs": "42a9755deb61144e52d44093f431f3a90aa7876d0550ada707ee3983cd85f050",
+      "tests/fixtures/pi-models.json": "44228610dac6b3dba5d86a5e9b8a04239ca051a4d5f2f840641cfae1ef5138ad",
+      "tests/quota_contract.rs": "d9b66771b6ba995c236621f62af1fa70ced7a56d0150c19f74cd22018113a414",
+      "tests/resource_bounds.rs": "0289bb9e2b00f58d87cc4da7c79d520c08c7424744bb3f72200ab25dc5d9d1a6",
+      "tests/retry_contract.rs": "a9217b22917dba2e0c82f3214d953ac55e173d82090bbcfda436dd128de882c5",
+      "tests/stream_lifetime.rs": "2f344c9c484e11de93d6a2fa039a2390c703a53ae23630e72c4465d9581e63e5",
+      "tests/support/fixture.rs": "0370e813cc68d43648576acbf5f692fad9ced8449af5b6e239d568eea65a8a7f",
+      "tests/support/mod.rs": "8b97b524ccba81d4ace73bd2f2b9d50e2a09896b929e8eb0f820158cff16dc6c",
+      "tests/task5_usage_contract.rs": "6d3ee55ddcf122438f1fac6f0dd620bd9c5e4ef74456d1f674ba1186e5e78166",
+      "tests/test_pi_probe.py": "f4b34b0c66ab24f14afbc60ffde7c3e52c750972bca2c3f0f2c520bde12d228a",
+      "tests/wire_contract.rs": "c4c0dee25fe156d80311bf8520009699bcd984d5ee8ec143d83e8407b05f2ee7"
+    }
+  },
+  "runs": [
+    {
+      "id": "smoke-seed941-direct",
+      "path": "artifacts/task8-quality-fix/smoke-runs/smoke-seed941-direct.json",
+      "sha256": "62a3a9ea37bf8e15146adaa6869f024d5c5de8aae2aa7f0396a39ab5346d79e7",
+      "summary": {
+        "all": {
+          "completion_ms_success_only": {
+            "max": 501.0907079995377,
+            "n": 17,
+            "p50": 11.783042005845346,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 500.98229099967284,
+            "n": 15,
+            "p50": 11.630708999291528,
+            "p95": 500.98229099967284,
+            "p99": 500.98229099967284
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 17
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1397445295679987,
+            "n": 20,
+            "p50": 0.09150802044594758,
+            "p95": 1.1369340974826114,
+            "p99": 1.1397445295679987
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.5062910024425946,
+            "n": 20,
+            "p50": 0.4767499995068647,
+            "p95": 1.1730409969459288,
+            "p99": 1.5062910024425946
+          },
+          "submitted": 20,
+          "terminal_ms_all_outcomes": {
+            "max": 501.0907079995377,
+            "n": 20,
+            "p50": 11.839667000458576,
+            "p95": 302.8200410044519,
+            "p99": 501.0907079995377
+          },
+          "within_measurement_completed": 17,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 17
+          }
+        },
+        "cost:matching": {
+          "completion_ms_success_only": {
+            "max": 501.0907079995377,
+            "n": 16,
+            "p50": 11.643291996733751,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 500.98229099967284,
+            "n": 14,
+            "p50": 11.560209000890609,
+            "p95": 500.98229099967284,
+            "p99": 500.98229099967284
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 16
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1397445295679987,
+            "n": 19,
+            "p50": 0.09150802044594758,
+            "p95": 1.1397445295679987,
+            "p99": 1.1397445295679987
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.5062910024425946,
+            "n": 19,
+            "p50": 0.4767499995068647,
+            "p95": 1.5062910024425946,
+            "p99": 1.5062910024425946
+          },
+          "submitted": 19,
+          "terminal_ms_all_outcomes": {
+            "max": 501.0907079995377,
+            "n": 19,
+            "p50": 11.839667000458576,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "within_measurement_completed": 16,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 16
+          }
+        },
+        "cost:overestimated": {
+          "completion_ms_success_only": {
+            "max": 301.0617079999065,
+            "n": 1,
+            "p50": 301.0617079999065,
+            "p95": 301.0617079999065,
+            "p99": 301.0617079999065
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 301.0248330028844,
+            "n": 1,
+            "p50": 301.0248330028844,
+            "p95": 301.0248330028844,
+            "p99": 301.0248330028844
+          },
+          "outcomes": {
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.27381766770018245,
+            "n": 1,
+            "p50": 0.27381766770018245,
+            "p95": 0.27381766770018245,
+            "p99": 0.27381766770018245
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 0.5034580026404001,
+            "n": 1,
+            "p50": 0.5034580026404001,
+            "p95": 0.5034580026404001,
+            "p99": 0.5034580026404001
+          },
+          "submitted": 1,
+          "terminal_ms_all_outcomes": {
+            "max": 301.0617079999065,
+            "n": 1,
+            "p50": 301.0617079999065,
+            "p95": 301.0617079999065,
+            "p99": 301.0617079999065
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "completed": 1
+          }
+        },
+        "length:long": {
+          "completion_ms_success_only": {
+            "max": 302.8200410044519,
+            "n": 2,
+            "p50": 301.0617079999065,
+            "p95": 302.8200410044519,
+            "p99": 302.8200410044519
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 302.76845800108276,
+            "n": 2,
+            "p50": 301.0248330028844,
+            "p95": 302.76845800108276,
+            "p99": 302.76845800108276
+          },
+          "outcomes": {
+            "cancelled": 2,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1397445295679987,
+            "n": 4,
+            "p50": 0.27381766770018245,
+            "p95": 1.1397445295679987,
+            "p99": 1.1397445295679987
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.1510830008774064,
+            "n": 4,
+            "p50": 0.5034580026404001,
+            "p95": 1.1510830008774064,
+            "p99": 1.1510830008774064
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 302.8200410044519,
+            "n": 4,
+            "p50": 51.53845799941337,
+            "p95": 302.8200410044519,
+            "p99": 302.8200410044519
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 2,
+            "completed": 2
+          }
+        },
+        "length:short": {
+          "completion_ms_success_only": {
+            "max": 501.0907079995377,
+            "n": 15,
+            "p50": 11.643291996733751,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 500.98229099967284,
+            "n": 13,
+            "p50": 11.560209000890609,
+            "p95": 500.98229099967284,
+            "p99": 500.98229099967284
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 15
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.964428296587938,
+            "n": 16,
+            "p50": 0.0835472323391991,
+            "p95": 0.964428296587938,
+            "p99": 0.964428296587938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.5062910024425946,
+            "n": 16,
+            "p50": 0.3779159960686229,
+            "p95": 1.5062910024425946,
+            "p99": 1.5062910024425946
+          },
+          "submitted": 16,
+          "terminal_ms_all_outcomes": {
+            "max": 501.0907079995377,
+            "n": 16,
+            "p50": 11.643291996733751,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "within_measurement_completed": 15,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 15
+          }
+        },
+        "retry_amplification": {
+          "gateway_started_attempts": null,
+          "gateway_started_per_ingress": null,
+          "gateway_started_without_mock_receive": null,
+          "ingress_submitted": 20,
+          "mock_received_attempts_per_ingress": 1.0,
+          "retried_ingress": 0,
+          "upstream_attempts": 20
+        },
+        "root:0": {
+          "completion_ms_success_only": {
+            "max": 302.8200410044519,
+            "n": 8,
+            "p50": 11.643291996733751,
+            "p95": 302.8200410044519,
+            "p99": 302.8200410044519
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 302.76845800108276,
+            "n": 7,
+            "p50": 11.630708999291528,
+            "p95": 302.76845800108276,
+            "p99": 302.76845800108276
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1397445295679987,
+            "n": 9,
+            "p50": 0.09150802044594758,
+            "p95": 1.1397445295679987,
+            "p99": 1.1397445295679987
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.5062910024425946,
+            "n": 9,
+            "p50": 0.4767499995068647,
+            "p95": 1.5062910024425946,
+            "p99": 1.5062910024425946
+          },
+          "submitted": 9,
+          "terminal_ms_all_outcomes": {
+            "max": 302.8200410044519,
+            "n": 9,
+            "p50": 11.783042005845346,
+            "p95": 302.8200410044519,
+            "p99": 302.8200410044519
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 8
+          }
+        },
+        "root:1": {
+          "completion_ms_success_only": {
+            "max": 13.057040996500291,
+            "n": 4,
+            "p50": 11.608624998189043,
+            "p95": 13.057040996500291,
+            "p99": 13.057040996500291
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 13.022749997617211,
+            "n": 4,
+            "p50": 11.560209000890609,
+            "p95": 13.022749997617211,
+            "p99": 13.022749997617211
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.6919161753744518,
+            "n": 5,
+            "p50": 0.24058404737203887,
+            "p95": 0.6919161753744518,
+            "p99": 0.6919161753744518
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.1730409969459288,
+            "n": 5,
+            "p50": 0.6460420045186765,
+            "p95": 1.1730409969459288,
+            "p99": 1.1730409969459288
+          },
+          "submitted": 5,
+          "terminal_ms_all_outcomes": {
+            "max": 51.30004099919461,
+            "n": 5,
+            "p50": 11.839667000458576,
+            "p95": 51.30004099919461,
+            "p99": 51.30004099919461
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 4
+          }
+        },
+        "root:2": {
+          "completion_ms_success_only": {
+            "max": 12.729665999358986,
+            "n": 2,
+            "p50": 11.047249994589947,
+            "p95": 12.729665999358986,
+            "p99": 12.729665999358986
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 11.038665994419716,
+            "n": 1,
+            "p50": 11.038665994419716,
+            "p95": 11.038665994419716,
+            "p99": 11.038665994419716
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.61495599715089,
+            "n": 3,
+            "p50": 0.032990995465254816,
+            "p95": 0.61495599715089,
+            "p99": 0.61495599715089
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 0.913290998141747,
+            "n": 3,
+            "p50": 0.40179200004786253,
+            "p95": 0.913290998141747,
+            "p99": 0.913290998141747
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 50.98237500351388,
+            "n": 3,
+            "p50": 12.729665999358986,
+            "p95": 50.98237500351388,
+            "p99": 50.98237500351388
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 2
+          }
+        },
+        "root:3": {
+          "completion_ms_success_only": {
+            "max": 501.0907079995377,
+            "n": 3,
+            "p50": 12.671249998675194,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 500.98229099967284,
+            "n": 3,
+            "p50": 12.643999994907063,
+            "p95": 500.98229099967284,
+            "p99": 500.98229099967284
+          },
+          "outcomes": {
+            "completed": 3
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.4210875817958204,
+            "n": 3,
+            "p50": 0.09476660399077019,
+            "p95": 0.4210875817958204,
+            "p99": 0.4210875817958204
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 0.8274159990833141,
+            "n": 3,
+            "p50": 0.3779159960686229,
+            "p95": 0.8274159990833141,
+            "p99": 0.8274159990833141
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 501.0907079995377,
+            "n": 3,
+            "p50": 12.671249998675194,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "within_measurement_completed": 3,
+          "within_measurement_terminal": {
+            "completed": 3
+          }
+        },
+        "synthetic_pair_workflows": {
+          "completed": 8,
+          "completed_within_measurement": 8,
+          "definition": "two predetermined independent fixture responses both validated; not an agent task",
+          "submitted": 10
+        },
+        "workload:burst": {
+          "completion_ms_success_only": {
+            "max": 11.783042005845346,
+            "n": 8,
+            "p50": 11.283291001745965,
+            "p95": 11.783042005845346,
+            "p99": 11.783042005845346
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 11.763250004150905,
+            "n": 8,
+            "p50": 11.274582997430116,
+            "p95": 11.763250004150905,
+            "p99": 11.763250004150905
+          },
+          "outcomes": {
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.09150802044594758,
+            "n": 8,
+            "p50": 0.04351773471577625,
+            "p95": 0.09150802044594758,
+            "p99": 0.09150802044594758
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 0.4767499995068647,
+            "n": 8,
+            "p50": 0.25720799749251455,
+            "p95": 0.4767499995068647,
+            "p99": 0.4767499995068647
+          },
+          "submitted": 8,
+          "terminal_ms_all_outcomes": {
+            "max": 11.783042005845346,
+            "n": 8,
+            "p50": 11.283291001745965,
+            "p95": 11.783042005845346,
+            "p99": 11.783042005845346
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "completed": 8
+          }
+        },
+        "workload:cancellation": {
+          "completion_ms_success_only": {
+            "max": 501.0907079995377,
+            "n": 1,
+            "p50": 501.0907079995377,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 500.98229099967284,
+            "n": 1,
+            "p50": 500.98229099967284,
+            "p95": 500.98229099967284,
+            "p99": 500.98229099967284
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1397445295679987,
+            "n": 4,
+            "p50": 0.09476660399077019,
+            "p95": 1.1397445295679987,
+            "p99": 1.1397445295679987
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.1510830008774064,
+            "n": 4,
+            "p50": 0.40179200004786253,
+            "p95": 1.1510830008774064,
+            "p99": 1.1510830008774064
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 501.0907079995377,
+            "n": 4,
+            "p50": 51.30004099919461,
+            "p95": 501.0907079995377,
+            "p99": 501.0907079995377
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 1
+          }
+        },
+        "workload:mixed_lengths": {
+          "completion_ms_success_only": {
+            "max": 302.8200410044519,
+            "n": 4,
+            "p50": 11.839667000458576,
+            "p95": 302.8200410044519,
+            "p99": 302.8200410044519
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 302.76845800108276,
+            "n": 4,
+            "p50": 11.790707998443395,
+            "p95": 302.76845800108276,
+            "p99": 302.76845800108276
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1369340974826114,
+            "n": 4,
+            "p50": 0.24058404737203887,
+            "p95": 1.1369340974826114,
+            "p99": 1.1369340974826114
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.0893330036196858,
+            "n": 4,
+            "p50": 0.593832999584265,
+            "p95": 1.0893330036196858,
+            "p99": 1.0893330036196858
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 302.8200410044519,
+            "n": 4,
+            "p50": 11.839667000458576,
+            "p95": 302.8200410044519,
+            "p99": 302.8200410044519
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        },
+        "workload:shared_quota": {
+          "completion_ms_success_only": {
+            "max": 13.355583003431093,
+            "n": 4,
+            "p50": 12.729665999358986,
+            "p95": 13.355583003431093,
+            "p99": 13.355583003431093
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 13.022749997617211,
+            "n": 2,
+            "p50": 12.643999994907063,
+            "p95": 13.022749997617211,
+            "p99": 13.022749997617211
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.964428296587938,
+            "n": 4,
+            "p50": 0.61495599715089,
+            "p95": 0.964428296587938,
+            "p99": 0.964428296587938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 1.5062910024425946,
+            "n": 4,
+            "p50": 0.913290998141747,
+            "p95": 1.5062910024425946,
+            "p99": 1.5062910024425946
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 13.355583003431093,
+            "n": 4,
+            "p50": 12.729665999358986,
+            "p95": 13.355583003431093,
+            "p99": 13.355583003431093
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "smoke-seed941-production_rr",
+      "path": "artifacts/task8-quality-fix/smoke-runs/smoke-seed941-production_rr.json",
+      "sha256": "238d491afc43eb25ab8cfa7f4806b72a7e08c2939fb57ba9b2dedeb161ed6c1b",
+      "summary": {
+        "all": {
+          "completion_ms_success_only": {
+            "max": 552.072083002713,
+            "n": 17,
+            "p50": 24.874457994883414,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 551.9047909983783,
+            "n": 15,
+            "p50": 36.2411250025616,
+            "p95": 551.9047909983783,
+            "p99": 551.9047909983783
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 17
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.861856143175893,
+            "n": 20,
+            "p50": 0.7825775273468949,
+            "p95": 3.74655001770869,
+            "p99": 3.861856143175893
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1322500015958,
+            "n": 19,
+            "p50": 11.814709003374446,
+            "p95": 297.1322500015958,
+            "p99": 297.1322500015958
+          },
+          "submitted": 20,
+          "terminal_ms_all_outcomes": {
+            "max": 552.072083002713,
+            "n": 20,
+            "p50": 36.275709004257806,
+            "p95": 312.67470799502917,
+            "p99": 552.072083002713
+          },
+          "within_measurement_completed": 17,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 17
+          }
+        },
+        "cost:matching": {
+          "completion_ms_success_only": {
+            "max": 552.072083002713,
+            "n": 16,
+            "p50": 24.70016600273084,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 551.9047909983783,
+            "n": 14,
+            "p50": 24.75274999596877,
+            "p95": 551.9047909983783,
+            "p99": 551.9047909983783
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 16
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.861856143175893,
+            "n": 19,
+            "p50": 1.1410170956852594,
+            "p95": 3.861856143175893,
+            "p99": 3.861856143175893
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1322500015958,
+            "n": 18,
+            "p50": 11.814709003374446,
+            "p95": 297.1322500015958,
+            "p99": 297.1322500015958
+          },
+          "submitted": 19,
+          "terminal_ms_all_outcomes": {
+            "max": 552.072083002713,
+            "n": 19,
+            "p50": 36.275709004257806,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "within_measurement_completed": 16,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 16
+          }
+        },
+        "cost:overestimated": {
+          "completion_ms_success_only": {
+            "max": 312.67470799502917,
+            "n": 1,
+            "p50": 312.67470799502917,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 312.59099999442697,
+            "n": 1,
+            "p50": 312.59099999442697,
+            "p95": 312.59099999442697,
+            "p99": 312.59099999442697
+          },
+          "outcomes": {
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.2597346661121769,
+            "n": 1,
+            "p50": 0.2597346661121769,
+            "p95": 0.2597346661121769,
+            "p99": 0.2597346661121769
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 9.885416999168228,
+            "n": 1,
+            "p50": 9.885416999168228,
+            "p95": 9.885416999168228,
+            "p99": 9.885416999168228
+          },
+          "submitted": 1,
+          "terminal_ms_all_outcomes": {
+            "max": 312.67470799502917,
+            "n": 1,
+            "p50": 312.67470799502917,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "completed": 1
+          }
+        },
+        "length:long": {
+          "completion_ms_success_only": {
+            "max": 312.67470799502917,
+            "n": 2,
+            "p50": 303.11087500012945,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 312.59099999442697,
+            "n": 2,
+            "p50": 302.9012920014793,
+            "p95": 312.59099999442697,
+            "p99": 312.59099999442697
+          },
+          "outcomes": {
+            "cancelled": 2,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1410170956852594,
+            "n": 4,
+            "p50": 0.2597346661121769,
+            "p95": 1.1410170956852594,
+            "p99": 1.1410170956852594
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 9.885416999168228,
+            "n": 3,
+            "p50": 1.6451250048703514,
+            "p95": 9.885416999168228,
+            "p99": 9.885416999168228
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 312.67470799502917,
+            "n": 4,
+            "p50": 51.204374998633284,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 2,
+            "completed": 2
+          }
+        },
+        "length:short": {
+          "completion_ms_success_only": {
+            "max": 552.072083002713,
+            "n": 15,
+            "p50": 24.70016600273084,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 551.9047909983783,
+            "n": 13,
+            "p50": 24.75274999596877,
+            "p95": 551.9047909983783,
+            "p99": 551.9047909983783
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 15
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.861856143175893,
+            "n": 16,
+            "p50": 1.1728862939477391,
+            "p95": 3.861856143175893,
+            "p99": 3.861856143175893
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1322500015958,
+            "n": 16,
+            "p50": 11.900457997398917,
+            "p95": 297.1322500015958,
+            "p99": 297.1322500015958
+          },
+          "submitted": 16,
+          "terminal_ms_all_outcomes": {
+            "max": 552.072083002713,
+            "n": 16,
+            "p50": 24.70016600273084,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "within_measurement_completed": 15,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 15
+          }
+        },
+        "retry_amplification": {
+          "gateway_started_attempts": 20,
+          "gateway_started_per_ingress": 1.0,
+          "gateway_started_without_mock_receive": 1,
+          "ingress_submitted": 20,
+          "mock_received_attempts_per_ingress": 0.95,
+          "retried_ingress": 0,
+          "upstream_attempts": 19
+        },
+        "root:0": {
+          "completion_ms_success_only": {
+            "max": 312.67470799502917,
+            "n": 8,
+            "p50": 36.52895800041733,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 312.59099999442697,
+            "n": 7,
+            "p50": 47.93341599724954,
+            "p95": 312.59099999442697,
+            "p99": 312.59099999442697
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.861856143175893,
+            "n": 9,
+            "p50": 3.6195831282027178,
+            "p95": 3.861856143175893,
+            "p99": 3.861856143175893
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 36.581832995580044,
+            "n": 9,
+            "p50": 9.885416999168228,
+            "p95": 36.581832995580044,
+            "p99": 36.581832995580044
+          },
+          "submitted": 9,
+          "terminal_ms_all_outcomes": {
+            "max": 312.67470799502917,
+            "n": 9,
+            "p50": 47.97987500205636,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 8
+          }
+        },
+        "root:1": {
+          "completion_ms_success_only": {
+            "max": 309.88212500233203,
+            "n": 4,
+            "p50": 12.199249998957384,
+            "p95": 309.88212500233203,
+            "p99": 309.88212500233203
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 309.7925830006716,
+            "n": 4,
+            "p50": 12.112417003663722,
+            "p95": 309.7925830006716,
+            "p99": 309.7925830006716
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.697756228053051,
+            "n": 5,
+            "p50": 0.3031002102713565,
+            "p95": 3.697756228053051,
+            "p99": 3.697756228053051
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1322500015958,
+            "n": 5,
+            "p50": 0.9584169965819456,
+            "p95": 297.1322500015958,
+            "p99": 297.1322500015958
+          },
+          "submitted": 5,
+          "terminal_ms_all_outcomes": {
+            "max": 309.88212500233203,
+            "n": 5,
+            "p50": 24.70016600273084,
+            "p95": 309.88212500233203,
+            "p99": 309.88212500233203
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 4
+          }
+        },
+        "root:2": {
+          "completion_ms_success_only": {
+            "max": 36.275709004257806,
+            "n": 2,
+            "p50": 23.372582996671554,
+            "p95": 36.275709004257806,
+            "p99": 36.275709004257806
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 36.2411250025616,
+            "n": 1,
+            "p50": 36.2411250025616,
+            "p95": 36.2411250025616,
+            "p99": 36.2411250025616
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.5190739864683134,
+            "n": 3,
+            "p50": 0.3056229956546197,
+            "p95": 3.5190739864683134,
+            "p99": 3.5190739864683134
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 24.797917001706082,
+            "n": 2,
+            "p50": 11.900457997398917,
+            "p95": 24.797917001706082,
+            "p99": 24.797917001706082
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 50.211583999043796,
+            "n": 3,
+            "p50": 36.275709004257806,
+            "p95": 50.211583999043796,
+            "p99": 50.211583999043796
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 2
+          }
+        },
+        "root:3": {
+          "completion_ms_success_only": {
+            "max": 552.072083002713,
+            "n": 3,
+            "p50": 23.32550000573974,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 551.9047909983783,
+            "n": 3,
+            "p50": 23.238167006638832,
+            "p95": 551.9047909983783,
+            "p99": 551.9047909983783
+          },
+          "outcomes": {
+            "completed": 3
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.4732469358572295,
+            "n": 3,
+            "p50": 0.11355859807071766,
+            "p95": 3.4732469358572295,
+            "p99": 3.4732469358572295
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 49.91804099699948,
+            "n": 3,
+            "p50": 11.814709003374446,
+            "p95": 49.91804099699948,
+            "p99": 49.91804099699948
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 552.072083002713,
+            "n": 3,
+            "p50": 23.32550000573974,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "within_measurement_completed": 3,
+          "within_measurement_terminal": {
+            "completed": 3
+          }
+        },
+        "synthetic_pair_workflows": {
+          "completed": 8,
+          "completed_within_measurement": 8,
+          "definition": "two predetermined independent fixture responses both validated; not an agent task",
+          "submitted": 10
+        },
+        "workload:burst": {
+          "completion_ms_success_only": {
+            "max": 48.19354200299131,
+            "n": 8,
+            "p50": 24.874457994883414,
+            "p95": 48.19354200299131,
+            "p99": 48.19354200299131
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 48.16937499708729,
+            "n": 8,
+            "p50": 24.75274999596877,
+            "p95": 48.16937499708729,
+            "p99": 48.16937499708729
+          },
+          "outcomes": {
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.861856143175893,
+            "n": 8,
+            "p50": 3.687184732675148,
+            "p95": 3.861856143175893,
+            "p99": 3.861856143175893
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 36.581832995580044,
+            "n": 8,
+            "p50": 13.426124998659361,
+            "p95": 36.581832995580044,
+            "p99": 36.581832995580044
+          },
+          "submitted": 8,
+          "terminal_ms_all_outcomes": {
+            "max": 48.19354200299131,
+            "n": 8,
+            "p50": 24.874457994883414,
+            "p95": 48.19354200299131,
+            "p99": 48.19354200299131
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "completed": 8
+          }
+        },
+        "workload:cancellation": {
+          "completion_ms_success_only": {
+            "max": 552.072083002713,
+            "n": 1,
+            "p50": 552.072083002713,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 551.9047909983783,
+            "n": 1,
+            "p50": 551.9047909983783,
+            "p95": 551.9047909983783,
+            "p99": 551.9047909983783
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.7825775273468949,
+            "n": 4,
+            "p50": 0.11355859807071766,
+            "p95": 0.7825775273468949,
+            "p99": 0.7825775273468949
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 49.91804099699948,
+            "n": 3,
+            "p50": 1.6451250048703514,
+            "p95": 49.91804099699948,
+            "p99": 49.91804099699948
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 552.072083002713,
+            "n": 4,
+            "p50": 50.90941699745599,
+            "p95": 552.072083002713,
+            "p99": 552.072083002713
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 1
+          }
+        },
+        "workload:mixed_lengths": {
+          "completion_ms_success_only": {
+            "max": 312.67470799502917,
+            "n": 4,
+            "p50": 303.11087500012945,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 312.59099999442697,
+            "n": 4,
+            "p50": 302.9012920014793,
+            "p95": 312.59099999442697,
+            "p99": 312.59099999442697
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1410170956852594,
+            "n": 4,
+            "p50": 0.23716804347984066,
+            "p95": 1.1410170956852594,
+            "p99": 1.1410170956852594
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1322500015958,
+            "n": 4,
+            "p50": 1.079875000868924,
+            "p95": 297.1322500015958,
+            "p99": 297.1322500015958
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 312.67470799502917,
+            "n": 4,
+            "p50": 303.11087500012945,
+            "p95": 312.67470799502917,
+            "p99": 312.67470799502917
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        },
+        "workload:shared_quota": {
+          "completion_ms_success_only": {
+            "max": 23.372582996671554,
+            "n": 4,
+            "p50": 12.109709001379088,
+            "p95": 23.372582996671554,
+            "p99": 23.372582996671554
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 23.238167006638832,
+            "n": 2,
+            "p50": 11.862999999721069,
+            "p95": 23.238167006638832,
+            "p99": 23.238167006638832
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1728862939477391,
+            "n": 4,
+            "p50": 0.3056229956546197,
+            "p95": 1.1728862939477391,
+            "p99": 1.1728862939477391
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 11.900457997398917,
+            "n": 4,
+            "p50": 0.7025840022834018,
+            "p95": 11.900457997398917,
+            "p99": 11.900457997398917
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 23.372582996671554,
+            "n": 4,
+            "p50": 12.109709001379088,
+            "p95": 23.372582996671554,
+            "p99": 23.372582996671554
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "smoke-seed941-benchmark_fifo",
+      "path": "artifacts/task8-quality-fix/smoke-runs/smoke-seed941-benchmark_fifo.json",
+      "sha256": "c836d72aab9bd91735cecc22552cf7c1454d2f7a36eaea0261fcd44f478728c0",
+      "summary": {
+        "all": {
+          "completion_ms_success_only": {
+            "max": 552.5245419994462,
+            "n": 17,
+            "p50": 25.549666002916638,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.408874995308,
+            "n": 15,
+            "p50": 35.942541995609645,
+            "p95": 552.408874995308,
+            "p99": 552.408874995308
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 17
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.021564147678938,
+            "n": 20,
+            "p50": 1.2040775281585425,
+            "p95": 3.9279161293604528,
+            "p99": 4.021564147678938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1434159990167,
+            "n": 19,
+            "p50": 13.241041000583209,
+            "p95": 297.1434159990167,
+            "p99": 297.1434159990167
+          },
+          "submitted": 20,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5245419994462,
+            "n": 20,
+            "p50": 35.95583399874158,
+            "p95": 311.42145799822174,
+            "p99": 552.5245419994462
+          },
+          "within_measurement_completed": 17,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 17
+          }
+        },
+        "cost:matching": {
+          "completion_ms_success_only": {
+            "max": 552.5245419994462,
+            "n": 16,
+            "p50": 25.330666001536883,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.408874995308,
+            "n": 14,
+            "p50": 25.481290998868644,
+            "p95": 552.408874995308,
+            "p99": 552.408874995308
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 16
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.021564147678938,
+            "n": 19,
+            "p50": 1.2040942949667066,
+            "p95": 4.021564147678938,
+            "p99": 4.021564147678938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1434159990167,
+            "n": 18,
+            "p50": 13.241041000583209,
+            "p95": 297.1434159990167,
+            "p99": 297.1434159990167
+          },
+          "submitted": 19,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5245419994462,
+            "n": 19,
+            "p50": 35.95583399874158,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "within_measurement_completed": 16,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 16
+          }
+        },
+        "cost:overestimated": {
+          "completion_ms_success_only": {
+            "max": 311.42145799822174,
+            "n": 1,
+            "p50": 311.42145799822174,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.37945799855515,
+            "n": 1,
+            "p50": 311.37945799855515,
+            "p95": 311.37945799855515,
+            "p99": 311.37945799855515
+          },
+          "outcomes": {
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.24444266957912575,
+            "n": 1,
+            "p50": 0.24444266957912575,
+            "p95": 0.24444266957912575,
+            "p99": 0.24444266957912575
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 10.205666992987972,
+            "n": 1,
+            "p50": 10.205666992987972,
+            "p95": 10.205666992987972,
+            "p99": 10.205666992987972
+          },
+          "submitted": 1,
+          "terminal_ms_all_outcomes": {
+            "max": 311.42145799822174,
+            "n": 1,
+            "p50": 311.42145799822174,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "completed": 1
+          }
+        },
+        "length:long": {
+          "completion_ms_success_only": {
+            "max": 311.42145799822174,
+            "n": 2,
+            "p50": 303.34379200212425,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.37945799855515,
+            "n": 2,
+            "p50": 303.2193750041188,
+            "p95": 311.37945799855515,
+            "p99": 311.37945799855515
+          },
+          "outcomes": {
+            "cancelled": 2,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.208225094339599,
+            "n": 4,
+            "p50": 0.6908475176468087,
+            "p95": 1.208225094339599,
+            "p99": 1.208225094339599
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 10.205666992987972,
+            "n": 3,
+            "p50": 2.43912500445731,
+            "p95": 10.205666992987972,
+            "p99": 10.205666992987972
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 311.42145799822174,
+            "n": 4,
+            "p50": 51.74437499954365,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 2,
+            "completed": 2
+          }
+        },
+        "length:short": {
+          "completion_ms_success_only": {
+            "max": 552.5245419994462,
+            "n": 15,
+            "p50": 25.330666001536883,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.408874995308,
+            "n": 13,
+            "p50": 25.481290998868644,
+            "p95": 552.408874995308,
+            "p99": 552.408874995308
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 15
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.021564147678938,
+            "n": 16,
+            "p50": 1.2040942949667066,
+            "p95": 4.021564147678938,
+            "p99": 4.021564147678938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1434159990167,
+            "n": 16,
+            "p50": 13.357541000004858,
+            "p95": 297.1434159990167,
+            "p99": 297.1434159990167
+          },
+          "submitted": 16,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5245419994462,
+            "n": 16,
+            "p50": 25.330666001536883,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "within_measurement_completed": 15,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 15
+          }
+        },
+        "retry_amplification": {
+          "gateway_started_attempts": 20,
+          "gateway_started_per_ingress": 1.0,
+          "gateway_started_without_mock_receive": 1,
+          "ingress_submitted": 20,
+          "mock_received_attempts_per_ingress": 0.95,
+          "retried_ingress": 0,
+          "upstream_attempts": 19
+        },
+        "root:0": {
+          "completion_ms_success_only": {
+            "max": 311.42145799822174,
+            "n": 8,
+            "p50": 24.662666000949685,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.37945799855515,
+            "n": 7,
+            "p50": 24.76520799973514,
+            "p95": 311.37945799855515,
+            "p99": 311.37945799855515
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.021564147678938,
+            "n": 9,
+            "p50": 3.8508927312563785,
+            "p95": 4.021564147678938,
+            "p99": 4.021564147678938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 24.671125000168104,
+            "n": 9,
+            "p50": 2.43912500445731,
+            "p95": 24.671125000168104,
+            "p99": 24.671125000168104
+          },
+          "submitted": 9,
+          "terminal_ms_all_outcomes": {
+            "max": 311.42145799822174,
+            "n": 9,
+            "p50": 24.88587499829009,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 8
+          }
+        },
+        "root:1": {
+          "completion_ms_success_only": {
+            "max": 308.9941660000477,
+            "n": 4,
+            "p50": 13.336666001123376,
+            "p95": 308.9941660000477,
+            "p99": 308.9941660000477
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 308.89162499806844,
+            "n": 4,
+            "p50": 13.275249999423977,
+            "p95": 308.89162499806844,
+            "p99": 308.89162499806844
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.867130233107175,
+            "n": 5,
+            "p50": 0.810558206989942,
+            "p95": 3.867130233107175,
+            "p99": 3.867130233107175
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1434159990167,
+            "n": 5,
+            "p50": 2.3455000045942143,
+            "p95": 297.1434159990167,
+            "p99": 297.1434159990167
+          },
+          "submitted": 5,
+          "terminal_ms_all_outcomes": {
+            "max": 308.9941660000477,
+            "n": 5,
+            "p50": 35.95583399874158,
+            "p95": 308.9941660000477,
+            "p99": 308.9941660000477
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 4
+          }
+        },
+        "root:2": {
+          "completion_ms_success_only": {
+            "max": 47.19016700255452,
+            "n": 2,
+            "p50": 25.330666001536883,
+            "p95": 47.19016700255452,
+            "p99": 47.19016700255452
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 47.17033300403273,
+            "n": 1,
+            "p50": 47.17033300403273,
+            "p95": 47.17033300403273,
+            "p99": 47.17033300403273
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.6810739903794025,
+            "n": 3,
+            "p50": 0.7383309979904773,
+            "p95": 3.6810739903794025,
+            "p99": 3.6810739903794025
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 35.934375002398156,
+            "n": 2,
+            "p50": 13.45512500120094,
+            "p95": 35.934375002398156,
+            "p99": 35.934375002398156
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 50.54016700159991,
+            "n": 3,
+            "p50": 47.19016700255452,
+            "p95": 50.54016700159991,
+            "p99": 50.54016700159991
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 2
+          }
+        },
+        "root:3": {
+          "completion_ms_success_only": {
+            "max": 552.5245419994462,
+            "n": 3,
+            "p50": 47.19695900712395,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.408874995308,
+            "n": 3,
+            "p50": 47.179917004541494,
+            "p95": 552.408874995308,
+            "p99": 552.408874995308
+          },
+          "outcomes": {
+            "completed": 3
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.6355379344171403,
+            "n": 3,
+            "p50": 0.74746257859859,
+            "p95": 3.6355379344171403,
+            "p99": 3.6355379344171403
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 50.493999995524064,
+            "n": 3,
+            "p50": 35.96933400694979,
+            "p95": 50.493999995524064,
+            "p99": 50.493999995524064
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5245419994462,
+            "n": 3,
+            "p50": 47.19695900712395,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "within_measurement_completed": 3,
+          "within_measurement_terminal": {
+            "completed": 3
+          }
+        },
+        "synthetic_pair_workflows": {
+          "completed": 8,
+          "completed_within_measurement": 8,
+          "definition": "two predetermined independent fixture responses both validated; not an agent task",
+          "submitted": 10
+        },
+        "workload:burst": {
+          "completion_ms_success_only": {
+            "max": 47.19695900712395,
+            "n": 8,
+            "p50": 24.88587499829009,
+            "p95": 47.19695900712395,
+            "p99": 47.19695900712395
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 47.179917004541494,
+            "n": 8,
+            "p50": 24.76520799973514,
+            "p95": 47.179917004541494,
+            "p99": 47.179917004541494
+          },
+          "outcomes": {
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.021564147678938,
+            "n": 8,
+            "p50": 3.867130233107175,
+            "p95": 4.021564147678938,
+            "p99": 4.021564147678938
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 35.96933400694979,
+            "n": 8,
+            "p50": 13.49520799703896,
+            "p95": 35.96933400694979,
+            "p99": 35.96933400694979
+          },
+          "submitted": 8,
+          "terminal_ms_all_outcomes": {
+            "max": 47.19695900712395,
+            "n": 8,
+            "p50": 24.88587499829009,
+            "p95": 47.19695900712395,
+            "p99": 47.19695900712395
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "completed": 8
+          }
+        },
+        "workload:cancellation": {
+          "completion_ms_success_only": {
+            "max": 552.5245419994462,
+            "n": 1,
+            "p50": 552.5245419994462,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.408874995308,
+            "n": 1,
+            "p50": 552.408874995308,
+            "p95": 552.408874995308,
+            "p99": 552.408874995308
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.2040775281585425,
+            "n": 4,
+            "p50": 0.6908475176468087,
+            "p95": 1.2040775281585425,
+            "p99": 1.2040775281585425
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 50.493999995524064,
+            "n": 3,
+            "p50": 2.43912500445731,
+            "p95": 50.493999995524064,
+            "p99": 50.493999995524064
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5245419994462,
+            "n": 4,
+            "p50": 51.400667005509604,
+            "p95": 552.5245419994462,
+            "p99": 552.5245419994462
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 1
+          }
+        },
+        "workload:mixed_lengths": {
+          "completion_ms_success_only": {
+            "max": 311.42145799822174,
+            "n": 4,
+            "p50": 303.34379200212425,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.37945799855515,
+            "n": 4,
+            "p50": 303.2193750041188,
+            "p95": 311.37945799855515,
+            "p99": 311.37945799855515
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.208225094339599,
+            "n": 4,
+            "p50": 0.24444266957912575,
+            "p95": 1.208225094339599,
+            "p99": 1.208225094339599
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.1434159990167,
+            "n": 4,
+            "p50": 1.2287920035305433,
+            "p95": 297.1434159990167,
+            "p99": 297.1434159990167
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 311.42145799822174,
+            "n": 4,
+            "p50": 303.34379200212425,
+            "p95": 311.42145799822174,
+            "p99": 311.42145799822174
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        },
+        "workload:shared_quota": {
+          "completion_ms_success_only": {
+            "max": 25.549666002916638,
+            "n": 4,
+            "p50": 13.543624998419546,
+            "p95": 25.549666002916638,
+            "p99": 25.549666002916638
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 25.481290998868644,
+            "n": 2,
+            "p50": 13.275249999423977,
+            "p95": 25.481290998868644,
+            "p99": 25.481290998868644
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.2040942949667066,
+            "n": 4,
+            "p50": 0.74746257859859,
+            "p95": 1.2040942949667066,
+            "p99": 1.2040942949667066
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 13.45512500120094,
+            "n": 4,
+            "p50": 1.8827919993782416,
+            "p95": 13.45512500120094,
+            "p99": 13.45512500120094
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 25.549666002916638,
+            "n": 4,
+            "p50": 13.543624998419546,
+            "p95": 25.549666002916638,
+            "p99": 25.549666002916638
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "smoke-seed941-benchmark_rr",
+      "path": "artifacts/task8-quality-fix/smoke-runs/smoke-seed941-benchmark_rr.json",
+      "sha256": "8d1fbab23ae7049ecfa090481b194c433bac27cb21c9bf48c6fea12ea239cbd1",
+      "summary": {
+        "all": {
+          "completion_ms_success_only": {
+            "max": 552.5620420012274,
+            "n": 17,
+            "p50": 24.927915997977834,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.4951670013252,
+            "n": 15,
+            "p50": 36.52637499908451,
+            "p95": 552.4951670013252,
+            "p99": 552.4951670013252
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 17
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.1518561394878555,
+            "n": 20,
+            "p50": 1.1998695290040828,
+            "p95": 4.051925014678166,
+            "p99": 4.1518561394878555
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.0556250002119,
+            "n": 19,
+            "p50": 12.513458998000715,
+            "p95": 297.0556250002119,
+            "p99": 297.0556250002119
+          },
+          "submitted": 20,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5620420012274,
+            "n": 20,
+            "p50": 36.57179199944949,
+            "p95": 311.0583340021549,
+            "p99": 552.5620420012274
+          },
+          "within_measurement_completed": 17,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 17
+          }
+        },
+        "cost:matching": {
+          "completion_ms_success_only": {
+            "max": 552.5620420012274,
+            "n": 16,
+            "p50": 24.60595800221199,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.4951670013252,
+            "n": 14,
+            "p50": 24.889832995540928,
+            "p95": 552.4951670013252,
+            "p99": 552.4951670013252
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 16
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.1518561394878555,
+            "n": 19,
+            "p50": 1.2264760918671014,
+            "p95": 4.1518561394878555,
+            "p99": 4.1518561394878555
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.0556250002119,
+            "n": 18,
+            "p50": 12.513458998000715,
+            "p95": 297.0556250002119,
+            "p99": 297.0556250002119
+          },
+          "submitted": 19,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5620420012274,
+            "n": 19,
+            "p50": 36.57179199944949,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "within_measurement_completed": 16,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 16
+          }
+        },
+        "cost:overestimated": {
+          "completion_ms_success_only": {
+            "max": 311.0583340021549,
+            "n": 1,
+            "p50": 311.0583340021549,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.02575000113575,
+            "n": 1,
+            "p50": 311.02575000113575,
+            "p95": 311.02575000113575,
+            "p99": 311.02575000113575
+          },
+          "outcomes": {
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 0.22348465929722394,
+            "n": 1,
+            "p50": 0.22348465929722394,
+            "p95": 0.22348465929722394,
+            "p99": 0.22348465929722394
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 10.5366670031799,
+            "n": 1,
+            "p50": 10.5366670031799,
+            "p95": 10.5366670031799,
+            "p99": 10.5366670031799
+          },
+          "submitted": 1,
+          "terminal_ms_all_outcomes": {
+            "max": 311.0583340021549,
+            "n": 1,
+            "p50": 311.0583340021549,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "completed": 1
+          }
+        },
+        "length:long": {
+          "completion_ms_success_only": {
+            "max": 311.0583340021549,
+            "n": 2,
+            "p50": 303.1955830010702,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.02575000113575,
+            "n": 2,
+            "p50": 303.15354200138245,
+            "p95": 311.02575000113575,
+            "p99": 311.02575000113575
+          },
+          "outcomes": {
+            "cancelled": 2,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.2264760918671014,
+            "n": 4,
+            "p50": 0.22348465929722394,
+            "p95": 1.2264760918671014,
+            "p99": 1.2264760918671014
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 10.5366670031799,
+            "n": 3,
+            "p50": 1.625666998734232,
+            "p95": 10.5366670031799,
+            "p99": 10.5366670031799
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 311.0583340021549,
+            "n": 4,
+            "p50": 51.48062499938533,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 2,
+            "completed": 2
+          }
+        },
+        "length:short": {
+          "completion_ms_success_only": {
+            "max": 552.5620420012274,
+            "n": 15,
+            "p50": 24.60595800221199,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.4951670013252,
+            "n": 13,
+            "p50": 24.889832995540928,
+            "p95": 552.4951670013252,
+            "p99": 552.4951670013252
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 15
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.1518561394878555,
+            "n": 16,
+            "p50": 1.228678293277552,
+            "p95": 4.1518561394878555,
+            "p99": 4.1518561394878555
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.0556250002119,
+            "n": 16,
+            "p50": 13.11520799936261,
+            "p95": 297.0556250002119,
+            "p99": 297.0556250002119
+          },
+          "submitted": 16,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5620420012274,
+            "n": 16,
+            "p50": 24.60595800221199,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "within_measurement_completed": 15,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 15
+          }
+        },
+        "retry_amplification": {
+          "gateway_started_attempts": 20,
+          "gateway_started_per_ingress": 1.0,
+          "gateway_started_without_mock_receive": 1,
+          "ingress_submitted": 20,
+          "mock_received_attempts_per_ingress": 0.95,
+          "retried_ingress": 0,
+          "upstream_attempts": 19
+        },
+        "root:0": {
+          "completion_ms_success_only": {
+            "max": 311.0583340021549,
+            "n": 8,
+            "p50": 36.57179199944949,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.02575000113575,
+            "n": 7,
+            "p50": 48.60333299438935,
+            "p95": 311.02575000113575,
+            "p99": 311.02575000113575
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.1518561394878555,
+            "n": 9,
+            "p50": 3.9820001267441665,
+            "p95": 4.1518561394878555,
+            "p99": 4.1518561394878555
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 37.16516699932981,
+            "n": 9,
+            "p50": 10.5366670031799,
+            "p95": 37.16516699932981,
+            "p99": 37.16516699932981
+          },
+          "submitted": 9,
+          "terminal_ms_all_outcomes": {
+            "max": 311.0583340021549,
+            "n": 9,
+            "p50": 48.65437500120606,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 8
+          }
+        },
+        "root:1": {
+          "completion_ms_success_only": {
+            "max": 308.54770799487596,
+            "n": 4,
+            "p50": 24.421499998425134,
+            "p95": 308.54770799487596,
+            "p99": 308.54770799487596
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 308.4803749952698,
+            "n": 4,
+            "p50": 24.380292001296766,
+            "p95": 308.4803749952698,
+            "p99": 308.4803749952698
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.012006227117538,
+            "n": 5,
+            "p50": 0.7372252053525763,
+            "p95": 4.012006227117538,
+            "p99": 4.012006227117538
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.0556250002119,
+            "n": 5,
+            "p50": 13.146582998160738,
+            "p95": 297.0556250002119,
+            "p99": 297.0556250002119
+          },
+          "submitted": 5,
+          "terminal_ms_all_outcomes": {
+            "max": 308.54770799487596,
+            "n": 5,
+            "p50": 24.927915997977834,
+            "p95": 308.54770799487596,
+            "p99": 308.54770799487596
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 4
+          }
+        },
+        "root:2": {
+          "completion_ms_success_only": {
+            "max": 36.669125001935754,
+            "n": 2,
+            "p50": 12.84812499943655,
+            "p95": 36.669125001935754,
+            "p99": 36.669125001935754
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 36.62241700658342,
+            "n": 1,
+            "p50": 36.62241700658342,
+            "p95": 36.62241700658342,
+            "p99": 36.62241700658342
+          },
+          "outcomes": {
+            "cancelled": 1,
+            "completed": 2
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.834615984602308,
+            "n": 3,
+            "p50": 0.763247995053451,
+            "p95": 3.834615984602308,
+            "p99": 3.834615984602308
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 24.537917000998277,
+            "n": 2,
+            "p50": 0.9437080007046461,
+            "p95": 24.537917000998277,
+            "p99": 24.537917000998277
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 50.68970800493844,
+            "n": 3,
+            "p50": 36.669125001935754,
+            "p95": 50.68970800493844,
+            "p99": 50.68970800493844
+          },
+          "within_measurement_completed": 2,
+          "within_measurement_terminal": {
+            "cancelled": 1,
+            "completed": 2
+          }
+        },
+        "root:3": {
+          "completion_ms_success_only": {
+            "max": 552.5620420012274,
+            "n": 3,
+            "p50": 24.293125003168825,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.4951670013252,
+            "n": 3,
+            "p50": 24.242167004558723,
+            "p95": 552.4951670013252,
+            "p99": 552.4951670013252
+          },
+          "outcomes": {
+            "completed": 3
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 3.7880389355563118,
+            "n": 3,
+            "p50": 0.6904625738539671,
+            "p95": 3.7880389355563118,
+            "p99": 3.7880389355563118
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 50.594667001860216,
+            "n": 3,
+            "p50": 12.513458998000715,
+            "p95": 50.594667001860216,
+            "p99": 50.594667001860216
+          },
+          "submitted": 3,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5620420012274,
+            "n": 3,
+            "p50": 24.293125003168825,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "within_measurement_completed": 3,
+          "within_measurement_terminal": {
+            "completed": 3
+          }
+        },
+        "synthetic_pair_workflows": {
+          "completed": 8,
+          "completed_within_measurement": 8,
+          "definition": "two predetermined independent fixture responses both validated; not an agent task",
+          "submitted": 10
+        },
+        "workload:burst": {
+          "completion_ms_success_only": {
+            "max": 48.66479199699825,
+            "n": 8,
+            "p50": 24.60595800221199,
+            "p95": 48.66479199699825,
+            "p99": 48.66479199699825
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 48.62804200092796,
+            "n": 8,
+            "p50": 24.573041999246925,
+            "p95": 48.62804200092796,
+            "p99": 48.62804200092796
+          },
+          "outcomes": {
+            "completed": 8
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 4.1518561394878555,
+            "n": 8,
+            "p50": 3.995142730977447,
+            "p95": 4.1518561394878555,
+            "p99": 4.1518561394878555
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 37.16516699932981,
+            "n": 8,
+            "p50": 13.146582998160738,
+            "p95": 37.16516699932981,
+            "p99": 37.16516699932981
+          },
+          "submitted": 8,
+          "terminal_ms_all_outcomes": {
+            "max": 48.66479199699825,
+            "n": 8,
+            "p50": 24.60595800221199,
+            "p95": 48.66479199699825,
+            "p99": 48.66479199699825
+          },
+          "within_measurement_completed": 8,
+          "within_measurement_terminal": {
+            "completed": 8
+          }
+        },
+        "workload:cancellation": {
+          "completion_ms_success_only": {
+            "max": 552.5620420012274,
+            "n": 1,
+            "p50": 552.5620420012274,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 552.4951670013252,
+            "n": 1,
+            "p50": 552.4951670013252,
+            "p95": 552.4951670013252,
+            "p99": 552.4951670013252
+          },
+          "outcomes": {
+            "cancelled": 3,
+            "completed": 1
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.1998695290040828,
+            "n": 4,
+            "p50": 0.16718359894429824,
+            "p95": 1.1998695290040828,
+            "p99": 1.1998695290040828
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 50.594667001860216,
+            "n": 3,
+            "p50": 1.625666998734232,
+            "p95": 50.594667001860216,
+            "p99": 50.594667001860216
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 552.5620420012274,
+            "n": 4,
+            "p50": 51.10241700458573,
+            "p95": 552.5620420012274,
+            "p99": 552.5620420012274
+          },
+          "within_measurement_completed": 1,
+          "within_measurement_terminal": {
+            "cancelled": 3,
+            "completed": 1
+          }
+        },
+        "workload:mixed_lengths": {
+          "completion_ms_success_only": {
+            "max": 311.0583340021549,
+            "n": 4,
+            "p50": 303.1955830010702,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 311.02575000113575,
+            "n": 4,
+            "p50": 303.15354200138245,
+            "p95": 311.02575000113575,
+            "p99": 311.02575000113575
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.2264760918671014,
+            "n": 4,
+            "p50": 0.2594258301314989,
+            "p95": 1.2264760918671014,
+            "p99": 1.2264760918671014
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 297.0556250002119,
+            "n": 4,
+            "p50": 1.4174579991959035,
+            "p95": 297.0556250002119,
+            "p99": 297.0556250002119
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 311.0583340021549,
+            "n": 4,
+            "p50": 303.1955830010702,
+            "p95": 311.0583340021549,
+            "p99": 311.0583340021549
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        },
+        "workload:shared_quota": {
+          "completion_ms_success_only": {
+            "max": 24.927915997977834,
+            "n": 4,
+            "p50": 13.261874999443535,
+            "p95": 24.927915997977834,
+            "p99": 24.927915997977834
+          },
+          "first_output_delta_ms_success_only": {
+            "max": 24.889832995540928,
+            "n": 2,
+            "p50": 24.242167004558723,
+            "p95": 24.889832995540928,
+            "p99": 24.889832995540928
+          },
+          "outcomes": {
+            "completed": 4
+          },
+          "post_measurement_drain_outcomes": {},
+          "scheduling_lag_ms": {
+            "max": 1.228678293277552,
+            "n": 4,
+            "p50": 0.763247995053451,
+            "p95": 1.228678293277552,
+            "p99": 1.228678293277552
+          },
+          "send_to_mock_receive_ms_mixed_ingress_queue_network": {
+            "max": 13.35579100123141,
+            "n": 4,
+            "p50": 1.4862919997540303,
+            "p95": 13.35579100123141,
+            "p99": 13.35579100123141
+          },
+          "submitted": 4,
+          "terminal_ms_all_outcomes": {
+            "max": 24.927915997977834,
+            "n": 4,
+            "p50": 13.261874999443535,
+            "p95": 24.927915997977834,
+            "p99": 24.927915997977834
+          },
+          "within_measurement_completed": 4,
+          "within_measurement_terminal": {
+            "completed": 4
+          }
+        }
+      }
+    }
+  ],
+  "schedule": [
+    [
+      "smoke",
+      941,
+      "direct"
+    ],
+    [
+      "smoke",
+      941,
+      "production_rr"
+    ],
+    [
+      "smoke",
+      941,
+      "benchmark_fifo"
+    ],
+    [
+      "smoke",
+      941,
+      "benchmark_rr"
+    ]
+  ],
+  "schema": 1,
+  "seeds": [
+    941
+  ],
+  "status": "completed_smoke",
+  "windows": 1
+}
