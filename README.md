@@ -140,6 +140,12 @@ contract checks; their full native flows remain earlier evidence. These tests
 do not certify every version, model capability, or real-world coding task.
 [Exact setup, file changes, and tested flows →](product/docs/client-compatibility.md)
 
+Automatic summarization and the next turn passed isolated native tests for
+Pi, Codex and Claude Code, including Claude on Windows. There are still limits:
+`/responses/compact` is unsupported, and known-TPM inspection rejects opaque
+compaction inputs and oversized byte estimates. See the
+[automatic compaction audit](reports/auto-compaction-audit-2026-09-16.md) before relying on long sessions.
+
 ## Small by design
 
 One executable. In-memory scheduling. Bounded queues and stream buffers.

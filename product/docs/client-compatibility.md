@@ -44,6 +44,25 @@ guarantee. Recovery files were retained; see the follow-up failure record.
 Windows Pi and all Linux native clients remain unverified. A profile parse or
 list command alone is not counted as inference or tool compatibility.
 
+## Automatic compaction
+
+DeskQuota does not disable client compaction or replace response usage with its
+quota estimate. Synthetic native checks on 2026-09-16 verified automatic
+summarization and the next turn for Pi 0.84.2, Codex 0.154.0 and Claude Code
+2.1.175 on macOS, plus Claude Code 2.1.76 on Windows. Direct-provider controls
+also passed. These used isolated explicit context limits; they do not certify
+long real conversations or change the version checks in `connect`.
+
+Important limits: `/responses/compact` is unsupported (404); known TPM rejects
+opaque `compaction` input items (400), and the byte estimate can reject large
+summary requests before usage is available. Pi's unverified 128000 context
+default can also shift compaction timing. `/messages/count_tokens` works when
+explicitly allowed on the root; new Claude connections add `messages` alone.
+Exact-cache replay preserves the original response usage. See the
+[compaction audit and reproducible checks](../../reports/auto-compaction-audit-2026-09-16.md).
+
+## Managed connection and restoration
+
 `connect` previews absolute target paths, scope, public URL, root, model,
 protocol, owned keys, redacted credential source, disconnect command, and one
 exact hash. The hash binds the client patch to the desired gateway config

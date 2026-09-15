@@ -1,6 +1,6 @@
 # 제한된 LLM 요청을 조정하는 게이트웨이 조사
 
-기준일: 2026-09-15. 목표는 **한 PC의 여러 에이전트가 제한된 LLM 용량을 덜 낭비하고 공정하게 쓰게 하는 최소 게이트웨이**다.
+기준일: 2026-09-16. 목표는 **한 PC의 여러 에이전트가 제한된 LLM 용량을 덜 낭비하고 공정하게 쓰게 하는 최소 게이트웨이**다.
 
 ## 현재 결론
 
@@ -21,7 +21,8 @@
 | Pi·Claude Code·Codex 연결 | [Native Task 4 수용](evidence/native-task4-accepted.json). 동일 Mac 빌드에서 세 도구의 격리 도구 왕복 확인 |
 | 사용자 로그인 자동 시작 | [Native Task 5 수용](evidence/native-task5-accepted.json). 명세·품질 통과, 실제 계정 등록·로그인 미검증 |
 | 작은 installer와 최종 메모리·실행 시간 측정 | [Native Task 6 수용](evidence/native-task6-accepted.json). macOS ARM 패키지 설치·재설치와 세 도구 왕복 확인 |
-| 실제 Windows/Linux·저사양 PC·사용자 채택 | 미검증 |
+| 자동 압축 호환성 | [macOS·Windows 네이티브 대조](reports/auto-compaction-audit-2026-09-16.md): 일반 요약과 다음 턴 통과. 전용 compact endpoint·opaque 입력·큰 바이트 추정 거절은 재현된 미지원 경계 |
+| 실제 Windows/Linux·저사양 PC·사용자 채택 | [Windows 10 x64 GNU 빌드·실행·클라이언트 검사](reports/windows-followup-and-improvements-2026-09-16.md) 진행. Windows 파일 교체의 간헐적 실패 원인, Linux·저사양 성능·사용자 채택은 미검증 |
 
 이전 Native Task 6 산출물은 [macOS ARM 패키지](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz)와 [체크섬](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256)이다. 당시 Rust 테스트 370개와 첫 저장→연결→종료의 독립 재검토를 통과했다. 동일 패키지의 M4 32GiB 개발 PC 관측은 대기 메모리 9.73MiB(10표본), 시작 36.4–63.1ms·종료 35.6–45.3ms(각 5회)다. [측정 범위와 제한](product/artifacts/native-final-integration-package/acceptance/README.md)을 함께 읽는다. 이 수치는 후속 변경본의 성능이나 저사양·처리량 우위를 입증하지 않는다. 현재 소스의 추가 변경과 검증은 위 최신 보고서를, 실행 방법은 [설치 안내](product/docs/installation.md)를 따른다.
 
