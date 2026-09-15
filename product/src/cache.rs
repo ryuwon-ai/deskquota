@@ -30,11 +30,33 @@ struct Inner {
 #[derive(Default)]
 struct State {
     entries: HashMap<Key, Arc<Entry>>,
+    considered: u64,
+    bypasses: Bypasses,
     hits: u64,
     misses: u64,
     stores: u64,
     evictions: u64,
     budget_bypasses: u64,
+}
+
+#[derive(Clone, Copy, Default, Serialize)]
+struct Bypasses {
+    request_cache_control: u64,
+    size: u64,
+    endpoint: u64,
+    tools_state: u64,
+    history: u64,
+    unsupported_shape: u64,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum Bypass {
+    RequestCacheControl,
+    Size,
+    Endpoint,
+    ToolsState,
+    History,
+    UnsupportedShape,
 }
 struct Entry {
     body: Box<[u8]>,
@@ -52,6 +74,8 @@ impl AsRef<[u8]> for Replay {
 #[derive(Serialize)]
 pub(crate) struct Snapshot {
     enabled: bool,
+    considered: u64,
+    bypasses: Bypasses,
     hits: u64,
     misses: u64,
     stores: u64,
@@ -90,10 +114,24 @@ impl ExactCache {
         headers: &HeaderMap,
         endpoint: Endpoint,
         body: &[u8],
+        forbids_reuse: bool,
     ) -> Option<Pending> {
-        if !eligible(endpoint, body, self.0.config.max_history) {
+        let bypass = bypass_reason(endpoint, body, self.0.config.max_history, forbids_reuse);
+        let mut state = self.0.state.lock().expect("cache mutex");
+        state.considered = state.considered.saturating_add(1);
+        if let Some(reason) = bypass {
+            let count = match reason {
+                Bypass::RequestCacheControl => &mut state.bypasses.request_cache_control,
+                Bypass::Size => &mut state.bypasses.size,
+                Bypass::Endpoint => &mut state.bypasses.endpoint,
+                Bypass::ToolsState => &mut state.bypasses.tools_state,
+                Bypass::History => &mut state.bypasses.history,
+                Bypass::UnsupportedShape => &mut state.bypasses.unsupported_shape,
+            };
+            *count = count.saturating_add(1);
             return None;
         }
+        drop(state);
         let mut hash = Sha256::new();
         fn frame(hash: &mut Sha256, bytes: &[u8]) {
             hash.update((bytes.len() as u64).to_be_bytes());
@@ -101,7 +139,10 @@ impl ExactCache {
         }
         frame(&mut hash, &(root as u64).to_be_bytes());
         frame(&mut hash, url.as_str().as_bytes());
-        let mut names: Vec<_> = headers.keys().collect();
+        let mut names: Vec<_> = headers
+            .keys()
+            .filter(|name| name.as_str() != "x-stainless-retry-count")
+            .collect();
         names.sort_unstable_by(|a, b| a.as_str().cmp(b.as_str()));
         frame(&mut hash, &(names.len() as u64).to_be_bytes());
         for name in names {
@@ -124,6 +165,8 @@ impl ExactCache {
     pub(crate) fn snapshot(cache: Option<&Self>) -> Snapshot {
         let mut result = Snapshot {
             enabled: cache.is_some(),
+            considered: 0,
+            bypasses: Bypasses::default(),
             hits: 0,
             misses: 0,
             stores: 0,
@@ -135,6 +178,8 @@ impl ExactCache {
         };
         if let Some(cache) = cache {
             let state = cache.0.state.lock().expect("cache mutex");
+            result.considered = state.considered;
+            result.bypasses = state.bypasses;
             result.hits = state.hits;
             result.misses = state.misses;
             result.stores = state.stores;
@@ -175,7 +220,10 @@ impl Pending {
             || original.contains_key("set-cookie")
             || original.get_all("vary").iter().any(|value| {
                 value.to_str().map_or(true, |value| {
-                    value.split(',').any(|field| field.trim() == "*")
+                    value.split(',').any(|field| {
+                        field.trim() == "*"
+                            || field.trim().eq_ignore_ascii_case("x-stainless-retry-count")
+                    })
                 })
             })
             || original
@@ -352,13 +400,80 @@ fn messages(value: &Value, max_history: usize, types: &[&str]) -> bool {
             })
     })
 }
-fn eligible(endpoint: Endpoint, body: &[u8], max_history: usize) -> bool {
+fn bypass_reason(
+    endpoint: Endpoint,
+    body: &[u8],
+    max_history: usize,
+    forbids_reuse: bool,
+) -> Option<Bypass> {
+    if forbids_reuse {
+        return Some(Bypass::RequestCacheControl);
+    }
     if body.len() > REQUEST_BYTES {
-        return false;
+        return Some(Bypass::Size);
+    }
+    if matches!(endpoint, Endpoint::Models | Endpoint::CountTokens) {
+        return Some(Bypass::Endpoint);
     }
     let Ok(value) = serde_json::from_slice::<Value>(body) else {
-        return false;
+        return Some(Bypass::UnsupportedShape);
     };
+    let input = value.get(if endpoint == Endpoint::Responses {
+        "input"
+    } else {
+        "messages"
+    });
+    if [
+        "tools",
+        "tool_choice",
+        "functions",
+        "function_call",
+        "parallel_tool_calls",
+        "previous_response_id",
+        "conversation",
+    ]
+    .iter()
+    .any(|field| value.get(field).is_some())
+        || (endpoint == Endpoint::Responses
+            && value.get("store").and_then(Value::as_bool) != Some(false))
+        || input.and_then(Value::as_array).is_some_and(|items| {
+            items.iter().any(|item| {
+                matches!(
+                    item.get("role").and_then(Value::as_str),
+                    Some("tool" | "function")
+                ) || ["tool_calls", "function_call", "tool_call_id"]
+                    .iter()
+                    .any(|field| item.get(field).is_some())
+                    || matches!(
+                        item.get("type").and_then(Value::as_str),
+                        Some("function_call" | "function_call_output" | "tool_use" | "tool_result")
+                    )
+                    || item
+                        .get("content")
+                        .and_then(Value::as_array)
+                        .is_some_and(|blocks| {
+                            blocks.iter().any(|block| {
+                                matches!(
+                                    block.get("type").and_then(Value::as_str),
+                                    Some("tool_use" | "tool_result")
+                                )
+                            })
+                        })
+            })
+        })
+    {
+        return Some(Bypass::ToolsState);
+    }
+    if input
+        .and_then(Value::as_array)
+        .is_some_and(|items| items.len() > max_history)
+    {
+        return Some(Bypass::History);
+    }
+    (!eligible(endpoint, &value, max_history)).then_some(Bypass::UnsupportedShape)
+}
+
+fn eligible(endpoint: Endpoint, value: &Value, max_history: usize) -> bool {
     let fields: &[&str] = match endpoint {
         Endpoint::ChatCompletions => &[
             "model",
@@ -400,7 +515,7 @@ fn eligible(endpoint: Endpoint, body: &[u8], max_history: usize) -> bool {
         ],
         _ => return false,
     };
-    if !only(&value, fields)
+    if !only(value, fields)
         || value
             .get("stream")
             .is_some_and(|stream| !stream.is_boolean())
@@ -857,21 +972,40 @@ mod tests {
         headers.append("x-test", "a".parse().unwrap());
         headers.append("x-test", "bc".parse().unwrap());
         let key = cache
-            .request(0, &url, &headers, Endpoint::ChatCompletions, body)
+            .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
             .unwrap()
             .key;
+        for value in ["0", "1", "2"] {
+            headers.append("x-stainless-retry-count", value.parse().unwrap());
+            assert_eq!(
+                key,
+                cache
+                    .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
+                    .unwrap()
+                    .key
+            );
+        }
+        headers.insert("x-stainless-read-timeout", "10".parse().unwrap());
+        assert_ne!(
+            key,
+            cache
+                .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
+                .unwrap()
+                .key
+        );
+        headers.remove("x-stainless-read-timeout");
         headers.remove("x-test");
         headers.append("x-test", "ab".parse().unwrap());
         headers.append("x-test", "c".parse().unwrap());
         assert_ne!(
             key,
             cache
-                .request(0, &url, &headers, Endpoint::ChatCompletions, body)
+                .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
                 .unwrap()
                 .key
         );
         let a = cache
-            .request(0, &url, &headers, Endpoint::ChatCompletions, body)
+            .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
             .unwrap()
             .key;
         headers.remove("x-test");
@@ -880,12 +1014,12 @@ mod tests {
         assert_ne!(
             a,
             cache
-                .request(0, &url, &headers, Endpoint::ChatCompletions, body)
+                .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
                 .unwrap()
                 .key
         );
         let a = cache
-            .request(0, &url, &headers, Endpoint::ChatCompletions, body)
+            .request(0, &url, &headers, Endpoint::ChatCompletions, body, false)
             .unwrap()
             .key;
         assert_ne!(
@@ -896,10 +1030,134 @@ mod tests {
                     &url,
                     &headers,
                     Endpoint::ChatCompletions,
-                    &[body.as_slice(), b" "].concat()
+                    &[body.as_slice(), b" "].concat(),
+                    false,
                 )
                 .unwrap()
                 .key
+        );
+    }
+
+    #[test]
+    fn bypass_reasons_are_fixed_order_and_preserve_short_text_eligibility() {
+        use serde_json::json;
+        let chat = json!({"model":"x", "messages":[{"role":"user", "content":"x"}]});
+        let history = vec![json!({"role":"user", "content":"x"}); 4];
+        let mut tools = chat.clone();
+        tools["tools"] = json!([]);
+        tools["messages"] = json!(history);
+        let mut long = chat.clone();
+        long["messages"] = tools["messages"].clone();
+        long["unknown"] = json!(true);
+        for (endpoint, body, forbidden, expected) in [
+            (Endpoint::ChatCompletions, chat.clone(), false, None),
+            (Endpoint::Models, json!({}), false, Some(Bypass::Endpoint)),
+            (
+                Endpoint::Models,
+                json!("x".repeat(REQUEST_BYTES)),
+                false,
+                Some(Bypass::Size),
+            ),
+            (
+                Endpoint::Models,
+                json!("x".repeat(REQUEST_BYTES)),
+                true,
+                Some(Bypass::RequestCacheControl),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                tools,
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                long,
+                false,
+                Some(Bypass::History),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[{"role":"tool","content":"x"}]}),
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[{"role":"assistant","content":"x","tool_calls":[]}]}),
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::Messages,
+                json!({"messages":[{"role":"user","content":[{"type":"tool_result"}]}]}),
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::Responses,
+                json!({"input":"x","store":false}),
+                false,
+                None,
+            ),
+            (
+                Endpoint::Responses,
+                json!({"input":"x"}),
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::Responses,
+                json!({"input":"x","store":false,"previous_response_id":"x"}),
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::Responses,
+                json!({"input":[{"type":"function_call_output"}],"store":false}),
+                false,
+                Some(Bypass::ToolsState),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[{"role":"user","content":[{"type":"image_url"}]}]}),
+                false,
+                Some(Bypass::UnsupportedShape),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[{"role":"user","content":"x"}],"n":2}),
+                false,
+                Some(Bypass::UnsupportedShape),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[{"role":"user","content":"x"}],"stream_options":{"include_usage":"yes"}}),
+                false,
+                Some(Bypass::UnsupportedShape),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[{"role":"user","content":"x"}],"unknown":true}),
+                false,
+                Some(Bypass::UnsupportedShape),
+            ),
+            (
+                Endpoint::ChatCompletions,
+                json!({"messages":[]}),
+                false,
+                Some(Bypass::UnsupportedShape),
+            ),
+        ] {
+            assert_eq!(
+                bypass_reason(endpoint, &serde_json::to_vec(&body).unwrap(), 3, forbidden),
+                expected,
+                "{endpoint:?}: {body}"
+            );
+        }
+        assert_eq!(
+            bypass_reason(Endpoint::ChatCompletions, b"{", 3, false),
+            Some(Bypass::UnsupportedShape)
         );
     }
 }

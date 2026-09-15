@@ -1,13 +1,13 @@
 # Native client compatibility
 
-This phase supports three fixed, version-checked profile formats. The versions
-below were exercised with a checksum-verified macOS arm64 packaged
-binary on the Apple M4 development host before the data-token removal. Those
-installed-client results remain historical evidence for Claude and Codex.
-After the data-token removal, the Pi0.84.2 completion and read-tool flows were
-rerun with the current release binary, an isolated loopback fixture, and
-upstream auth `none`: both passed (one and two upstream calls). Real-provider
-authentication and the revised Claude/Codex full native flows remain unverified.
+This phase supports three fixed, version-checked profile formats. The current
+Claude Code profile accepts **2.1.76**, verified on Windows 10 x64 with isolated
+loopback traffic on 2026-09-16. The earlier 2.1.63 macOS result is historical;
+that version is no longer accepted by `connect`. Pi 0.84.2 was rerun after the
+data-token removal on macOS. Codex 0.154.0 completed Windows profile loading and
+a Responses round trip, but its native tool policy rejected the fixture's read
+command; full Windows tool compatibility is unverified. No real-provider
+authentication is established by these synthetic checks.
 `connect`
 does not discover providers, sign in, forward a chat
 subscription, or make a paid request. The selected root, model, and endpoint
@@ -25,14 +25,24 @@ credential selection and any API-key approval prompt. See the official
 | Client | Version | Protocol | Listing | Selection | Tools | OS and scope |
 |---|---:|---|---|---|---|---|
 | Pi | 0.84.2 | OpenAI Chat Completions | picker/list verified from `<home>/.pi/agent/models.json` | verified | exact read-tool result and follow-up request verified | macOS arm64, isolated user-private fixture |
-| Claude Code | 2.1.63 | Anthropic Messages | opt-in discovery unsupported in this profile | verified | exact Read result and follow-up request verified | macOS arm64, isolated user-private fixture |
-| Codex | 0.154.0 | OpenAI Responses; WebSocket disabled | unverified because the gateway list is not a Codex catalog | verified | exact `exec_command` read result and follow-up request verified | macOS arm64, isolated named profile |
+| Claude Code | 2.1.76 | Anthropic Messages | opt-in discovery unsupported in this profile | verified | exact Read result and follow-up request verified | Windows 10 x64, isolated private home and Korean path; managed connect/disconnect passed |
+| Claude Code (historical) | 2.1.63 | Anthropic Messages | unsupported | verified | exact Read result verified | earlier macOS arm64 fixture; not accepted by current profile |
+| Codex (historical) | 0.154.0 | OpenAI Responses; WebSocket disabled | unverified because the gateway list is not a Codex catalog | verified | exact `exec_command` read result verified | earlier macOS arm64 isolated named profile |
+| Codex | 0.154.0 | OpenAI Responses; WebSocket disabled | unverified | verified | blocked by native client policy; not passed | Windows 10 x64, managed connect/disconnect and synthetic response round trip |
 
-All three combinations also verified inference, expected failure with the
-gateway off and zero new upstream fixture calls, reload after disconnect, and
-preservation of an unrelated user edit. Linux and Windows client runtime remain
-unverified. A profile parse or list command alone is not counted as inference or
-tool compatibility.
+The earlier macOS combinations also verified inference, expected failure with
+the gateway off and zero new upstream fixture calls, reload after disconnect,
+and preservation of an unrelated user edit. Those controls were not rerun for
+the Windows clients. The Windows suite separately covers 24 client-profile
+and 39 config-patch contract tests; installed-client evidence is in the
+[Windows follow-up report](../../reports/windows-followup-and-improvements-2026-09-16.md).
+A repeat on the final Windows binary failed once while replacing the protected
+patch journal (Windows error 1175); the next isolated run passed the entire
+Claude flow. The cause is unresolved, so a successful row is not a reliability
+guarantee. Recovery files were retained; see the follow-up failure record.
+
+Windows Pi and all Linux native clients remain unverified. A profile parse or
+list command alone is not counted as inference or tool compatibility.
 
 `connect` previews absolute target paths, scope, public URL, root, model,
 protocol, owned keys, redacted credential source, disconnect command, and one
@@ -108,7 +118,7 @@ ignored; this state is checked during preview, before gateway activation, and
 again immediately before the client write. Safe parent-directory aliases remain
 supported, while aliases into tracked or shared targets are refused. Conflicting
 process environment or supplied managed policy blocks the patch. Discovery is
-opt-in and remains unsupported for the verified 2.1.63 profile. Claude 2.1.63
+opt-in and remains unsupported for the verified 2.1.76 profile. Claude 2.1.76
 also requires a nonempty API-key setting before it starts a headless request.
 For env/none gateway modes, the profile owns the public literal
 `ANTHROPIC_API_KEY=llmgw-local-only` as a client-availability placeholder. It is
@@ -132,8 +142,9 @@ config, and working directories plus an allowlisted child environment. They use
 loopback fixtures, synthetic local tokens, and no login, subscription, keychain,
 or real API credential. Claude's generated placeholder API key is accepted only
 by the client and is stripped by gateway `auth = "none"`; it never reaches the fixture.
-Pi, Claude, and Codex each completed an exact synthetic file-read result followed
-by a second model request. The Codex model catalog remains unverified because a
+The earlier macOS probes completed an exact synthetic file read followed by a
+second model request for each client. Windows Claude 2.1.76 also passed that
+flow; Windows Codex tool execution remains blocked by client policy. The Codex model catalog remains unverified because a
 Responses endpoint is not its catalog. In the gateway-off controls, Claude and
 Codex were terminated at the bounded eight-second timeout with zero upstream
 fixture calls; those expected failures are not positive inference results.

@@ -1,0 +1,59 @@
+INFO:     Started server process [69330]
+INFO:     Waiting for application startup.
+
+   ██╗     ██╗████████╗███████╗██╗     ██╗     ███╗   ███╗
+   ██║     ██║╚══██╔══╝██╔════╝██║     ██║     ████╗ ████║
+   ██║     ██║   ██║   █████╗  ██║     ██║     ██╔████╔██║
+   ██║     ██║   ██║   ██╔══╝  ██║     ██║     ██║╚██╔╝██║
+   ███████╗██║   ██║   ███████╗███████╗███████╗██║ ╚═╝ ██║
+   ╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝
+
+13:56:07 - LiteLLM Proxy:CRITICAL: proxy_server.py:5465 - LITELLM_MASTER_KEY is not set! All requests will be treated as INTERNAL_USER with no admin access. Set LITELLM_MASTER_KEY for production use.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:50866 (Press CTRL+C to quit)
+
+[1;37m#------------------------------------------------------------#[0m
+[1;37m#                                                            #[0m
+[1;37m#            'The thing I wish you improved is...'            #[0m
+[1;37m#        https://github.com/BerriAI/litellm/issues/new        #[0m
+[1;37m#                                                            #[0m
+[1;37m#------------------------------------------------------------#[0m
+
+ Thank you for using LiteLLM! - Krrish & Ishaan
+
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+
+
+[32mLiteLLM: Proxy initialized with Config, Set models:[0m
+[32m    synthetic[0m
+INFO:     127.0.0.1:50890 - "GET /health/liveliness HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50893 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50896 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50897 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50900 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50901 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50902 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50904 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50903 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50908 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50907 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50910 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50912 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50914 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50913 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+13:56:35 - LiteLLM Proxy:ERROR: common_request_processing.py:1437 - litellm.proxy.proxy_server._handle_llm_api_exception(): Exception occured - litellm.RateLimitError: No deployments available for selected model. Passed model=synthetic. Deployments={'a8617af8013c090bddd6482e03df8bb6c53e73e738b9e714451ed96bb152b5bc': {'current_tpm': None, 'tpm_limit': 6000, 'current_rpm': 15, 'rpm_limit': 16}}. Received Model Group=synthetic
+Available Model Group Fallbacks=None
+INFO:     127.0.0.1:50916 - "POST /v1/chat/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:50915 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+13:56:38 - LiteLLM Proxy:ERROR: common_request_processing.py:1437 - litellm.proxy.proxy_server._handle_llm_api_exception(): Exception occured - litellm.RateLimitError: No deployments available for selected model. Passed model=synthetic. Deployments={'a8617af8013c090bddd6482e03df8bb6c53e73e738b9e714451ed96bb152b5bc': {'current_tpm': None, 'tpm_limit': 6000, 'current_rpm': 15, 'rpm_limit': 16}}. Received Model Group=synthetic
+Available Model Group Fallbacks=None
+INFO:     127.0.0.1:50919 - "POST /v1/chat/completions HTTP/1.1" 429 Too Many Requests
+13:56:40 - LiteLLM Proxy:ERROR: common_request_processing.py:1437 - litellm.proxy.proxy_server._handle_llm_api_exception(): Exception occured - litellm.RateLimitError: No deployments available for selected model. Passed model=synthetic. Deployments={'a8617af8013c090bddd6482e03df8bb6c53e73e738b9e714451ed96bb152b5bc': {'current_tpm': None, 'tpm_limit': 6000, 'current_rpm': 15, 'rpm_limit': 16}}. Received Model Group=synthetic
+Available Model Group Fallbacks=None
+INFO:     127.0.0.1:50922 - "POST /v1/chat/completions HTTP/1.1" 429 Too Many Requests
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69330]

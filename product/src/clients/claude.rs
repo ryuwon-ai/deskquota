@@ -14,15 +14,15 @@ pub(super) fn patches(
     request: &ProfileRequest,
     config_dir: &Path,
 ) -> Result<AdapterPatches, Error> {
-    version_is(&request.installed_version, "2.1.63", "Claude Code")?;
+    version_is(&request.installed_version, "2.1.76", "Claude Code")?;
     if request.protocol != Protocol::AnthropicMessages {
         return Err(Error::message(
-            "Claude Code 2.1.63 requires anthropic_messages",
+            "Claude Code 2.1.76 requires anthropic_messages",
         ));
     }
     if request.discover_models {
         return Err(Error::message(
-            "Claude Code 2.1.63 model discovery is not verified; leave discovery off",
+            "Claude Code 2.1.76 model discovery is not verified; leave discovery off",
         ));
     }
     let forward = request.upstream_auth == crate::config::Auth::Forward;
@@ -234,6 +234,8 @@ fn git_output(directory: &Path, args: &[&str]) -> Result<std::process::Output, E
 }
 
 fn validate_private_directory(path: &Path) -> Result<(), Error> {
+    #[cfg(not(unix))]
+    let _ = path;
     #[cfg(unix)]
     {
         use std::os::unix::fs::MetadataExt;

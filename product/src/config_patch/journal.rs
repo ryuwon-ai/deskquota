@@ -1,7 +1,6 @@
 use super::{Error, Format, KeyPath, snapshot_hash};
 use serde::{Deserialize, Serialize};
 use std::{
-    fs,
     io::{Read, Write},
     path::{Path, PathBuf},
 };
@@ -303,18 +302,6 @@ pub(crate) fn ensure_state_parent(path: &Path) -> Result<(), Error> {
     let parent = path
         .parent()
         .ok_or_else(|| Error::message("journal path has no parent directory"))?;
-    if !parent.exists() {
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::DirBuilderExt;
-            fs::DirBuilder::new()
-                .recursive(true)
-                .mode(0o700)
-                .create(parent)?;
-        }
-        #[cfg(not(unix))]
-        fs::create_dir_all(parent)?;
-    }
-    crate::lifecycle::platform::directory(parent)?;
+    crate::lifecycle::platform::directory_tree(parent)?;
     Ok(())
 }

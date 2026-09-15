@@ -1,0 +1,106 @@
+{
+  "recorded_at": "2026-09-15T14:56:13.983575+00:00",
+  "input": "actual SSH PTY / native Windows console",
+  "apply": "SaveOnly",
+  "config": {
+    "listen": "127.0.0.1:4141",
+    "concurrency": 3,
+    "startup_hold_secs": 60,
+    "cancel_policy": "drain",
+    "accounting": "actual",
+    "retry_transient_429": false,
+    "cache": {
+      "ttl_secs": 300,
+      "max_history": 3
+    },
+    "upstream": {
+      "api_base": "http://127.0.0.1:9/v1",
+      "auth": {
+        "mode": "forward"
+      }
+    },
+    "quota": {
+      "rpm": {
+        "kind": "known",
+        "value": 18
+      },
+      "tpm": {
+        "kind": "known",
+        "value": 450000
+      }
+    },
+    "models": [
+      {
+        "id": "synthetic",
+        "max_output_tokens": 64
+      }
+    ],
+    "roots": [
+      {
+        "id": "default",
+        "endpoints": [
+          "chat/completions"
+        ],
+        "models": [
+          "synthetic"
+        ]
+      }
+    ]
+  },
+  "pending": {
+    "version": 1,
+    "shared_with_other_pcs": false,
+    "separate_input_output": false,
+    "login_requested": false,
+    "clients": [
+      "manual"
+    ]
+  },
+  "offline_doctor": "passed; no network/inference request",
+  "followup_lifecycle": "on/status/off passed with Windows-only PATH",
+  "observed_admission": {
+    "accounting": "actual",
+    "active": 0,
+    "barrier_root": null,
+    "blocked_reason": null,
+    "estimate_mode": "json_utf8_bytes_plus_output_reservation",
+    "queue_length": 0,
+    "reservation": {
+      "excess_tokens": "0",
+      "observed_tokens": "0",
+      "reserved_tokens": "0",
+      "samples": 0,
+      "shortfall_tokens": "0",
+      "unknown": 0
+    },
+    "retained": 0,
+    "roots": [
+      {
+        "id": "default",
+        "queue_length": 0
+      }
+    ],
+    "rpm_capacity": "18",
+    "rpm_debited": "0",
+    "rpm_mode": "known",
+    "shared_cooldown_ms": 0,
+    "startup_hold_ms": 59931,
+    "tpm_capacity": "450000",
+    "tpm_debited": "0",
+    "tpm_held": "0",
+    "tpm_mode": "known"
+  },
+  "final_worker_state": "stopped",
+  "client_states": {
+    "claude": {
+      "state": "not_connected"
+    },
+    "codex": {
+      "state": "not_connected"
+    },
+    "pi": {
+      "state": "not_connected"
+    }
+  },
+  "autostart_registration": "disabled"
+}

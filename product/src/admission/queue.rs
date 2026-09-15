@@ -20,6 +20,7 @@ struct Waiting {
     sequence: u64,
     bypasses: u8,
 }
+
 pub(super) struct Queue {
     pub ledger: Ledger,
     #[cfg(feature = "bench-harness")]
@@ -218,15 +219,69 @@ impl Queue {
         deadlines.chain(ages).chain(resource_wake).min()
     }
     pub fn blocked_reason(&mut self, now: Duration) -> Option<&'static str> {
+        if self.len() == 0 {
+            return None;
+        }
         if now < self.cooldown_until {
             return Some("upstream_cooldown");
         }
-        if self.barrier.is_some() {
-            return Some("starvation_barrier");
+        if let Some((root, _)) = self.barrier {
+            return self.roots[root]
+                .front()
+                .and_then(|head| self.ledger.check(now, head.cost).err());
         }
         self.roots
             .iter()
             .filter_map(|q| q.front())
             .find_map(|w| self.ledger.check(now, w.cost).err())
+    }
+}
+
+#[cfg(test)]
+mod diagnostics_tests {
+    use super::*;
+    use crate::config::{Accounting, Limit, Quota};
+
+    #[test]
+    fn protected_head_reports_resource_and_empty_cooldown_has_no_blocker() {
+        let ledger = Ledger::new(
+            Quota {
+                rpm: Limit::Unlimited,
+                tpm: Limit::Known(100.try_into().unwrap()),
+            },
+            Accounting::Reserved,
+            2,
+            Duration::ZERO,
+            Duration::ZERO,
+        );
+        let mut queue = Queue::new(ledger, 2);
+        let Decision::Admitted(id) = queue
+            .ledger
+            .admit(Duration::ZERO, RequestCost::exact_fixture(70))
+        else {
+            panic!("fixture admission")
+        };
+        queue.ledger.start(Duration::ZERO, id);
+        queue.ledger.finish(Duration::ZERO, id, None);
+        let now = Duration::from_secs(5);
+        let ticket = queue
+            .enqueue(
+                0,
+                RequestCost::exact_fixture(80),
+                Duration::ZERO,
+                Duration::from_secs(120),
+            )
+            .unwrap();
+        let wake = queue.drive(now);
+        assert_eq!(queue.barrier(), Some(0));
+        assert_eq!(queue.blocked_reason(now), Some("tpm"));
+        queue.cooldown_until = Duration::from_secs(9);
+        assert_eq!(queue.blocked_reason(now), Some("upstream_cooldown"));
+        queue.cooldown_until = Duration::ZERO;
+        assert_eq!(queue.drive(now), wake);
+        assert!(ticket.lock().unwrap().is_none());
+        queue.cancel(now, 0, &ticket);
+        queue.cooldown_until = Duration::from_secs(90);
+        assert_eq!(queue.blocked_reason(now), None);
     }
 }

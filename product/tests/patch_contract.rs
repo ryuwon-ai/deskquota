@@ -15,6 +15,10 @@ const UPSTREAM_SENTINEL: &str = concat!("upstream-", "synthetic-", "8f2f5a47");
 const DATA_SENTINEL: &str = concat!("local-data-", "synthetic-", "3dcb99a1");
 const CONTROL_SENTINEL: &str = concat!("control-", "synthetic-", "6a01c442");
 
+#[path = "support/private_fs.rs"]
+mod private_fs;
+use private_fs::{private_dir, write_private};
+
 struct Fixture {
     root: PathBuf,
 }
@@ -81,6 +85,7 @@ impl Drop for Fixture {
     }
 }
 
+#[cfg(unix)]
 fn walk_dirs(root: &Path) -> Vec<PathBuf> {
     let mut found = vec![root.to_path_buf()];
     let mut index = 0;
@@ -95,30 +100,6 @@ fn walk_dirs(root: &Path) -> Vec<PathBuf> {
         index += 1;
     }
     found
-}
-
-fn private_dir(path: &Path) {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::DirBuilderExt;
-        fs::DirBuilder::new()
-            .recursive(true)
-            .mode(0o700)
-            .create(path)
-            .unwrap();
-    }
-    #[cfg(not(unix))]
-    fs::create_dir_all(path).unwrap();
-}
-
-fn write_private(path: &Path, bytes: &[u8]) {
-    private_dir(path.parent().unwrap());
-    fs::write(path, bytes).unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(path, fs::Permissions::from_mode(0o600)).unwrap();
-    }
 }
 
 fn key(parts: &[&str]) -> KeyPath {
@@ -647,6 +628,7 @@ fn cooperating_editors_share_one_lock_namespace_across_different_journals() {
     let shown = preview(&tx).unwrap();
     let lock_path = cooperating_lock_path(&path).unwrap();
     private_dir(lock_path.parent().unwrap());
+    write_private(&lock_path, b"");
     let lock = OpenOptions::new()
         .create(true)
         .truncate(false)
@@ -773,6 +755,7 @@ fn case_aliases_share_a_lock_when_the_filesystem_equates_them() {
     let held_path = cooperating_lock_path(&path).unwrap();
     let alias_path = cooperating_lock_path(&alias).unwrap();
     assert_eq!(held_path, alias_path);
+    write_private(&held_path, b"");
     let lock = OpenOptions::new()
         .create(true)
         .truncate(false)
@@ -847,6 +830,7 @@ fn assert_absent_aliases_contend(first_name: &str, second_name: &str, label: &st
     let first = parent.join(first_name);
     let second = parent.join(second_name);
     let held_path = cooperating_lock_path(&first).unwrap();
+    write_private(&held_path, b"");
     let lock = OpenOptions::new()
         .create(true)
         .truncate(false)
@@ -897,6 +881,7 @@ fn absent_case_distinct_files_keep_independent_locks_on_case_sensitive_filesyste
     let held_path = cooperating_lock_path(&upper).unwrap();
     let lower_path = cooperating_lock_path(&lower).unwrap();
     assert_ne!(held_path, lower_path);
+    write_private(&held_path, b"");
     let lock = OpenOptions::new()
         .create(true)
         .truncate(false)
@@ -959,7 +944,7 @@ fn adjacent_resource_lock_preserves_an_existing_ordinary_parent_mode() {
 }
 
 #[test]
-fn unresolved_alias_through_a_missing_parent_is_refused_before_writing() {
+fn missing_parent_alias_follows_native_path_resolution_before_writing() {
     let fixture = Fixture::new("unsupported-missing-alias");
     let path = fixture.path("missing/../client/new.json");
     let tx = transaction(
@@ -973,8 +958,17 @@ fn unresolved_alias_through_a_missing_parent_is_refused_before_writing() {
         )],
     );
 
-    let error = preview(&tx).unwrap_err().to_string();
-    assert!(error.contains("unresolved parent aliases"));
+    if cfg!(windows) {
+        // Win32 resolves parent components lexically even if `missing` is absent.
+        preview(&tx).unwrap();
+        assert_eq!(
+            cooperating_lock_path(&path).unwrap(),
+            cooperating_lock_path(&fixture.path("client/new.json")).unwrap()
+        );
+    } else {
+        let error = preview(&tx).unwrap_err().to_string();
+        assert!(error.contains("unresolved parent aliases"));
+    }
     assert!(!fixture.path("client/new.json").exists());
 }
 

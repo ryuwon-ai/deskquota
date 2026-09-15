@@ -1,4 +1,4 @@
-//! The only unsafe module: Win32 has no complete maintained safe creation +
+//! Win32 storage/process boundary: no complete maintained safe creation +
 //! handle ACL verification wrapper in our dependency set. Every returned File
 //! has been checked before any caller can write token bytes. Never edit an
 //! existing ACL. Runtime Windows acceptance is required beyond cross-checking.
@@ -24,9 +24,24 @@ use windows_sys::Win32::{
 pub fn detach_session() -> io::Result<()> {
     Ok(())
 }
-pub fn configure_detached(command: &mut Command) {
+pub fn configure_detached(command: &mut Command) -> io::Result<()> {
     use std::os::windows::process::CommandExt;
-    command.creation_flags(0x8 | 0x200);
+    // Command redirects the worker's stdio, but Rust 1.88 also inherits other
+    // inheritable handles. Keep the caller's capture pipes out of the worker so
+    // `llmgw on` reaches EOF while the detached worker is still running.
+    for handle in [
+        io::stdin().as_raw_handle(),
+        io::stdout().as_raw_handle(),
+        io::stderr().as_raw_handle(),
+    ] {
+        if !handle.is_null() && handle != INVALID_HANDLE_VALUE {
+            // SAFETY: borrowed process stdio handle; this changes only its
+            // inheritance flag, never closes it or changes current I/O.
+            unsafe { check(SetHandleInformation(handle, HANDLE_FLAG_INHERIT, 0))? };
+        }
+    }
+    command.creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP);
+    Ok(())
 }
 fn denied() -> io::Error {
     io::Error::new(
@@ -150,11 +165,61 @@ impl Drop for LocalString {
 }
 pub fn current_user_identity() -> io::Result<String> {
     let user = User::current()?;
+    sid_string(user.sid())
+}
+
+pub(crate) fn account_identity(account: &str) -> io::Result<String> {
+    if account.is_empty() || account.len() > 4096 {
+        return Err(denied());
+    }
+    let account = wide(Path::new(account))?;
+    let (mut sid_size, mut domain_size, mut sid_use) = (0, 0, 0);
+    // SAFETY: sizing call with null output buffers and initialized size pointers.
+    unsafe {
+        LookupAccountNameW(
+            null(),
+            account.as_ptr(),
+            null_mut(),
+            &mut sid_size,
+            null_mut(),
+            &mut domain_size,
+            &mut sid_use,
+        );
+    }
+    if !(8..=65536).contains(&sid_size) || domain_size > 65536 {
+        return Err(denied());
+    }
+    let mut sid = vec![0usize; (sid_size as usize).div_ceil(size_of::<usize>())];
+    let mut domain = vec![0u16; domain_size.max(1) as usize];
+    let capacity = sid.len() * size_of::<usize>();
+    sid_size = capacity as u32;
+    // SAFETY: aligned, bounded SID and UTF-16 domain allocations match the
+    // supplied capacities and outlive the call. Validate SID bounds afterward.
+    unsafe {
+        check(LookupAccountNameW(
+            null(),
+            account.as_ptr(),
+            sid.as_mut_ptr().cast(),
+            &mut sid_size,
+            domain.as_mut_ptr(),
+            &mut domain_size,
+            &mut sid_use,
+        ))?;
+    }
+    let pointer = sid.as_mut_ptr().cast();
+    if sid_size as usize > capacity || !sid_fits(pointer, sid.as_ptr() as usize + sid_size as usize)
+    {
+        return Err(denied());
+    }
+    sid_string(pointer)
+}
+
+fn sid_string(sid: PSID) -> io::Result<String> {
     let mut raw = null_mut();
-    // SAFETY: user owns a validated current-process token SID for this call;
+    // SAFETY: callers own a validated SID allocation for this call;
     // the returned LocalAlloc buffer is immediately placed under RAII.
     unsafe {
-        check(ConvertSidToStringSidW(user.sid(), &mut raw))?;
+        check(ConvertSidToStringSidW(sid, &mut raw))?;
     }
     if raw.is_null() {
         return Err(denied());

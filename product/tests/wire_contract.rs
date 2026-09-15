@@ -1,3 +1,5 @@
+#[path = "support/private_fs.rs"]
+mod private_fs;
 mod support;
 
 use std::fs;
@@ -869,15 +871,12 @@ models = ["fixture-model"]
     };
     assert!(missing.to_string().contains("control-token"));
 
-    fs::create_dir_all(&loaded.state_paths.directory).expect("create temporary state directory");
+    private_fs::private_dir(&loaded.state_paths.directory);
     let control_secret = b"only-in-temporary-control-file";
-    fs::write(&loaded.state_paths.control_token, control_secret)
-        .expect("write temporary control token");
-    protect(&loaded.state_paths.control_token);
+    private_fs::write_private(&loaded.state_paths.control_token, control_secret);
     RuntimeCredentials::load(&loaded).expect("protected control token file loads");
 
     fs::write(&loaded.state_paths.control_token, b"").expect("replace temporary control token");
-    protect(&loaded.state_paths.control_token);
     let duplicate = match RuntimeCredentials::load(&loaded) {
         Ok(_) => panic!("empty control credential must reject startup"),
         Err(error) => error,
@@ -887,16 +886,6 @@ models = ["fixture-model"]
     assert!(!rendered.contains(std::str::from_utf8(control_secret).expect("fixture secret")));
     fs::remove_dir_all(directory).expect("remove temporary runtime fixture");
 }
-
-#[cfg(unix)]
-fn protect(path: &std::path::Path) {
-    use std::os::unix::fs::PermissionsExt;
-    fs::set_permissions(path, fs::Permissions::from_mode(0o600))
-        .expect("protect temporary token file");
-}
-
-#[cfg(not(unix))]
-fn protect(_path: &std::path::Path) {}
 
 #[tokio::test]
 async fn known_tpm_rejects_missing_output_bound_before_upstream() {

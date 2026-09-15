@@ -7,8 +7,8 @@
 <p align="center">English · <a href="README.ko.md">한국어</a></p>
 
 <p align="center">
-  <strong>Your LLM quota, managed at your desk.</strong><br>
-  A small, native gateway for coding agents sharing a limited LLM endpoint.
+  <strong>Get more done within your LLM limits.</strong><br>
+  A lightweight gateway that coordinates LLM requests around shared limits.
 </p>
 
 <p align="center">
@@ -26,9 +26,10 @@
 ## A little order for a busy desk
 
 One agent is refactoring. Another is reviewing. A third is waiting for a small answer.
-They all share the same company API limit—or the same local model server.
+They all share an API allowance or a local model's capacity—whether the endpoint
+is paid, free, or provided by your company.
 
-DeskQuota sits on your computer, between your coding tools and **one configured
+DeskQuota sits on your computer, between your tools, scripts, agents and **one configured
 LLM endpoint**. It keeps a shared local quota ledger, gives configured client
 queues their turn, and coordinates waiting when the upstream returns `429`.
 
@@ -44,9 +45,13 @@ Keep your tools. Put their shared limits in one place.
 | Starting and stopping your workday | Terminal setup, `on`, `off`, status, and optional user-login startup |
 
 **Early development.** The macOS ARM64 package and selected client flows have
-been exercised. Windows/Linux runtime validation and real-provider performance
-comparisons are still ahead. The command is currently **`llmgw`**; DeskQuota is
-the project name.
+been exercised. On one Windows 10 x64 host, the GNU build, 404 tests, ZIP
+installer, setup wizard, and runtime with development tools removed from PATH
+passed. Claude Code 2.1.76 also passed managed connection and a native Read tool
+flow. See the [Windows follow-up](reports/windows-followup-and-improvements-2026-09-16.md)
+for remaining client and platform limits, including an intermittent Windows
+client-settings file replacement failure. Linux and real-provider performance comparisons remain unverified.
+The command is currently **`llmgw`**; DeskQuota is the project name.
 
 ## Get started
 
@@ -124,7 +129,7 @@ from supported JSON and streaming responses. `startup_hold_secs = 60` is configu
 | Client | Exercised version | Exercised protocol | Model-list boundary |
 |---|---|---|---|
 | Pi | 0.84.2 | Chat Completions | Explicit model list and selection verified |
-| Claude Code | 2.1.63 | Messages | Automatic discovery unsupported in this profile |
+| Claude Code | 2.1.76 | Messages | Automatic discovery unsupported in this profile |
 | Codex | 0.154.0 | Responses over HTTP | Gateway model listing is not a Codex catalog |
 
 These are **earlier isolated macOS ARM64 tests with a synthetic upstream**,
@@ -144,7 +149,17 @@ Optional exact caching reuses complete short text responses for repeated calls.
 Enable it in setup or add `[cache]` with `ttl_secs = 300` and `max_history = 3`.
 It uses a fixed 4 MiB payload budget and spends no upstream quota on a hit.
 Reusing a result means you receive the earlier answer rather than a fresh sample.
-`llmgw status` shows cache hits, eligible misses, entries and retained bytes.
+`llmgw status` shows cache-policy evaluations, hits, eligible misses and named
+exclusions alongside entries and retained bytes. SDK `x-stainless-retry-count`
+alone does not split cache entries; a response that declares `Vary` on that
+header is not stored. Credentials, other effective headers and body bytes still
+separate entries.
+
+Status also compares reservations with observed usage for finished upstream
+attempts under a known TPM limit. Missing usage is counted separately. These
+totals explain reservation differences; they are not an exact tokenizer or a
+provider balance. Queue status shows a representative current resource blocker
+and any protected root. Counters reset when the worker restarts.
 
 The default policy is round robin with starvation protection. An experimental
 backfill policy tests whether smaller requests can use available capacity while
@@ -154,7 +169,7 @@ behind the `bench-harness` feature and is **not the default**.
 Some boundaries are deliberate:
 
 - One instance accounts for its own traffic. Other PCs can consume a shared
-  company allowance outside its view.
+  allowance outside its view.
 - Quota estimates are not an exact copy of every provider's limiter. The current
   in-flight input estimate uses request bytes. Valid final usage from supported JSON and streaming responses corrects
   the reservation by default; missing usage retains it. Provider admission
@@ -171,6 +186,13 @@ Some boundaries are deliberate:
 Numbers are useful when their boundaries are visible. These are local
 observations on an **Apple M4 with 32 GiB RAM**, not low-end hardware guarantees.
 
+The current diagnostics update also removes a specific cache miss: two otherwise
+identical requests with different SDK retry-count metadata used **one upstream
+call instead of two**, for both JSON and streaming responses. A matching `Vary`
+control still used two. These are synthetic reruns, not a measured SDK retry
+workflow or company hit rate.
+[Diagnostics update and current release checks →](reports/quota-diagnostics-2026-09-15.md)
+
 Adding JSON usage reconciliation improved completions from **5/20 to 20/20**
 in a small-TPM fixture with a 750 ms client deadline, across five paired runs.
 Reserved accounting and missing-usage controls stayed at 5/20 on both versions.
@@ -178,12 +200,23 @@ No-wait p95 was approximately 0.263 ms on both; the release binary grew by 1,184
 with no new dependencies. This demonstrates local admission behavior, not a general
 throughput multiplier or a provider quota increase.
 
-The current exact-cache check recorded **0.51 ms JSON / 0.69 ms streaming hit p95**
+The pre-diagnostics exact-cache check recorded **0.60 ms JSON / 0.72 ms streaming hit p95**
 (30 samples each). It deliberately repeated half of 120 gateway requests,
 avoiding 60 upstream calls against a fixture with a 50 ms delay. This verifies
 local reuse, not real-world hit rate or model speed.
-[Current implementation, controls and complete measurements →](reports/competitor-round2-2026-09-15.md)
+[Current comparison and cache measurements →](reports/current-competitor-comparison-2026-09-15.md)
+[JSON accounting implementation and paired controls →](reports/competitor-round2-2026-09-15.md)
 [Earlier field changes and cache measurements →](reports/company-feedback-2026-09-15.md)
+
+A comparison of the pre-diagnostics RR/actual release used Bifrost
+transport v2.1.1, HiveMind's pinned HEAD, and LiteLLM v1.100.1. Across five rotated
+runs of 100 sequential requests per arm, DeskQuota recorded **0.433–0.556 ms p95**
+and **9.56–9.66 MiB idle RSS**, below those three tested configurations. All arms
+completed 500/500 requests. This is a cache-off, no-wait local fixture; LiteLLM's
+new v1.101.0 was not executed. In a separate quota fixture, DeskQuota completed
+18/18 after waiting, with 16 inside the first 60 seconds—the same first-window
+count as Direct, Bifrost and HiveMind. Limits, rejected requests and long waits
+are included in the [full comparison](reports/current-competitor-comparison-2026-09-15.md).
 
 Earlier measurements remain separate:
 
@@ -216,7 +249,7 @@ mechanism probe, and the behavior remains experimental.
 A new generation-only input completed **16 of 18 requests with RR and 15 with
 backfill**. We retain that counterexample and keep RR as the default. Real-API
 performance superiority remains unverified.
-[Latest competitor comparison, configurations, and complete outcomes →](reports/competitor-comparison-results-2026-09-15.md)
+[Earlier competitor comparison, configurations, and complete outcomes →](reports/competitor-comparison-results-2026-09-15.md)
 
 [Accepted package measurements](product/artifacts/native-final-integration-package/acceptance/README.md) ·
 [Backfill results and raw evidence](reports/backfill-experiment-results.md) ·
@@ -227,7 +260,8 @@ performance superiority remains unverified.
 - Reduce avoidable model-list waiting while preserving quota and fairness rules.
 - Validate quota estimation against a real endpoint's accounting contract.
 - Compare independent workloads, including NVIDIA hosted API compatibility checks.
-- Exercise Windows, Linux, and lower-resource computers before claiming support.
+- Reduce duplicate upstream calls during concurrent cold cache misses; verify quota and cancellation behavior.
+- Extend Windows checks to a fresh non-admin account, Pi, and actual login startup; exercise Linux and lower-resource computers.
 
 A useful contribution is a small reproducible case: the configured limits,
 client version, expected behavior, and observed outcome. Please keep credentials,

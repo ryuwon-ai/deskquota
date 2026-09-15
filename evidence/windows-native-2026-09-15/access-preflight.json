@@ -1,0 +1,50 @@
+{
+  "recorded_at": "2026-09-15T12:10:25.955150+00:00",
+  "device_alias": "windows-labtop",
+  "scope": "Read-only Tailscale connectivity and targeted remote-management reachability checks; no Windows code executed.",
+  "tailscale": {
+    "backend": "Running",
+    "peer_os": "windows",
+    "online": true,
+    "ping": "pong",
+    "path": "direct LAN endpoint",
+    "rtt_ms": 7
+  },
+  "tcp_checks": [
+    {
+      "port": 22,
+      "result": "timeout",
+      "timeout_s": 4
+    },
+    {
+      "port": 3389,
+      "result": "timeout",
+      "timeout_s": 4
+    },
+    {
+      "port": 5985,
+      "result": "timeout",
+      "timeout_s": 4
+    },
+    {
+      "port": 5986,
+      "result": "timeout",
+      "timeout_s": 4
+    }
+  ],
+  "ssh_profile_configured": false,
+  "remote_username": "unknown",
+  "native_build_executed": false,
+  "native_tests_executed": false,
+  "remote_files_or_services_changed": false,
+  "limits": [
+    "TCP timeout does not distinguish firewall or tailnet policy from absent service.",
+    "Tailscale network connectivity alone does not provide a Windows remote shell.",
+    "Current standard Tailscale SSH server supports Linux and open-source macOS hosts; Windows requires an existing remote service such as OpenSSH."
+  ],
+  "next_action": "Obtain configured remote method/port and Windows account name. If none exists, inspect OpenSSH Server capability/service on the Windows PC before setting up remote access. No password requested.",
+  "source_notes": [
+    "https://tailscale.com/docs/features/tailscale-ssh#limitations",
+    "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse"
+  ]
+}

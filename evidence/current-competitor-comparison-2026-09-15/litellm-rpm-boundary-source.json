@@ -1,0 +1,14 @@
+{
+  "version": "v1.101.0",
+  "file": "litellm/router_strategy/lowest_tpm_rpm_v2.py",
+  "github_blob_sha": "665ff69ab47710cff89f63609ca60ce18319dc96",
+  "sha256": "c92803cbc665f9b94a4bbf8b892ce5198020e6c83fa8c85bfe42b83a1df82ea9",
+  "selected_lines": [
+    {
+      "line": 339,
+      "text": "and (rpm_dict[item] + 1 >= _deployment_rpm)"
+    }
+  ],
+  "runtime_executed": false,
+  "observation": "The v1.100.1 run logged current_rpm15, limit16, three gateway-side429s; pinned source excludes a candidate when rpm+1>=limit. Latest source lookup does not establish latest runtime behavior."
+}

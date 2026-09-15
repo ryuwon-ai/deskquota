@@ -270,7 +270,7 @@ async def run(args):
                 binary, reference = (BASELINE/'llmgw', BASELINE/'bench_gateway') if old else (CURRENT/'llmgw', CURRENT/'examples/bench_gateway')
                 policy = 'benchmark_rr' if args.arm == 'deskquota_rr' else 'benchmark_backfill'
                 if args.arm in ('deskquota_native_rr', 'deskquota_native_actual'):
-                    binary = NATIVE/'llmgw'
+                    binary = args.native_binary or NATIVE/'llmgw'
                     policy = 'production_actual' if args.arm == 'deskquota_native_actual' else 'production_rr'
                 proc, port, result['config'] = await bench.start_gateway(policy, binary, reference, mock.port, quota, temp, lambda _: None)
                 if quota:
@@ -401,7 +401,10 @@ if __name__ == '__main__':
     parser.add_argument('--cost-contract', choices=['byte_reserved', 'quarter_actual'], default='byte_reserved')
     parser.add_argument('--cap', type=int, choices=[1, 2], default=2)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--native-binary', type=Path, help='Explicit release binary for deskquota_native_* arms')
     args = parser.parse_args()
+    if args.native_binary is not None and (not args.native_binary.is_file() or args.arm not in ('deskquota_native_rr', 'deskquota_native_actual')):
+        parser.error('--native-binary requires an existing file and a deskquota_native_* arm')
     if args.cap != 2 and args.arm in ('hivemind', 'litellm', 'bifrost'):
         parser.error('external launchers are pinned to concurrency2; cap1 is a DeskQuota/direct negative control')
     if args.profile in ('mixed', 'metadata_barrier') and args.arm in ('hivemind', 'litellm', 'bifrost'):

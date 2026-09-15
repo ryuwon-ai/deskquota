@@ -1152,42 +1152,81 @@ fn cache_details(value: &serde_json::Value) -> String {
         Some(false) => "disabled",
         None => "n/a",
     };
+    let bypasses = [
+        "request_cache_control",
+        "size",
+        "endpoint",
+        "tools_state",
+        "history",
+        "unsupported_shape",
+    ]
+    .map(|name| {
+        format!(
+            "{name}: {}",
+            value["bypasses"][name]
+                .as_u64()
+                .map_or_else(|| "n/a".to_owned(), |n| n.to_string())
+        )
+    })
+    .join("; ");
     format!(
-        "exact cache: {enabled}; hits: {}; eligible misses: {}; entries: {}; retained: {}/{} bytes",
+        "exact cache: {enabled}; hits: {}; eligible misses: {}; entries: {}; retained: {}/{} bytes\n\
+         cache policy evaluations (enabled, validated requests): {}; bypasses: {bypasses}\n\
+         capture budget bypasses: {}; counters reset with worker; store rejection is separate from request eligibility",
         number("hits"),
         number("misses"),
         number("entries"),
         number("retained_bytes"),
-        number("budget_bytes")
+        number("budget_bytes"),
+        number("considered"),
+        number("budget_bypasses"),
     )
 }
 
 fn admission_details(value: &serde_json::Value) -> String {
     let field = |name: &str| value[name].as_str().unwrap_or("n/a");
-    let reason = match value["blocked_reason"].as_str() {
-        None => "none",
-        Some("startup_hold") => "startup quota window",
-        Some("upstream_cooldown") => "upstream cooldown",
-        Some("starvation_barrier") => "protecting an older queued request",
-        Some("concurrency") => "execution slots occupied",
-        Some("rpm") => "local request budget exhausted",
-        Some("tpm") => "local token budget does not fit",
-        Some("ledger_capacity") => "local ledger capacity reached",
-        Some("identity_exhausted") => "reservation identities exhausted",
-        Some("estimate_exceeds_budget") => "estimate exceeds local token capacity",
-        Some(other) => other,
+    let reason = match value.get("blocked_reason") {
+        None => "n/a",
+        Some(serde_json::Value::Null) => "none",
+        Some(reason) => match reason.as_str() {
+            None => "n/a",
+            Some("startup_hold") => "startup quota window",
+            Some("upstream_cooldown") => "upstream cooldown",
+            Some("concurrency") => "execution slots occupied",
+            Some("rpm") => "local request budget exhausted",
+            Some("tpm") => "local token budget does not fit",
+            Some("ledger_capacity") => "local ledger capacity reached",
+            Some("identity_exhausted") => "reservation identities exhausted",
+            Some("estimate_exceeds_budget") => "estimate exceeds local token capacity",
+            Some(other) => other,
+        },
     };
     let estimate = match field("estimate_mode") {
         "json_utf8_bytes_plus_output_reservation" => "request UTF-8 bytes + output reservation",
         "tpm_unenforced" => "TPM unenforced",
         other => other,
     };
+    let protected_root = match value.get("barrier_root") {
+        Some(serde_json::Value::Null) => "none",
+        Some(root) => root.as_str().unwrap_or("n/a"),
+        None => "n/a",
+    };
+    let reservation = &value["reservation"];
+    let count = |name: &str| {
+        reservation[name]
+            .as_u64()
+            .map_or_else(|| "n/a".to_owned(), |n| n.to_string())
+    };
+    let tokens = |name: &str| reservation[name].as_str().unwrap_or("n/a");
     format!(
         "queue reason (representative): {reason}; protected root: {}\n\
          RPM: {}; capacity: {}; local debited: {}\n\
          TPM: {}; capacity: {}; local debited: {}; held: {}\n\
-         accounting: {}; estimate: {estimate}\n",
-        value["barrier_root"].as_str().unwrap_or("none"),
+         accounting: {}; estimate: {estimate}\n\
+         reservation observations (finished known-TPM generation attempts): samples: {}; unknown usage: {}\n\
+         known samples only: reserved: {}; observed: {}; excess: {}; shortfall: {} tokens\n\
+         reservation differences are not refundable quota; counters reset with worker\n",
+        protected_root,
         field("rpm_mode"),
         field("rpm_capacity"),
         field("rpm_debited"),
@@ -1196,6 +1235,12 @@ fn admission_details(value: &serde_json::Value) -> String {
         field("tpm_debited"),
         field("tpm_held"),
         field("accounting"),
+        count("samples"),
+        count("unknown"),
+        tokens("reserved_tokens"),
+        tokens("observed_tokens"),
+        tokens("excess_tokens"),
+        tokens("shortfall_tokens"),
     )
 }
 
@@ -1303,28 +1348,39 @@ mod status_tests {
             super::cache_details(
                 &serde_json::json!({"enabled":true,"hits":7,"misses":3,"entries":2,"retained_bytes":40,"budget_bytes":4194304})
             ),
-            "exact cache: enabled; hits: 7; eligible misses: 3; entries: 2; retained: 40/4194304 bytes"
+            "exact cache: enabled; hits: 7; eligible misses: 3; entries: 2; retained: 40/4194304 bytes\n\
+            cache policy evaluations (enabled, validated requests): n/a; bypasses: request_cache_control: n/a; size: n/a; endpoint: n/a; tools_state: n/a; history: n/a; unsupported_shape: n/a\n\
+            capture budget bypasses: n/a; counters reset with worker; store rejection is separate from request eligibility"
         );
         assert_eq!(
             super::cache_details(&serde_json::Value::Null),
-            "exact cache: n/a; hits: n/a; eligible misses: n/a; entries: n/a; retained: n/a/n/a bytes"
+            "exact cache: n/a; hits: n/a; eligible misses: n/a; entries: n/a; retained: n/a/n/a bytes\n\
+            cache policy evaluations (enabled, validated requests): n/a; bypasses: request_cache_control: n/a; size: n/a; endpoint: n/a; tools_state: n/a; history: n/a; unsupported_shape: n/a\n\
+            capture budget bypasses: n/a; counters reset with worker; store rejection is separate from request eligibility"
         );
     }
 
     #[test]
     fn admission_text_preserves_wide_debt_and_labels_the_representative_barrier() {
         let text = super::admission_details(&serde_json::json!({
-            "blocked_reason": "starvation_barrier", "barrier_root": "interactive",
+            "blocked_reason": "tpm", "barrier_root": "interactive",
             "rpm_mode": "known", "rpm_capacity": "60", "rpm_debited": "4",
             "tpm_mode": "known", "tpm_capacity": "100", "tpm_debited": "36893488147419103230", "tpm_held": "20",
-            "accounting": "actual", "estimate_mode": "json_utf8_bytes_plus_output_reservation"
+            "accounting": "actual", "estimate_mode": "json_utf8_bytes_plus_output_reservation",
+            "reservation": {"samples":2, "unknown":1, "reserved_tokens":"2", "observed_tokens":"36893488147419103230", "excess_tokens":"0", "shortfall_tokens":"36893488147419103228"}
         }));
         assert_eq!(
             text,
-            "queue reason (representative): protecting an older queued request; protected root: interactive\n\
+            "queue reason (representative): local token budget does not fit; protected root: interactive\n\
             RPM: known; capacity: 60; local debited: 4\n\
             TPM: known; capacity: 100; local debited: 36893488147419103230; held: 20\n\
-            accounting: actual; estimate: request UTF-8 bytes + output reservation\n"
+            accounting: actual; estimate: request UTF-8 bytes + output reservation\n\
+            reservation observations (finished known-TPM generation attempts): samples: 2; unknown usage: 1\n\
+            known samples only: reserved: 2; observed: 36893488147419103230; excess: 0; shortfall: 36893488147419103228 tokens\n\
+            reservation differences are not refundable quota; counters reset with worker\n"
         );
+        let absent = super::admission_details(&serde_json::Value::Null);
+        assert!(absent.contains("queue reason (representative): n/a"));
+        assert!(absent.contains("samples: n/a; unknown usage: n/a"));
     }
 }

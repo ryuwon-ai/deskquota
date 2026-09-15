@@ -316,9 +316,11 @@
         "evidence/competitor-comparison-2026-09-15/metadata-mechanism-validation.json",
         "evidence/competitor-comparison-2026-09-15/native-build.json",
         "reports/competitor-round2-2026-09-15.md",
-        "evidence/competitor-round2-2026-09-15/result-audit.json"
+        "evidence/competitor-round2-2026-09-15/result-audit.json",
+        "reports/current-competitor-comparison-2026-09-15.md",
+        "evidence/current-competitor-comparison-2026-09-15/audit.json"
       ],
-      "next_action": "2026-09-15 구현·경쟁3종 포함44회 합성 실행 완료. 낮은 RSS와 특정 metadata 기전 개선 관측; 독립 생성 입력은 RR16/BF15 완료로 승격 기각, RR 유지. 일반 binary actual 정산은 quarter_actual에서 창7→16·최종16→18, 동일 비용 계약에서는 이득 없음. 기존120초5쌍은 미실행으로 보존. 실제 제공자 제한 계약·저사양·작업 품질·일반 성능 우위는 미검증이므로 V01 진행 중."
+      "next_action": "Current release compared in35sequential pinned runs:2680measured=2632complete+46rejected+2timeout. No-wait5repeats p95.433–.556ms andidle9.56–9.66MiB below tested configs. Quota one-run/contract remains exploratory; byte_reserved first7/final16 with2timeouts, quarter_actual first16/final18. LatestLiteLLM1.101.0 sourcechecked butnotrun. Validate actual company18RPM/450kTPM/cap3, cache bypass/retry-header misses and Windows runtime before general claims."
     },
     {
       "id": "V02",
@@ -340,9 +342,24 @@
         "evidence/native-task6-accepted.json",
         "evidence/native-final-packaged-parent-check.json",
         "evidence/native-final-integration-review/rereview-i1/README.md",
-        "product/artifacts/native-final-integration-package/acceptance/README.md"
+        "product/artifacts/native-final-integration-package/acceptance/README.md",
+        "evidence/windows-native-2026-09-15/access-preflight.json",
+        "evidence/windows-native-2026-09-15/rdp-access-ready.json",
+        "evidence/windows-native-2026-09-15/rdp-login-input-check.json",
+        "evidence/windows-native-2026-09-15/environment.json",
+        "evidence/windows-native-2026-09-15/native-tests.json",
+        "evidence/windows-native-2026-09-15/release-build.json",
+        "evidence/windows-native-2026-09-15/release-acceptance.json",
+        "evidence/windows-native-2026-09-15/interactive-setup.json",
+        "evidence/windows-native-2026-09-15/final-state.json",
+        "reports/windows-followup-and-improvements-2026-09-16.md",
+        "evidence/windows-followup-2026-09-16/native-tests.json",
+        "evidence/windows-followup-2026-09-16/autostart.json",
+        "evidence/windows-followup-2026-09-16/claude-managed-final.json",
+        "evidence/windows-followup-2026-09-16/claude-managed-failure.json",
+        "evidence/windows-followup-2026-09-16/cache-burst.json"
       ],
-      "next_action": "Current macOS arm64 packaged binary passed isolated install/reinstall/PATH, real Pi/Claude/Codex wire/tool/off/disconnect flows and descriptive native observations. Actual Windows/Linux/macOSx64, clean native account, low-end hardware, signing/quarantine and human login remain unverified."
+      "next_action": "404 Windows tests pass; task registration/manual run/non-elevated token/cleanup verified; Claude 2.1.76 native Read passes but final binary also hit intermittent journal ReplaceFileW1175 once. Reproduce and validate safe recovery first, then cache recheck after queue wait (10 identical cold concurrent calls produced10 upstream calls in3runs). Codex native tool policy, fresh non-admin, actual login, Pi Windows, Linux and low-end remain open."
     },
     {
       "id": "U01",
@@ -419,7 +436,33 @@
         "evidence/competitor-round2-2026-09-15/result-audit.json"
       ],
       "next_action": "Implemented and independently reviewed;427 Rust checks passed. Local actual-JSON mechanism5/20→20/20;Reserved/missingcontrols unchanged. V01/V02 retain provider/Windows/low-end validation. No commit/push/release."
+    },
+    {
+      "id": "R13",
+      "title": "한도가 있는 LLM 요청 전반으로 포지셔닝 재평가 및 경쟁 독창성·Star 비교",
+      "status": "done",
+      "evidence": [
+        "reports/positioning-and-originality-2026-09-15.md",
+        "evidence/positioning-review-2026-09-15.json",
+        "evidence/positioning-stars-2026-09-15.json"
+      ],
+      "next_action": "Research complete; lightweight shared-limit coordination recommended. Native deployment and measured loss diagnostics first; future behavior requires concrete design. New LiteLLM Rust workspace and all 31 repository stars observed, not benchmarked. No claim of novel algorithm or validated market demand."
+    },
+    {
+      "id": "I06",
+      "title": "공유 한도 진단과 SDK 재시도 헤더로 인한 exact cache miss 개선",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-15-quota-diagnostics-design.md",
+        "docs/superpowers/plans/2026-09-15-quota-diagnostics.md",
+        "evidence/quota-diagnostics-2026-09-15/baseline.json",
+        "reports/quota-diagnostics-2026-09-15.md",
+        "evidence/quota-diagnostics-2026-09-15/impl-results.json",
+        "evidence/quota-diagnostics-2026-09-15/reviews.json",
+        "evidence/quota-diagnostics-2026-09-15/audit.json"
+      ],
+      "next_action": "Bounded implementation accepted:435Rust checks,fmt/clippy/normalrelease,independent spec/quality/result review;retry-header-only synthetic reruns2→1upstream,Vary control unchanged. No consistent latency improvement in3alternating pairs. Native Windows pending user PC via Tailscale; no Tailscale/global setup,commit/push/release in this turn. Future estimator/scheduler work follows actual quota/cache evidence."
     }
   ],
-  "updated_at": "2026-09-15T04:17:11.981403+00:00"
+  "updated_at": "2026-09-15T14:58:29.946903+00:00"
 }

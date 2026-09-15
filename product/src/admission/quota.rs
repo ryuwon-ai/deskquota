@@ -65,6 +65,25 @@ pub struct Snapshot {
     pub retained: usize,
     pub cleanups: u64,
     pub starts: u64,
+    pub reservation: ReservationDiagnostics,
+}
+
+/// Finished known-TPM generation only; these differences are not refundable quota.
+#[derive(Clone, Copy, Default, Debug, serde::Serialize)]
+pub struct ReservationDiagnostics {
+    pub samples: u64,
+    pub unknown: u64,
+    #[serde(serialize_with = "decimal")]
+    pub reserved_tokens: u128,
+    #[serde(serialize_with = "decimal")]
+    pub observed_tokens: u128,
+    #[serde(serialize_with = "decimal")]
+    pub excess_tokens: u128,
+    #[serde(serialize_with = "decimal")]
+    pub shortfall_tokens: u128,
+}
+fn decimal<S: serde::Serializer>(value: &u128, serializer: S) -> Result<S::Ok, S::Error> {
+    serializer.collect_str(value)
 }
 struct Entry {
     id: ReservationId,
@@ -85,6 +104,7 @@ pub struct Ledger {
     entries: Vec<Entry>,
     cleanups: u64,
     starts: u64,
+    reservation: ReservationDiagnostics,
 }
 fn known(limit: &Limit) -> Option<u128> {
     if let Limit::Known(n) = limit {
@@ -120,6 +140,7 @@ impl Ledger {
             entries: Vec::new(),
             cleanups: 0,
             starts: 0,
+            reservation: ReservationDiagnostics::default(),
         }
     }
     fn advance(&mut self, now: Duration) {
@@ -133,6 +154,7 @@ impl Ledger {
             retained: self.entries.len(),
             cleanups: self.cleanups,
             starts: self.starts,
+            reservation: self.reservation,
             ..Snapshot::default()
         };
         for e in &self.entries {
@@ -314,6 +336,17 @@ impl Ledger {
         e.active = false;
         if !e.metadata && known(&self.quota.tpm).is_some() {
             if let Some(usage) = usage {
+                let d = &mut self.reservation;
+                let observed = u128::from(usage);
+                d.samples = d.samples.saturating_add(1);
+                d.reserved_tokens = d.reserved_tokens.saturating_add(e.tokens);
+                d.observed_tokens = d.observed_tokens.saturating_add(observed);
+                d.excess_tokens = d
+                    .excess_tokens
+                    .saturating_add(e.tokens.saturating_sub(observed));
+                d.shortfall_tokens = d
+                    .shortfall_tokens
+                    .saturating_add(observed.saturating_sub(e.tokens));
                 if live(e.tpm_until, self.now) {
                     if self.accounting == Accounting::Actual {
                         e.tokens = u128::from(usage);
@@ -324,11 +357,59 @@ impl Ledger {
                     e.tokens = u128::from(usage);
                     e.tpm_until = Some(self.now.saturating_add(WINDOW));
                 }
+            } else {
+                self.reservation.unknown = self.reservation.unknown.saturating_add(1);
             }
         }
         self.cleanups = self.cleanups.saturating_add(1);
         self.advance(now);
         true
+    }
+}
+
+#[cfg(test)]
+mod diagnostics_tests {
+    use super::*;
+
+    #[test]
+    fn cumulative_diagnostics_saturate_without_wrapping() {
+        let mut ledger = Ledger::new(
+            Quota {
+                rpm: Limit::Unlimited,
+                tpm: Limit::Known(100.try_into().unwrap()),
+            },
+            Accounting::Actual,
+            2,
+            Duration::ZERO,
+            Duration::ZERO,
+        );
+        ledger.reservation = ReservationDiagnostics {
+            samples: u64::MAX,
+            unknown: u64::MAX,
+            reserved_tokens: u128::MAX - 1,
+            observed_tokens: u128::MAX - 1,
+            excess_tokens: u128::MAX - 1,
+            shortfall_tokens: u128::MAX - 1,
+        };
+        for (at, cost, usage) in [(0, 100, Some(2)), (60, 0, Some(100)), (120, 0, None)] {
+            let now = Duration::from_secs(at);
+            let Decision::Admitted(id) = ledger.admit(now, RequestCost::exact_fixture(cost)) else {
+                panic!("fixture admission")
+            };
+            ledger.start(now, id);
+            ledger.finish(now, id, usage);
+        }
+        let d = ledger.snapshot(Duration::from_secs(120)).reservation;
+        assert_eq!((d.samples, d.unknown), (u64::MAX, u64::MAX));
+        assert_eq!(
+            (
+                d.reserved_tokens,
+                d.observed_tokens,
+                d.excess_tokens,
+                d.shortfall_tokens
+            ),
+            (u128::MAX, u128::MAX, u128::MAX, u128::MAX)
+        );
     }
 }
 

@@ -47,6 +47,7 @@ pub(crate) struct AdmissionStatus {
     rpm_debited: String,
     tpm_debited: String,
     tpm_held: String,
+    reservation: quota::ReservationDiagnostics,
 }
 #[derive(serde::Serialize)]
 struct RootStatus {
@@ -310,6 +311,7 @@ impl Admission {
             rpm_debited: snapshot.rpm_debited.to_string(),
             tpm_debited: snapshot.tpm_debited.to_string(),
             tpm_held: snapshot.tpm_held.to_string(),
+            reservation: snapshot.reservation,
         }
     }
 }
@@ -574,10 +576,48 @@ mod tests {
             (u128::from(u64::MAX) * 2).to_string()
         );
         assert_eq!(status["rpm_mode"], "unknown");
+        assert_eq!(status["reservation"]["samples"], 2);
+        assert_eq!(status["reservation"]["reserved_tokens"], "2");
+        assert_eq!(
+            status["reservation"]["observed_tokens"],
+            (u128::from(u64::MAX) * 2).to_string()
+        );
+        assert_eq!(
+            status["reservation"]["shortfall_tokens"],
+            (u128::from(u64::MAX) * 2 - 2).to_string()
+        );
         assert_eq!(status["tpm_capacity"], u64::MAX.to_string());
         assert_eq!(
             status["estimate_mode"],
             "json_utf8_bytes_plus_output_reservation"
+        );
+        clock.advance_to(Duration::from_secs(121));
+        let mut overflow = a
+            .acquire(
+                0,
+                RequestCost::exact_fixture(10),
+                Endpoint::Responses,
+                Duration::from_secs(120),
+            )
+            .await
+            .unwrap();
+        overflow.start();
+        overflow.usage(Some(ObservedUsage {
+            input_tokens: u64::MAX,
+            output_tokens: 1,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0,
+        }));
+        drop(overflow);
+        let status = serde_json::to_value(a.status()).unwrap();
+        assert_eq!(
+            status["reservation"]["samples"], 2,
+            "overflowed usage is unknown"
+        );
+        assert_eq!(status["reservation"]["unknown"], 1);
+        assert_eq!(
+            status["reservation"]["reserved_tokens"], "2",
+            "unknown excluded from known sums"
         );
     }
 }

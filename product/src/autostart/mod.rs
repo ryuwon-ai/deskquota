@@ -122,7 +122,7 @@ impl RegistrationPlan {
         user_home: &Path,
         action: Action,
     ) -> Result<Self, Error> {
-        if !user_home.is_absolute() {
+        if !absolute_for(platform, user_home) {
             return Err(Error::message("autostart user home must be absolute"));
         }
         let spec = RegistrationSpec::new(platform, executable, config)?;
@@ -300,7 +300,16 @@ impl RegistrationPlan {
         let temporary = parent.join(format!(".{}.{}.tmp", self.spec.label(), std::process::id()));
         let mut temporary_file = crate::lifecycle::platform::open(&temporary, true, true)?;
         let write_result = (|| -> io::Result<()> {
-            temporary_file.write_all(self.spec.definition().as_bytes())?;
+            if self.spec.platform() == Platform::Windows {
+                // schtasks /Create consumes a UTF-16 file, including its BOM.
+                let bytes: Vec<u8> = std::iter::once(0xfeff)
+                    .chain(self.spec.definition().encode_utf16())
+                    .flat_map(u16::to_le_bytes)
+                    .collect();
+                temporary_file.write_all(&bytes)?;
+            } else {
+                temporary_file.write_all(self.spec.definition().as_bytes())?;
+            }
             temporary_file.sync_all()
         })();
         drop(temporary_file);
@@ -525,14 +534,16 @@ fn snapshot(path: &Path, label: &str, platform: Platform) -> Result<Snapshot, Er
                 });
             }
             let bytes = fs::read(path)?;
+            let definition = if platform == Platform::Windows {
+                decode_windows_xml(&bytes)?
+            } else {
+                String::from_utf8_lossy(&bytes).into_owned()
+            };
             let marker = format!("llmgw-owned:{label}");
             Ok(Snapshot::Present {
                 digest: digest(&bytes),
-                owned: String::from_utf8_lossy(&bytes).contains(&marker),
-                registered_executable: registered_executable(
-                    platform,
-                    &String::from_utf8_lossy(&bytes),
-                ),
+                owned: definition.contains(&marker),
+                registered_executable: registered_executable(platform, &definition),
             })
         }
         Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(Snapshot::Missing),
@@ -766,7 +777,7 @@ fn digest_bytes(bytes: &[u8]) -> String {
 }
 
 fn windows_query_failure(code: Option<i32>, reason: &str) -> ManagerSnapshot {
-    if code.is_some_and(|code| code as u32 == 0x8007_0002) {
+    if code.is_some_and(|code| matches!(code as u32, 0x8007_0002 | 0x8007_0003)) {
         ManagerSnapshot::Absent
     } else {
         ManagerSnapshot::Unknown {
@@ -958,22 +969,28 @@ fn parse_windows_manager_xml(
     let marker = format!("llmgw-owned:{label}");
     let current_user_scoped = fields
         .get("trigger_user")
-        .is_some_and(|user| user.trim() == expected_user)
+        .is_some_and(|user| windows_identity_matches(user.trim(), expected_user))
         && fields
             .get("principal_user")
-            .is_some_and(|user| user.trim() == expected_user);
+            .is_some_and(|user| windows_identity_matches(user.trim(), expected_user));
     let owned = fields
         .get("description")
         .is_some_and(|description| description.trim() == marker)
         && current_user_scoped;
     let enabled = match fields.get("enabled").map(String::as_str) {
+        // Task Scheduler omits the schema's true default when exporting XML.
+        None => true,
         Some(value) if value.trim() == "true" => true,
         Some(value) if value.trim() == "false" => false,
-        _ => return Err(Error::message("Windows task XML omitted Settings/Enabled")),
+        _ => {
+            return Err(Error::message(
+                "Windows task XML has invalid Settings/Enabled",
+            ));
+        }
     };
     if fields
         .get("trigger_enabled")
-        .is_none_or(|value| value.trim() != "true")
+        .is_some_and(|value| value.trim() != "true")
     {
         return Err(Error::message(
             "Windows task XML has an unsupported logon trigger",
@@ -985,6 +1002,23 @@ fn parse_windows_manager_xml(
         .map(PathBuf::from)
         .ok_or_else(|| Error::message("Windows task XML omitted Exec/Command"))?;
     Ok((owned, current_user_scoped, enabled, Some(executable)))
+}
+
+fn windows_identity_matches(observed: &str, expected_sid: &str) -> bool {
+    if observed == expected_sid {
+        return true;
+    }
+    if observed.is_empty() || valid_windows_sid(observed) {
+        return false;
+    }
+    #[cfg(windows)]
+    {
+        // Task Scheduler may export the logon user as DOMAIN\name. Resolve it
+        // through Windows; a display-name comparison cannot establish ownership.
+        crate::lifecycle::platform::account_identity(observed).is_ok_and(|sid| sid == expected_sid)
+    }
+    #[cfg(not(windows))]
+    false
 }
 
 #[derive(Default)]
@@ -1518,13 +1552,13 @@ fn remove_manager(plan: &RegistrationPlan) -> Result<(), Error> {
 }
 
 fn absolute_for(platform: Platform, path: &Path) -> bool {
-    if path.is_absolute() {
+    let bytes = path.as_os_str().as_encoded_bytes();
+    if platform != Platform::Windows {
+        return bytes.starts_with(b"/");
+    }
+    if cfg!(windows) && path.is_absolute() {
         return true;
     }
-    if platform != Platform::Windows {
-        return false;
-    }
-    let bytes = path.as_os_str().as_encoded_bytes();
     bytes.len() >= 3
         && bytes[0].is_ascii_alphabetic()
         && bytes[1] == b':'
@@ -1641,7 +1675,7 @@ fn windows_definition(
 ) -> String {
     let arguments = format!("--config {} run", windows_argument(config));
     format!(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+        "<?xml version=\"1.0\" encoding=\"UTF-16\"?>\n\
 <Task version=\"1.4\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">\n\
   <RegistrationInfo><Description>llmgw-owned:{}</Description><URI>\\llmgw\\{}</URI></RegistrationInfo>\n\
   <Triggers><LogonTrigger><Enabled>true</Enabled><UserId>{}</UserId></LogonTrigger></Triggers>\n\
@@ -1755,6 +1789,33 @@ mod manager_snapshot_tests {
     }
 
     #[test]
+    fn windows_manager_accepts_scheduler_omitted_enabled_defaults() {
+        let label = "io.llmgw.gateway.defaults";
+        let user = "S-1-5-21-1-2-3-1001";
+        let definition = windows_definition(
+            label,
+            Path::new(r"C:\Tools\llmgw.exe"),
+            Path::new(r"C:\config.toml"),
+            user,
+        );
+        let normalized = definition.replace("<Enabled>true</Enabled>", "");
+        assert_eq!(
+            parse_windows_manager_xml(label, user, &normalized).unwrap(),
+            parse_windows_manager_xml(label, user, &definition).unwrap()
+        );
+        for invalid in ["", "invalid"] {
+            let changed = definition.replace(
+                "<Enabled>true</Enabled>",
+                &format!("<Enabled>{invalid}</Enabled>"),
+            );
+            assert!(parse_windows_manager_xml(label, user, &changed).is_err());
+        }
+        let disabled_trigger =
+            definition.replacen("<Enabled>true</Enabled>", "<Enabled>false</Enabled>", 1);
+        assert!(parse_windows_manager_xml(label, user, &disabled_trigger).is_err());
+    }
+
+    #[test]
     fn windows_manager_requires_one_complete_trigger_principal_and_action() {
         let label = "io.llmgw.gateway.shape";
         let target = Path::new(r"C:\Users\fixture\task.xml");
@@ -1812,7 +1873,7 @@ mod manager_snapshot_tests {
             Path::new(r"C:\config.toml"),
             user,
         );
-        let declaration = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        let declaration = "<?xml version=\"1.0\" encoding=\"UTF-16\"?>\n";
         let without_declaration = definition.strip_prefix(declaration).unwrap();
         let rejected = [
             format!(
@@ -1957,9 +2018,13 @@ mod manager_snapshot_tests {
     }
 
     #[test]
-    fn windows_query_failure_is_unknown_except_file_not_found_hresult() {
+    fn windows_query_failure_is_unknown_except_file_or_path_not_found_hresult() {
         assert!(matches!(
             windows_query_failure(Some(0x80070002_u32 as i32), "not found"),
+            ManagerSnapshot::Absent
+        ));
+        assert!(matches!(
+            windows_query_failure(Some(0x80070003_u32 as i32), "task folder not found"),
             ManagerSnapshot::Absent
         ));
         assert!(matches!(

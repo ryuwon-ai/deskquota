@@ -2,7 +2,13 @@ use llmgw::clients::{
     ClientKind, ModelMetadata, ProfileRequest, ProjectLocalApproval, Protocol, Verification,
     apply_reviewed, disconnect, prepare, validate_current_snapshot,
 };
-use std::{collections::BTreeMap, fs, net::TcpListener, path::PathBuf, process::Command};
+#[cfg(unix)]
+use std::net::TcpListener;
+use std::{collections::BTreeMap, fs, path::PathBuf, process::Command};
+
+#[path = "support/private_fs.rs"]
+mod private_fs;
+use private_fs::{private_dir, write_private};
 
 struct Fixture {
     root: PathBuf,
@@ -16,12 +22,7 @@ impl Fixture {
             std::process::id(),
             rand::random::<u64>()
         ));
-        fs::create_dir_all(&root).unwrap();
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(&root, fs::Permissions::from_mode(0o700)).unwrap();
-        }
+        private_dir(&root);
         Self {
             root,
             preserve_on_drop: false,
@@ -34,13 +35,7 @@ impl Fixture {
 
     fn private_file(&self, relative: &str, bytes: &[u8]) -> PathBuf {
         let path = self.path(relative);
-        fs::create_dir_all(path.parent().unwrap()).unwrap();
-        fs::write(&path, bytes).unwrap();
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
-        }
+        write_private(&path, bytes);
         path
     }
 }
@@ -54,6 +49,7 @@ impl Drop for Fixture {
     }
 }
 
+#[cfg(unix)]
 fn fresh_setup_draft(port: u16) -> llmgw::setup::SetupDraft {
     llmgw::setup::SetupDraft::new(llmgw::setup::EnvironmentPreset::ExternalApi)
         .connection(llmgw::setup::ConnectionAnswers {
@@ -83,6 +79,7 @@ fn fresh_setup_draft(port: u16) -> llmgw::setup::SetupDraft {
         .tools(llmgw::setup::ToolAnswers { clients: vec![] })
 }
 
+#[cfg(unix)]
 fn isolated_cli(binary: &str, home: &std::path::Path) -> Command {
     let mut command = Command::new(binary);
     command
@@ -307,7 +304,7 @@ fn claude_preserves_existing_env_and_headers_in_private_user_settings() {
     let input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     let plan = prepare(&input).unwrap();
@@ -353,7 +350,7 @@ fn claude_native_directory_refuses_a_git_tracked_settings_file_before_writes() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.config_dir = target.parent().unwrap().to_owned();
@@ -377,7 +374,7 @@ fn claude_native_directory_accepts_a_safe_canonical_parent_alias() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.config_dir = alias;
@@ -405,7 +402,7 @@ fn claude_native_scope_is_rechecked_when_git_state_changes_after_preview() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.config_dir = target.parent().unwrap().to_owned();
@@ -474,7 +471,7 @@ models = ["example-model"]
     .unwrap();
     let claude = fixture.private_file(
         "bin/claude",
-        b"#!/bin/sh\nprintf '%s\\n' '2.1.63 (Claude Code)'\n",
+        b"#!/bin/sh\nprintf '%s\\n' '2.1.76 (Claude Code)'\n",
     );
     fs::set_permissions(&claude, fs::Permissions::from_mode(0o700)).unwrap();
     let wrong_hash = "0".repeat(64);
@@ -524,7 +521,7 @@ fn claude_project_local_requires_private_and_untracked_confirmation() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.project_local = Some(ProjectLocalApproval {
@@ -552,7 +549,7 @@ fn claude_project_local_uses_actual_git_ignore_tracking_and_private_path_checks(
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.project_local = Some(ProjectLocalApproval {
@@ -614,7 +611,7 @@ fn claude_refuses_higher_priority_environment_and_conflicting_managed_policy() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.effective_environment.insert(
@@ -659,7 +656,7 @@ fn claude_discovery_is_version_gated_and_never_implied() {
     let mut old = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     old.discover_models = true;
@@ -673,7 +670,7 @@ fn claude_discovery_is_version_gated_and_never_implied() {
     let ordinary = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     let plan = prepare(&ordinary).unwrap();
@@ -788,7 +785,7 @@ fn reviewed_hash_is_required_and_reconnect_disconnect_preserves_user_conflicts()
     let input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     let first = prepare(&input).unwrap();
@@ -1435,7 +1432,7 @@ fn fresh_setup_save_only_allows_all_client_previews_without_manual_token_seeding
         ),
         (
             "claude",
-            "2.1.63 (Claude Code)",
+            "2.1.76 (Claude Code)",
             ".claude/settings.json",
             "claude-work",
             br#"{"keep":true}"#.as_slice(),
@@ -1650,7 +1647,7 @@ fn claude_forward_preserves_native_credentials_and_custom_headers() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.config_dir = settings.parent().unwrap().to_path_buf();
@@ -1687,7 +1684,7 @@ fn claude_forward_refuses_implicit_subscription_login_and_accepts_existing_helpe
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.upstream_auth = llmgw::config::Auth::Forward;
@@ -1698,14 +1695,8 @@ fn claude_forward_refuses_implicit_subscription_login_and_accepts_existing_helpe
             .contains("implicit saved subscription")
     );
     let path = input.config_dir.join("settings.json");
-    fs::create_dir_all(path.parent().unwrap()).unwrap();
     let before = br#"{"apiKeyHelper":"helper-not-executed-by-profile-preparation"}"#;
-    fs::write(&path, before).unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
-    }
+    write_private(&path, before);
     let plan = prepare(&input).unwrap();
     assert!(!plan.preview().text.contains("helper-not-executed"));
     apply_reviewed(&plan, &plan.preview().hash).unwrap();
@@ -1730,7 +1721,7 @@ fn claude_project_forward_uses_existing_user_native_credential_source() {
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     input.config_dir = native.parent().unwrap().to_path_buf();
@@ -1761,7 +1752,7 @@ fn claude_disconnect_refuses_to_restore_native_secret_into_widened_permissions()
     let input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     let plan = prepare(&input).unwrap();
@@ -1817,7 +1808,7 @@ fn claude_forward_does_not_treat_gateway_placeholder_as_native_authentication() 
     let mut input = request(
         &fixture,
         ClientKind::Claude,
-        "2.1.63",
+        "2.1.76",
         Protocol::AnthropicMessages,
     );
     let plan = prepare(&input).unwrap();

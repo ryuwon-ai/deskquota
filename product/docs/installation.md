@@ -113,10 +113,12 @@ The script verifies the ZIP before replacing `llmgw.exe`. It prints the exact
 directory to add to the user PATH, but it does not read or write the user PATH
 registry. Add the directory through the normal Windows user environment UI,
 open a new PowerShell window, then run `Get-Command llmgw` and `llmgw setup`.
-`-PathAction None` suppresses the preview. Windows execution, Authenticode,
-SmartScreen, and user-PATH behavior remain unverified until an actual Windows
-artifact is tested on Windows; do not use an execution-policy bypass or an
-antivirus exception.
+`-PathAction None` suppresses the preview. On one Windows 10 Education x64 host,
+installation, reinstall, checksum rejection, and execution with only Windows
+directories on PATH passed; both user and machine PATH registry values stayed
+unchanged. This does not verify a clean non-admin account, manually adding PATH,
+Authenticode, or SmartScreen. Do not use an execution-policy bypass or an
+antivirus exception. See the [native validation report](../../reports/windows-native-validation-2026-09-15.md).
 
 If the installer reports `replace_failed_recovery_unconfirmed`, stop and keep
 the reported target, destination-local `.llmgw-backup-*`, and candidate files.
@@ -188,9 +190,27 @@ Config-file replacement uses the opened handle's volume and full 128-bit file
 ID, attributes, and bytes. Creation time and length are not identity checks;
 filesystems that cannot provide the required ID fail closed.
 [Microsoft file identity contract](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info)
-The source was typechecked for Windows on the development Mac in a scoped
-ConfigPatch/platform check. A complete Windows build, native regression run,
-and the exact WinLibs configuration above remain unverified here.
+The full product was built and tested natively on Windows 10 Education x64 with
+Rust 1.88.0 GNU, existing MinGW-w64 GCC 8.1.0 / Binutils 2.30, and prebuilt NASM
+objects: 404 tests passed, 2 were ignored, and the default-feature release build
+passed. The example WinLibs location above is illustrative; the tested toolchain
+was at `C:\mingw64\bin`. This is evidence for that combination, not a recommendation
+to install an old GCC or a claim about every WinLibs release.
+
+The reusable acceptance check uses Python 3.11+ only as a test driver. From
+`product`, point it at your built binary and a new work directory outside
+OneDrive; it installs into that directory and calls a synthetic loopback server:
+
+```powershell
+py -3.11 scripts\verify_windows.py `
+  --binary "$env:CARGO_TARGET_DIR\x86_64-pc-windows-gnu\release\llmgw.exe" `
+  --work "$env:LOCALAPPDATA\llmgw-acceptance-new" `
+  --output "$env:LOCALAPPDATA\llmgw-acceptance.json"
+```
+
+It checks install/reinstall/checksum failure, PATH preservation, `on/status/off`,
+standard Authorization forwarding, JSON/SSE exact-cache replay, usage settlement,
+and idle connection resource counters. It makes no real-provider requests.
 
 ## First setup and lifecycle
 
@@ -234,12 +254,30 @@ including preserved unrelated edits, is described in
 | macOS arm64 installer | Verified on the Apple M4 development host | local archive, loopback HTTP fixture, checksum failure, missing artifact, invalid entries, destination failure, reinstall, PATH absent control, and a fresh child-shell PATH smoke |
 | macOS arm64 runtime | Verified on the same development host | isolated setup save-only, repeated `on`/authenticated `status`/`off`, and three installed clients listed below |
 | macOS x64 | Unverified | no x64 artifact or runtime host was exercised |
-| Windows x64 | Unverified | installer source review only; PowerShell was unavailable on the host |
+| Windows x64 GNU | Verified on one Windows 10 Education x64 admin account | Rust 1.88 GNU build, 404 tests, ZIP install/reinstall/checksum rejection, interactive setup, lifecycle, JSON/SSE cache and usage, restricted-PATH execution |
+| Windows user-login task | Registration and manual scheduler run verified | UTF-16 XML, current-user identity, non-elevated worker token, owned status, stop and task removal; no actual login event |
 | Linux x64/arm64 | Unverified | no Linux runtime, systemd user manager, or target artifact was exercised |
 | Clean native account without development runtimes | Unverified | restricted PATH on the development account is a separate smoke |
 | Login, low-end PC, signing/notarization/quarantine | Unverified | no actual user-login cycle, low-end host, signed public artifact, or quarantine flow was available |
 
-The verified client combinations are Pi 0.84.2 over OpenAI Chat Completions,
-Claude Code 2.1.63 over Anthropic Messages, and Codex 0.154.0 over OpenAI
-Responses with WebSocket disabled. See the detailed listing, selection, tool,
+The current profiles accept Pi 0.84.2, Claude Code 2.1.76, and Codex 0.154.0.
+Windows Claude 2.1.76 passed managed connection, an exact Read result, and
+disconnect. Windows Codex completed profile loading and a Responses round trip,
+but its tool command was blocked by native client policy. Pi and the earlier
+Claude 2.1.63/Codex native tool results were exercised on macOS, with the
+historical limits described in the compatibility matrix. See the detailed listing, selection, tool,
 disconnect, and gateway-off results in [client compatibility](client-compatibility.md).
+
+The Windows user-login task smoke is independently runnable with Python 3.11+
+while the current user is logged in. It uses a new isolated directory, registers
+one temporary task and manually asks Task Scheduler to run it, then stops the
+worker and removes the registration. It does not test logout/login or reboot:
+
+```powershell
+py -3.11 scripts/verify_windows_autostart.py `
+  --binary C:\approved\llmgw.exe `
+  --work C:\approved\new-isolated-autostart-check
+```
+
+See the [2026-09-16 follow-up](../../reports/windows-followup-and-improvements-2026-09-16.md)
+for the exact native-client and Task Scheduler evidence.

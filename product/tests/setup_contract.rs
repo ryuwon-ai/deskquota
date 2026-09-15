@@ -16,6 +16,8 @@ use std::{
         atomic::{AtomicUsize, Ordering},
     },
 };
+#[path = "support/private_fs.rs"]
+mod private_fs;
 mod support;
 use support::fixture::{response_body, send_raw, status};
 
@@ -583,6 +585,25 @@ tpm = { kind = "unknown" }
         parsed.roots[0].endpoints,
         [Endpoint::Responses, Endpoint::Models]
     );
+}
+
+#[test]
+fn summary_shows_exact_quota_limits_and_concurrency_before_apply() {
+    let temp = Temp::new("quota-summary");
+    let configured = draft(4141).quota(QuotaAnswers {
+        rpm: LimitAnswer::known(18).unwrap(),
+        tpm: LimitAnswer::known(450_000).unwrap(),
+        concurrency: 3,
+        shared_with_other_pcs: false,
+        separate_input_output: false,
+        startup_hold_secs: 60,
+        cache: None,
+    });
+    let summary = configured.summary(&temp.config()).unwrap();
+    assert!(summary.contains("RPM: 18; TPM: 450000; concurrency: 3"));
+    let summary = draft(4141).summary(&temp.config()).unwrap();
+    assert!(summary.contains("RPM: unlimited; TPM: unknown; concurrency: 1"));
+    assert!(!temp.config().exists());
 }
 
 #[test]
@@ -1280,16 +1301,7 @@ fn save_only_never_repairs_a_missing_token_under_a_running_worker() {
         "{error}"
     );
     assert!(!loaded.state_paths.control_token.exists());
-    fs::write(&loaded.state_paths.control_token, control).unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(
-            &loaded.state_paths.control_token,
-            fs::Permissions::from_mode(0o600),
-        )
-        .unwrap();
-    }
+    private_fs::write_private(&loaded.state_paths.control_token, &control);
     let after = gateway_status(&temp.config());
     assert_eq!(after["state"], "running");
     assert_eq!(after["identity"]["pid"], before["identity"]["pid"]);

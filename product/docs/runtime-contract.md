@@ -181,7 +181,11 @@ enable/disable` without `--now` and only discloses existing linger state. Window
 uses a current-user LogonTrigger task with `InteractiveToken`, `LeastPrivilege`,
 `IgnoreNew`, unlimited execution time, continuous-service battery/idle/network
 conditions, no restart policy, and the executable plus quoted argv. Registration
-never calls Task Scheduler Run, and removal never calls End.
+never calls Task Scheduler Run, and removal never calls End. The task file is
+written as UTF-16LE with a BOM. Readback honors the scheduler's omitted true
+Enabled defaults and resolves exported account names to SIDs through Windows
+before checking ownership. File/path-not-found HRESULTs mean unregistered;
+access errors remain unknown and block mutation.
 
 Linux registration status comes from one `systemctl --user show --all` query
 bound into the reviewed plan. The local fragment is accepted only when
@@ -215,7 +219,12 @@ Doctor JSON reports `state_directory` as the machine-readable fixture boundary
 and creates no runtime state. No mandatory Python, Node.js, Redis, Docker, or WSL
 runtime is introduced. The owned PTY and network fixture drivers use Python only
 as test tooling. Interactive and synthetic loopback runtime verification for
-Task 2 was performed on macOS; Linux and Windows setup runtime remain unverified.
+Task 2 was performed on macOS. The 2026-09-16 Windows 10 x64 run passed
+404 native tests. `scripts/verify_windows_autostart.py` additionally registered
+a real temporary task, manually ran it through Task Scheduler, checked a
+non-elevated worker token and owned registration, then stopped the worker and
+removed the task. Linux and an actual login cycle remain unverified. See the
+[Windows follow-up](../../reports/windows-followup-and-improvements-2026-09-16.md).
 
 The canonical config path's SHA256 selects a sibling `.llmgw-<64 hex hash>`
 directory. Config content SHA256 separately identifies the immutable running
@@ -253,7 +262,9 @@ reported separately from whether a worker lock is held.
 
 Manual `on` launches the same executable with argv and disconnected stdio. Unix calls
 setsid before creating Tokio threads; Windows uses DETACHED_PROCESS and
-CREATE_NEW_PROCESS_GROUP. There is no watchdog, periodic worker, shell command,
+CREATE_NEW_PROCESS_GROUP. Before spawning, inherited caller stdio handles are
+marked non-inheritable so captured `on` output reaches EOF while the worker
+continues. There is no watchdog, periodic worker, shell command,
 or automatic model start. `worker.log` holds one fixed bounded
 sanitized diagnostic event, not request or provider data. Startup outcomes come
 from the new child's exit status, never a possibly stale log. An internal hidden
@@ -275,16 +286,25 @@ no Linux libacl runtime requirement.
 Windows uses windows-sys 0.61.2 to create a protected current-user-only DACL,
 then verifies the opened object's SID, ACL and disk/non-reparse type before
 returning a writable file. Null/unsupported ACLs and any non-owner grants are
-rejected. The only unsafe exception is the small Windows protection module;
-all other product source retains deny. Its isolated Windows API type/clippy
-check is not runtime proof. Full Windows cargo check on this Mac is blocked by
-aws-lc-sys requiring Windows C/SDK headers; no Windows SDK was installed.
+rejected. Missing state ancestors are created with the same protection, rather
+than created with inherited grants and then repaired. Windows replacement
+syncs use writable handles. Native Windows tests now cover these paths.
+
+Unsafe Win32 calls are confined to the storage/process protection module and
+the Windows disconnect monitor; other product source retains `deny`. On
+Windows, Mio 1.2.3 does not classify a TCP reset as ERROR readiness. The monitor
+uses Winsock FD_CLOSE and a Windows thread-pool wait to distinguish reset from
+graceful send-half-close without periodic polling or one thread per connection.
+Cancellation disarms the wait and joins its callback before freeing the event
+or callback context. The existing 128-connection cap bounds these registrations.
 
 No actual LLM, current-account login registration, human login cycle, or release
 was exercised by Native Task 5. Owned temporary-home macOS registration fixtures
-and plist validation are distinct from actual login evidence. Windows and Linux
-runtime registration remain unverified. See `artifacts/native-task5/` for exact
-checks and remaining native OS acceptance limits.
+and plist validation are distinct from actual login evidence. The subsequent
+2026-09-16 Windows check verified task registration, manual scheduler execution,
+non-elevated worker identity, and removal. Linux registration and a real login
+event remain unverified. See `artifacts/native-task5/` for the historical scope
+and the linked Windows follow-up for the newer evidence.
 
 ## Local quota admission
 
@@ -368,6 +388,7 @@ Authenticated `GET /_llmgw/status` preserves existing counters and adds a typed
 | `rpm_mode`, `tpm_mode`, `accounting` | Explicit known/unknown/unlimited and reserved/actual settings |
 | `rpm_capacity`, `tpm_capacity` | Known local capacity as a decimal string, otherwise null |
 | `rpm_debited`, `tpm_debited`, `tpm_held` | Exact local ledger sums as decimal strings, preserving values above u64 |
+| `reservation` | Cumulative reservation-versus-observed-usage diagnostics for finished, started generation attempts under known TPM |
 
 Ledger sums being exact does not make the HTTP token estimator exact or prove
 provider compliance. Root labels come only from validated configuration; status
@@ -378,6 +399,22 @@ also shows the representative queue reason, protected root, local quota modes,
 capacities/debits/holds, accounting and estimate mode. A representative reason
 is not each request's exact cause or an ETA. Unknown/unlimited capacities appear
 as `n/a`, not zero remaining capacity; local ledger sums are not provider balances.
+With queued requests, shared cooldown takes precedence. A protected root otherwise
+reports its head's actual ledger blocker, such as TPM, rather than a generic
+starvation-barrier label. An empty queue has no blocking cause, even while the
+separate cooldown duration remains positive. These fields do not change scheduling.
+
+`reservation.samples` counts finished upstream attempts with known usage;
+`reservation.unknown` counts those without it. Retries are distinct attempts.
+Known samples contribute to `reserved_tokens`, `observed_tokens`, `excess_tokens`
+and `shortfall_tokens`; the last two sum each attempt's positive difference in
+the corresponding direction. Totals saturate at u128 and are serialized as
+decimal strings. Valid zero usage is known; malformed or overflowing usage is
+unknown. Metadata, unstarted cancellations, cache hits and unmetered TPM are
+excluded. Both actual and reserved accounting, including expired reservations,
+record observations without changing debit rules. These are original reservations
+versus final usage, not tokenizer accuracy, refunds, saved tokens or provider
+remaining capacity. Counters reset with the worker.
 
 The Task 6 exact-cost fairness traces use the same Admission/Queue/Ledger library
 as HTTP, with a manual/paused monotonic clock and `exact_fixture` costs. Actual
@@ -476,10 +513,10 @@ read from the wire. A separate paused-Tokio unit test exercises the production
 coordinator clock and start notification; Tokio `test-util` is a development
 feature only.
 
-Ordinary `llmgw status` renders the existing exact-cache snapshot: enabled state,
-hits, eligible misses, entries and retained/budget bytes. Missing data displays
-`n/a`; misses exclude requests that fail cache eligibility. This adds no storage,
-polling or counters.
+Ordinary `llmgw status` renders the exact-cache snapshot: enabled state, policy
+evaluations, hits, eligible misses, named bypass counts, entries and
+retained/budget bytes. Missing data displays `n/a`; misses exclude requests that
+fail cache eligibility. These fixed counters add no request log or polling.
 
 ## Installed Pi compatibility probe
 
@@ -748,8 +785,10 @@ also provision a missing control token for a hand-written config. Users do not
 create control token files by hand. The token
 must still be nonempty, bounded, and protected; an invalid token file
 causes startup to fail without weakening its permissions or following a link.
-Native Windows ACL runtime support remains unverified. Tests use only synthetic
-credentials and temporary state.
+Windows ACL creation, file identity, and replacement were exercised on Windows
+10 Education x64/NTFS with Rust 1.88 GNU. The symlink-privilege case and a clean
+non-admin account remain unverified. Tests use only synthetic credentials and
+temporary state.
 
 ## Receiver limits
 
@@ -825,11 +864,16 @@ produce a fresh random sample. The history threshold limits eligibility; it
 does not guarantee model quality or determinism. Restarting the gateway clears
 all entries. Prompts, credentials, and cache contents are not written to disk.
 
-Keys include the root, full composed upstream URL and query, all effective
+Keys include the root, full composed upstream URL and query, effective
 request headers including authentication, and the original body. Length framing
 keeps component boundaries distinct. Different credentials, roots, options,
-queries, or body bytes do not share an entry. Headers that change on each call
-can lower the hit rate; they are not silently removed from the key.
+queries, or body bytes do not share an entry. The sole header exception is
+`x-stainless-retry-count`: absence, changed values or duplicate values do not
+split entries. The header is still forwarded unchanged on misses. No other
+`x-stainless-*` or caller header is removed from the key; changing those can
+still lower the hit rate. An original response `Vary` naming this excluded
+header prevents storage, case-insensitively across comma-separated or duplicate
+fields, even if hop-by-hop processing would remove the Vary field later.
 
 Only text generation requests up to 32 KiB and within `max_history` qualify.
 The history limit counts input messages/items; a Responses string input is one
@@ -856,10 +900,29 @@ Hits do not consume upstream RPM/TPM or add worker/usage observations. Separate
 counters keep their existing meaning. The cached body retains its original
 usage fields; these describe the reused response, not a new upstream charge.
 
-`exact_cache` includes `enabled`, `hits`, `misses`, `stores`, `evictions`,
+`exact_cache` includes `enabled`, `considered`, `bypasses`, `hits`, `misses`, `stores`, `evictions`,
 `budget_bypasses`, `entries`, `retained_bytes`, and `budget_bytes`. Hits and
 misses count eligible lookups, not all incoming requests. A miss need not become
 a stored entry. `retained_bytes` includes active captures and replay ownership.
+
+`considered` counts policy evaluations after route/body validation while caching
+is enabled. Invalid ingress and disabled-cache traffic do not enter this count;
+it is distinct from the existing global `requests` metric. Each excluded request
+increments one `bypasses` field in this precedence order:
+
+| Field | Exclusion |
+|---|---|
+| `request_cache_control` | Original request Cache-Control/Pragma prohibits reuse, including when later header processing strips it |
+| `size` | Request body exceeds 32 KiB |
+| `endpoint` | Endpoint does not support exact caching |
+| `tools_state` | Tools or stateful request fields, including empty tools |
+| `history` | Input history exceeds the configured limit |
+| `unsupported_shape` | Other unsupported fields or request shapes |
+
+After evaluations and lookups settle, `considered = hits + misses + sum(bypasses)`.
+Response storage rejection and payload-budget exhaustion are separate from request
+eligibility. The counters reset with the worker; independent live status counters
+are not a transactionally consistent whole-runtime accounting snapshot.
 
 The fixed limits are 4 MiB of retained payload, 256 KiB per capture/entry, and
 128 entries. Payload ownership includes retained headers and remains charged

@@ -284,3 +284,84 @@ fn configurable_startup_hold_does_not_change_the_sixty_second_quota_window() {
     );
     admitted(&mut unlimited, 0, 0);
 }
+
+#[test]
+fn reservation_diagnostics_record_known_zero_unknown_and_expired_attempts_once() {
+    for mode in [Accounting::Actual, Accounting::Reserved] {
+        let mut l = ledger(Limit::Unlimited, known(100), mode);
+        let id = admitted(&mut l, 60, 90);
+        assert!(!l.finish(time(60), id, Some(0)), "unstarted is excluded");
+        assert!(l.cancel(time(60), id));
+        let id = admitted(&mut l, 60, 90);
+        l.start(time(60), id);
+        l.finish(time(61), id, Some(0));
+        assert!(!l.finish(time(61), id, Some(99)), "exactly once");
+        assert_eq!(
+            l.snapshot(time(61)).tpm_debited,
+            if mode == Accounting::Actual { 0 } else { 90 }
+        );
+        let id = admitted(&mut l, 120, 80);
+        l.start(time(120), id);
+        l.finish(time(121), id, None);
+        assert_eq!(
+            l.snapshot(time(121)).tpm_debited,
+            80,
+            "unknown retains reservation"
+        );
+        let id = admitted(&mut l, 180, 70);
+        l.start(time(180), id);
+        l.finish(time(241), id, Some(100));
+        assert_eq!(
+            l.snapshot(time(241)).tpm_debited,
+            100,
+            "expired reservation does not refund fresh usage"
+        );
+        let Decision::Admitted(metadata) = l.admit(time(301), RequestCost::Metadata) else {
+            panic!("metadata")
+        };
+        l.start(time(301), metadata);
+        l.finish(time(301), metadata, Some(999));
+        let d = l.snapshot(time(301)).reservation;
+        assert_eq!((d.samples, d.unknown), (2, 1));
+        assert_eq!(
+            (
+                d.reserved_tokens,
+                d.observed_tokens,
+                d.excess_tokens,
+                d.shortfall_tokens
+            ),
+            (160, 100, 90, 30)
+        );
+    }
+    for limit in [Limit::Unknown, Limit::Unlimited] {
+        let mut l = ledger(Limit::Unlimited, limit, Accounting::Actual);
+        for usage in [None, Some(0), Some(100)] {
+            let id = admitted(&mut l, 60, 90);
+            l.start(time(60), id);
+            l.finish(time(60), id, usage);
+        }
+        let d = l.snapshot(time(60)).reservation;
+        assert_eq!(
+            (d.samples, d.unknown, d.reserved_tokens, d.observed_tokens),
+            (0, 0, 0, 0)
+        );
+    }
+}
+
+#[test]
+fn reservation_diagnostics_sum_wide_original_reservations_and_usage() {
+    let mut l = ledger(Limit::Unlimited, known(u64::MAX), Accounting::Actual);
+    for at in [60, 120] {
+        let id = admitted(&mut l, at, u64::MAX);
+        l.start(time(at), id);
+        l.finish(time(at), id, Some(u64::MAX));
+    }
+    let d = l.snapshot(time(120)).reservation;
+    assert_eq!(d.samples, 2);
+    assert_eq!(d.reserved_tokens, u128::from(u64::MAX) * 2);
+    assert_eq!(d.observed_tokens, u128::from(u64::MAX) * 2);
+    assert_eq!((d.excess_tokens, d.shortfall_tokens), (0, 0));
+    let json = serde_json::to_value(d).unwrap();
+    assert_eq!(json["reserved_tokens"], d.reserved_tokens.to_string());
+    assert_eq!(json["observed_tokens"], d.observed_tokens.to_string());
+}

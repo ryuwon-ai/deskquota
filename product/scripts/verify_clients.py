@@ -552,8 +552,8 @@ def verify_claude(binary: Path, output: Path, executable: Path) -> int:
         "passed": False,
     }
     write(output, result)
-    if version != "2.1.63":
-        reason = "installed version does not match the supported Claude Code 2.1.63 profile"
+    if version != "2.1.76":
+        reason = "installed version does not match the supported Claude Code 2.1.76 profile"
         for field in ("selection", "inference", "tools"):
             result[field] = {"status": "unsupported", "reason": reason}
         result["gateway_off"] = {"status": "not_run"}

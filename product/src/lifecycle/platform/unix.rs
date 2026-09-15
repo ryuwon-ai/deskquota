@@ -8,7 +8,9 @@ use std::{
 pub fn detach_session() -> io::Result<()> {
     rustix::process::setsid().map(|_| ()).map_err(Into::into)
 }
-pub fn configure_detached(_command: &mut Command) {}
+pub fn configure_detached(_command: &mut Command) -> io::Result<()> {
+    Ok(())
+}
 pub fn current_user_identity() -> io::Result<String> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,

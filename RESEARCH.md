@@ -1,10 +1,10 @@
-# 로컬 LLM 게이트웨이 조사
+# 제한된 LLM 요청을 조정하는 게이트웨이 조사
 
 기준일: 2026-09-15. 목표는 **한 PC의 여러 에이전트가 제한된 LLM 용량을 덜 낭비하고 공정하게 쓰게 하는 최소 게이트웨이**다.
 
 ## 현재 결론
 
-유사 구현은 이미 있다. Overlaat의 자원별 예약, PromptForge의 클라이언트 순환 큐, SMG의 선점 전 취소, MindRouter와 obleth의 공정 배분을 확인했다. 차별화 가설은 **사내 API의 RPM/TPM을 함께 지키면서 여러 개발 도구의 완료량과 대기시간을 개선하는, 설치가 쉬운 로컬 제품**이다. 성능 우위와 시장 규모는 아직 입증하지 않았다.
+유사 구현은 이미 있다. Overlaat의 자원별 예약, PromptForge의 클라이언트 순환 큐, SMG의 선점 전 취소, MindRouter와 obleth의 공정 배분을 확인했다. 적용 대상은 **사내·로컬에 한정하지 않고, 한도나 용량 제한이 있는 LLM 요청 전반**이다. 차별화 가설은 공유 한도 안에서 요청의 낭비와 대기를 줄이는, 설치가 쉬운 네이티브 제품이다. [포지셔닝·독창성 재평가와 31개 저장소 Star](reports/positioning-and-originality-2026-09-15.md)는 2026-09-15의 최신 소개와 기존 구현·실행 근거를 구분한다. 일반적인 성능 우위와 시장 규모는 아직 입증하지 않았다.
 
 ## 구현 진행
 
@@ -15,6 +15,8 @@
 | 경쟁 패턴 적용·실행 비교 | [새 비교와 반례](reports/competitor-comparison-results-2026-09-15.md): CLI 상태 표시·metadata 의미 보존, 추가 의존성0, 관련 검사221개 통과. 독립 입력의 완료율 반례로 기본 RR 유지 |
 | 사내 피드백 반영 | [Windows 소스·표준 인증·exact cache·시작 대기](reports/company-feedback-2026-09-15.md): 당시 macOS 420개 검사 통과. 실제 Windows 빌드·실행은 별도 검증 필요 |
 | 경쟁 패턴 추가 적용 | [JSON 정산·캐시 상태](reports/competitor-round2-2026-09-15.md): 전체 검사427개·독립 검토 통과. 작은 TPM 합성 조건에서 완료5/20→20/20, 무환급 대조군 유지. 실제 제공자 효율은 별도 검증 |
+| 진단 추가 전 일반 release 경쟁 재비교 | [35회 실행·캐시 재확인](reports/current-competitor-comparison-2026-09-15.md): 무대기5반복 p95 0.433–0.556ms·idle9.56–9.66MiB. 한 제한 조건에서 첫 창16/최종18건 완료. 2,680건의 실패·대기와 최신 LiteLLM 버전 미실행 범위 포함 |
+| 공유 한도 진단·retry 헤더 캐시 | [현재 변경과 전후 검사](reports/quota-diagnostics-2026-09-15.md): 캐시 제외·예약/usage 차이·보호 요청 병목 표시. 합성 재실행 호출2→1, Vary 대조군 유지. 전체435검사·독립 검토 통과, 지연 우위는 미확정 |
 | `on/off/status/restart`, 첫 설정, 파일 변경·복원 | Native Task 1–3 수용 |
 | Pi·Claude Code·Codex 연결 | [Native Task 4 수용](evidence/native-task4-accepted.json). 동일 Mac 빌드에서 세 도구의 격리 도구 왕복 확인 |
 | 사용자 로그인 자동 시작 | [Native Task 5 수용](evidence/native-task5-accepted.json). 명세·품질 통과, 실제 계정 등록·로그인 미검증 |
@@ -30,7 +32,7 @@
 | 실행 위치 | 사용자 PC, Windows/macOS/Linux 네이티브 |
 | 설치 제약 | Docker·WSL 필수 의존 금지. 코어는 Rust binary 하나; Python·Node는 개발/검증에서 사용 가능 |
 | 핵심 언어 | Rust. 언어 자체를 성능 개선의 증거로 삼지 않음 |
-| 우선 환경 | RPM/TPM이 제한된 사내·무료 API. 로컬 GPU/메모리 경합은 다음 축 |
+| 적용 환경 | 공유 RPM/TPM·동시성 제한이 있는 상용·무료·사내 API와 로컬 endpoint. 현재 구현은 한 instance의 한 upstream이며 엔진 내부 GPU/KV 제어와 구분 |
 | 클라이언트 | Claude Code, Codex, Pi 등의 동일 프로토콜 전달. API 포맷 변환 제외 |
 | 비용 | 공개 mock 중심. 추가 유료 API 비용을 기본값으로 발생시키지 않음 |
 | 사내 검증 | 사용자가 구두로 전할 결과는 별도 기록. 공개 재현 실험과 합치지 않음 |

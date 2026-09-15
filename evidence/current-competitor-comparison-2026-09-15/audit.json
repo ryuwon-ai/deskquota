@@ -1,0 +1,24 @@
+{
+  "status": "PASS_WITH_LIMITS",
+  "runs": 35,
+  "totals": {
+    "completed": 2632,
+    "submitted": 2680,
+    "attempts": 2670,
+    "warmup": 125,
+    "discovery": 14,
+    "rejected": 46,
+    "timeout": 2
+  },
+  "separate_cache_requests": 180,
+  "cache_hits_avoiding_upstream": 60,
+  "source_and_harness_hashes_held": true,
+  "same_input_shapes_across_arms": true,
+  "limits": [
+    "5 no-wait process repetitions of one workload; 1 quota run per contract and arm",
+    "not company RPM18/TPM450000/concurrency3; synthetic RPM16/TPM6000/concurrency2",
+    "different product quota policies; not a scheduler-only ablation",
+    "RSS samples not continuous peak; CPU from coarse ps process counter",
+    "no real provider, model quality, low-end or Windows verification"
+  ]
+}

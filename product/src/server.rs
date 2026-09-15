@@ -17,7 +17,9 @@ use hyper::body::Incoming;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper_util::rt::{TokioIo, TokioTimer};
-use tokio::io::{AsyncRead, AsyncWrite, Interest, ReadBuf};
+#[cfg(not(windows))]
+use tokio::io::Interest;
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::TcpListener;
 use tokio::sync::{Semaphore, mpsc, watch};
 use tokio::task::{JoinHandle, JoinSet};
@@ -491,8 +493,6 @@ async fn serve(
                     let monitor_standard = standard.try_clone().expect("accepted socket clone");
                     let socket = tokio::net::TcpStream::from_std(standard)
                         .expect("accepted async socket conversion");
-                    let monitor_socket = tokio::net::TcpStream::from_std(monitor_standard)
-                        .expect("accepted monitor socket conversion");
                     let service = service_fn(move |request| {
                         handle(request, state.clone(), disconnect_rx.clone())
                     });
@@ -508,7 +508,7 @@ async fn serve(
                         disconnect: disconnect.clone(),
                     };
                     let connection = builder.serve_connection(TokioIo::new(io), service);
-                    let reset_monitor = monitor_reset(monitor_socket, disconnect.clone());
+                    let reset_monitor = monitor_reset(monitor_standard, disconnect.clone());
                     tokio::pin!(connection);
                     tokio::pin!(reset_monitor);
                     tokio::select! {
@@ -572,7 +572,21 @@ async fn serve(
     Ok(())
 }
 
-async fn monitor_reset(socket: tokio::net::TcpStream, disconnect: watch::Sender<bool>) {
+#[cfg(windows)]
+async fn monitor_reset(socket: std::net::TcpStream, disconnect: watch::Sender<bool>) {
+    if crate::transport::windows_disconnect::reset(socket)
+        .await
+        .unwrap_or(true)
+    {
+        let _ = disconnect.send(true);
+    }
+    std::future::pending::<()>().await;
+}
+
+#[cfg(not(windows))]
+async fn monitor_reset(socket: std::net::TcpStream, disconnect: watch::Sender<bool>) {
+    let socket =
+        tokio::net::TcpStream::from_std(socket).expect("accepted monitor socket conversion");
     let result: io::Result<()> = socket
         .async_io(Interest::ERROR, || {
             match socket2::SockRef::from(&socket).take_error() {
@@ -769,26 +783,23 @@ async fn handle_request(
         Ok(cost) => cost,
         Err(error) => return error.into_response(),
     };
-    let allow_cache = state.cache.is_some() && !crate::cache::forbids_reuse(&parts.headers);
+    let forbids_cache_reuse = state.cache.is_some() && crate::cache::forbids_reuse(&parts.headers);
     let mut request_headers = parts.headers;
     headers::prepare_request(
         &mut request_headers,
         &state.config.upstream.auth,
         state.credentials.upstream_token.as_ref().map(Secret::bytes),
     );
-    let cache = if allow_cache {
-        state.cache.as_ref().and_then(|cache| {
-            cache.request(
-                route.root_index,
-                &upstream_url,
-                &request_headers,
-                route.endpoint,
-                body.bytes(),
-            )
-        })
-    } else {
-        None
-    };
+    let cache = state.cache.as_ref().and_then(|cache| {
+        cache.request(
+            route.root_index,
+            &upstream_url,
+            &request_headers,
+            route.endpoint,
+            body.bytes(),
+            forbids_cache_reuse,
+        )
+    });
     if let Some(hit) = cache.as_ref().and_then(crate::cache::Pending::lookup) {
         return hit;
     }

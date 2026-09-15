@@ -45,6 +45,6 @@ pub fn spawn(config: &Path, fingerprint: &str) -> io::Result<Child> {
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());
-    platform::configure_detached(&mut command);
+    platform::configure_detached(&mut command)?;
     command.spawn()
 }

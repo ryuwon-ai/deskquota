@@ -100,6 +100,156 @@ async fn status(gateway: &GatewayHandle) -> Value {
 const PATH: &str = "/r/one/v1/chat/completions";
 
 #[tokio::test]
+async fn retry_count_only_reruns_reuse_json_and_sse_and_forward_original_metadata() {
+    for (stream, media, output) in [
+        (false, "application/json", JSON_RESPONSE.to_owned()),
+        (
+            true,
+            "text/event-stream",
+            [DELTA, STOP, USAGE, DONE].concat(),
+        ),
+    ] {
+        let upstream = UpstreamFixture::start(upstream_response(200, media, "", &output)).await;
+        let gateway = spawn_gateway(config(upstream.address())).await;
+        for retry in [Some("0"), Some("1"), None] {
+            let headers: Vec<_> = retry
+                .map(|v| ("x-stainless-retry-count", v))
+                .into_iter()
+                .collect();
+            assert_eq!(
+                send(&gateway, PATH, &request(stream), &headers)
+                    .await
+                    .bytes()
+                    .await
+                    .unwrap(),
+                output
+            );
+        }
+        assert_eq!(
+            upstream.attempts(),
+            1,
+            "retry metadata must not split cache keys"
+        );
+        assert_eq!(
+            upstream.capture().await.header("x-stainless-retry-count"),
+            Some(b"0".as_slice())
+        );
+        let value = status(&gateway).await;
+        assert_eq!(value["exact_cache"]["considered"], 3);
+        assert_eq!(value["exact_cache"]["hits"], 2);
+        assert_eq!(value["exact_cache"]["misses"], 1);
+        assert_eq!(value["admission"]["reservation"]["samples"], 1);
+        assert_eq!(value["admission"]["reservation"]["observed_tokens"], "23");
+        gateway.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn original_vary_retry_metadata_forbids_json_and_sse_storage() {
+    for (stream, media, output) in [
+        (false, "application/json", JSON_RESPONSE.to_owned()),
+        (
+            true,
+            "text/event-stream",
+            [DELTA, STOP, USAGE, DONE].concat(),
+        ),
+    ] {
+        let upstream = UpstreamFixture::start(upstream_response(200, media,
+            "Vary: Accept-Encoding\r\nVary: x-other, X-Stainless-Retry-Count\r\nConnection: vary\r\n", &output)).await;
+        let gateway = spawn_gateway(config(upstream.address())).await;
+        for _ in 0..2 {
+            assert_eq!(
+                send(
+                    &gateway,
+                    PATH,
+                    &request(stream),
+                    &[("x-stainless-retry-count", "1")]
+                )
+                .await
+                .bytes()
+                .await
+                .unwrap(),
+                output
+            );
+        }
+        assert_eq!(
+            upstream.attempts(),
+            2,
+            "original Vary must prevent reuse even after hop-by-hop scrubbing"
+        );
+        assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
+        gateway.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn cache_policy_denominator_includes_bypasses_but_excludes_invalid_ingress() {
+    let upstream = UpstreamFixture::start(upstream_response(
+        200,
+        "application/json",
+        "",
+        JSON_RESPONSE,
+    ))
+    .await;
+    let mut cfg = config(upstream.address());
+    cfg.quota.tpm = config::Limit::Unknown;
+    cfg.roots[0].endpoints.push(config::Endpoint::CountTokens);
+    let gateway = spawn_gateway(cfg).await;
+    let mut tools = request(false);
+    tools["tools"] = json!([]);
+    let mut history = request(false);
+    history["messages"] = json!(vec![json!({"role":"user","content":"1"}); 4]);
+    let mut unsupported = request(false);
+    unsupported["n"] = json!(2);
+    let mut size = request(false);
+    size["messages"][0]["content"] = json!("x".repeat(33 * 1024));
+    for (path, body, headers) in [
+        (PATH, request(false), vec![]),
+        (PATH, request(false), vec![]),
+        (
+            PATH,
+            request(false),
+            vec![
+                ("cache-control", "no-cache"),
+                ("connection", "cache-control, close"),
+            ],
+        ),
+        (PATH, size, vec![]),
+        ("/r/one/v1/messages/count_tokens", request(false), vec![]),
+        (PATH, tools, vec![]),
+        (PATH, history, vec![]),
+        (PATH, unsupported, vec![]),
+    ] {
+        assert_eq!(
+            send(&gateway, path, &body, &headers)
+                .await
+                .bytes()
+                .await
+                .unwrap(),
+            JSON_RESPONSE
+        );
+    }
+    assert_ne!(send(&gateway, PATH, &json!({}), &[]).await.status(), 200);
+    let value = status(&gateway).await;
+    let cache = &value["exact_cache"];
+    assert_eq!(cache["considered"], 8);
+    assert_eq!(cache["hits"], 1);
+    assert_eq!(cache["misses"], 1);
+    for reason in [
+        "request_cache_control",
+        "size",
+        "endpoint",
+        "tools_state",
+        "history",
+        "unsupported_shape",
+    ] {
+        assert_eq!(cache["bypasses"][reason], 1, "{reason}");
+    }
+    assert_eq!(upstream.attempts(), 7);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
 async fn exact_json_hit_skips_admission_and_scrubs_stale_response_metadata() {
     let upstream = UpstreamFixture::start(upstream_response(200, "application/json", "X-Request-Id: old\r\nX-RateLimit-Remaining: 3\r\nRetry-After: 9\r\nDate: Sat, 01 Jan 2000 00:00:00 GMT\r\n", JSON_RESPONSE)).await;
     let gateway = spawn_gateway(config(upstream.address())).await;
@@ -519,6 +669,16 @@ async fn expired_entries_miss_and_disabled_cache_does_not_capture() {
     assert_eq!(upstream.attempts(), 4);
     let status = status(&gateway).await;
     assert_eq!(status["exact_cache"]["enabled"], false);
+    assert_eq!(status["exact_cache"]["considered"], 0);
+    assert_eq!(status["exact_cache"]["hits"], 0);
+    assert_eq!(status["exact_cache"]["misses"], 0);
+    assert!(
+        status["exact_cache"]["bypasses"]
+            .as_object()
+            .unwrap()
+            .values()
+            .all(|v| v == 0)
+    );
     assert_eq!(status["exact_cache"]["retained_bytes"], 0);
     gateway.shutdown().await.unwrap();
 }

@@ -400,6 +400,8 @@ fn write_protected_file(
         file.sync_all()?;
         drop(file);
         if let Some((metadata, _)) = &existing {
+            #[cfg(not(unix))]
+            let _ = metadata;
             #[cfg(unix)]
             fs::set_permissions(&temporary, metadata.permissions())?;
             #[cfg(unix)]
@@ -442,7 +444,10 @@ fn write_protected_file(
                     )));
                 }
             }
-            fs::File::open(&temporary)?.sync_all()?;
+            fs::OpenOptions::new()
+                .write(true)
+                .open(&temporary)?
+                .sync_all()?;
             let Some((current_metadata, current)) = read_regular(path, kind)
                 .map_err(|error| std::io::Error::other(error.to_string()))?
             else {
@@ -473,6 +478,8 @@ fn write_protected_file(
                     "existing {kind} ACL changed before setup could replace it"
                 )));
             }
+            #[cfg(not(unix))]
+            let _ = current_metadata;
             #[cfg(not(unix))]
             if current.as_slice() != expected.expect("existing file has snapshot") {
                 return Err(std::io::Error::other(format!(

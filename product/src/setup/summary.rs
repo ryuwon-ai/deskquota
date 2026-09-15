@@ -60,6 +60,11 @@ pub fn render(
             },
         ),
     };
+    let display_limit = |limit: &Limit| match limit {
+        Limit::Known(value) => value.to_string(),
+        Limit::Unknown => "unknown".to_owned(),
+        Limit::Unlimited => "unlimited".to_owned(),
+    };
     let known = |limit: &Limit| matches!(limit, Limit::Known(_));
     let quota = if draft.shared_with_other_pcs
         || draft.separate_input_output
@@ -141,7 +146,7 @@ pub fn render(
     );
     let cache = draft.config.cache.map_or_else(|| "disabled".to_owned(), |cache| format!("enabled; TTL {} seconds; at most {} messages; 4 MiB payload budget; exact reuse changes fresh sampling", cache.ttl_secs, cache.max_history));
     Ok(format!(
-        "config: {}\nstate: {} (final apply initializes protected local control token; preview and cancel create no state)\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to {} seconds after readiness\nexact response cache: {cache}\nlogin requested: {}; pending, registration not applied; after config save, exact OS target preview and separate confirmation\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
+        "config: {}\nstate: {} (final apply initializes protected local control token; preview and cancel create no state)\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; RPM: {rpm}; TPM: {tpm}; concurrency: {concurrency}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to {} seconds after readiness\nexact response cache: {cache}\nlogin requested: {}; pending, registration not applied; after config save, exact OS target preview and separate confirmation\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
         config_path.display(),
         state.directory.display(),
         pending.display(),
@@ -171,5 +176,8 @@ pub fn render(
         if clients.is_empty() { "none" } else { &clients },
         fingerprint_impact,
         root.id,
+        rpm = display_limit(&draft.config.quota.rpm),
+        tpm = display_limit(&draft.config.quota.tpm),
+        concurrency = draft.config.concurrency,
     ))
 }

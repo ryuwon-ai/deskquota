@@ -1,0 +1,40 @@
+{
+  "stage": "native-tests",
+  "exit_code": 0,
+  "elapsed_seconds": 120.7422927,
+  "toolchain": "1.88.0-x86_64-pc-windows-gnu",
+  "gcc": "8.1.0",
+  "build_jobs": 2,
+  "incremental": false,
+  "debug_info": false,
+  "suites": 19,
+  "passed": 402,
+  "failed": 0,
+  "ignored": 2,
+  "source_changes": {
+    "product/Cargo.toml": "ce82c859a8f2c39e1e0752bf3d28a10991fe28c6badcc6fa08a6aa3091ec5d55",
+    "product/src/autostart/mod.rs": "3f47fcaf32d3da9171aa4c444446841e564152ded79b8ad27b2523cff2d0ebcc",
+    "product/src/clients/claude.rs": "7fbf6810b054f3c41bcf1a6f6d30b592d8013e4665ba26d6c0bebbe5bd3d83d2",
+    "product/src/config_patch/journal.rs": "350b43208e20fd0fb10867f4aac2af3b020076e902448334940f543739d81b23",
+    "product/src/config_patch/storage.rs": "b97d244b2790738850e2a8bf517d0437a5d35ddf4067929501776bcfc835c548",
+    "product/src/lifecycle/platform/mod.rs": "844e8df72e12029e3488ff9c6e16b9be2b0ab16e03903a04763bb5a8e6d51d09",
+    "product/src/lifecycle/platform/unix.rs": "f661624cf68d338ec9abe9b0c283aded17155ad2ff624439d04da62d7e17452d",
+    "product/src/lifecycle/platform/windows.rs": "86ed14bf985aea9a61ebe1325cc0a9246dfb2653d51e9d4713a346dd67db985a",
+    "product/src/lifecycle/process.rs": "98707e4934f86d85e7f82d2ca566900a06105ac48ac7697c5a9e42a722c2d0a6",
+    "product/src/server.rs": "335329c6b0ed5e2d6f0439d0a951072b752c3f0154a77311cf34aae12e93afe3",
+    "product/src/setup/persist.rs": "1b31d63b4e96b5fb66fc2e8379ffc311cad5dfc8a598396035bbe0432c750b12",
+    "product/src/transport/mod.rs": "e70962c648fa75100ebb1b5ad3c0cc41d6ef6d5e1ebfbf3cd7131c724a1b521e",
+    "product/src/transport/windows_disconnect.rs": "920fca448144b107ebe0fbc5b7a91272eed537c219ec1214f519199c27acefcf",
+    "product/tests/autostart_templates.rs": "fda9127e114128d033941180bcdb3fe60e04a23fd50bf3c64af00dd173f8dfe1",
+    "product/tests/client_profiles.rs": "262051ab66c2d4756adbbb3616ec43fe2d1d02ce8c97de1148f05c4253f61019",
+    "product/tests/patch_contract.rs": "f063dd272e973453ffa3680a3f4be6687fd0e94d09227e72158a247ff5bc1a79",
+    "product/tests/setup_contract.rs": "7b261ed12bec5472ca0f56f623103b85f4fe84a60c499ef9d23c9da0b0b4781d",
+    "product/tests/support/private_fs.rs": "d807ab9a75c51a664608427615e8eb46a73e6508996eeefc7a838d6bc51beaff",
+    "product/tests/wire_contract.rs": "56a41905ffe4450765dac4eec8dbae1f259267820b2bb0f38a73af27105f41e5"
+  },
+  "command": "cargo +1.88.0 test --locked --all-targets --no-fail-fast --features bench-harness --target x86_64-pc-windows-gnu -- --test-threads=2",
+  "ignored_reasons": [
+    "profiling only",
+    "symlink fixture requires Developer Mode or symlink privilege"
+  ]
+}

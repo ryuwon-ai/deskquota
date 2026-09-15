@@ -1,7 +1,9 @@
+#[cfg(target_os = "macos")]
+use llmgw::autostart::RegistrationState;
 use llmgw::{
     autostart::{
         Action, LoginAuthAvailability, Platform, RegistrationPlan, RegistrationSpec,
-        RegistrationState, login_auth_availability,
+        login_auth_availability,
     },
     config::Auth,
 };
@@ -12,6 +14,27 @@ fn paths() -> (&'static Path, &'static Path) {
         Path::new("/Applications/LLM 게이트웨이 & 도구/llmgw<실행>.exe"),
         Path::new("/Users/테스트 계정/설정 $100% \\\"<&>/gateway 설정.toml"),
     )
+}
+
+#[test]
+fn absolute_paths_are_checked_for_the_registration_platform() {
+    for platform in [Platform::Macos, Platform::Linux] {
+        assert!(
+            RegistrationSpec::new(platform, Path::new("/bin/llmgw"), Path::new("/config")).is_ok()
+        );
+        assert!(
+            RegistrationSpec::new(platform, Path::new(r"C:\llmgw.exe"), Path::new("/config"))
+                .is_err()
+        );
+    }
+    assert!(
+        RegistrationSpec::new_for_windows_user(
+            Path::new("/bin/llmgw"),
+            Path::new(r"C:\config"),
+            "S-1-5-21-123"
+        )
+        .is_err()
+    );
 }
 
 #[test]
@@ -60,7 +83,7 @@ fn windows_current_user_task_is_interactive_least_privilege_and_continuous() {
     let spec = RegistrationSpec::new_for_windows_user(binary, config, user).unwrap();
     let xml = spec.definition();
 
-    assert!(xml.starts_with("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+    assert!(xml.starts_with("<?xml version=\"1.0\" encoding=\"UTF-16\"?>"));
     assert!(xml.contains("<LogonTrigger>"));
     assert!(xml.contains(&format!("<UserId>{user}</UserId>")));
     assert!(xml.contains("<LogonType>InteractiveToken</LogonType>"));

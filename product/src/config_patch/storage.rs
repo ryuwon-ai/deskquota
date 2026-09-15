@@ -332,16 +332,7 @@ pub(crate) fn atomic_write_client(
 
 fn ensure_client_parent(parent: &Path) -> Result<(), Error> {
     if !parent.exists() {
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::DirBuilderExt;
-            fs::DirBuilder::new()
-                .recursive(true)
-                .mode(0o700)
-                .create(parent)?;
-        }
-        #[cfg(not(unix))]
-        fs::create_dir_all(parent)?;
+        crate::lifecycle::platform::directory_tree(parent)?;
     }
     let metadata = fs::symlink_metadata(parent)?;
     if !metadata.is_dir() || metadata.file_type().is_symlink() {
@@ -442,7 +433,10 @@ fn prepare_existing_replacement(
     return Err(Error::message(format!(
         "existing {kind} ACL preservation is unsupported on this Unix platform"
     )));
-    fs::File::open(temporary)?.sync_all()?;
+    fs::OpenOptions::new()
+        .write(true)
+        .open(temporary)?
+        .sync_all()?;
     Ok(())
 }
 

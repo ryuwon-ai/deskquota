@@ -1,0 +1,1508 @@
+{
+  "status": "diverged",
+  "total_commits": 1620,
+  "base_sha": "1dba17b10ded12ad0021edb453ba2c54e4637928",
+  "head_sha": "18243cd7af4c3325165ba68b21379e2719e051c7",
+  "files": [
+    {
+      "filename": ".circleci/config.yml",
+      "status": "modified",
+      "changes": 56
+    },
+    {
+      "filename": ".github/actions/cache-cargo-build/action.yml",
+      "status": "modified",
+      "changes": 23
+    },
+    {
+      "filename": ".github/actions/setup-uv-with-retries/action.yml",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": ".github/ci-coverage-allowlist.yml",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": ".github/scripts/close_duplicate_issues.py",
+      "status": "removed",
+      "changes": 230
+    },
+    {
+      "filename": ".github/scripts/smoke_test_native_wheel.py",
+      "status": "added",
+      "changes": 68
+    },
+    {
+      "filename": ".github/scripts/verify_linux_native_wheel.py",
+      "status": "added",
+      "changes": 282
+    },
+    {
+      "filename": ".github/workflows/_test-unit-base.yml",
+      "status": "modified",
+      "changes": 29
+    },
+    {
+      "filename": ".github/workflows/auto-close-duplicates.yml",
+      "status": "added",
+      "changes": 69
+    },
+    {
+      "filename": ".github/workflows/check_duplicate_issues.yml",
+      "status": "modified",
+      "changes": 40
+    },
+    {
+      "filename": ".github/workflows/image-scan.yml",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": ".github/workflows/report-rust-release-wheel.yml",
+      "status": "added",
+      "changes": 129
+    },
+    {
+      "filename": ".github/workflows/test-code-quality.yml",
+      "status": "modified",
+      "changes": 33
+    },
+    {
+      "filename": ".github/workflows/test-e2e-redis-chaos.yml",
+      "status": "added",
+      "changes": 103
+    },
+    {
+      "filename": ".github/workflows/test-litellm-ui-build.yml",
+      "status": "modified",
+      "changes": 24
+    },
+    {
+      "filename": ".github/workflows/test-litellm-ui-unit.yml",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": ".github/workflows/test-redis-compat.yml",
+      "status": "added",
+      "changes": 77
+    },
+    {
+      "filename": ".github/workflows/test-rust.yml",
+      "status": "modified",
+      "changes": 72
+    },
+    {
+      "filename": ".github/workflows/test-terraform-modules.yml",
+      "status": "modified",
+      "changes": 31
+    },
+    {
+      "filename": ".github/workflows/test-unit.yml",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "CLAUDE.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "Dockerfile",
+      "status": "modified",
+      "changes": 23
+    },
+    {
+      "filename": "README.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "backend/Dockerfile",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": "basedpyright-code-budget.json",
+      "status": "modified",
+      "changes": 44
+    },
+    {
+      "filename": "docker/Dockerfile.database",
+      "status": "modified",
+      "changes": 17
+    },
+    {
+      "filename": "docker/Dockerfile.non_root",
+      "status": "modified",
+      "changes": 20
+    },
+    {
+      "filename": "docker/build_from_pip/Dockerfile.build_from_pip",
+      "status": "modified",
+      "changes": 5
+    },
+    {
+      "filename": "docker/component_entrypoint.sh",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "docker/prod_entrypoint.sh",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/enterprise_callbacks/secret_detection.py",
+      "status": "modified",
+      "changes": 226
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/enterprise_callbacks/secrets_plugins/openai_api_key.py",
+      "status": "modified",
+      "changes": 15
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/proxy/audit_logging_endpoints.py",
+      "status": "modified",
+      "changes": 49
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/proxy/common_utils/check_batch_cost.py",
+      "status": "modified",
+      "changes": 27
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/proxy/hooks/managed_files.py",
+      "status": "modified",
+      "changes": 142
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/proxy/hooks/managed_vector_stores.py",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "enterprise/litellm_enterprise/proxy/management_endpoints/internal_user_endpoints.py",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "enterprise/pyproject.toml",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "gateway/Dockerfile",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "gateway/routes/allowlist.py",
+      "status": "modified",
+      "changes": 1
+    },
+    {
+      "filename": "helm/litellm-helm/Chart.yaml",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "helm/litellm-helm/README.md",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "helm/litellm-helm/templates/secret-masterkey.yaml",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": "helm/litellm-helm/tests/hpa_tests.yaml",
+      "status": "modified",
+      "changes": 42
+    },
+    {
+      "filename": "helm/litellm-helm/tests/masterkey-secret_tests.yaml",
+      "status": "modified",
+      "changes": 47
+    },
+    {
+      "filename": "helm/litellm-helm/values.yaml",
+      "status": "modified",
+      "changes": 11
+    },
+    {
+      "filename": "helm/litellm/templates/_helpers.tpl",
+      "status": "modified",
+      "changes": 13
+    },
+    {
+      "filename": "helm/litellm/templates/backend/deployment.yaml",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "helm/litellm/templates/gateway/deployment.yaml",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "helm/litellm/templates/ingress.yaml",
+      "status": "modified",
+      "changes": 45
+    },
+    {
+      "filename": "helm/litellm/templates/migrations-job.yaml",
+      "status": "modified",
+      "changes": 24
+    },
+    {
+      "filename": "helm/litellm/templates/ui/deployment.yaml",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "helm/litellm/tests/ingress_controller_tests.yaml",
+      "status": "added",
+      "changes": 205
+    },
+    {
+      "filename": "helm/litellm/tests/migration_job_hooks_tests.yaml",
+      "status": "added",
+      "changes": 63
+    },
+    {
+      "filename": "helm/litellm/tests/migration_job_tests.yaml",
+      "status": "modified",
+      "changes": 68
+    },
+    {
+      "filename": "helm/litellm/tests/rollout_strategy_tests.yaml",
+      "status": "added",
+      "changes": 66
+    },
+    {
+      "filename": "helm/litellm/values.yaml",
+      "status": "modified",
+      "changes": 51
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/migrations/20260831000000_shadow_eval_typed_targets/migration.sql",
+      "status": "added",
+      "changes": 21
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/migrations/20260901000000_shadow_eval_multi_router/migration.sql",
+      "status": "added",
+      "changes": 3
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/migrations/20260901000001_add_guardrail_usage_units_cost/migration.sql",
+      "status": "added",
+      "changes": 3
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/migrations/20260904000000_shadow_eval_model_scope/migration.sql",
+      "status": "added",
+      "changes": 1
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/prisma_toolchain.py",
+      "status": "modified",
+      "changes": 91
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/replica_identity.py",
+      "status": "modified",
+      "changes": 7
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/schema.prisma",
+      "status": "modified",
+      "changes": 15
+    },
+    {
+      "filename": "litellm-proxy-extras/litellm_proxy_extras/utils.py",
+      "status": "modified",
+      "changes": 415
+    },
+    {
+      "filename": "litellm-proxy-extras/pyproject.toml",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-proxy-extras/tests/test_setup_database_fail_fast.py",
+      "status": "modified",
+      "changes": 235
+    },
+    {
+      "filename": "litellm-rust/ADDING_A_PROVIDER.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "litellm-rust/AGENTS.md",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "litellm-rust/CLAUDE.md",
+      "status": "modified",
+      "changes": 16
+    },
+    {
+      "filename": "litellm-rust/Cargo.lock",
+      "status": "modified",
+      "changes": 200
+    },
+    {
+      "filename": "litellm-rust/Cargo.toml",
+      "status": "modified",
+      "changes": 22
+    },
+    {
+      "filename": "litellm-rust/README.md",
+      "status": "modified",
+      "changes": 21
+    },
+    {
+      "filename": "litellm-rust/crates/CODING_STANDARDS/PROVIDER_CODING_STANDARDS.md",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/AGENTS.md",
+      "status": "modified",
+      "changes": 9
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/ARCHITECTURE.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/Cargo.toml",
+      "status": "modified",
+      "changes": 7
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/Dockerfile",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/README.md",
+      "status": "modified",
+      "changes": 31
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/config.yaml",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/audio_transcription/common_utils.rs",
+      "status": "removed",
+      "changes": 48
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/audio_transcription/handler.rs",
+      "status": "removed",
+      "changes": 89
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/audio_transcription/hooks.rs",
+      "status": "modified",
+      "changes": 138
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/audio_transcription/mod.rs",
+      "status": "modified",
+      "changes": 8
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/audio_transcription/types.rs",
+      "status": "modified",
+      "changes": 11
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/gil.rs",
+      "status": "removed",
+      "changes": 58
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/io/realtime.rs",
+      "status": "modified",
+      "changes": 43
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/io/realtime_pool.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/io/responses_ws.rs",
+      "status": "modified",
+      "changes": 76
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/lib.rs",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/main.rs",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/ocr/common_utils.rs",
+      "status": "modified",
+      "changes": 170
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/ocr/handler.rs",
+      "status": "modified",
+      "changes": 39
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/ocr/hooks.rs",
+      "status": "modified",
+      "changes": 198
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/ocr/mod.rs",
+      "status": "modified",
+      "changes": 158
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/ocr/prepare.rs",
+      "status": "modified",
+      "changes": 108
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/ocr/types.rs",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/python/AGENTS.md",
+      "status": "removed",
+      "changes": 27
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/python/config.rs",
+      "status": "removed",
+      "changes": 39
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/python/mod.rs",
+      "status": "removed",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/realtime/streaming.rs",
+      "status": "modified",
+      "changes": 44
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/AGENTS.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/gil.rs",
+      "status": "removed",
+      "changes": 30
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/messages/mod.rs",
+      "status": "modified",
+      "changes": 44
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/messages/service.rs",
+      "status": "modified",
+      "changes": 22
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/mod.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/realtime/service.rs",
+      "status": "modified",
+      "changes": 34
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/routes/responses/service.rs",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/src/trace_parity.rs",
+      "status": "added",
+      "changes": 65
+    },
+    {
+      "filename": "litellm-rust/crates/ai-gateway/tests/ocr_lifecycle.rs",
+      "status": "renamed",
+      "changes": 197
+    },
+    {
+      "filename": "litellm-rust/crates/config/Cargo.toml",
+      "status": "added",
+      "changes": 16
+    },
+    {
+      "filename": "litellm-rust/crates/config/src/error.rs",
+      "status": "added",
+      "changes": 11
+    },
+    {
+      "filename": "litellm-rust/crates/config/src/lib.rs",
+      "status": "added",
+      "changes": 7
+    },
+    {
+      "filename": "litellm-rust/crates/config/src/python.rs",
+      "status": "added",
+      "changes": 76
+    },
+    {
+      "filename": "litellm-rust/crates/core/Cargo.toml",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/client.rs",
+      "status": "added",
+      "changes": 14
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/handler.rs",
+      "status": "added",
+      "changes": 91
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/mod.rs",
+      "status": "modified",
+      "changes": 19
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/prepare.rs",
+      "status": "added",
+      "changes": 74
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/tests.rs",
+      "status": "added",
+      "changes": 50
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/transformation.rs",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/audio_transcription/types.rs",
+      "status": "modified",
+      "changes": 53
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/call_lifecycle/mod.rs",
+      "status": "modified",
+      "changes": 34
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/common_utils.rs",
+      "status": "modified",
+      "changes": 8
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/handler.rs",
+      "status": "modified",
+      "changes": 40
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/mod.rs",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/prepare.rs",
+      "status": "modified",
+      "changes": 63
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/tests.rs",
+      "status": "modified",
+      "changes": 50
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/transformation.rs",
+      "status": "modified",
+      "changes": 24
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/chat_completions/types.rs",
+      "status": "modified",
+      "changes": 11
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/constants.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/error.rs",
+      "status": "modified",
+      "changes": 8
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/http_utils.rs",
+      "status": "modified",
+      "changes": 32
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/lib.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/messages/common_utils.rs",
+      "status": "modified",
+      "changes": 8
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/messages/handler.rs",
+      "status": "modified",
+      "changes": 42
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/messages/mod.rs",
+      "status": "modified",
+      "changes": 13
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/messages/prepare.rs",
+      "status": "modified",
+      "changes": 71
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/messages/tests.rs",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/messages/transformation.rs",
+      "status": "modified",
+      "changes": 13
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/observability/function_trace.rs",
+      "status": "added",
+      "changes": 215
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/observability/mod.rs",
+      "status": "added",
+      "changes": 59
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/ocr/transformation.rs",
+      "status": "modified",
+      "changes": 40
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/ocr/types.rs",
+      "status": "modified",
+      "changes": 15
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/anthropic/chat_completions/tests.rs",
+      "status": "modified",
+      "changes": 16
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/anthropic/chat_completions/transformation.rs",
+      "status": "modified",
+      "changes": 39
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/anthropic/messages/transformation.rs",
+      "status": "modified",
+      "changes": 13
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/azure_ai/messages/transformation.rs",
+      "status": "modified",
+      "changes": 23
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/azure_ai/ocr/transformation.rs",
+      "status": "modified",
+      "changes": 1035
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/bedrock/audio_transcription.rs",
+      "status": "modified",
+      "changes": 23
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/bedrock/aws_base.rs",
+      "status": "modified",
+      "changes": 38
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/bedrock/chat_completions/tests.rs",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/bedrock/chat_completions/transformation.rs",
+      "status": "modified",
+      "changes": 95
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/mistral/ocr/transformation.rs",
+      "status": "modified",
+      "changes": 223
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/mod.rs",
+      "status": "modified",
+      "changes": 1
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/openai/realtime/transformation.rs",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/openai/responses/transformation.rs",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/reducto/mod.rs",
+      "status": "added",
+      "changes": 1
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/reducto/ocr/mod.rs",
+      "status": "added",
+      "changes": 4
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/reducto/ocr/tests.rs",
+      "status": "added",
+      "changes": 202
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/reducto/ocr/transformation.rs",
+      "status": "added",
+      "changes": 407
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/providers/vertex_ai/ocr/transformation.rs",
+      "status": "modified",
+      "changes": 84
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/realtime/transformation.rs",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/responses/instrumentation.rs",
+      "status": "modified",
+      "changes": 8
+    },
+    {
+      "filename": "litellm-rust/crates/core/src/responses/websocket.rs",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "filename": "litellm-rust/crates/core/tests/workspace_crate_allowlist.rs",
+      "status": "modified",
+      "changes": 24
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/AGENTS.md",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/CLAUDE.md",
+      "status": "modified",
+      "changes": 5
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/Cargo.toml",
+      "status": "modified",
+      "changes": 15
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/benches/serialization.rs",
+      "status": "modified",
+      "changes": 11
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/diagnostics.rs",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/errors.rs",
+      "status": "added",
+      "changes": 99
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/execution.rs",
+      "status": "added",
+      "changes": 423
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/function_trace.rs",
+      "status": "added",
+      "changes": 22
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/gil.rs",
+      "status": "removed",
+      "changes": 32
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/lib.rs",
+      "status": "modified",
+      "changes": 737
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/marshal.rs",
+      "status": "modified",
+      "changes": 118
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/audio_transcription.rs",
+      "status": "added",
+      "changes": 71
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/chat_completions.rs",
+      "status": "added",
+      "changes": 91
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/definition.rs",
+      "status": "added",
+      "changes": 516
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/gateway_messages.rs",
+      "status": "added",
+      "changes": 29
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/messages.rs",
+      "status": "added",
+      "changes": 65
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/mod.rs",
+      "status": "added",
+      "changes": 30
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/src/routes/ocr.rs",
+      "status": "added",
+      "changes": 73
+    },
+    {
+      "filename": "litellm-rust/crates/python-bridge/tests/marshal_boundary.rs",
+      "status": "modified",
+      "changes": 11
+    },
+    {
+      "filename": "litellm-rust/crates/python-interop/AGENTS.md",
+      "status": "added",
+      "changes": 1
+    },
+    {
+      "filename": "litellm-rust/crates/python-interop/Cargo.toml",
+      "status": "added",
+      "changes": 15
+    },
+    {
+      "filename": "litellm-rust/crates/python-interop/src/gil.rs",
+      "status": "added",
+      "changes": 21
+    },
+    {
+      "filename": "litellm-rust/crates/python-interop/src/lib.rs",
+      "status": "added",
+      "changes": 5
+    },
+    {
+      "filename": "litellm-rust/crates/python-interop/src/marshal.rs",
+      "status": "added",
+      "changes": 92
+    },
+    {
+      "filename": "litellm-rust/crates/python-interop/tests/interop.rs",
+      "status": "added",
+      "changes": 44
+    },
+    {
+      "filename": "litellm/__init__.py",
+      "status": "modified",
+      "changes": 43
+    },
+    {
+      "filename": "litellm/_lazy_imports.py",
+      "status": "modified",
+      "changes": 22
+    },
+    {
+      "filename": "litellm/_lazy_imports_registry.py",
+      "status": "modified",
+      "changes": 10
+    },
+    {
+      "filename": "litellm/_logging.py",
+      "status": "modified",
+      "changes": 106
+    },
+    {
+      "filename": "litellm/_redis.py",
+      "status": "modified",
+      "changes": 125
+    },
+    {
+      "filename": "litellm/_redis_credential_provider.py",
+      "status": "modified",
+      "changes": 17
+    },
+    {
+      "filename": "litellm/_service_logger.py",
+      "status": "modified",
+      "changes": 163
+    },
+    {
+      "filename": "litellm/a2a_protocol/card_resolver.py",
+      "status": "modified",
+      "changes": 3
+    },
+    {
+      "filename": "litellm/a2a_protocol/providers/bedrock_agentcore/handler.py",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm/a2a_protocol/providers/bedrock_agentcore/transformation.py",
+      "status": "modified",
+      "changes": 63
+    },
+    {
+      "filename": "litellm/a2a_protocol/providers/watsonx_orchestrate/transformation.py",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": "litellm/a2a_protocol/streaming_iterator.py",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm/a2a_protocol/utils.py",
+      "status": "modified",
+      "changes": 31
+    },
+    {
+      "filename": "litellm/anthropic_interface/exceptions/exceptions.py",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm/assistants/utils.py",
+      "status": "modified",
+      "changes": 45
+    },
+    {
+      "filename": "litellm/batches/batch_utils.py",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm/caching/caching.py",
+      "status": "modified",
+      "changes": 46
+    },
+    {
+      "filename": "litellm/caching/caching_handler.py",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "filename": "litellm/caching/dual_cache.py",
+      "status": "modified",
+      "changes": 112
+    },
+    {
+      "filename": "litellm/caching/qdrant_semantic_cache.py",
+      "status": "modified",
+      "changes": 18
+    },
+    {
+      "filename": "litellm/caching/redis_cache.py",
+      "status": "modified",
+      "changes": 330
+    },
+    {
+      "filename": "litellm/caching/redis_cluster_node_isolation.py",
+      "status": "modified",
+      "changes": 93
+    },
+    {
+      "filename": "litellm/caching/redis_semantic_cache.py",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": "litellm/caching/valkey_semantic_cache.py",
+      "status": "modified",
+      "changes": 85
+    },
+    {
+      "filename": "litellm/completion_extras/litellm_responses_transformation/handler.py",
+      "status": "modified",
+      "changes": 14
+    },
+    {
+      "filename": "litellm/completion_extras/litellm_responses_transformation/transformation.py",
+      "status": "modified",
+      "changes": 9
+    },
+    {
+      "filename": "litellm/compression/compress.py",
+      "status": "modified",
+      "changes": 12
+    },
+    {
+      "filename": "litellm/compression/scoring/embedding_scorer.py",
+      "status": "modified",
+      "changes": 3
+    },
+    {
+      "filename": "litellm/constants.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/containers/endpoint_factory.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/containers/main.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/cost_calculator.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/endpoints/speech/speech_to_completion_bridge/handler.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/endpoints/speech/speech_to_completion_bridge/transformation.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/exceptions.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/experimental_mcp_client/client.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/experimental_mcp_client/tools.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/files/main.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/fine_tuning/main.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/google_genai/adapters/transformation.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/google_genai/main.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/images/main.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/images/utils.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/SlackAlerting/slack_alerting.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/SlackAlerting/user_spend_alerts.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/anthropic_cache_control_hook.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/arize/_utils.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/arize/arize_phoenix_prompt_manager.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/azure_storage/azure_storage.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/bitbucket/bitbucket_client.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/bitbucket/bitbucket_prompt_manager.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/cloudzero/cz_stream_api.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/cloudzero/database.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/cloudzero/transform.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/compression_interception/handler.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/custom_guardrail.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/custom_logger.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/datadog/datadog.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/datadog/datadog_cost_management.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/datadog/datadog_llm_obs.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/dotprompt/dotprompt_manager.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/dotprompt/prompt_manager.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/focus/database.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/focus/destinations/s3_destination.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/focus/focus_logger.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/galileo.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/generic_prompt_management/generic_prompt_manager.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/gitlab/gitlab_client.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/gitlab/gitlab_prompt_manager.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/humanloop.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/langfuse/langfuse.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/newrelic/newrelic.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/opentelemetry.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/opentelemetry_utils/gen_ai_semconv.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/opik/opik.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/opik/opik_payload_builder/extractors.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/opik/opik_payload_builder/payload_builders.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/README.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/langfuse_logger.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/logger.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/mappers/genai.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/mappers/langfuse.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/mappers/legacy.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/model/config.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/model/destination.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/model/metadata.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/model/payloads.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/model/request_io.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/model/semconv.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/plumbing/context.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/plumbing/metrics.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/plumbing/providers.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/plumbing/routing.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/agentops.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/arize.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/base.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/destinations.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/langfuse.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/langtrace.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/levo.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/newrelic.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/phoenix.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/utils.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/otel/presets/weave.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/posthog.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/prometheus.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/prometheus_helpers/bounded_prometheus_series_tracker.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/rubrik.py",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "filename": "litellm/integrations/s3.py",
+      "status": "modified",
+      "changes": 0
+    }
+  ]
+}
