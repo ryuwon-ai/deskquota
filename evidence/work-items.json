@@ -306,9 +306,19 @@
         "product/artifacts/backfill-resume-2026-09-14/repeat-descriptive.json",
         "product/artifacts/backfill-resume-2026-09-14/research-integrity.json",
         "reports/additional-quota-references-2026-09-14.md",
-        "reports/recent-scheduling-evidence-2026-09-14.md"
+        "reports/recent-scheduling-evidence-2026-09-14.md",
+        "reports/competitor-adoption-debate-2026-09-15.md",
+        "scripts/analyze-backfill-request-classes.py",
+        "evidence/backfill-request-classes-2026-09-15.json",
+        "reports/competitor-comparison-results-2026-09-15.md",
+        "evidence/competitor-comparison-2026-09-15/completed-run-audit.json",
+        "evidence/competitor-comparison-2026-09-15/completed-run-summary.json",
+        "evidence/competitor-comparison-2026-09-15/metadata-mechanism-validation.json",
+        "evidence/competitor-comparison-2026-09-15/native-build.json",
+        "reports/competitor-round2-2026-09-15.md",
+        "evidence/competitor-round2-2026-09-15/result-audit.json"
       ],
-      "next_action": "이번 round 종료:60초5시드에서 짧은 최종 평균16.3% 감소, p95·처리량 동률. 기본값 승격 전 새 holdout·별도120초5쌍·전체 장부 scan 비용 확인. 실제 NVIDIA 호환성은 키 위치 대기; 경쟁 성능·저사양 우위는 미검증."
+      "next_action": "2026-09-15 구현·경쟁3종 포함44회 합성 실행 완료. 낮은 RSS와 특정 metadata 기전 개선 관측; 독립 생성 입력은 RR16/BF15 완료로 승격 기각, RR 유지. 일반 binary actual 정산은 quarter_actual에서 창7→16·최종16→18, 동일 비용 계약에서는 이득 없음. 기존120초5쌍은 미실행으로 보존. 실제 제공자 제한 계약·저사양·작업 품질·일반 성능 우위는 미검증이므로 V01 진행 중."
     },
     {
       "id": "V02",
@@ -366,7 +376,50 @@
         "evidence/recent-scheduling-evidence-2026-09-14.json"
       ],
       "next_action": "소스·게재 상태 조사만 완료. 경쟁 성능·논문 재현·실제 NVIDIA 및 채택 검증은 별도."
+    },
+    {
+      "id": "I03",
+      "title": "경쟁 패턴을 반영한 상태 표시와 true metadata 의미 보존",
+      "status": "done",
+      "evidence": [
+        "evidence/adoption-product-2026-09-15/README.md",
+        "evidence/competitor-comparison-2026-09-15/product-review.json",
+        "docs/superpowers/plans/2026-09-15-competitor-adoption.md"
+      ],
+      "next_action": "221개 관련 검사·fmt/clippy·독립 spec/quality 검토 완료. 제품 의존성 추가0. RR 기본값 유지; metadata backfill은 실험 경로. 공개 commit/push는 별도 승인 대상."
+    },
+    {
+      "id": "I04",
+      "title": "사내 Windows 피드백: 표준 인증, exact cache, actual 정산 및 시작 대기",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-15-company-feedback-design.md",
+        "docs/superpowers/plans/2026-09-15-company-feedback.md",
+        "reports/company-feedback-2026-09-15.md",
+        "evidence/company-feedback-2026-09-15/chunk2-results.json",
+        "evidence/company-feedback-2026-09-15/final-01.json",
+        "evidence/company-feedback-2026-09-15/cache-timing-01.json",
+        "evidence/company-feedback-2026-09-15/cache-result-review.json",
+        "evidence/company-feedback-2026-09-15/native-setup-02.json",
+        "evidence/company-feedback-2026-09-15/pi-native-01.json"
+      ],
+      "next_action": "Implementation and local checks complete; V02 retains native Windows/GNU and revised Claude/Codex runtime verification. Obtain company quota/usage/cache-policy details for real endpoint validation. No commit/push/release."
+    },
+    {
+      "id": "I05",
+      "title": "경쟁 패턴 추가 적용: 일반 JSON actual 정산과 터미널 캐시 상태",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-15-competitor-round2-design.md",
+        "docs/superpowers/plans/2026-09-15-competitor-round2.md",
+        "reports/competitor-round2-2026-09-15.md",
+        "evidence/competitor-round2-2026-09-15/design-review.json",
+        "evidence/competitor-round2-2026-09-15/baseline.json",
+        "evidence/competitor-round2-2026-09-15/final-build-01.json",
+        "evidence/competitor-round2-2026-09-15/result-audit.json"
+      ],
+      "next_action": "Implemented and independently reviewed;427 Rust checks passed. Local actual-JSON mechanism5/20→20/20;Reserved/missingcontrols unchanged. V01/V02 retain provider/Windows/low-end validation. No commit/push/release."
     }
   ],
-  "updated_at": "2026-09-13T11:54:11.473538+00:00"
+  "updated_at": "2026-09-15T04:17:11.981403+00:00"
 }

@@ -158,8 +158,8 @@ class Runner:
         config.write_text(text)
         state = Path(json.loads(subprocess.check_output([str(self.binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
         state.mkdir(mode=0o700)
-        self.data_token, self.control_token = secrets.token_hex(32), secrets.token_hex(32)
-        for name, value in (("data-token", self.data_token), ("control-token", self.control_token)):
+        self.control_token = secrets.token_hex(32)
+        for name, value in (("control-token", self.control_token),):
             path = state / name
             path.write_text(value)
             path.chmod(0o600)
@@ -210,7 +210,7 @@ class Runner:
         sock = socket.create_connection(("127.0.0.1", self.port), timeout=3)
         self.sockets[label] = sock
         head = (f"{method} /r/{root}/v1/{path} HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n"
-                f"X-LLMGW-Token: {self.data_token}\r\nX-Fixture-Request: {label}\r\n"
+                f"X-Fixture-Request: {label}\r\n"
                 f"X-Fixture-Endpoint: {endpoint}\r\nX-Session-Id: child-{label}\r\n"
                 f"Content-Type: application/json\r\nContent-Length: {len(body)}\r\n"
                 "Connection: close\r\n\r\n").encode()
@@ -241,7 +241,7 @@ class Runner:
         stdout, stderr = self.process.communicate(timeout=15)
         require(self.process.returncode == 0, "control_stop_exit")
         require(all(value not in stdout + stderr for value in
-                    (self.data_token.encode(), self.control_token.encode(), BODY)),
+                    (self.control_token.encode(), BODY)),
                 "fixture_material_in_output")
         self.control_stopped = True
         return trace

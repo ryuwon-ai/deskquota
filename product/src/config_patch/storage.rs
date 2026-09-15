@@ -10,6 +10,8 @@ use std::{
 pub(crate) struct Snapshot {
     pub metadata: fs::Metadata,
     pub bytes: Vec<u8>,
+    #[cfg(windows)]
+    identity: crate::lifecycle::platform::FileIdentity,
 }
 
 pub(crate) fn read_regular(path: &Path, kind: &str) -> Result<Option<Snapshot>, Error> {
@@ -24,7 +26,7 @@ pub(crate) fn read_regular(path: &Path, kind: &str) -> Result<Option<Snapshot>, 
         )));
     }
     #[cfg(unix)]
-    let mut file = {
+    let file = {
         use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
         let file = OpenOptions::new()
             .read(true)
@@ -39,7 +41,7 @@ pub(crate) fn read_regular(path: &Path, kind: &str) -> Result<Option<Snapshot>, 
         file
     };
     #[cfg(windows)]
-    let mut file = {
+    let file = {
         use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
         use windows_sys::Win32::Storage::FileSystem::{
             FILE_ATTRIBUTE_REPARSE_POINT, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
@@ -49,36 +51,53 @@ pub(crate) fn read_regular(path: &Path, kind: &str) -> Result<Option<Snapshot>, 
                 "existing {kind} reparse points are unsupported"
             )));
         }
-        let file = OpenOptions::new()
+        OpenOptions::new()
             .read(true)
             .share_mode(0x1 | 0x2 | 0x4)
             .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS)
-            .open(path)?;
-        let opened = file.metadata()?;
-        if opened.volume_serial_number() != metadata.volume_serial_number()
-            || opened.file_index() != metadata.file_index()
-        {
+            .open(path)?
+    };
+    read_snapshot(file, kind).map(Some)
+}
+
+fn read_snapshot(mut file: fs::File, kind: &str) -> Result<Snapshot, Error> {
+    let metadata = file.metadata()?;
+    if !metadata.is_file() || metadata.file_type().is_symlink() {
+        return Err(Error::message(format!(
+            "opened {kind} must be a regular file, not a link"
+        )));
+    }
+    #[cfg(windows)]
+    let identity = {
+        use std::os::windows::fs::MetadataExt;
+        use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
+        if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
             return Err(Error::message(format!(
-                "existing {kind} changed while it was opened"
+                "opened {kind} reparse points are unsupported"
             )));
         }
-        file
+        crate::lifecycle::platform::file_identity(&file)?
     };
     let mut bytes = Vec::new();
     file.read_to_end(&mut bytes)?;
-    Ok(Some(Snapshot { metadata, bytes }))
+    Ok(Snapshot {
+        metadata,
+        bytes,
+        #[cfg(windows)]
+        identity,
+    })
 }
 
-pub(crate) fn validate_local_token_target(path: &Path, exists: bool) -> Result<(), Error> {
+pub(crate) fn validate_private_target(path: &Path, exists: bool) -> Result<(), Error> {
     if !exists {
         return Ok(());
     }
-    let snapshot = read_regular(path, "token-bearing client config")?
-        .ok_or_else(|| Error::message("token-bearing client config disappeared"))?;
-    validate_local_token_snapshot(path, Some(&snapshot))
+    let snapshot = read_regular(path, "private client config")?
+        .ok_or_else(|| Error::message("private client config disappeared"))?;
+    validate_private_snapshot(path, Some(&snapshot))
 }
 
-pub(crate) fn validate_local_token_snapshot(
+pub(crate) fn validate_private_snapshot(
     path: &Path,
     snapshot: Option<&Snapshot>,
 ) -> Result<(), Error> {
@@ -104,8 +123,8 @@ pub(crate) fn validate_local_token_snapshot(
                 "client config has an extended ACL that may grant other readers; correct the permission or ACL manually, then retry; llmgw did not alter it",
             ));
         }
-        let current = read_regular(path, "token-bearing client config")?
-            .ok_or_else(|| Error::message("token-bearing client config disappeared"))?;
+        let current = read_regular(path, "private client config")?
+            .ok_or_else(|| Error::message("private client config disappeared"))?;
         if !same_snapshot(&current, snapshot) {
             return Err(Error::message(
                 "client config permission, ACL, identity, or bytes changed during token privacy validation; create a new preview",
@@ -259,6 +278,11 @@ pub(crate) fn atomic_write_client(
         .parent()
         .ok_or_else(|| Error::message("client config path has no parent directory"))?;
     ensure_client_parent(parent)?;
+    // Recovery may contain a native credential: reject widened access before
+    // creating a candidate, not only before publishing it.
+    if require_user_private {
+        validate_private_snapshot(path, expected)?;
+    }
     let temporary = temporary_path(path, "candidate");
     let result = (|| -> Result<(), Error> {
         let mut file = crate::lifecycle::platform::open(&temporary, true, true)?;
@@ -266,16 +290,16 @@ pub(crate) fn atomic_write_client(
         file.sync_all()?;
         drop(file);
         if let Some(expected) = expected {
-            prepare_existing_replacement(path, &temporary, expected, kind)?;
+            prepare_existing_replacement(path, &temporary, expected, kind, require_user_private)?;
             if require_user_private {
                 // Perform the access check after candidate metadata has been
                 // prepared, immediately before the final identity/byte check.
                 // An external editor can still race the final check and rename;
                 // ConfigPatch does not claim filesystem CAS against it.
-                validate_local_token_snapshot(path, Some(expected))?;
-                let candidate = read_regular(&temporary, "token-bearing client candidate")?
-                    .ok_or_else(|| Error::message("token-bearing client candidate disappeared"))?;
-                validate_local_token_snapshot(&temporary, Some(&candidate))?;
+                validate_private_snapshot(path, Some(expected))?;
+                let candidate = read_regular(&temporary, "private client candidate")?
+                    .ok_or_else(|| Error::message("private client candidate disappeared"))?;
+                validate_private_snapshot(&temporary, Some(&candidate))?;
             }
             let current = read_regular(path, kind)?
                 .ok_or_else(|| Error::message(format!("existing {kind} disappeared")))?;
@@ -358,8 +382,7 @@ fn same_snapshot(current: &Snapshot, expected: &Snapshot) -> bool {
     #[cfg(windows)]
     {
         use std::os::windows::fs::MetadataExt;
-        current.metadata.volume_serial_number() == expected.metadata.volume_serial_number()
-            && current.metadata.file_index() == expected.metadata.file_index()
+        current.identity == expected.identity
             && current.metadata.file_attributes() == expected.metadata.file_attributes()
     }
 }
@@ -370,8 +393,11 @@ fn prepare_existing_replacement(
     temporary: &Path,
     expected: &Snapshot,
     kind: &str,
+    require_user_private: bool,
 ) -> Result<(), Error> {
     use std::os::unix::fs::MetadataExt;
+    #[cfg(not(target_os = "macos"))]
+    let _ = require_user_private;
     if expected.metadata.uid() != rustix::process::geteuid().as_raw() {
         return Err(Error::message(format!(
             "existing {kind} is not owned by the current user"
@@ -394,6 +420,9 @@ fn prepare_existing_replacement(
     #[cfg(target_os = "macos")]
     {
         let acl = exacl::getfacl(path, exacl::AclOption::SYMLINK_ACL)?;
+        if require_user_private && !acl.is_empty() {
+            return Err(Error::message("private client config has an extended ACL"));
+        }
         let current = fs::symlink_metadata(path)?;
         if current.dev() != expected.metadata.dev() || current.ino() != expected.metadata.ino() {
             return Err(Error::message(format!(
@@ -423,6 +452,7 @@ fn prepare_existing_replacement(
     _temporary: &Path,
     _expected: &Snapshot,
     _kind: &str,
+    _require_user_private: bool,
 ) -> Result<(), Error> {
     // ReplaceFileW merges the destination's attributes and DACL. Independent
     // private recovery copies are created by the shared replacement helper.
@@ -482,17 +512,10 @@ fn validate_replacement_metadata(
 }
 
 pub(crate) fn write_private_state_atomic(path: &Path, bytes: &[u8]) -> Result<(), Error> {
-    let existing = match crate::config_patch::journal::read_private(path) {
-        Ok(bytes) => Some(bytes),
+    let expected = match crate::lifecycle::platform::read(path) {
+        Ok(file) => Some(read_snapshot(file, "protected patch journal")?),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
         Err(error) => return Err(error.into()),
-    };
-    let expected = match existing {
-        Some(bytes) => Some(Snapshot {
-            metadata: fs::symlink_metadata(path)?,
-            bytes,
-        }),
-        None => None,
     };
     atomic_write_client(
         path,
@@ -511,5 +534,91 @@ fn refuse_linux_posix_acl(path: &Path, kind: &str) -> Result<(), Error> {
         ))),
         Err(rustix::io::Errno::NODATA | rustix::io::Errno::NOTSUP) => Ok(()),
         Err(error) => Err(std::io::Error::from(error).into()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct Fixture(PathBuf);
+
+    impl Fixture {
+        fn new() -> Self {
+            let path = std::env::temp_dir().join(format!(
+                "llmgw-snapshot-{}-{:016x}",
+                std::process::id(),
+                rand::random::<u64>()
+            ));
+            fs::create_dir(&path).unwrap();
+            Self(path)
+        }
+    }
+
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn equal_bytes_replacement_has_different_snapshot_identity() {
+        let fixture = Fixture::new();
+        let path = fixture.0.join("config.json");
+        let bytes = b"{\"same\":true}";
+        fs::write(&path, bytes).unwrap();
+        let expected = read_regular(&path, "test config").unwrap().unwrap();
+        let unchanged = read_regular(&path, "test config").unwrap().unwrap();
+        assert!(same_snapshot(&unchanged, &expected));
+
+        // Retain the original file so its ID cannot be recycled for the replacement.
+        fs::rename(&path, fixture.0.join("original.json")).unwrap();
+        fs::write(&path, bytes).unwrap();
+        let replacement = read_regular(&path, "test config").unwrap().unwrap();
+        assert_eq!(replacement.bytes, expected.bytes);
+        assert_eq!(replacement.metadata.len(), expected.metadata.len());
+        assert!(!same_snapshot(&replacement, &expected));
+        let error =
+            atomic_write_client(&path, b"{}", Some(&expected), "test config", false).unwrap_err();
+        assert!(error.to_string().contains("changed"));
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+    }
+
+    #[test]
+    fn opened_snapshot_rejects_a_directory() {
+        let fixture = Fixture::new();
+        assert!(read_regular(&fixture.0, "test config").is_err());
+        let mut options = OpenOptions::new();
+        options.read(true);
+        #[cfg(windows)]
+        {
+            use std::os::windows::fs::OpenOptionsExt;
+            use windows_sys::Win32::Storage::FileSystem::FILE_FLAG_BACKUP_SEMANTICS;
+            options.custom_flags(FILE_FLAG_BACKUP_SEMANTICS);
+        }
+        let directory = options.open(&fixture.0).unwrap();
+        assert!(read_snapshot(directory, "test config").is_err());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "requires Windows Developer Mode or symbolic-link privilege"]
+    fn windows_snapshot_rejects_a_file_reparse_point() {
+        use std::os::windows::fs::{OpenOptionsExt, symlink_file};
+        use windows_sys::Win32::Storage::FileSystem::{
+            FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
+        };
+        let fixture = Fixture::new();
+        let path = fixture.0.join("config.json");
+        let link = fixture.0.join("link.json");
+        fs::write(&path, b"{}").unwrap();
+        symlink_file(&path, &link).unwrap();
+        assert!(read_regular(&link, "test config").is_err());
+        let file = OpenOptions::new()
+            .read(true)
+            .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS)
+            .open(&link)
+            .unwrap();
+        assert!(read_snapshot(file, "test config").is_err());
     }
 }

@@ -1,6 +1,6 @@
 # 로컬 LLM 게이트웨이 조사
 
-기준일: 2026-09-14. 목표는 **한 PC의 여러 에이전트가 제한된 LLM 용량을 덜 낭비하고 공정하게 쓰게 하는 최소 게이트웨이**다.
+기준일: 2026-09-15. 목표는 **한 PC의 여러 에이전트가 제한된 LLM 용량을 덜 낭비하고 공정하게 쓰게 하는 최소 게이트웨이**다.
 
 ## 현재 결론
 
@@ -12,13 +12,16 @@
 |---|---|
 | HTTP/SSE, RPM/TPM, 공정 큐, 429·취소 | Core Task 1–8 수용. 합성 비교에서 효율 우위는 입증하지 못함 |
 | 실험용 Backfill | [동일 바이너리의60초5시드 탐색 반복](reports/backfill-experiment-results.md): 짧은 평균 지연16.3% 감소, p95·처리량 동률. 일반 기본값은 그대로 |
+| 경쟁 패턴 적용·실행 비교 | [새 비교와 반례](reports/competitor-comparison-results-2026-09-15.md): CLI 상태 표시·metadata 의미 보존, 추가 의존성0, 관련 검사221개 통과. 독립 입력의 완료율 반례로 기본 RR 유지 |
+| 사내 피드백 반영 | [Windows 소스·표준 인증·exact cache·시작 대기](reports/company-feedback-2026-09-15.md): 당시 macOS 420개 검사 통과. 실제 Windows 빌드·실행은 별도 검증 필요 |
+| 경쟁 패턴 추가 적용 | [JSON 정산·캐시 상태](reports/competitor-round2-2026-09-15.md): 전체 검사427개·독립 검토 통과. 작은 TPM 합성 조건에서 완료5/20→20/20, 무환급 대조군 유지. 실제 제공자 효율은 별도 검증 |
 | `on/off/status/restart`, 첫 설정, 파일 변경·복원 | Native Task 1–3 수용 |
 | Pi·Claude Code·Codex 연결 | [Native Task 4 수용](evidence/native-task4-accepted.json). 동일 Mac 빌드에서 세 도구의 격리 도구 왕복 확인 |
 | 사용자 로그인 자동 시작 | [Native Task 5 수용](evidence/native-task5-accepted.json). 명세·품질 통과, 실제 계정 등록·로그인 미검증 |
 | 작은 installer와 최종 메모리·실행 시간 측정 | [Native Task 6 수용](evidence/native-task6-accepted.json). macOS ARM 패키지 설치·재설치와 세 도구 왕복 확인 |
 | 실제 Windows/Linux·저사양 PC·사용자 채택 | 미검증 |
 
-현재 산출물은 [macOS ARM 패키지](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz), [체크섬](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256), [설치 안내](product/docs/installation.md)다. Rust 테스트 370개와 첫 저장→연결→종료의 독립 재검토를 통과했다. 동일 패키지의 M4 32GiB 개발 PC 관측은 대기 메모리 9.73MiB(10표본), 시작 36.4–63.1ms·종료 35.6–45.3ms(각 5회)다. [측정 범위와 제한](product/artifacts/native-final-integration-package/acceptance/README.md)을 함께 읽는다. 이 수치는 저사양 성능이나 처리량 우위를 입증하지 않는다.
+이전 Native Task 6 산출물은 [macOS ARM 패키지](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz)와 [체크섬](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256)이다. 당시 Rust 테스트 370개와 첫 저장→연결→종료의 독립 재검토를 통과했다. 동일 패키지의 M4 32GiB 개발 PC 관측은 대기 메모리 9.73MiB(10표본), 시작 36.4–63.1ms·종료 35.6–45.3ms(각 5회)다. [측정 범위와 제한](product/artifacts/native-final-integration-package/acceptance/README.md)을 함께 읽는다. 이 수치는 후속 변경본의 성능이나 저사양·처리량 우위를 입증하지 않는다. 현재 소스의 추가 변경과 검증은 위 최신 보고서를, 실행 방법은 [설치 안내](product/docs/installation.md)를 따른다.
 
 ## 합의한 경계
 
@@ -47,6 +50,8 @@
 10. [코어 구현 계획](docs/superpowers/plans/2026-09-12-gateway-core.md)과 [네이티브 경험 구현 계획](docs/superpowers/plans/2026-09-12-native-experience.md): 두 명세·네 chunk 리뷰 완료
 11. [스트리밍 관찰 계약](reports/stream-protocol-contracts.md): Pi·Codex와 공식 프로토콜의 usage·framing·종료 경계를 Core Task 3 수용 조건으로 연결
 12. [NVIDIA 소량 API 검증 준비](reports/nvidia-api-evaluation.md): dry-run 기본 도구·로컬 검사 완료, 키 위치와 실제 무료 계정 검증 대기
+13. [경쟁 구현 교차 토론](reports/competitor-adoption-debate-2026-09-15.md)과 [적용·실행 비교](reports/competitor-comparison-results-2026-09-15.md): 고정 Bifrost·HiveMind·LiteLLM 비교, PromptForge 소스 검토, 독립 입력의 반례와 metadata 기전 검사. 이전 패키지의 수치와 새 실험 바이너리 수치를 구분한다.
+14. [사내 피드백 반영](reports/company-feedback-2026-09-15.md)과 [JSON 정산 후속](reports/competitor-round2-2026-09-15.md): 표준 인증·native Windows 소스 수정·bounded exact cache, 일반 JSON 사용량 정산의 범위와 별도 실행 근거.
 
 ## 직접 확인한 것과 남은 것
 

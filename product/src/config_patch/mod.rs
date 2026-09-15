@@ -13,7 +13,7 @@ pub use apply::{apply, preview};
 pub use journal::{JournalStatus, inspect_journal};
 pub use restore::restore;
 pub use storage::cooperating_lock_path;
-pub(crate) use storage::{normalize_resource_path, validate_local_token_target};
+pub(crate) use storage::{normalize_resource_path, validate_private_target};
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -87,10 +87,6 @@ impl fmt::Debug for KeyPath {
 #[derive(Clone, PartialEq)]
 pub enum EditValue {
     Public(serde_json::Value),
-    LocalDataToken(String),
-    /// A dedicated provider object containing only the local data token and
-    /// reviewed public metadata. Its contents are always opaque in output.
-    LocalDataTokenObject(serde_json::Value),
     UpstreamCredential(String),
     ControlToken(String),
 }
@@ -99,10 +95,6 @@ impl fmt::Debug for EditValue {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Public(value) => formatter.debug_tuple("Public").field(value).finish(),
-            Self::LocalDataToken(_) => formatter.write_str("LocalDataToken([REDACTED])"),
-            Self::LocalDataTokenObject(_) => {
-                formatter.write_str("LocalDataTokenObject([REDACTED])")
-            }
             Self::UpstreamCredential(_) => formatter.write_str("UpstreamCredential([REDACTED])"),
             Self::ControlToken(_) => formatter.write_str("ControlToken([REDACTED])"),
         }
@@ -113,8 +105,6 @@ impl EditValue {
     fn value(&self) -> Option<serde_json::Value> {
         match self {
             Self::Public(value) => Some(value.clone()),
-            Self::LocalDataToken(value) => Some(serde_json::Value::String(value.clone())),
-            Self::LocalDataTokenObject(value) => Some(value.clone()),
             Self::UpstreamCredential(_) | Self::ControlToken(_) => None,
         }
     }
@@ -123,14 +113,6 @@ impl EditValue {
         match self {
             Self::Public(value) => {
                 hasher.update(b"public\0");
-                hasher.update(serde_json::to_vec(value).expect("JSON value serializes"));
-            }
-            Self::LocalDataToken(value) => {
-                hasher.update(b"local-data-token\0");
-                hasher.update(value.as_bytes());
-            }
-            Self::LocalDataTokenObject(value) => {
-                hasher.update(b"local-data-token-object-v1\0");
                 hasher.update(serde_json::to_vec(value).expect("JSON value serializes"));
             }
             Self::UpstreamCredential(value) => {
@@ -142,13 +124,6 @@ impl EditValue {
                 hasher.update(value.as_bytes());
             }
         }
-    }
-
-    fn is_local_data_token(&self) -> bool {
-        matches!(
-            self,
-            Self::LocalDataToken(_) | Self::LocalDataTokenObject(_)
-        )
     }
 }
 
@@ -297,21 +272,7 @@ fn validate_patch_shape(patch: &Patch) -> Result<(), Error> {
                         "control tokens cannot be copied into a client config",
                     ));
                 }
-                EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_)
-                    if patch.scope != Scope::UserPrivate =>
-                {
-                    return Err(Error::message(
-                        "local data tokens require a user-private client config",
-                    ));
-                }
-                EditValue::LocalDataTokenObject(value) if !value.is_object() => {
-                    return Err(Error::message(
-                        "local data token object must be a JSON object",
-                    ));
-                }
-                EditValue::Public(_)
-                | EditValue::LocalDataToken(_)
-                | EditValue::LocalDataTokenObject(_) => {}
+                EditValue::Public(_) => {}
             }
         }
     }

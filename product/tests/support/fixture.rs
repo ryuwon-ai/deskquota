@@ -179,21 +179,43 @@ pub struct GatedUpstreamFixture {
 
 impl GatedUpstreamFixture {
     pub async fn start(first_chunks: Vec<Vec<u8>>, final_chunks: Vec<Vec<u8>>) -> Self {
-        Self::start_inner(first_chunks, final_chunks, false, false).await
+        Self::start_inner(
+            first_chunks,
+            final_chunks,
+            false,
+            false,
+            "text/event-stream",
+        )
+        .await
     }
 
     pub async fn start_before_headers(
         first_chunks: Vec<Vec<u8>>,
         final_chunks: Vec<Vec<u8>>,
     ) -> Self {
-        Self::start_inner(first_chunks, final_chunks, true, false).await
+        Self::start_inner(first_chunks, final_chunks, true, false, "text/event-stream").await
     }
 
     pub async fn start_with_body_error(
         first_chunks: Vec<Vec<u8>>,
         final_chunks: Vec<Vec<u8>>,
     ) -> Self {
-        Self::start_inner(first_chunks, final_chunks, false, true).await
+        Self::start_inner(first_chunks, final_chunks, false, true, "text/event-stream").await
+    }
+
+    pub async fn start_json(
+        first_chunks: Vec<Vec<u8>>,
+        final_chunks: Vec<Vec<u8>>,
+        fail_body: bool,
+    ) -> Self {
+        Self::start_inner(
+            first_chunks,
+            final_chunks,
+            false,
+            fail_body,
+            "application/json",
+        )
+        .await
     }
 
     async fn start_inner(
@@ -201,6 +223,7 @@ impl GatedUpstreamFixture {
         final_chunks: Vec<Vec<u8>>,
         gate_before_headers: bool,
         fail_body: bool,
+        media: &'static str,
     ) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
@@ -265,7 +288,7 @@ impl GatedUpstreamFixture {
                             }
                             if writer
                                 .write_all(
-                                    b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n",
+                                    format!("HTTP/1.1 200 OK\r\nContent-Type: {media}\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n").as_bytes(),
                                 )
                                 .await
                                 .is_err()
@@ -508,7 +531,21 @@ async fn read_request(socket: &mut TcpStream) -> io::Result<CapturedRequest> {
 
 pub async fn send_raw(address: SocketAddr, request: &[u8]) -> Vec<u8> {
     let mut socket = TcpStream::connect(address).await.expect("connect gateway");
-    socket.write_all(request).await.expect("write request");
+    let marker = b"Host: localhost\r\n";
+    let request = if let Some(index) = request
+        .windows(marker.len())
+        .position(|bytes| bytes == marker)
+    {
+        [
+            request[..index].to_vec(),
+            format!("Host: {address}\r\n").into_bytes(),
+            request[index + marker.len()..].to_vec(),
+        ]
+        .concat()
+    } else {
+        request.to_vec()
+    };
+    socket.write_all(&request).await.expect("write request");
     socket.shutdown().await.expect("finish request write");
     let mut response = Vec::new();
     tokio::time::timeout(Duration::from_secs(3), socket.read_to_end(&mut response))
@@ -520,7 +557,21 @@ pub async fn send_raw(address: SocketAddr, request: &[u8]) -> Vec<u8> {
 
 pub async fn open_raw(address: SocketAddr, request: &[u8]) -> TcpStream {
     let mut socket = TcpStream::connect(address).await.expect("connect gateway");
-    socket.write_all(request).await.expect("write request");
+    let marker = b"Host: localhost\r\n";
+    let request = if let Some(index) = request
+        .windows(marker.len())
+        .position(|bytes| bytes == marker)
+    {
+        [
+            request[..index].to_vec(),
+            format!("Host: {address}\r\n").into_bytes(),
+            request[index + marker.len()..].to_vec(),
+        ]
+        .concat()
+    } else {
+        request.to_vec()
+    };
+    socket.write_all(&request).await.expect("write request");
     socket
 }
 

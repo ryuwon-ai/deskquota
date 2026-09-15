@@ -1,0 +1,166 @@
+{
+  "arm": "hivemind-head",
+  "command": [
+    "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/python/hivemind-head-venv/bin/python",
+    "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/reference-python-2026-09-15/hivemind-head-launch.py"
+  ],
+  "performance_benchmark": false,
+  "cases": [
+    {
+      "name": "json",
+      "status": 200,
+      "wire_bytes": 270,
+      "upstream_attempts": 1,
+      "ingress_forwarded": true,
+      "pass": true
+    },
+    {
+      "name": "sse",
+      "status": 200,
+      "wire_bytes": 480,
+      "upstream_attempts": 1,
+      "ingress_forwarded": true,
+      "pass": true
+    },
+    {
+      "name": "429-no-retry",
+      "status": 429,
+      "wire_bytes": 100,
+      "upstream_attempts": 1,
+      "ingress_forwarded": true,
+      "pass": true
+    }
+  ],
+  "upstream_attempts": [
+    {
+      "path": "/v1/chat/completions",
+      "model": "synthetic",
+      "stream": false,
+      "reject": false,
+      "ingress_header": "smoke-ingress",
+      "agent_header": "smoke"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "synthetic",
+      "stream": true,
+      "reject": false,
+      "ingress_header": "smoke-ingress",
+      "agent_header": "smoke"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "synthetic",
+      "stream": false,
+      "reject": true,
+      "ingress_header": "smoke-ingress",
+      "agent_header": "smoke"
+    }
+  ],
+  "environment_overrides": {
+    "HOME": "[inherited]",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PATH": "[inherited]",
+    "NO_PROXY": "127.0.0.1,localhost",
+    "LITELLM_LOCAL_MODEL_COST_MAP": "True",
+    "DO_NOT_TRACK": "1",
+    "OTEL_SDK_DISABLED": "true",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "LITELLM_MODE": "DEV"
+  },
+  "startup_ready": true,
+  "stats": {
+    "proxy": {
+      "upstream_url": "http://127.0.0.1:18764",
+      "host": "127.0.0.1",
+      "port": 18765
+    },
+    "caching": {
+      "requests_seen": 3,
+      "requests_with_cache_control": 0,
+      "responses_with_cache_usage": 0,
+      "cache_creation_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_supported": false
+    },
+    "admission": {
+      "max_concurrency": 2,
+      "active": 0,
+      "available": 2,
+      "total_admitted": 3,
+      "avg_queue_time_ms": 0.0
+    },
+    "rate_limiter": {
+      "is_throttled": true,
+      "throttle_remaining_seconds": 1.0,
+      "provider": "Generic",
+      "scope": "global",
+      "rpm_limit": 16,
+      "rpm_current": 3,
+      "tpm_limit": 6000,
+      "tpm_current": 21,
+      "fair_share": {
+        "requests_factor": 1.0,
+        "tokens_factor": 1.0
+      },
+      "agent_limits": {},
+      "providers": {
+        "default": {
+          "remaining_requests": null,
+          "remaining_tokens": null,
+          "limit_requests": null,
+          "limit_tokens": null,
+          "age_seconds": 0.0
+        }
+      },
+      "agents": {}
+    },
+    "backpressure": {
+      "recommended_concurrency": 2,
+      "current_concurrency_float": 2,
+      "max_concurrency": 2,
+      "min_concurrency": 2,
+      "avg_latency_ms": 5.51,
+      "latency_target_ms": 2000.0,
+      "backpressure_factor": 0.0,
+      "error_count": 0,
+      "circuit_open": false,
+      "window_size": 3,
+      "recent_adjustments": []
+    },
+    "budget": {
+      "total_budget": null,
+      "total_used": 21,
+      "total_remaining": null,
+      "default_agent_budget": null,
+      "agents": {
+        "smoke": {
+          "budget": null,
+          "used": 21,
+          "remaining": null,
+          "usage_ratio": null
+        }
+      }
+    },
+    "latency": {
+      "total_requests": 3,
+      "window_size": 3,
+      "avg_ms": 5.51,
+      "p50_ms": 0.96,
+      "p95_ms": 14.96,
+      "p99_ms": 14.96,
+      "min_ms": 0.61,
+      "max_ms": 14.96,
+      "error_rate": 0.3333
+    },
+    "retry": {
+      "max_retries": 0,
+      "total_retries": 0,
+      "total_retry_time_seconds": 0.0
+    }
+  },
+  "passed": true,
+  "exit_code": -15
+}

@@ -39,16 +39,13 @@ pub(super) fn patches(
     let provider = json!({
         "baseUrl": base,
         "api": "openai-completions",
-        "apiKey": "llmgw-local-header",
-        "headers": {
-            "X-LLMGW-Token": request.local_data_token,
-            "X-LLMGW-Client": "pi"
-        },
+        "apiKey": if request.upstream_auth == crate::config::Auth::Forward { format!("${}", request.client_key_env) } else { "llmgw-local-only".to_owned() },
+        "headers": {"X-LLMGW-Client": "pi"},
         "models": [model]
     });
     let model_edits = vec![Edit::Set {
         key: key(&["providers", "llmgw"])?,
-        value: EditValue::LocalDataTokenObject(provider),
+        value: EditValue::Public(provider),
     }];
     let mut patches = vec![patch(
         models_path,

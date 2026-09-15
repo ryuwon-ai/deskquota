@@ -19,41 +19,34 @@ async fn verify(endpoint: Endpoint, sse: &str, known: Option<u128>) {
     verify_mode(endpoint, sse, known, Accounting::Actual).await;
 }
 async fn verify_mode(endpoint: Endpoint, sse: &str, known: Option<u128>, accounting: Accounting) {
+    verify_response(
+        endpoint,
+        sse,
+        known,
+        accounting,
+        "200 OK",
+        "Content-Type: text/event-stream\r\n",
+    )
+    .await;
+}
+async fn verify_response(
+    endpoint: Endpoint,
+    payload: &str,
+    known: Option<u128>,
+    accounting: Accounting,
+    status_line: &str,
+    headers: &str,
+) {
     let raw = format!(
-        "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{sse}",
-        sse.len()
+        "HTTP/1.1 {status_line}\r\n{headers}Content-Length: {}\r\nConnection: close\r\n\r\n{payload}",
+        payload.len()
     );
     let upstream = UpstreamFixture::start(raw.into_bytes()).await;
-    let config = Config {
-        listen: "127.0.0.1:0".parse().unwrap(),
-        concurrency: 1,
-        cancel_policy: CancelPolicy::Drain,
-        accounting,
-        retry_transient_429: false,
-        upstream: Upstream {
-            api_base: format!("http://{}/v1", upstream.address()).parse().unwrap(),
-            auth: Auth::None,
-            proxy: None,
-            ca_bundle: None,
-        },
-        quota: Quota {
-            rpm: Limit::Unlimited,
-            tpm: Limit::Known(1000.try_into().unwrap()),
-        },
-        models: vec![Model {
-            id: "synthetic".into(),
-            max_output_tokens: Some(300.try_into().unwrap()),
-        }],
-        roots: vec![Root {
-            id: "review-fix".into(),
-            endpoints: vec![endpoint],
-            models: vec!["synthetic".into()],
-        }],
-    };
+    let config = test_config(upstream.address(), endpoint, accounting);
     let clock = ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
         clock.clone(),
         None,
     )
@@ -72,10 +65,10 @@ async fn verify_mode(endpoint: Endpoint, sse: &str, known: Option<u128>, account
         body.len()
     );
     let response = send_raw(gateway.address(), request.as_bytes()).await;
-    assert_eq!(status(&response), 200);
+    assert_eq!(status(&response), status_line[..3].parse::<u16>().unwrap());
     assert_eq!(
         response_body(&response),
-        sse.as_bytes(),
+        payload.as_bytes(),
         "observation must not change wire bytes"
     );
     let snapshot = server::testing::quota_snapshot(&gateway);
@@ -345,4 +338,311 @@ async fn quality_messages_ordered_start_delta_stop_settles_known_usage() {
 #[tokio::test]
 async fn quality_messages_non_accounting_events_after_stop_preserve_final_usage() {
     verify(Endpoint::Messages,&format!("{MESSAGES_USAGE}{MESSAGE_STOP}event: message_delta\ndata: {{\"type\":\"message_delta\",\"delta\":{{\"stop_reason\":\"end_turn\"}}}}\n\nevent: message_start\ndata: {{\"type\":\"message_start\",\"message\":{{}}}}\n\ndata: {{\"type\":\"synthetic.notice\"}}\n\n{MESSAGE_STOP}"),Some(31)).await;
+}
+
+const CHAT_JSON: &str = r#"{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"x"}}],"usage":{"prompt_tokens":20,"completion_tokens":3,"prompt_tokens_details":{"cached_tokens":7}}}"#;
+const RESP_JSON: &str = r#"{"status":"completed","error":null,"incomplete_details":null,"output":[],"usage":{"input_tokens":20,"output_tokens":3,"input_tokens_details":{"cached_tokens":7}}}"#;
+const MSG_JSON: &str = r#"{"type":"message","role":"assistant","stop_reason":"end_turn","content":[],"usage":{"input_tokens":17,"output_tokens":9,"cache_creation_input_tokens":3,"cache_read_input_tokens":2}}"#;
+
+#[tokio::test]
+async fn json_final_usage_reconciles_all_three_endpoints() {
+    for (endpoint, body, total) in [
+        (Endpoint::ChatCompletions, CHAT_JSON, 23),
+        (Endpoint::Responses, RESP_JSON, 23),
+        (Endpoint::Messages, MSG_JSON, 31),
+    ] {
+        verify_response(
+            endpoint,
+            body,
+            Some(total),
+            Accounting::Actual,
+            "200 OK",
+            "Content-Type: application/json; charset=utf-8\r\n",
+        )
+        .await;
+    }
+}
+
+#[tokio::test]
+async fn json_unknown_representations_and_incomplete_bodies_keep_reservations() {
+    for headers in [
+        "Content-Type: application/json\r\nContent-Encoding: gzip\r\n",
+        "Content-Type: application/json\r\nContent-Encoding: identity\r\nContent-Encoding: identity\r\n",
+        "Content-Type: application/json\r\nContent-Type: application/json\r\n",
+        "Content-Type: application/json\r\nContent-Type: text/event-stream\r\n",
+        "Content-Type: application/json\r\nContent-Encoding: identity, gzip\r\n",
+        "Content-Type: text/plain\r\n",
+        "",
+    ] {
+        verify_response(
+            Endpoint::ChatCompletions,
+            CHAT_JSON,
+            None,
+            Accounting::Actual,
+            "200 OK",
+            headers,
+        )
+        .await;
+    }
+    for status in ["206 Partial Content", "500 Synthetic"] {
+        verify_response(
+            Endpoint::ChatCompletions,
+            CHAT_JSON,
+            None,
+            Accounting::Actual,
+            status,
+            "Content-Type: application/json\r\n",
+        )
+        .await;
+    }
+    for body in [
+        CHAT_JSON[..CHAT_JSON.len() - 1].to_owned(),
+        format!("{CHAT_JSON}{{}}"),
+        format!("{CHAT_JSON}{}", " ".repeat(256 * 1024)),
+    ] {
+        verify_response(
+            Endpoint::ChatCompletions,
+            &body,
+            None,
+            Accounting::Actual,
+            "200 OK",
+            "Content-Type: application/json\r\n",
+        )
+        .await;
+    }
+    for (endpoint, body) in [
+        (Endpoint::ChatCompletions, CHAT_JSON),
+        (Endpoint::Responses, RESP_JSON),
+        (Endpoint::Messages, MSG_JSON),
+    ] {
+        let value: serde_json::Value = serde_json::from_str(body).unwrap();
+        for (field, replacement) in [
+            ("usage", serde_json::Value::Null),
+            ("error", serde_json::json!({"message":"synthetic"})),
+        ] {
+            let mut bad = value.clone();
+            bad[field] = replacement;
+            verify_response(
+                endpoint,
+                &bad.to_string(),
+                None,
+                Accounting::Actual,
+                "200 OK",
+                "Content-Type: application/json\r\n",
+            )
+            .await;
+        }
+        let mut bad = value.clone();
+        match endpoint {
+            Endpoint::ChatCompletions => {
+                bad["choices"][0]["finish_reason"] = serde_json::Value::Null
+            }
+            Endpoint::Responses => bad["status"] = serde_json::json!("in_progress"),
+            _ => bad["stop_reason"] = serde_json::Value::Null,
+        }
+        verify_response(
+            endpoint,
+            &bad.to_string(),
+            None,
+            Accounting::Actual,
+            "200 OK",
+            "Content-Type: application/json\r\n",
+        )
+        .await;
+    }
+}
+
+#[tokio::test]
+async fn json_actual_creates_debt_reserved_keeps_estimate_and_tool_stops_settle() {
+    for (endpoint, body, total, old, new) in [
+        (
+            Endpoint::ChatCompletions,
+            CHAT_JSON,
+            23,
+            "stop",
+            "tool_calls",
+        ),
+        (Endpoint::Responses, RESP_JSON, 23, "completed", "completed"),
+        (Endpoint::Messages, MSG_JSON, 31, "end_turn", "max_tokens"),
+    ] {
+        verify_response(
+            endpoint,
+            &body.replace(old, new),
+            Some(total),
+            Accounting::Actual,
+            "200 OK",
+            "Content-Type: application/json\r\nContent-Encoding: identity\r\n",
+        )
+        .await;
+        verify_response(
+            endpoint,
+            body,
+            Some(total),
+            Accounting::Reserved,
+            "200 OK",
+            "Content-Type: application/json\r\n",
+        )
+        .await;
+    }
+    verify_response(
+        Endpoint::ChatCompletions,
+        &CHAT_JSON.replace("\"completion_tokens\":3", "\"completion_tokens\":1200"),
+        Some(1220),
+        Accounting::Actual,
+        "200 OK",
+        "Content-Type: application/json\r\n",
+    )
+    .await;
+}
+
+fn test_config(
+    address: std::net::SocketAddr,
+    endpoint: Endpoint,
+    accounting: Accounting,
+) -> Config {
+    Config {
+        listen: "127.0.0.1:0".parse().unwrap(),
+        concurrency: 1,
+        startup_hold_secs: 60,
+        cache: None,
+        cancel_policy: CancelPolicy::Drain,
+        accounting,
+        retry_transient_429: false,
+        upstream: Upstream {
+            api_base: format!("http://{address}/v1").parse().unwrap(),
+            auth: Auth::None,
+            proxy: None,
+            ca_bundle: None,
+        },
+        quota: Quota {
+            rpm: Limit::Unlimited,
+            tpm: Limit::Known(1000.try_into().unwrap()),
+        },
+        models: vec![Model {
+            id: "synthetic".into(),
+            max_output_tokens: Some(300.try_into().unwrap()),
+        }],
+        roots: vec![Root {
+            id: "review-fix".into(),
+            endpoints: vec![endpoint],
+            models: vec!["synthetic".into()],
+        }],
+    }
+}
+
+#[tokio::test]
+async fn json_chunks_forward_before_eof_and_close_error_deadline_never_refund() {
+    use support::fixture::{GatedUpstreamFixture, abort_socket, open_raw, read_until};
+    use tokio::io::AsyncReadExt;
+    for outcome in ["eof", "drain", "close", "body_error", "deadline"] {
+        let split = CHAT_JSON.len() / 2;
+        let upstream = GatedUpstreamFixture::start_json(
+            vec![CHAT_JSON.as_bytes()[..split].to_vec()],
+            vec![CHAT_JSON.as_bytes()[split..].to_vec()],
+            outcome == "body_error",
+        )
+        .await;
+        let mut config = test_config(
+            upstream.address(),
+            Endpoint::ChatCompletions,
+            Accounting::Actual,
+        );
+        config.startup_hold_secs = 0;
+        config.cache = Some(Default::default());
+        config.cancel_policy = if outcome == "close" {
+            CancelPolicy::Close
+        } else {
+            CancelPolicy::Drain
+        };
+        let gateway = server::testing::spawn_with_timeouts(
+            config,
+            RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+            if outcome == "deadline" {
+                Duration::from_millis(200)
+            } else {
+                Duration::from_secs(5)
+            },
+            Duration::from_millis(200),
+        )
+        .await
+        .unwrap();
+        let body = r#"{"model":"synthetic","messages":[{"role":"user","content":"x"}]}"#;
+        let request = format!(
+            "POST /r/review-fix/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+            body.len()
+        );
+        let mut socket = open_raw(gateway.address(), request.as_bytes()).await;
+        upstream.release_first();
+        let mut received = read_until(&mut socket, &CHAT_JSON.as_bytes()[..split]).await;
+        let before = server::testing::quota_snapshot(&gateway);
+        assert_eq!(
+            before.cleanups, 0,
+            "must retain worker and reservation until HTTP EOF"
+        );
+        assert_eq!(before.tpm_debited, body.len() as u128 + 300);
+        let aborted = matches!(outcome, "drain" | "close");
+        if aborted {
+            abort_socket(socket);
+            if outcome == "close" {
+                upstream.wait_for_disconnect().await;
+            } else {
+                tokio::time::timeout(Duration::from_secs(2), async {
+                    loop {
+                        let client = reqwest::Client::builder().no_proxy().build().unwrap();
+                        let response = client
+                            .get(format!("http://{}/_llmgw/status", gateway.address()))
+                            .header("x-llmgw-control-token", "synthetic-control")
+                            .send()
+                            .await
+                            .unwrap();
+                        let metrics: serde_json::Value =
+                            serde_json::from_slice(&response.bytes().await.unwrap()).unwrap();
+                        if metrics["draining"] == 1 {
+                            break;
+                        }
+                        tokio::task::yield_now().await;
+                    }
+                })
+                .await
+                .unwrap();
+            }
+        } else {
+            upstream.release_final();
+            received.extend(read_until(&mut socket, &CHAT_JSON.as_bytes()[split..]).await);
+            assert_eq!(server::testing::quota_snapshot(&gateway).cleanups, 0);
+            if outcome != "deadline" {
+                upstream.release_eof();
+            }
+            tokio::time::timeout(Duration::from_secs(2), socket.read_to_end(&mut received))
+                .await
+                .unwrap()
+                .unwrap();
+        }
+        if outcome == "drain" {
+            upstream.release_final();
+            upstream.release_eof();
+        }
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while server::testing::quota_snapshot(&gateway).cleanups == 0 {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        let known = matches!(outcome, "eof" | "drain");
+        assert_eq!(
+            server::testing::quota_snapshot(&gateway).tpm_debited,
+            if known { 23 } else { body.len() as u128 + 300 },
+            "{outcome}"
+        );
+        let control = send_raw(gateway.address(), b"GET /_llmgw/status HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Control-Token: synthetic-control\r\nConnection: close\r\n\r\n").await;
+        let metrics: serde_json::Value = serde_json::from_slice(response_body(&control)).unwrap();
+        gateway.shutdown().await.unwrap();
+        assert_eq!(metrics["usage_known"], u64::from(known), "{outcome}");
+        assert_eq!(
+            metrics["exact_cache"]["stores"],
+            u64::from(outcome == "eof"),
+            "{outcome}"
+        );
+    }
 }

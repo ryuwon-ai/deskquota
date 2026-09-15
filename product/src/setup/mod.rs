@@ -124,6 +124,8 @@ pub struct QuotaAnswers {
     pub shared_with_other_pcs: bool,
     pub separate_input_output: bool,
     pub concurrency: u8,
+    pub startup_hold_secs: u64,
+    pub cache: Option<crate::config::CacheConfig>,
 }
 
 impl QuotaAnswers {
@@ -132,6 +134,16 @@ impl QuotaAnswers {
             .contains(&self.concurrency)
         {
             return Err(Error::message("concurrency must be between 1 and 16"));
+        }
+        if self.cache.is_some_and(|cache| !cache.is_valid()) {
+            return Err(Error::message(
+                "cache ttl_secs must be 1..3600 and max_history must be 1..64",
+            ));
+        }
+        if self.startup_hold_secs > 3600 {
+            return Err(Error::message(
+                "startup_hold_secs must be between 0 and 3600",
+            ));
         }
         Ok(())
     }
@@ -179,8 +191,10 @@ impl SetupDraft {
             config: Config {
                 listen: SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 4141),
                 concurrency: 1,
+                startup_hold_secs: 60,
+                cache: None,
                 cancel_policy: CancelPolicy::Drain,
-                accounting: Accounting::Reserved,
+                accounting: Accounting::Actual,
                 retry_transient_429: false,
                 upstream: Upstream {
                     api_base: "http://127.0.0.1:11434/v1".parse().expect("static URL"),
@@ -321,6 +335,8 @@ impl SetupDraft {
             tpm: answers.tpm.to_limit(),
         };
         self.config.concurrency = answers.concurrency;
+        self.config.startup_hold_secs = answers.startup_hold_secs;
+        self.config.cache = answers.cache;
         self.shared_with_other_pcs = answers.shared_with_other_pcs;
         self.separate_input_output = answers.separate_input_output;
         self
@@ -581,6 +597,9 @@ pub fn run_wizard(
 struct ConfigOutput<'a> {
     listen: String,
     concurrency: u8,
+    startup_hold_secs: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    cache: Option<crate::config::CacheConfig>,
     cancel_policy: &'static str,
     accounting: &'static str,
     retry_transient_429: bool,
@@ -674,6 +693,8 @@ fn serialize_config(config: &Config) -> Result<String, Error> {
     let output = ConfigOutput {
         listen: config.listen.to_string(),
         concurrency: config.concurrency,
+        startup_hold_secs: config.startup_hold_secs,
+        cache: config.cache,
         cancel_policy: match config.cancel_policy {
             CancelPolicy::Drain => "drain",
             CancelPolicy::Close => "close",

@@ -41,6 +41,8 @@ fn config(upstream: &UpstreamFixture, auth: Auth, base_query: bool) -> Config {
     Config {
         listen: "127.0.0.1:0".parse().expect("fixture listen"),
         concurrency: 1,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: CancelPolicy::Drain,
         accounting: Accounting::Reserved,
         retry_transient_429: false,
@@ -78,6 +80,8 @@ fn constructed_config(listen: &str) -> Config {
     Config {
         listen: listen.parse().expect("fixture listen"),
         concurrency: 1,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: CancelPolicy::Drain,
         accounting: Accounting::Reserved,
         retry_transient_429: false,
@@ -109,8 +113,7 @@ async fn gateway(
     env: Option<&[u8]>,
     base_query: bool,
 ) -> GatewayHandle {
-    let credentials =
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, env).expect("fixture credentials");
+    let credentials = RuntimeCredentials::new(CONTROL_TOKEN, env).expect("fixture credentials");
     server::spawn(config(upstream, auth, base_query), credentials)
         .await
         .expect("start gateway")
@@ -118,10 +121,16 @@ async fn gateway(
 
 fn post(path: &str, extra_headers: &[(&str, &str)], body: &[u8]) -> Vec<u8> {
     let mut request = format!(
-        "POST {path} HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: {}\r\nContent-Length: {}\r\nConnection: close\r\n",
-        std::str::from_utf8(DATA_TOKEN).expect("fixture token"),
+        "POST {path} HTTP/1.1\r\nHost: localhost\r\nContent-Length: {}\r\nConnection: close\r\n",
         body.len()
-    ).into_bytes();
+    )
+    .into_bytes();
+    if !extra_headers
+        .iter()
+        .any(|(name, _)| name.eq_ignore_ascii_case("content-type"))
+    {
+        request.extend_from_slice(b"Content-Type: application/json\r\n");
+    }
     for (name, value) in extra_headers {
         request.extend_from_slice(format!("{name}: {value}\r\n").as_bytes());
     }
@@ -494,7 +503,7 @@ async fn unknown_route_never_reaches_upstream() {
 }
 
 #[tokio::test]
-async fn duplicate_data_credentials_are_rejected() {
+async fn obsolete_data_header_is_ignored_and_scrubbed() {
     let upstream = UpstreamFixture::start(upstream_response("200 OK", &[], b"{}")).await;
     let gateway = gateway(&upstream, Auth::None, None, false).await;
     let response = send_raw(
@@ -506,8 +515,9 @@ async fn duplicate_data_credentials_are_rejected() {
         ),
     )
     .await;
-    assert_eq!(status(&response), 401);
-    assert_eq!(upstream.attempts(), 0);
+    assert_eq!(status(&response), 200);
+    assert_eq!(upstream.attempts(), 1);
+    assert_eq!(upstream.capture().await.header("x-llmgw-token"), None);
     gateway.shutdown().await.expect("shutdown gateway");
 }
 
@@ -604,11 +614,11 @@ async fn unsupported_background_and_upgrade_never_reach_upstream() {
 }
 
 #[tokio::test]
-async fn missing_token_is_rejected_before_body_read() {
+async fn browser_origin_is_rejected_before_body_read() {
     let upstream = UpstreamFixture::start(upstream_response("200 OK", &[], b"{}")).await;
     let gateway = gateway(&upstream, Auth::None, None, false).await;
-    let request = b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Length: 1048576\r\nConnection: close\r\n\r\n";
-    assert_eq!(status(&send_raw(gateway.address(), request).await), 401);
+    let request = b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nOrigin: https://browser.example\r\nContent-Length: 1048576\r\nConnection: close\r\n\r\n";
+    assert_eq!(status(&send_raw(gateway.address(), request).await), 403);
     assert_eq!(upstream.attempts(), 0);
     gateway.shutdown().await.expect("shutdown gateway");
 }
@@ -629,7 +639,7 @@ async fn model_allowlist_and_body_limit_are_enforced_before_upstream() {
         400
     );
     let request = format!(
-        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
         std::str::from_utf8(DATA_TOKEN).expect("fixture token"),
         8 * 1024 * 1024 + 1
     );
@@ -677,7 +687,7 @@ async fn many_small_chunked_frames_preserve_body_bytes() {
     let gateway = gateway(&upstream, Auth::None, None, false).await;
     let body = br#"{"model":"fixture-model","unknown":"small-frames"}"#;
     let mut request = format!(
-        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: {}\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n",
+        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: {}\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n",
         std::str::from_utf8(DATA_TOKEN).expect("fixture token")
     )
     .into_bytes();
@@ -701,9 +711,8 @@ async fn many_small_chunked_frames_preserve_body_bytes() {
 #[tokio::test]
 async fn reserved_env_auth_header_is_rejected_before_any_http_attempt() {
     let upstream = UpstreamFixture::start(upstream_response("200 OK", &[], b"{}")).await;
-    let credentials =
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, Some(b"reserved-header-secret"))
-            .expect("fixture credentials");
+    let credentials = RuntimeCredentials::new(CONTROL_TOKEN, Some(b"reserved-header-secret"))
+        .expect("fixture credentials");
     let result = server::spawn(
         config(
             &upstream,
@@ -744,12 +753,9 @@ fn start_validation_rejects_a_constructed_non_loopback_config_before_bind() {
 
 #[tokio::test]
 async fn public_spawn_rejects_non_loopback_before_other_startup_work() {
-    let credentials = RuntimeCredentials::new(
-        DATA_TOKEN,
-        CONTROL_TOKEN,
-        Some(b"synthetic-unused-upstream-token"),
-    )
-    .expect("synthetic credentials");
+    let credentials =
+        RuntimeCredentials::new(CONTROL_TOKEN, Some(b"synthetic-unused-upstream-token"))
+            .expect("synthetic credentials");
     let error = match server::spawn(constructed_config("0.0.0.0:0"), credentials).await {
         Ok(handle) => {
             handle
@@ -861,28 +867,24 @@ models = ["fixture-model"]
         Ok(_) => panic!("missing state credentials must reject startup"),
         Err(error) => error,
     };
-    assert!(missing.to_string().contains("data-token"));
+    assert!(missing.to_string().contains("control-token"));
 
     fs::create_dir_all(&loaded.state_paths.directory).expect("create temporary state directory");
-    let data_secret = b"only-in-temporary-data-file";
     let control_secret = b"only-in-temporary-control-file";
-    fs::write(&loaded.state_paths.data_token, data_secret).expect("write temporary data token");
     fs::write(&loaded.state_paths.control_token, control_secret)
         .expect("write temporary control token");
-    protect(&loaded.state_paths.data_token);
     protect(&loaded.state_paths.control_token);
-    RuntimeCredentials::load(&loaded).expect("protected distinct token files load");
+    RuntimeCredentials::load(&loaded).expect("protected control token file loads");
 
-    fs::write(&loaded.state_paths.control_token, data_secret)
-        .expect("replace temporary control token");
+    fs::write(&loaded.state_paths.control_token, b"").expect("replace temporary control token");
     protect(&loaded.state_paths.control_token);
     let duplicate = match RuntimeCredentials::load(&loaded) {
-        Ok(_) => panic!("duplicate state credentials must reject startup"),
+        Ok(_) => panic!("empty control credential must reject startup"),
         Err(error) => error,
     };
     let rendered = format!("{duplicate}\n{duplicate:?}");
-    assert!(rendered.contains("distinct"));
-    assert!(!rendered.contains(std::str::from_utf8(data_secret).expect("fixture secret")));
+    assert!(rendered.contains("empty"));
+    assert!(!rendered.contains(std::str::from_utf8(control_secret).expect("fixture secret")));
     fs::remove_dir_all(directory).expect("remove temporary runtime fixture");
 }
 
@@ -903,7 +905,7 @@ async fn known_tpm_rejects_missing_output_bound_before_upstream() {
     config.quota.tpm = Limit::Known(10000.try_into().unwrap());
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
     )
     .await
     .unwrap();
@@ -974,7 +976,7 @@ async fn known_tpm_rejects_multimodal_and_oversized_estimate_without_attempt() {
         config.quota.tpm = Limit::Known(10000.try_into().unwrap());
         let gateway = server::spawn(
             config,
-            RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+            RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         )
         .await
         .unwrap();
@@ -1002,7 +1004,7 @@ async fn known_quota_production_startup_holds_before_any_http_attempt() {
     config.quota.rpm = Limit::Known(1.try_into().unwrap());
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
     )
     .await
     .unwrap();
@@ -1066,7 +1068,7 @@ async fn known_tpm_explicit_caps_and_text_only_inputs_forward_exact_bytes() {
         let clock = llmgw::admission::ManualClock::default();
         let gateway = server::testing::spawn_with_clock(
             config,
-            RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+            RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
             clock.clone(),
             None,
         )
@@ -1101,7 +1103,7 @@ async fn model_default_and_explicit_cap_precedence_do_not_rewrite_body() {
         let clock = llmgw::admission::ManualClock::default();
         let gateway = server::testing::spawn_with_clock(
             config,
-            RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+            RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
             clock.clone(),
             None,
         )
@@ -1139,7 +1141,7 @@ async fn metadata_endpoints_have_zero_generation_tpm_and_share_rpm_across_roots(
     let clock = llmgw::admission::ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         clock.clone(),
         None,
     )
@@ -1187,6 +1189,56 @@ async fn metadata_endpoints_have_zero_generation_tpm_and_share_rpm_across_roots(
 }
 
 #[tokio::test]
+async fn metadata_keeps_upstream_catalog_and_authorization_error_bytes() {
+    for (status_line, code, body) in [
+        (
+            "200 OK",
+            200,
+            &b"{\"data\":[{\"id\":\"upstream-only\"}]}"[..],
+        ),
+        (
+            "403 Forbidden",
+            403,
+            &b"{\"error\":\"synthetic permission denied\"}"[..],
+        ),
+    ] {
+        let upstream = UpstreamFixture::start(upstream_response(
+            status_line,
+            &[("Content-Type", "application/json")],
+            body,
+        ))
+        .await;
+        let mut cfg = config(&upstream, Auth::Forward, false);
+        cfg.quota.tpm = Limit::Known(1.try_into().unwrap());
+        cfg.quota.rpm = Limit::Known(2.try_into().unwrap());
+        let clock = llmgw::admission::ManualClock::default();
+        let gateway = server::testing::spawn_with_clock(
+            cfg,
+            RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
+            clock.clone(),
+            None,
+        )
+        .await
+        .unwrap();
+        clock.advance_to(Duration::from_secs(60));
+        let request = b"GET /r/pi-work/v1/models HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data-token\r\nAuthorization: Bearer synthetic-upstream\r\nConnection: close\r\n\r\n";
+        let response = send_raw(gateway.address(), request).await;
+        assert_eq!(status(&response), code);
+        assert_eq!(response_body(&response), body);
+        let capture = upstream.capture().await;
+        assert_eq!(capture.target, "/team/v1/models");
+        assert_eq!(
+            capture.header("authorization"),
+            Some(b"Bearer synthetic-upstream".as_slice())
+        );
+        assert_eq!(upstream.attempts(), 1);
+        let snapshot = server::testing::quota_snapshot(&gateway);
+        assert_eq!((snapshot.rpm_debited, snapshot.tpm_debited), (1, 0));
+        gateway.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
 async fn admitted_prestart_reset_releases_joint_hold_once_without_http_attempt() {
     use support::fixture::{abort_socket, open_raw};
     let upstream = UpstreamFixture::start(upstream_response("200 OK", &[], b"{}")).await;
@@ -1198,7 +1250,7 @@ async fn admitted_prestart_reset_releases_joint_hold_once_without_http_attempt()
     let (gate, gate_rx) = tokio::sync::watch::channel(false);
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         clock.clone(),
         Some(gate_rx),
     )
@@ -1277,7 +1329,7 @@ async fn actual_wire_usage_cache_semantics_and_unknown_usage_keep_correct_debits
         let clock = llmgw::admission::ManualClock::default();
         let gateway = server::testing::spawn_with_clock(
             config,
-            RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+            RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
             clock.clone(),
             None,
         )
@@ -1309,7 +1361,7 @@ async fn known_quota_queue_deadline_holds_no_resources_and_starts_no_http() {
     config.quota.rpm = Limit::Known(1.try_into().unwrap());
     let gateway = server::testing::spawn_with_timeouts(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         Duration::from_millis(30),
         Duration::from_millis(100),
     )
@@ -1342,7 +1394,7 @@ async fn stop_cancels_admitted_unstarted_worker_and_its_quota_hold() {
     let (_gate, gate_rx) = tokio::sync::watch::channel(false);
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         clock.clone(),
         Some(gate_rx),
     )
@@ -1383,7 +1435,7 @@ async fn known_tpm_cannot_be_bypassed_by_caps_modalities_or_nested_tool_media() 
         config.models[0].max_output_tokens = Some(10.try_into().unwrap());
         let gateway = server::spawn(
             config,
-            RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+            RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         )
         .await
         .unwrap();
@@ -1410,7 +1462,7 @@ async fn protocol_specific_opaque_fields_do_not_become_multimodal_inputs() {
     let clock = llmgw::admission::ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         clock.clone(),
         None,
     )
@@ -1439,7 +1491,7 @@ async fn responses_tool_output_media_is_rejected_before_admission() {
     let clock = llmgw::admission::ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         clock.clone(),
         None,
     )
@@ -1458,5 +1510,50 @@ async fn responses_tool_output_media_is_rejected_before_admission() {
         400
     );
     assert_eq!(upstream.attempts(), 0);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn native_auth_requires_no_gateway_header_and_rejects_browser_hosts_and_forms() {
+    let upstream = UpstreamFixture::start(upstream_response("200 OK", &[], b"{}")).await;
+    let gateway = gateway(&upstream, Auth::Forward, None, false).await;
+    for extra in [
+        vec![("Origin", "null")],
+        vec![("Host", "attacker.example:4141")],
+        vec![("Content-Type", "text/plain")],
+        vec![("Content-Type", "application/x-www-form-urlencoded")],
+    ] {
+        let response = send_raw(
+            gateway.address(),
+            &post("/r/pi-work/v1/chat/completions", &extra, JSON),
+        )
+        .await;
+        assert!([400, 403, 415].contains(&status(&response)));
+    }
+    assert_eq!(upstream.attempts(), 0);
+    let response = send_raw(
+        gateway.address(),
+        &post(
+            "/r/pi-work/v1/chat/completions",
+            &[
+                ("Authorization", "Bearer native-key"),
+                ("x-api-key", "native-anthropic-key"),
+                ("Content-Type", "application/json; charset=utf-8"),
+            ],
+            JSON,
+        ),
+    )
+    .await;
+    assert_eq!(status(&response), 200);
+    let capture = upstream.capture().await;
+    assert_eq!(
+        capture.header("authorization"),
+        Some(b"Bearer native-key".as_slice())
+    );
+    assert_eq!(
+        capture.header("x-api-key"),
+        Some(b"native-anthropic-key".as_slice())
+    );
+    assert_eq!(capture.header("x-llmgw-token"), None);
     gateway.shutdown().await.unwrap();
 }

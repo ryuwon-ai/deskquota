@@ -1,6 +1,6 @@
 use super::{
-    ApplyReport, Edit, EditValue, Error, Format, OwnedKeyRequirement, Patch, Preview, Scope,
-    Transaction, document, hex_digest, snapshot_hash, storage, validate_patch_shape, value_hash,
+    ApplyReport, Edit, Error, Format, OwnedKeyRequirement, Patch, Preview, Scope, Transaction,
+    document, hex_digest, snapshot_hash, storage, validate_patch_shape, value_hash,
 };
 use crate::config_patch::journal::{
     JournalDocument, JournalStatus, KeyStage, OwnedKeyRecord, ResourceRecord, ResourceStage,
@@ -38,11 +38,7 @@ pub fn preview(transaction: &Transaction) -> Result<Preview, Error> {
                     lines.push(format!(
                         "  set {} = {}",
                         edit.key().display(),
-                        if value.is_local_data_token() {
-                            "[REDACTED local data token]"
-                        } else {
-                            "[reviewed value]"
-                        }
+                        "[reviewed value]"
                     ));
                 }
                 Edit::Remove { .. } => {
@@ -186,15 +182,7 @@ fn plan_reviewed_targets(
             created: patch.expected_hash == snapshot_hash(None),
             created_hash: None,
             pending_created_hash: None,
-            requires_user_private: patch.edits.iter().any(|edit| {
-                matches!(
-                    edit,
-                    Edit::Set {
-                        value: EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_),
-                        ..
-                    }
-                )
-            }),
+            requires_user_private: patch.scope == Scope::UserPrivate,
             stage: ResourceStage::Unstarted,
             owned_keys: Vec::new(),
             backup_refs: Vec::new(),
@@ -224,15 +212,7 @@ fn record_unstarted_failure(patch: &Patch, journal: &mut JournalDocument) {
         created: patch.expected_hash == snapshot_hash(None),
         created_hash: None,
         pending_created_hash: None,
-        requires_user_private: patch.edits.iter().any(|edit| {
-            matches!(
-                edit,
-                Edit::Set {
-                    value: EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_),
-                    ..
-                }
-            )
-        }),
+        requires_user_private: patch.scope == Scope::UserPrivate,
         stage: ResourceStage::Failed,
         owned_keys: Vec::new(),
         backup_refs: Vec::new(),
@@ -250,8 +230,8 @@ fn apply_one(
     patch.path = normalized_path;
     let patch = &patch;
     let prepared = prepare_patch(patch)?;
-    if prepared.contains_local_data_token {
-        storage::validate_local_token_target(&patch.path, prepared.before.is_some())?;
+    if patch.scope == Scope::UserPrivate {
+        storage::validate_private_target(&patch.path, prepared.before.is_some())?;
     }
 
     let resource_index = journal
@@ -301,7 +281,7 @@ fn apply_one(
         resource.created = prepared.before.is_none();
         resource.created_hash = None;
         resource.pending_created_hash = None;
-        resource.requires_user_private = prepared.contains_local_data_token;
+        resource.requires_user_private = patch.scope == Scope::UserPrivate;
         resource.stage = ResourceStage::Unstarted;
     }
 
@@ -320,7 +300,7 @@ fn apply_one(
                     .before
                     .is_none()
                     .then(|| snapshot_hash(Some(&prepared.candidate))),
-                requires_user_private: prepared.contains_local_data_token,
+                requires_user_private: patch.scope == Scope::UserPrivate,
                 stage: ResourceStage::Unstarted,
                 owned_keys: Vec::new(),
                 backup_refs: Vec::new(),
@@ -333,7 +313,7 @@ fn apply_one(
             "an existing owned resource cannot change document format",
         ));
     }
-    journal.resources[index].requires_user_private |= prepared.contains_local_data_token;
+    journal.resources[index].requires_user_private |= patch.scope == Scope::UserPrivate;
     if let Some(backup) = &backup {
         journal.resources[index].backup_refs.push(backup.clone());
     }
@@ -375,15 +355,12 @@ fn apply_one(
             "client config changed immediately before replacement; create a new preview",
         ));
     }
-    if prepared.contains_local_data_token {
-        storage::validate_local_token_snapshot(&patch.path, current.as_ref())?;
-    }
     storage::atomic_write_client(
         &patch.path,
         &prepared.candidate,
         current.as_ref(),
         "client config",
-        prepared.contains_local_data_token,
+        journal.resources[index].requires_user_private,
     )?;
     journal.resources[index].stage = ResourceStage::Written;
     journal.save(&transaction.journal_path)?;
@@ -418,7 +395,6 @@ fn apply_one(
 struct PreparedPatch {
     before: Option<Vec<u8>>,
     candidate: Vec<u8>,
-    contains_local_data_token: bool,
 }
 
 fn prepare_patch(patch: &Patch) -> Result<PreparedPatch, Error> {
@@ -436,19 +412,7 @@ fn prepare_patch(patch: &Patch) -> Result<PreparedPatch, Error> {
     });
     let candidate = document::render_edits(patch.format, source, &patch.edits)?;
     document::parse_document(patch.format, &candidate)?;
-    Ok(PreparedPatch {
-        before,
-        candidate,
-        contains_local_data_token: patch.edits.iter().any(|edit| {
-            matches!(
-                edit,
-                Edit::Set {
-                    value: EditValue::LocalDataToken(_) | EditValue::LocalDataTokenObject(_),
-                    ..
-                }
-            )
-        }),
-    })
+    Ok(PreparedPatch { before, candidate })
 }
 
 fn validate_transaction(transaction: &Transaction) -> Result<(), Error> {

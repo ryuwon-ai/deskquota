@@ -22,6 +22,8 @@ fn config(upstream: &GatedUpstreamFixture, policy: CancelPolicy) -> Config {
     Config {
         listen: "127.0.0.1:0".parse().expect("fixture listen"),
         concurrency: 1,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: policy,
         accounting: Accounting::Reserved,
         retry_transient_429: false,
@@ -56,8 +58,7 @@ fn config(upstream: &GatedUpstreamFixture, policy: CancelPolicy) -> Config {
 }
 
 async fn gateway(upstream: &GatedUpstreamFixture, policy: CancelPolicy) -> GatewayHandle {
-    let credentials =
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).expect("synthetic credentials");
+    let credentials = RuntimeCredentials::new(CONTROL_TOKEN, None).expect("synthetic credentials");
     server::spawn(config(upstream, policy), credentials)
         .await
         .expect("start gateway")
@@ -69,8 +70,7 @@ async fn gateway_with_timeouts(
     request: Duration,
     shutdown: Duration,
 ) -> GatewayHandle {
-    let credentials =
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).expect("synthetic credentials");
+    let credentials = RuntimeCredentials::new(CONTROL_TOKEN, None).expect("synthetic credentials");
     server::testing::spawn_with_timeouts(config(upstream, policy), credentials, request, shutdown)
         .await
         .expect("start gateway with fixture timeouts")
@@ -82,7 +82,7 @@ fn post(path: &str, body: &[u8]) -> Vec<u8> {
 
 fn post_with_connection(path: &str, body: &[u8], connection: &str) -> Vec<u8> {
     let mut request = format!(
-        "POST {path} HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: {}\r\nContent-Length: {}\r\nConnection: {connection}\r\n\r\n",
+        "POST {path} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: {}\r\nContent-Length: {}\r\nConnection: {connection}\r\n\r\n",
         std::str::from_utf8(DATA_TOKEN).expect("fixture token"),
         body.len()
     )
@@ -712,8 +712,8 @@ async fn public_spawn_rejects_constructed_concurrency_outside_fixed_range() {
     for concurrency in [0, 17, 255] {
         let mut constructed = config(&upstream, CancelPolicy::Drain);
         constructed.concurrency = concurrency;
-        let credentials = RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None)
-            .expect("synthetic credentials");
+        let credentials =
+            RuntimeCredentials::new(CONTROL_TOKEN, None).expect("synthetic credentials");
         match server::spawn(constructed, credentials).await {
             Err(_) => {}
             Ok(handle) => {
@@ -725,8 +725,8 @@ async fn public_spawn_rejects_constructed_concurrency_outside_fixed_range() {
     for concurrency in [1, 16] {
         let mut constructed = config(&upstream, CancelPolicy::Drain);
         constructed.concurrency = concurrency;
-        let credentials = RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None)
-            .expect("synthetic credentials");
+        let credentials =
+            RuntimeCredentials::new(CONTROL_TOKEN, None).expect("synthetic credentials");
         let handle = server::spawn(constructed, credentials)
             .await
             .expect("valid constructed concurrency");
@@ -994,7 +994,7 @@ async fn known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt(
     let clock = llmgw::admission::ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(DATA_TOKEN, CONTROL_TOKEN, None).unwrap(),
+        RuntimeCredentials::new(CONTROL_TOKEN, None).unwrap(),
         clock.clone(),
         None,
     )

@@ -30,3 +30,21 @@ used for a deployed endpoint. Original evidence bytes were preserved.
 README local links and GitHub Markdown rendering were checked. The publication
 changes branding and documentation; it does not change the gateway runtime.
 Benchmark and compatibility claims remain limited to their linked evidence.
+
+## 2026-09-15 implementation update
+
+The follow-up includes bounded exact caching, standard client authentication,
+final JSON/SSE usage settlement, configurable startup hold, Windows source
+fixes, and the associated tests, documentation and competitor comparisons.
+Selected text evidence includes successful runs, controls and failed attempts;
+reference runtimes, bytecode, build output and executables remain local.
+
+Before committing, the 70 source/manifests matched the recorded release build
+with 427 passing Rust tests, zero failures and one ignored profiling check.
+The release binary hash also matched. This rechecks artifact identity; it is
+not a new test run or native Windows validation.
+
+Gitleaks 8.30.1 identified one additional SHA-256 file identity in
+`evidence/company-feedback-2026-09-15/final-integrity.json`. It was recomputed
+against `windows-after-auth.json` and matched. Only that exact file/rule/line
+fingerprint was added to `.gitleaksignore`; original evidence bytes remain intact.

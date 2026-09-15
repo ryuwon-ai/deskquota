@@ -139,13 +139,66 @@ a new temporary directory, and confirm that the five expected files are the
 only extracted files before copying `llmgw.exe` to the user-writable install
 directory. Do not continue when the checksum or member list differs.
 
+### Building from source on Windows
+
+Running a supplied `llmgw.exe` does not require Rust, MSVC Build Tools, MinGW,
+Docker, or WSL. Building from source has separate requirements. The repository
+pins Rust 1.88.0; select `x86_64-pc-windows-gnu` explicitly when using an approved
+WinLibs/MinGW-w64 installation instead of MSVC. Rust's target standard library
+does not supply the complete C build environment. Use one matching x64 toolchain
+with GCC/G++, Windows headers and libraries, and Binutils (`as`, `ar`, `ld`,
+`dlltool`). [Rust GNU target requirements](https://doc.rust-lang.org/rustc/platform-support/windows-gnu.html)
+
+In a new PowerShell session, after provisioning that toolchain and the pinned
+Rust GNU host/target through your approved software channel:
+
+```powershell
+$winlibsBin = 'C:\Tools\winlibs\mingw64\bin' # Replace with your approved location.
+$env:PATH = "$winlibsBin;$env:PATH"
+Get-Command gcc, g++, as, ar, ld, dlltool
+gcc --version
+as --version
+dlltool --version
+rustc +1.88.0-x86_64-pc-windows-gnu --version
+$env:CARGO_TARGET_DIR = "$env:LOCALAPPDATA\llmgw-build"
+$env:CARGO_BUILD_JOBS = '2'
+cargo +1.88.0-x86_64-pc-windows-gnu build --locked --release --target x86_64-pc-windows-gnu
+```
+
+If Rust selects its bundled `dlltool` but assembly fails, confirm that the
+matching assembler is present and resolvable; adding only `dlltool.exe` is
+insufficient. GNU documents its assembler dependency and `--as` selection.
+[Binutils dlltool](https://sourceware.org/binutils/docs/binutils/dlltool.html)
+For an explicitly selected external toolchain, the following repository-local
+`.cargo/config.toml` settings select its linker and import-library tool. Adjust
+the paths; preserve any other existing target settings:
+
+```toml
+[target.x86_64-pc-windows-gnu]
+linker = 'C:\Tools\winlibs\mingw64\bin\gcc.exe'
+rustflags = ["-C", "link-self-contained=no", "-C", 'dlltool=C:\Tools\winlibs\mingw64\bin\dlltool.exe']
+```
+
+The TLS dependency also builds C code. For its x64 non-FIPS build, NASM or the
+documented prebuilt NASM objects are required; `AWS_LC_SYS_PREBUILT_NASM=1` is
+an available build setting when NASM is absent. Do not use the debug-only
+no-assembly option as a release workaround. [AWS-LC Windows requirements](https://aws.github.io/aws-lc-rs/requirements/windows.html)
+
+Config-file replacement uses the opened handle's volume and full 128-bit file
+ID, attributes, and bytes. Creation time and length are not identity checks;
+filesystems that cannot provide the required ID fail closed.
+[Microsoft file identity contract](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info)
+The source was typechecked for Windows on the development Mac in a scoped
+ConfigPatch/platform check. A complete Windows build, native regression run,
+and the exact WinLibs configuration above remain unverified here.
+
 ## First setup and lifecycle
 
 `llmgw setup` opens the terminal wizard. It does not download or start a model,
 reuse a subscription login, inspect a keychain, call inference, or change a
 client file before the final reviewed apply. Model listing is a separate user
 choice. Final apply, including Save only, creates the protected config-scoped
-state directory and local data/control tokens without starting a worker or
+state directory and local control token without starting a worker or
 changing a client. Existing token bytes are preserved. For an older or
 hand-written config without initialized state, `llmgw run` and `llmgw on` use
 the same protected lifecycle provisioning path.
@@ -157,6 +210,12 @@ llmgw on
 llmgw status
 llmgw off
 ```
+
+While running, `llmgw status` shows local quota modes, capacities, debits and
+holds, plus a representative queue reason and the protected root. These values
+explain local admission; they are not the provider's remaining allowance or a
+per-request wait estimate. Unknown/unlimited capacity is shown as `n/a`.
+Use `llmgw status --json` for the existing machine-readable status fields.
 
 `off` leaves client URLs and login intent in place. Connected clients will fail
 while the gateway is off; run `llmgw on` again or use the matching

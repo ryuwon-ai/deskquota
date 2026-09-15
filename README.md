@@ -113,6 +113,12 @@ A setup-default OpenAI-style route looks like
 `http://127.0.0.1:4141/r/pi-work/v1`. Messages clients use the corresponding
 base without the trailing `/v1`. The wizard shows the exact URL for each client.
 
+Use your client's standard API-key authentication. With `auth.mode = "forward"`,
+DeskQuota forwards `Authorization` or `x-api-key`; no `X-LLMGW-Token` is needed.
+The worker binds only to loopback and keeps lifecycle controls separately authenticated.
+New configurations use `accounting = "actual"` to settle valid final usage
+from supported JSON and streaming responses. `startup_hold_secs = 60` is configurable, including 0 to disable the hold.
+
 ### Connect the tools you already use
 
 | Client | Exercised version | Exercised protocol | Model-list boundary |
@@ -121,15 +127,24 @@ base without the trailing `/v1`. The wizard shows the exact URL for each client.
 | Claude Code | 2.1.63 | Messages | Automatic discovery unsupported in this profile |
 | Codex | 0.154.0 | Responses over HTTP | Gateway model listing is not a Codex catalog |
 
-These are **isolated macOS ARM64 tests with a synthetic upstream**, including a
-file-read tool call and follow-up request. They do not certify every version,
-model capability, or real-world coding task.
+These are **earlier isolated macOS ARM64 tests with a synthetic upstream**,
+including a file-read tool call and follow-up request. After removing the custom
+data token, Pi 0.84.2's completion and read-tool flows passed again with a local
+fixture and upstream auth `none`. Claude/Codex's updated profiles have local
+contract checks; their full native flows remain earlier evidence. These tests
+do not certify every version, model capability, or real-world coding task.
 [Exact setup, file changes, and tested flows →](product/docs/client-compatibility.md)
 
 ## Small by design
 
 One executable. In-memory scheduling. Bounded queues and stream buffers.
 Connections are reused and response chunks are forwarded as they arrive.
+
+Optional exact caching reuses complete short text responses for repeated calls.
+Enable it in setup or add `[cache]` with `ttl_secs = 300` and `max_history = 3`.
+It uses a fixed 4 MiB payload budget and spends no upstream quota on a hit.
+Reusing a result means you receive the earlier answer rather than a fresh sample.
+`llmgw status` shows cache hits, eligible misses, entries and retained bytes.
 
 The default policy is round robin with starvation protection. An experimental
 backfill policy tests whether smaller requests can use available capacity while
@@ -141,12 +156,13 @@ Some boundaries are deliberate:
 - One instance accounts for its own traffic. Other PCs can consume a shared
   company allowance outside its view.
 - Quota estimates are not an exact copy of every provider's limiter. The current
-  input estimate uses request bytes; reported usage and provider admission
-  rules are different things.
+  in-flight input estimate uses request bytes. Valid final usage from supported JSON and streaming responses corrects
+  the reservation by default; missing usage retains it. Provider admission
+  rules may differ from reported usage.
 - Scheduling can reduce avoidable waiting. It does not increase your provider's
   quota or pause and resume a remote model's token generation.
-- Response caching, semantic caching, automatic model routing, and prompt
-  rewriting are not implemented.
+- Semantic caching, automatic model routing, and prompt rewriting are not
+  implemented. Exact caching skips tools, stateful requests and incomplete responses.
 
 [Runtime and quota contract →](product/docs/runtime-contract.md)
 
@@ -154,6 +170,22 @@ Some boundaries are deliberate:
 
 Numbers are useful when their boundaries are visible. These are local
 observations on an **Apple M4 with 32 GiB RAM**, not low-end hardware guarantees.
+
+Adding JSON usage reconciliation improved completions from **5/20 to 20/20**
+in a small-TPM fixture with a 750 ms client deadline, across five paired runs.
+Reserved accounting and missing-usage controls stayed at 5/20 on both versions.
+No-wait p95 was approximately 0.263 ms on both; the release binary grew by 1,184 bytes,
+with no new dependencies. This demonstrates local admission behavior, not a general
+throughput multiplier or a provider quota increase.
+
+The current exact-cache check recorded **0.51 ms JSON / 0.69 ms streaming hit p95**
+(30 samples each). It deliberately repeated half of 120 gateway requests,
+avoiding 60 upstream calls against a fixture with a 50 ms delay. This verifies
+local reuse, not real-world hit rate or model speed.
+[Current implementation, controls and complete measurements →](reports/competitor-round2-2026-09-15.md)
+[Earlier field changes and cache measurements →](reports/company-feedback-2026-09-15.md)
+
+Earlier measurements remain separate:
 
 | Observation | Recorded result | Scope |
 |---|---|---|
@@ -168,8 +200,23 @@ drain. Each arm submitted 100 requests: 85 completed and 15 were deliberately
 cancelled. The short-request group includes model-list requests. These repeats
 vary arrival jitter in one workload, not five independent workload families.
 These seconds include quota waiting and upstream response time; they are not
-measurements of the gateway's own processing overhead. There is no demonstrated
-competitor-gateway speed advantage or real-API performance result yet.
+measurements of the gateway's own processing overhead.
+
+On 2026-09-15, we also ran pinned Bifrost, HiveMind, and LiteLLM versions on this
+Mac. Across three repeats of 100 sequential no-wait requests, DeskQuota's
+experimental RR binary recorded **0.394–1.229 ms p95** and **8.78–8.84 MiB idle
+RSS**. Its observed memory use was smaller than the compared configurations;
+its p95 was not lower in every repeat.
+
+A separate paired probe of a blocked queue reduced model-list completion from
+**52.02 s to 13.77 ms** in experimental backfill. The protected request still
+started at the first quota-expiry opportunity in both runs. This was one
+mechanism probe, and the behavior remains experimental.
+
+A new generation-only input completed **16 of 18 requests with RR and 15 with
+backfill**. We retain that counterexample and keep RR as the default. Real-API
+performance superiority remains unverified.
+[Latest competitor comparison, configurations, and complete outcomes →](reports/competitor-comparison-results-2026-09-15.md)
 
 [Accepted package measurements](product/artifacts/native-final-integration-package/acceptance/README.md) ·
 [Backfill results and raw evidence](reports/backfill-experiment-results.md) ·

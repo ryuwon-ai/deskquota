@@ -1,0 +1,34 @@
+{
+  "reviewer": "comparison_harness_review",
+  "status": "approved",
+  "scope": "independent read-only raw recomputation and current source/binary/docs check, no additional product run",
+  "raw_files": {
+    "paired-01.json": "e08986a16e73c482648974fc8b12a11c4334c718dadded45a7adcecfd60d04cc",
+    "cache-01.json": "0ab303cb8a5c6a4739c76f06c649bbb5b3af607634d13549fa3c72cad35df8d3",
+    "final-build-01.json": "071f03e3286b3380f5d066d8525353562bfa2c69ce4e57b214a522462381561d",
+    "parent-summary.json": "2d03de5e3db0978413bf6cc79d7a4e8589a40b7924cc8566b34cdfe7e872f0e6"
+  },
+  "scripts": {
+    "product/scripts/probe_json_accounting.py": "691232c6bbaf09b69ccd6995558d3e48ff8ad66eb4c94a68cddc70ce04c6380c",
+    "product/scripts/benchmark_cache.py": "068fd55d0807e96d7ab5c77ff759f0bab106ab2007924482d7b7f9147c48e2f6"
+  },
+  "counts": {
+    "runs": 40,
+    "submitted": 370,
+    "completed": 295,
+    "client_timeout": 75,
+    "warmup_included": 50,
+    "upstream_attempts": 295,
+    "cache_rows": 180,
+    "tests_passed": 427,
+    "tests_failed": 0,
+    "profiling_ignored": 1
+  },
+  "limits": [
+    "750ms client timeout plus RST, no provider quota enforcement",
+    "5 repeated processes perarm, pooled no-wait descriptive statistics; some repeat p95 increases",
+    "50% deliberate cache hit rate and 30sample p99=max",
+    "RSS snapshots notpeak; CPU .00 quantization notzero usage",
+    "no real-provider, low-end or competitor performance superiority"
+  ]
+}

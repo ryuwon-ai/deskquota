@@ -97,7 +97,7 @@ class Checks(unittest.TestCase):
                 pass
 
             def do_POST(self):
-                observations.append((self.path, self.headers.get("X-LLMGW-Token") == "local-fixture"))
+                observations.append((self.path, self.headers.get("Authorization") == "Bearer synthetic-key", self.headers.get("X-LLMGW-Token") is None))
                 self.rfile.read(int(self.headers["Content-Length"]))
                 path = self.path
                 status = 302 if path.startswith("/redirect/") else 429 if path.startswith("/limited/") else 200
@@ -123,11 +123,11 @@ class Checks(unittest.TestCase):
             base = "http://127.0.0.1:" + str(server.server_port)
             for case, expected in (("ok", "completed"), ("redirect", "http_error"), ("limited", "http_error"),
                                    ("error", "invalid_stream"), ("json", "non_sse"), ("large", "error")):
-                result = probe.request(base + "/" + case, b"{}", "synthetic-key", "local-fixture", deadline=5)
+                result = probe.request(base + "/" + case, b"{}", "synthetic-key", deadline=5)
                 self.assertEqual(result["outcome"], expected, result)
                 self.assertEqual(result["rate_headers"], {"retry-after": "3"})
             self.assertEqual(len(observations), 6)  # Redirect and 429 made no extra attempts.
-            self.assertTrue(all(local_auth for _, local_auth in observations))
+            self.assertTrue(all(auth and no_custom for _, auth, no_custom in observations))
             result = probe.request(base + "/stall", b"{}", "synthetic-key", deadline=.4)
             self.assertEqual(result["outcome"], "timeout")
             self.assertLess(result["process_wall_ms"], 3000)
@@ -140,7 +140,7 @@ class Checks(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "dry.json"
             args = argparse.Namespace(model=["fixture/a", "fixture/b"], gateway_base="http://127.0.0.1:1/r/smoke/v1",
-                                      live=False, key_env="PROBE_KEY", gateway_key_env="LOCAL_KEY", output=output)
+                                      live=False, key_env="PROBE_KEY", output=output)
             with patch.object(probe, "request", side_effect=AssertionError("dry run called network")):
                 report = probe.execute(args)
             self.assertEqual(report["max_client_requests"], 8)
@@ -150,7 +150,7 @@ class Checks(unittest.TestCase):
                 probe.execute(args)
             self.assertEqual(output.read_bytes(), original)
             args.live, args.output = True, Path(temp) / "failure.json"
-            with patch.dict(os.environ, PROBE_KEY="synthetic-key", LOCAL_KEY="local-fixture"), patch.object(probe, "PAUSE", 0), \
+            with patch.dict(os.environ, PROBE_KEY="synthetic-key"), patch.object(probe, "PAUSE", 0), \
                  patch.object(probe, "request", side_effect=[{"outcome": "completed"}, {"outcome": "http_error", "http_status": 429}]) as call:
                 report = probe.execute(args)
             self.assertEqual(report["status"], "stopped_on_failure")
@@ -165,7 +165,7 @@ class Checks(unittest.TestCase):
             with patch.dict(os.environ, PROBE_KEY=""), self.assertRaises(ValueError):
                 probe.execute(args)
             self.assertFalse(args.output.exists())
-            with patch.dict(os.environ, PROBE_KEY="synthetic-key", LOCAL_KEY="local-fixture"), \
+            with patch.dict(os.environ, PROBE_KEY="synthetic-key"), \
                  patch.object(probe, "request", side_effect=KeyboardInterrupt), self.assertRaises(KeyboardInterrupt):
                 probe.execute(args)
             interrupted = json.loads(args.output.read_text())

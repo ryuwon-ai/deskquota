@@ -1,0 +1,32 @@
+config-version = 2
+
+[server]
+bind = "127.0.0.1:18773"
+api_key = "fixture-only-not-a-secret"
+
+[[dominion]]
+id = "mock-pool"
+kind = "remote"
+max_concurrency = 2
+max_queue = 64
+policy = "queue"
+fair_scheduling = true
+
+[[endpoint]]
+id = "mock"
+protocol = "openai"
+base_url = "http://127.0.0.1:18771/v1"
+api_key = ""
+dominion = "mock-pool"
+
+[[model]]
+name = "synthetic"
+description = "Synthetic comparison fixture"
+context = 32768
+thinking = "never"
+upstream = "synthetic"
+endpoints = ["mock"]
+
+[[profile]]
+name = "benchmark"
+models = ["synthetic"]

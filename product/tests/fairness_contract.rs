@@ -10,6 +10,8 @@ fn config(cap: u8, tpm: u64, roots: usize) -> Config {
     Config {
         listen: "127.0.0.1:0".parse().unwrap(),
         concurrency: cap,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: CancelPolicy::Drain,
         accounting: Accounting::Reserved,
         retry_transient_429: false,
@@ -304,7 +306,7 @@ mod support;
 use llmgw::server::{self, RuntimeCredentials};
 use support::fixture::{UpstreamFixture, response_body, send_raw, status};
 fn creds() -> RuntimeCredentials {
-    RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap()
+    RuntimeCredentials::new(b"synthetic-control", None).unwrap()
 }
 async fn control_status(g: &server::GatewayHandle) -> serde_json::Value {
     let r=send_raw(g.address(),b"GET /_llmgw/status HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Control-Token: synthetic-control\r\nConnection: close\r\n\r\n").await;
@@ -369,7 +371,7 @@ fn wire_request(root: usize, id: &str, count: bool) -> Vec<u8> {
     } else {
         ("GET", "models", "")
     };
-    format!("{method} /r/root{root}/v1/{path}?synthetic_id={id} HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nX-Pi-Session-Id: child-{id}\r\nX-Session-Id: independent-{id}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len()).into_bytes()
+    format!("{method} /r/root{root}/v1/{path}?synthetic_id={id} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-Pi-Session-Id: child-{id}\r\nX-Session-Id: independent-{id}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",body.len()).into_bytes()
 }
 async fn wait_queue(g: &server::GatewayHandle, n: u64) -> serde_json::Value {
     tokio::time::timeout(Duration::from_secs(3), async {

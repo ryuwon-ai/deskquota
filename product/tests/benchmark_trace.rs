@@ -10,6 +10,8 @@ fn config(cap: u8, tpm: u64, roots: usize) -> Config {
     Config {
         listen: "127.0.0.1:0".parse().unwrap(),
         concurrency: cap,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: CancelPolicy::Drain,
         accounting: Accounting::Reserved,
         retry_transient_429: false,

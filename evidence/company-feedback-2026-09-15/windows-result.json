@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-09-15T02:17:07.494221+00:00",
+  "changed_files": {
+    "product/src/config_patch/storage.rs": "afb1a87258a8a051161aabb29d8d4f32f2bddc3e95c1d3e79601c3abf7611387",
+    "product/src/lifecycle/platform/windows.rs": "579e8d125acf904d37635a3707de9a248a2a944dba52baca54fe76f4def956d5",
+    "product/docs/installation.md": "964e284966e253e152c462cac09c86d3457f5e3b674947eb1c66c2bca4eb1c11"
+  },
+  "new_product_dependencies": 0,
+  "checks": [
+    {
+      "command": "cargo +1.88.0 check --offline --manifest-path /Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/Cargo.toml --target x86_64-pc-windows-msvc --all-targets",
+      "phase": "before",
+      "exit_code": 101,
+      "evidence": "/Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/before.log",
+      "result": "8 E0658 windows_by_handle errors reproduced"
+    },
+    {
+      "command": "cargo +1.88.0 check --offline --manifest-path /Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/Cargo.toml --target x86_64-pc-windows-msvc --all-targets",
+      "phase": "after",
+      "exit_code": 0,
+      "evidence": "/Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/after-final.log",
+      "result": "whole ConfigPatch, file_replace and platform exact-source modules; library plus unit test typecheck, not linked or executed"
+    },
+    {
+      "command": "cargo test --locked --lib config_patch::storage::tests",
+      "exit_code": 0,
+      "evidence": "/Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/storage-tests.log",
+      "passed": 2
+    },
+    {
+      "command": "cargo test --locked --test patch_contract",
+      "exit_code": 0,
+      "evidence": "/Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/patch-contract.log",
+      "passed": 50
+    },
+    {
+      "command": "cargo clippy --locked --lib -- -D warnings",
+      "exit_code": 0,
+      "evidence": "/Users/ryuwon/Library/Caches/deskquota-windows-check-2026-09-15/clippy.log"
+    },
+    {
+      "command": "rustfmt +1.88.0 --edition 2024 --check product/src/config_patch/storage.rs product/src/lifecycle/platform/windows.rs",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "full_windows_check": {
+    "command": "cargo check --locked --target x86_64-pc-windows-msvc --all-targets --all-features",
+    "exit_code": 101,
+    "blocked_before_product": "aws-lc-sys C compilation lacks Windows SDK stdlib.h/windows.h on macOS host",
+    "tool_session_id": 86603
+  },
+  "scope_dependencies": "All scoped source-check dependencies match versions already present in product/Cargo.lock",
+  "unverified": [
+    "native Windows execution",
+    "GNU linking with WinLibs",
+    "Windows-only file reparse-point test (requires symbolic-link privilege or Developer Mode; explicitly ignored by default)"
+  ],
+  "sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getfileinformationbyhandleex",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info",
+    "https://doc.rust-lang.org/rustc/platform-support/windows-gnu.html",
+    "https://sourceware.org/binutils/docs/binutils/dlltool.html",
+    "https://aws.github.io/aws-lc-rs/requirements/windows.html"
+  ]
+}

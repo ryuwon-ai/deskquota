@@ -66,6 +66,9 @@ enum Command {
         /// Exact native config directory; overrides --client-home and native environment variables.
         #[arg(long, value_name = "DIR", conflicts_with = "client_home")]
         client_config_dir: Option<PathBuf>,
+        /// Standard API key environment reference for forward-mode Pi/Codex.
+        #[arg(long, default_value = "OPENAI_API_KEY")]
+        client_key_env: String,
         #[arg(long)]
         root: String,
         #[arg(long)]
@@ -211,6 +214,7 @@ pub fn run() -> Result<ExitCode, crate::lifecycle::Error> {
         client_executable,
         client_home,
         client_config_dir,
+        client_key_env,
         root,
         model,
         apply_hash,
@@ -229,6 +233,7 @@ pub fn run() -> Result<ExitCode, crate::lifecycle::Error> {
             client_executable,
             client_home,
             client_config_dir,
+            client_key_env,
             root,
             model,
             apply_hash,
@@ -427,6 +432,7 @@ struct ConnectArgs {
     client_executable: Option<PathBuf>,
     client_home: Option<PathBuf>,
     client_config_dir: Option<PathBuf>,
+    client_key_env: String,
     root: String,
     model: String,
     apply_hash: Option<String>,
@@ -445,12 +451,6 @@ fn connect(args: ConnectArgs) -> Result<ExitCode, crate::lifecycle::Error> {
         ClientKind, ModelMetadata, ProfileRequest, ProjectLocalApproval, Protocol,
     };
     let loaded = LoadedConfig::load(&args.config)?;
-    if matches!(loaded.config.upstream.auth, crate::config::Auth::Forward) {
-        return Err(std::io::Error::other(
-            "automatic client connection is unsupported with upstream auth=forward because existing client subscription or placeholder credentials could reach an arbitrary upstream; configure the client manually",
-        )
-        .into());
-    }
     let client: ClientKind = args.client.parse()?;
     let protocol = match client {
         ClientKind::Pi => Protocol::OpenAiCompletions,
@@ -500,13 +500,6 @@ fn connect(args: ConnectArgs) -> Result<ExitCode, crate::lifecycle::Error> {
         .client_executable
         .unwrap_or_else(|| PathBuf::from(client.as_str()));
     let version = installed_version(client, &executable, &location)?;
-    let token_bytes = crate::server::read_secret_file(&loaded.state_paths.data_token)?;
-    let local_data_token = String::from_utf8(token_bytes)
-        .map_err(|_| std::io::Error::other("gateway data token is not UTF-8"))?;
-    let local_data_token = local_data_token.trim().to_owned();
-    if local_data_token.is_empty() {
-        return Err(std::io::Error::other("gateway data token is empty").into());
-    }
     let effective_environment = relevant_environment(client);
     let project_local = args.project_dir.map(|directory| ProjectLocalApproval {
         directory,
@@ -524,8 +517,8 @@ fn connect(args: ConnectArgs) -> Result<ExitCode, crate::lifecycle::Error> {
         root: args.root,
         model: args.model,
         protocol,
-        local_data_token,
-        token_source: loaded.state_paths.data_token.clone(),
+        upstream_auth: desired_config.upstream.auth.clone(),
+        client_key_env: args.client_key_env,
         journal_path: loaded
             .state_paths
             .directory
@@ -793,6 +786,7 @@ fn relevant_environment(client: crate::clients::ClientKind) -> BTreeMap<String, 
             "ANTHROPIC_MODEL",
             "ANTHROPIC_CUSTOM_HEADERS",
             "ANTHROPIC_API_KEY",
+            "ANTHROPIC_AUTH_TOKEN",
             "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
         ],
         crate::clients::ClientKind::Codex => &[],
@@ -1094,7 +1088,9 @@ fn display(value: &serde_json::Value, off: bool) {
             admission["queue_length"],
             admission["active"]
         );
+        print!("{}", admission_details(admission));
     }
+    println!("{}", cache_details(&value["runtime"]["exact_cache"]));
     if let Some(clients) = value.get("clients").and_then(serde_json::Value::as_object) {
         for (client, state) in clients {
             println!(
@@ -1145,6 +1141,64 @@ fn display(value: &serde_json::Value, off: bool) {
     }
 }
 
+fn cache_details(value: &serde_json::Value) -> String {
+    let number = |name: &str| {
+        value[name]
+            .as_u64()
+            .map_or_else(|| "n/a".to_owned(), |n| n.to_string())
+    };
+    let enabled = match value["enabled"].as_bool() {
+        Some(true) => "enabled",
+        Some(false) => "disabled",
+        None => "n/a",
+    };
+    format!(
+        "exact cache: {enabled}; hits: {}; eligible misses: {}; entries: {}; retained: {}/{} bytes",
+        number("hits"),
+        number("misses"),
+        number("entries"),
+        number("retained_bytes"),
+        number("budget_bytes")
+    )
+}
+
+fn admission_details(value: &serde_json::Value) -> String {
+    let field = |name: &str| value[name].as_str().unwrap_or("n/a");
+    let reason = match value["blocked_reason"].as_str() {
+        None => "none",
+        Some("startup_hold") => "startup quota window",
+        Some("upstream_cooldown") => "upstream cooldown",
+        Some("starvation_barrier") => "protecting an older queued request",
+        Some("concurrency") => "execution slots occupied",
+        Some("rpm") => "local request budget exhausted",
+        Some("tpm") => "local token budget does not fit",
+        Some("ledger_capacity") => "local ledger capacity reached",
+        Some("identity_exhausted") => "reservation identities exhausted",
+        Some("estimate_exceeds_budget") => "estimate exceeds local token capacity",
+        Some(other) => other,
+    };
+    let estimate = match field("estimate_mode") {
+        "json_utf8_bytes_plus_output_reservation" => "request UTF-8 bytes + output reservation",
+        "tpm_unenforced" => "TPM unenforced",
+        other => other,
+    };
+    format!(
+        "queue reason (representative): {reason}; protected root: {}\n\
+         RPM: {}; capacity: {}; local debited: {}\n\
+         TPM: {}; capacity: {}; local debited: {}; held: {}\n\
+         accounting: {}; estimate: {estimate}\n",
+        value["barrier_root"].as_str().unwrap_or("none"),
+        field("rpm_mode"),
+        field("rpm_capacity"),
+        field("rpm_debited"),
+        field("tpm_mode"),
+        field("tpm_capacity"),
+        field("tpm_debited"),
+        field("tpm_held"),
+        field("accounting"),
+    )
+}
+
 fn setup_selected_clients(
     config: &Path,
     selected: &[crate::setup::ClientIntent],
@@ -1160,7 +1214,7 @@ fn setup_selected_clients(
             crate::setup::ClientIntent::Codex => crate::clients::ClientKind::Codex,
             crate::setup::ClientIntent::Manual => {
                 println!(
-                    "client stage manual: pending; use the reviewed public route and local data-token header"
+                    "client stage manual: pending; use the reviewed public route and standard upstream authentication"
                 );
                 continue;
             }
@@ -1182,6 +1236,7 @@ fn setup_selected_clients(
             client_executable: None,
             client_home: None,
             client_config_dir: explicit_config_dir,
+            client_key_env: "OPENAI_API_KEY".into(),
             root: root.into(),
             model: model.into(),
             apply_hash: None,
@@ -1238,4 +1293,38 @@ fn client_statuses(config: &Path) -> Result<serde_json::Value, crate::lifecycle:
         statuses.insert(client.into(), value);
     }
     Ok(serde_json::Value::Object(statuses))
+}
+
+#[cfg(test)]
+mod status_tests {
+    #[test]
+    fn cache_status_preserves_available_counts_and_labels_missing_data() {
+        assert_eq!(
+            super::cache_details(
+                &serde_json::json!({"enabled":true,"hits":7,"misses":3,"entries":2,"retained_bytes":40,"budget_bytes":4194304})
+            ),
+            "exact cache: enabled; hits: 7; eligible misses: 3; entries: 2; retained: 40/4194304 bytes"
+        );
+        assert_eq!(
+            super::cache_details(&serde_json::Value::Null),
+            "exact cache: n/a; hits: n/a; eligible misses: n/a; entries: n/a; retained: n/a/n/a bytes"
+        );
+    }
+
+    #[test]
+    fn admission_text_preserves_wide_debt_and_labels_the_representative_barrier() {
+        let text = super::admission_details(&serde_json::json!({
+            "blocked_reason": "starvation_barrier", "barrier_root": "interactive",
+            "rpm_mode": "known", "rpm_capacity": "60", "rpm_debited": "4",
+            "tpm_mode": "known", "tpm_capacity": "100", "tpm_debited": "36893488147419103230", "tpm_held": "20",
+            "accounting": "actual", "estimate_mode": "json_utf8_bytes_plus_output_reservation"
+        }));
+        assert_eq!(
+            text,
+            "queue reason (representative): protecting an older queued request; protected root: interactive\n\
+            RPM: known; capacity: 60; local debited: 4\n\
+            TPM: known; capacity: 100; local debited: 36893488147419103230; held: 20\n\
+            accounting: actual; estimate: request UTF-8 bytes + output reservation\n"
+        );
+    }
 }

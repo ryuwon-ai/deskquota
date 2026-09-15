@@ -142,8 +142,8 @@ def run_case(binary, fixture_template, policy, pre_headers, force_shutdown=False
             config.write_text(text)
             state = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
             state.mkdir(mode=0o700)
-            data_token, control_token = secrets.token_hex(32), secrets.token_hex(32)
-            for name, value in (("data-token", data_token), ("control-token", control_token)):
+            control_token = secrets.token_hex(32)
+            for name, value in (("control-token", control_token),):
                 file = state / name
                 file.write_text(value)
                 file.chmod(0o600)
@@ -161,7 +161,7 @@ def run_case(binary, fixture_template, policy, pre_headers, force_shutdown=False
                             "X-LLMGW-Control-Token": control_token, "Connection": "close"})
                     else:
                         connection.request("POST", "/r/pi-work/v1/chat/completions", BODY, {
-                            "X-LLMGW-Token": data_token, "Content-Type": "application/json",
+                            "Content-Type": "application/json",
                             "Connection": "close"})
                     response = connection.getresponse()
                     return response.status, response.read()
@@ -179,7 +179,7 @@ def run_case(binary, fixture_template, policy, pre_headers, force_shutdown=False
             first = socket.create_connection(("127.0.0.1", port), timeout=3)
             request_head = (
                 f"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\n"
-                f"X-LLMGW-Token: {data_token}\r\nContent-Type: application/json\r\n"
+                f"Content-Type: application/json\r\n"
                 f"Content-Length: {len(BODY)}\r\nConnection: close\r\n\r\n"
             ).encode()
             first.sendall(request_head + BODY)
@@ -210,7 +210,7 @@ def run_case(binary, fixture_template, policy, pre_headers, force_shutdown=False
                 require(upstream.count() == 1 and not upstream.finished.is_set(), "forced stop fixture completed unexpectedly")
                 require(not upstream.fixture_errors, "fixture failed internally")
                 require(all(value not in stdout + stderr for value in
-                            (data_token.encode(), control_token.encode(), BODY)), "fixture data reached output")
+                            (control_token.encode(), BODY)), "fixture data reached output")
                 return {"policy": policy, "disconnect_phase": "after_terminal_marker",
                         "force_shutdown": True, "passed": True, "upstream_attempts": 1,
                         "upstream_close_observed": True, "body_eof_gate_completed": False,
@@ -234,7 +234,7 @@ def run_case(binary, fixture_template, policy, pre_headers, force_shutdown=False
             stdout, stderr = process.communicate(timeout=15)
             require(process.returncode == 0, "gateway stop did not exit zero")
             require(all(value not in stdout + stderr for value in
-                        (data_token.encode(), control_token.encode(), BODY)), "fixture data reached output")
+                        (control_token.encode(), BODY)), "fixture data reached output")
             return {"policy": policy, "disconnect_phase": "before_headers" if pre_headers else "after_terminal_marker",
                     "passed": True, "upstream_attempts": 2,
                     "upstream_close_observed": upstream.first_disconnected.is_set(),

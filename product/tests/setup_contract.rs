@@ -70,6 +70,8 @@ fn draft(port: u16) -> SetupDraft {
             shared_with_other_pcs: false,
             separate_input_output: false,
             concurrency: 1,
+            startup_hold_secs: 60,
+            cache: None,
         })
         .run(RunAnswers {
             port,
@@ -132,7 +134,7 @@ fn presets_only_supply_defaults_and_never_claim_protocol_or_local_start() {
     assert!(!local.local_model_started_or_downloaded());
     assert!(corporate.endpoints().is_empty());
     assert!(external.endpoints().is_empty());
-    assert_eq!(local.accounting(), Accounting::Reserved);
+    assert_eq!(local.accounting(), Accounting::Actual);
     assert!(!local.retry_transient_429());
 }
 
@@ -152,6 +154,8 @@ fn quota_known_unknown_and_unlimited_are_typed_and_zero_is_rejected() {
             shared_with_other_pcs: true,
             separate_input_output: true,
             concurrency: 17,
+            startup_hold_secs: 60,
+            cache: None,
         }
         .validate()
         .is_err()
@@ -294,7 +298,7 @@ fn scripted_wizard_supports_back_and_cancel_without_writes() {
     assert_eq!(before, after);
     assert!(!config.exists());
     assert!(!state.directory.exists());
-    assert!(!state.data_token.exists());
+    assert!(!state.directory.join("data-token").exists());
     assert!(!state.control_token.exists());
 }
 
@@ -329,6 +333,8 @@ fn scripted_wizard_accepts_local_corporate_and_external_presets() {
                     shared_with_other_pcs: false,
                     separate_input_output: false,
                     concurrency: 1,
+                    startup_hold_secs: 60,
+                    cache: None,
                 }),
             ),
             (
@@ -906,6 +912,8 @@ fn save_and_rerun_preserve_minimal_pending_intents_without_credentials() {
             shared_with_other_pcs: true,
             separate_input_output: true,
             concurrency: 1,
+            startup_hold_secs: 60,
+            cache: None,
         })
         .run(RunAnswers {
             port: 4141,
@@ -1135,11 +1143,9 @@ fn fresh_save_only_initializes_private_tokens_without_starting_and_preserves_ide
 
     let save = apply(&temp.config(), &draft(port), ApplyMode::SaveOnly).unwrap();
     let loaded = LoadedConfig::load(temp.config()).unwrap();
-    let data_before = fs::read(&loaded.state_paths.data_token).unwrap();
     let control_before = fs::read(&loaded.state_paths.control_token).unwrap();
-    assert_eq!(data_before.len(), 64);
     assert_eq!(control_before.len(), 64);
-    assert_ne!(data_before, control_before);
+    assert!(!loaded.state_paths.directory.join("data-token").exists());
     assert!(!loaded.state_paths.runtime_state.exists());
     assert_eq!(save.runtime_state, "not_started");
     assert_eq!(save.worker_processes_started, 0);
@@ -1156,23 +1162,18 @@ fn fresh_save_only_initializes_private_tokens_without_starting_and_preserves_ide
                 & 0o777,
             0o700
         );
-        for path in [
-            &loaded.state_paths.data_token,
-            &loaded.state_paths.control_token,
-        ] {
-            assert_eq!(
-                fs::metadata(path).unwrap().permissions().mode() & 0o777,
-                0o600
-            );
-        }
+        assert_eq!(
+            fs::metadata(&loaded.state_paths.control_token)
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777,
+            0o600
+        );
     }
 
     let rerun = SetupDraft::from_loaded(&loaded).unwrap();
     apply(&temp.config(), &rerun, ApplyMode::SaveOnly).unwrap();
-    assert_eq!(
-        fs::read(&loaded.state_paths.data_token).unwrap(),
-        data_before
-    );
     assert_eq!(
         fs::read(&loaded.state_paths.control_token).unwrap(),
         control_before
@@ -1211,7 +1212,7 @@ fn state_initialization_failure_reports_partial_apply_and_never_starts_worker() 
             .join(".gateway 설정.toml.setup-pending.json")
             .exists()
     );
-    assert!(!state.data_token.exists());
+    assert!(!state.directory.join("data-token").exists());
     assert!(!state.control_token.exists());
     assert!(!state.runtime_state.exists());
 
@@ -1230,11 +1231,8 @@ fn existing_invalid_token_is_preserved_and_reports_partial_state_initialization(
     let state = StatePaths::from_config_path(&config).unwrap();
     fs::create_dir(&state.directory).unwrap();
     fs::set_permissions(&state.directory, fs::Permissions::from_mode(0o700)).unwrap();
-    fs::write(&state.data_token, b"").unwrap();
-    fs::write(&state.control_token, b"c".repeat(64)).unwrap();
-    for path in [&state.data_token, &state.control_token] {
-        fs::set_permissions(path, fs::Permissions::from_mode(0o600)).unwrap();
-    }
+    fs::write(&state.control_token, b"").unwrap();
+    fs::set_permissions(&state.control_token, fs::Permissions::from_mode(0o600)).unwrap();
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port();
     drop(listener);
@@ -1247,8 +1245,7 @@ fn existing_invalid_token_is_preserved_and_reports_partial_state_initialization(
         "{error}"
     );
     assert!(config.exists());
-    assert_eq!(fs::read(&state.data_token).unwrap(), b"");
-    assert_eq!(fs::read(&state.control_token).unwrap(), b"c".repeat(64));
+    assert_eq!(fs::read(&state.control_token).unwrap(), b"");
     assert!(!state.runtime_state.exists());
 }
 
@@ -1271,7 +1268,8 @@ fn save_only_never_repairs_a_missing_token_under_a_running_worker() {
     );
     let before = gateway_status(&temp.config());
     let loaded = LoadedConfig::load(temp.config()).unwrap();
-    fs::remove_file(&loaded.state_paths.data_token).unwrap();
+    let control = fs::read(&loaded.state_paths.control_token).unwrap();
+    fs::remove_file(&loaded.state_paths.control_token).unwrap();
 
     let rerun = SetupDraft::from_loaded(&loaded).unwrap();
     let error = apply(&temp.config(), &rerun, ApplyMode::SaveOnly)
@@ -1281,7 +1279,17 @@ fn save_only_never_repairs_a_missing_token_under_a_running_worker() {
         error.contains("protected state initialization failed"),
         "{error}"
     );
-    assert!(!loaded.state_paths.data_token.exists());
+    assert!(!loaded.state_paths.control_token.exists());
+    fs::write(&loaded.state_paths.control_token, control).unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(
+            &loaded.state_paths.control_token,
+            fs::Permissions::from_mode(0o600),
+        )
+        .unwrap();
+    }
     let after = gateway_status(&temp.config());
     assert_eq!(after["state"], "running");
     assert_eq!(after["identity"]["pid"], before["identity"]["pid"]);
@@ -1538,7 +1546,7 @@ async fn explicit_proxy_is_used_for_non_loopback_upstream_without_environment_pr
     config.roots[0].endpoints.push(Endpoint::Models);
     let gateway = llmgw::server::spawn(
         config,
-        llmgw::server::RuntimeCredentials::new(b"data", b"control", None).unwrap(),
+        llmgw::server::RuntimeCredentials::new(b"control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -1573,7 +1581,7 @@ async fn explicit_proxy_bypasses_owned_loopback_upstream() {
     config.roots[0].endpoints.push(Endpoint::Models);
     let gateway = llmgw::server::spawn(
         config,
-        llmgw::server::RuntimeCredentials::new(b"data", b"control", None).unwrap(),
+        llmgw::server::RuntimeCredentials::new(b"control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -1634,7 +1642,7 @@ async fn explicit_ca_bundle_merges_with_system_trust_for_owned_tls_upstream() {
     config.roots[0].endpoints.push(Endpoint::Models);
     let gateway = llmgw::server::spawn(
         config,
-        llmgw::server::RuntimeCredentials::new(b"data", b"control", None).unwrap(),
+        llmgw::server::RuntimeCredentials::new(b"control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -1651,4 +1659,74 @@ async fn explicit_ca_bundle_merges_with_system_trust_for_owned_tls_upstream() {
         String::from_utf8_lossy(response_body(&response))
     );
     gateway.shutdown().await.unwrap();
+}
+
+#[test]
+fn cache_setup_enables_preserves_edits_and_removes_only_the_requested_table() {
+    let temp = Temp::new("exact-cache-setup");
+    let answers = |cache| QuotaAnswers {
+        rpm: LimitAnswer::Unlimited,
+        tpm: LimitAnswer::Unknown,
+        shared_with_other_pcs: false,
+        separate_input_output: false,
+        concurrency: 1,
+        startup_hold_secs: 60,
+        cache,
+    };
+    let cache = llmgw::config::CacheConfig {
+        ttl_secs: 180,
+        max_history: 2,
+    };
+    let raw = draft(4141)
+        .quota(answers(Some(cache)))
+        .render_config()
+        .unwrap();
+    assert_eq!(
+        llmgw::config::parse(raw.as_bytes()).unwrap().cache,
+        Some(cache)
+    );
+    let raw = raw.replace("ttl_secs = 180", "ttl_secs = 180 # preserve cache comment");
+    fs::write(temp.config(), &raw).unwrap();
+    let loaded = LoadedConfig::load(temp.config()).unwrap();
+    assert_eq!(
+        SetupDraft::from_loaded(&loaded)
+            .unwrap()
+            .render_config()
+            .unwrap(),
+        raw
+    );
+    let updated = llmgw::config::CacheConfig {
+        ttl_secs: 90,
+        max_history: 3,
+    };
+    let edited = SetupDraft::from_loaded(&loaded)
+        .unwrap()
+        .quota(answers(Some(updated)))
+        .render_config()
+        .unwrap();
+    assert!(edited.contains("# preserve cache comment"));
+    assert_eq!(
+        llmgw::config::parse(edited.as_bytes()).unwrap().cache,
+        Some(updated)
+    );
+    let removed = SetupDraft::from_loaded(&loaded)
+        .unwrap()
+        .quota(answers(None))
+        .render_config()
+        .unwrap();
+    assert!(!removed.contains("[cache]"));
+    assert!(
+        llmgw::config::parse(removed.as_bytes())
+            .unwrap()
+            .cache
+            .is_none()
+    );
+    assert!(
+        answers(Some(llmgw::config::CacheConfig {
+            ttl_secs: 0,
+            max_history: 3
+        }))
+        .validate()
+        .is_err()
+    );
 }

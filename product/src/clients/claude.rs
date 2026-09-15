@@ -4,11 +4,9 @@ use std::process::Command;
 
 const CLIENT_AUTH_PLACEHOLDER: &str = "llmgw-local-only";
 
-const OWNED_ENV: [&str; 5] = [
+const OWNED_ENV: [&str; 3] = [
     "ANTHROPIC_BASE_URL",
     "ANTHROPIC_MODEL",
-    "ANTHROPIC_CUSTOM_HEADERS",
-    "ANTHROPIC_API_KEY",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
 ];
 
@@ -27,15 +25,20 @@ pub(super) fn patches(
             "Claude Code 2.1.63 model discovery is not verified; leave discovery off",
         ));
     }
-    for name in OWNED_ENV {
-        if request.effective_environment.contains_key(name) {
+    let forward = request.upstream_auth == crate::config::Auth::Forward;
+    let mut owned_env = OWNED_ENV.to_vec();
+    if !forward {
+        owned_env.push("ANTHROPIC_API_KEY");
+    }
+    for name in &owned_env {
+        if request.effective_environment.contains_key(*name) {
             return Err(Error::message(format!(
                 "higher-priority environment {name} conflicts with the reviewed Claude settings"
             )));
         }
     }
     for managed in &request.managed_settings {
-        if managed_conflicts(managed)? {
+        if managed_conflicts(managed, &owned_env)? {
             return Err(Error::message(format!(
                 "managed policy {} controls an llmgw-owned Claude setting; the policy was not bypassed",
                 absolute(managed)?.display()
@@ -45,7 +48,7 @@ pub(super) fn patches(
     let (path, scope, scope_check) = if let Some(project) = &request.project_local {
         if !project.user_private_confirmed || !project.untracked_confirmed {
             return Err(Error::message(
-                "Claude project-local token config requires explicit user-private and untracked confirmations",
+                "Claude project-local config requires explicit user-private and untracked confirmations",
             ));
         }
         let path = absolute(&project.directory)?.join(".claude/settings.local.json");
@@ -67,30 +70,32 @@ pub(super) fn patches(
             PlanCheck::ClaudeNative { target: path },
         )
     };
-    let existing_headers = existing_custom_headers(&path)?;
-    let headers = replace_llmgw_header(&existing_headers, &request.local_data_token);
+    if forward && !has_native_credential_source(request, &path)? {
+        return Err(Error::message(
+            "Claude forward mode requires an explicit ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN, or apiKeyHelper source; an implicit saved subscription login or llmgw placeholder is not redirected; disconnect the previous none/env profile to restore its native credential, or configure an actual native API credential",
+        ));
+    }
     let base = format!(
         "{}/r/{}",
         request.gateway_origin.trim_end_matches('/'),
         request.root
     );
-    let edits = vec![
+    let mut edits = vec![
         set_public(&["env", "ANTHROPIC_BASE_URL"], json!(base))?,
         set_public(&["env", "ANTHROPIC_MODEL"], json!(request.model))?,
-        set_token(&["env", "ANTHROPIC_CUSTOM_HEADERS"], &headers)?,
-        set_public(
+    ];
+    if !forward {
+        edits.push(set_public(
             &["env", "ANTHROPIC_API_KEY"],
             json!(CLIENT_AUTH_PLACEHOLDER),
-        )?,
-    ];
+        )?);
+    }
     Ok((
         vec![patch(path, Format::StrictJson, edits, Vec::new())?],
         base,
         scope,
         vec![
-            format!(
-                "ANTHROPIC_API_KEY={CLIENT_AUTH_PLACEHOLDER} is a reviewed client-availability placeholder, not upstream authentication; gateway auth none/env strips it before upstream"
-            ),
+            if forward { "Existing Anthropic API key/auth token/helper and custom headers are unchanged; the client controls credential selection and runtime authentication remains unverified".into() } else { format!("ANTHROPIC_API_KEY={CLIENT_AUTH_PLACEHOLDER} is a client-availability placeholder; gateway auth none/env strips it before upstream") },
             "model listing was not requested; configured selection, inference, and tools remain separate runtime results".into(),
         ],
         vec![scope_check],
@@ -98,7 +103,7 @@ pub(super) fn patches(
 }
 
 pub(super) fn validate_native_target(target: &Path) -> Result<(), Error> {
-    crate::config_patch::validate_local_token_target(target, target.exists())?;
+    crate::config_patch::validate_private_target(target, target.exists())?;
     let canonical_target = crate::config_patch::normalize_resource_path(target)?;
     let Some(repository_hint) = git_repository_ancestor(&canonical_target)? else {
         return Ok(());
@@ -123,7 +128,7 @@ pub(super) fn validate_project_target(project: &Path, target: &Path) -> Result<(
             "Claude project-local settings target must not be a symlink",
         ));
     }
-    crate::config_patch::validate_local_token_target(target, target.exists())?;
+    crate::config_patch::validate_private_target(target, target.exists())?;
     if let Some(parent) = target.parent().filter(|parent| parent.exists()) {
         validate_private_directory(parent)?;
     }
@@ -178,7 +183,7 @@ fn validate_git_nonshared(directory: &Path, canonical_target: &Path) -> Result<(
     match tracked.status.code() {
         Some(0) => {
             return Err(Error::message(
-                "Claude settings target is Git-tracked and cannot contain the local token",
+                "Claude settings target is Git-tracked and cannot be edited as a private native config",
             ));
         }
         Some(1) => {}
@@ -255,34 +260,7 @@ fn validate_private_directory(path: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-fn existing_custom_headers(path: &Path) -> Result<String, Error> {
-    let (_, bytes) = snapshot(path)?;
-    let Some(bytes) = bytes else {
-        return Ok(String::new());
-    };
-    let value: serde_json::Value = serde_json::from_slice(&bytes)
-        .map_err(|_| Error::message("Claude settings must be strict JSON"))?;
-    Ok(value
-        .pointer("/env/ANTHROPIC_CUSTOM_HEADERS")
-        .and_then(serde_json::Value::as_str)
-        .unwrap_or_default()
-        .to_owned())
-}
-
-fn replace_llmgw_header(existing: &str, token: &str) -> String {
-    let mut lines = existing
-        .lines()
-        .filter(|line| {
-            line.split_once(':')
-                .is_none_or(|(name, _)| !name.trim().eq_ignore_ascii_case("x-llmgw-token"))
-        })
-        .map(str::to_owned)
-        .collect::<Vec<_>>();
-    lines.push(format!("X-LLMGW-Token: {token}"));
-    lines.join("\n")
-}
-
-fn managed_conflicts(path: &Path) -> Result<bool, Error> {
+fn managed_conflicts(path: &Path, owned_env: &[&str]) -> Result<bool, Error> {
     let bytes = match fs::read(path) {
         Ok(bytes) => bytes,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
@@ -290,7 +268,48 @@ fn managed_conflicts(path: &Path) -> Result<bool, Error> {
     };
     let value: serde_json::Value = serde_json::from_slice(&bytes)
         .map_err(|_| Error::message("Claude managed policy must be strict JSON"))?;
-    Ok(OWNED_ENV
+    Ok(owned_env
         .iter()
         .any(|name| value.pointer(&format!("/env/{name}")).is_some()))
+}
+
+fn has_native_credential_source(request: &ProfileRequest, target: &Path) -> Result<bool, Error> {
+    const NAMES: [&str; 2] = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"];
+    if NAMES.iter().any(|name| {
+        request
+            .effective_environment
+            .get(*name)
+            .is_some_and(|value| {
+                !value.trim().is_empty() && value.trim() != CLIENT_AUTH_PLACEHOLDER
+            })
+    }) {
+        return Ok(true);
+    }
+    let native = request.config_dir.join("settings.json");
+    for path in std::iter::once(target)
+        .chain((native != target).then_some(native.as_path()))
+        .chain(request.managed_settings.iter().map(PathBuf::as_path))
+    {
+        let (_, bytes) = snapshot(path)?;
+        if let Some(bytes) = bytes {
+            let value: serde_json::Value = serde_json::from_slice(&bytes).map_err(|_| {
+                Error::message("Claude credential-source settings must be strict JSON")
+            })?;
+            if NAMES.iter().any(|name| {
+                value
+                    .pointer(&format!("/env/{name}"))
+                    .and_then(serde_json::Value::as_str)
+                    .is_some_and(|value| {
+                        !value.trim().is_empty() && value.trim() != CLIENT_AUTH_PLACEHOLDER
+                    })
+            }) || value
+                .get("apiKeyHelper")
+                .and_then(serde_json::Value::as_str)
+                .is_some_and(|value| !value.trim().is_empty())
+            {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
 }

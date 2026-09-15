@@ -3,6 +3,7 @@ use serde_json::Value;
 use super::{ObservedUsage, nested_token, token};
 
 pub(super) struct Observer {
+    cache: Option<crate::cache::StreamCompletion>,
     final_usage: Option<ObservedUsage>,
     invalid: bool,
     output_delta: bool,
@@ -10,8 +11,11 @@ pub(super) struct Observer {
 }
 
 impl Observer {
-    pub(super) fn new() -> Self {
+    pub(super) fn new(cache: bool) -> Self {
         Self {
+            cache: cache.then(|| {
+                crate::cache::StreamCompletion::new(crate::config::Endpoint::ChatCompletions)
+            }),
             final_usage: None,
             invalid: false,
             output_delta: false,
@@ -21,13 +25,22 @@ impl Observer {
 
     pub(super) fn observe(&mut self, data: &[u8]) {
         if data == b"[DONE]" {
+            if let Some(cache) = &mut self.cache {
+                cache.done();
+            }
             self.terminal = true;
             return;
         }
         let Ok(value) = serde_json::from_slice::<Value>(data) else {
+            if let Some(cache) = &mut self.cache {
+                cache.invalidate();
+            }
             self.invalid = true;
             return;
         };
+        if let Some(cache) = &mut self.cache {
+            cache.observe(None, &value);
+        }
         if value.get("error").is_some_and(|error| !error.is_null()) {
             self.invalid = true;
             return;
@@ -96,7 +109,16 @@ impl Observer {
         }
     }
 
+    pub(super) fn cache_complete(&self) -> bool {
+        self.cache
+            .as_ref()
+            .is_some_and(crate::cache::StreamCompletion::complete)
+    }
+
     pub(super) fn mark_invalid(&mut self) {
+        if let Some(cache) = &mut self.cache {
+            cache.invalidate();
+        }
         self.invalid = true;
     }
 

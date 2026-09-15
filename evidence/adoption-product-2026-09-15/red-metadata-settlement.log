@@ -1,0 +1,21 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.51s
+     Running tests/quota_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/quota_contract-321e3ad04481266f)
+
+running 1 test
+
+thread 'metadata_never_recharges_but_other_zero_costs_keep_late_usage_debt' panicked at tests/quota_contract.rs:228:13:
+assertion `left == right` failed
+  left: 31
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test metadata_never_recharges_but_other_zero_costs_keep_late_usage_debt ... FAILED
+
+failures:
+
+failures:
+    metadata_never_recharges_but_other_zero_costs_keep_late_usage_debt
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test quota_contract`

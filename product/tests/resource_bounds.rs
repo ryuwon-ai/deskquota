@@ -13,11 +13,11 @@ async fn declared_body_cap_uses_protocol_error_and_starts_no_wire_attempt() {
     config.upstream.api_base = format!("http://{}/v1", upstream.address()).parse().unwrap();
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
-    let request = b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: 8388609\r\nConnection: close\r\n\r\n";
+    let request = b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: 8388609\r\nConnection: close\r\n\r\n";
     let response = send_raw(gateway.address(), request).await;
     assert_eq!(status(&response), 413);
     let json: serde_json::Value = serde_json::from_slice(response_body(&response)).unwrap();
@@ -45,7 +45,7 @@ async fn sixty_four_partial_bodies_release_memory_on_rejection_and_another_reque
     config.upstream.api_base = format!("http://{}/v1", upstream.address()).parse().unwrap();
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -57,7 +57,7 @@ async fn sixty_four_partial_bodies_release_memory_on_rejection_and_another_reque
     let mut prefix = br#"{"model":"example-model","messages":[]}"#.to_vec();
     prefix.resize(512 * 1024, b' ');
     let header = format!(
-        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
         prefix.len() + 1
     );
     let request = [header.as_bytes(), &prefix].concat();
@@ -89,7 +89,7 @@ async fn sixty_four_partial_bodies_release_memory_on_rejection_and_another_reque
     );
     // All other partial senders remain incomplete; progress must use the released budget now.
     let small = br#"{"model":"example-model","messages":[]}"#;
-    let request = [format!("POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", small.len()).into_bytes(), small.to_vec()].concat();
+    let request = [format!("POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", small.len()).into_bytes(), small.to_vec()].concat();
     let completed = tokio::time::timeout(
         Duration::from_secs(1),
         send_raw(gateway.address(), &request),
@@ -119,13 +119,13 @@ async fn original_request_deadline_includes_a_slow_partial_body() {
     config.quota.rpm = llmgw::config::Limit::Unlimited;
     let gateway = server::testing::spawn_with_timeouts(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
         Duration::from_millis(80),
         Duration::from_millis(100),
     )
     .await
     .unwrap();
-    let mut client = open_raw(gateway.address(), b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: 100\r\nConnection: close\r\n\r\n{").await;
+    let mut client = open_raw(gateway.address(), b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: 100\r\nConnection: close\r\n\r\n{").await;
     let mut raw = Vec::new();
     tokio::time::timeout(Duration::from_millis(500), client.read_to_end(&mut raw))
         .await
@@ -151,7 +151,7 @@ async fn ingress_128_connections_cap_rejects_129th_and_reopens_after_release() {
     config.upstream.api_base = format!("http://{}/v1", upstream.address()).parse().unwrap();
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -199,7 +199,7 @@ async fn slow_downstream_lifetimes_bound_delivery_and_release_workers_queue_and_
     config.upstream.api_base = format!("http://{}/v1", upstream.address()).parse().unwrap();
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -266,12 +266,12 @@ async fn production_header_and_body_read_timeouts_release_slow_senders() {
     config.quota.rpm = llmgw::config::Limit::Unlimited;
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
     let mut header = open_raw(gateway.address(), b"GET /").await;
-    let mut body = open_raw(gateway.address(), b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: 100\r\nConnection: close\r\n\r\n{").await;
+    let mut body = open_raw(gateway.address(), b"POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: 100\r\nConnection: close\r\n\r\n{").await;
     let mut head_result = Vec::new();
     let start = tokio::time::Instant::now();
     tokio::time::timeout(
@@ -317,7 +317,7 @@ async fn sixty_four_barrier_released_writers_account_for_every_memory_pressure_o
     config.upstream.api_base = format!("http://{}/v1", upstream.address()).parse().unwrap();
     let gateway = server::spawn(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -326,7 +326,7 @@ async fn sixty_four_barrier_released_writers_account_for_every_memory_pressure_o
     let mut clients = Vec::new();
     for id in 0..WRITERS {
         let header = format!(
-            "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nX-Test-Contender: {id}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+            "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nX-Test-Contender: {id}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
             PARTIAL_BYTES + 1
         );
         clients.push(open_raw(gateway.address(), &[header.as_bytes(), &prefix].concat()).await);
@@ -430,7 +430,7 @@ async fn sixty_four_barrier_released_writers_account_for_every_memory_pressure_o
         assert!(held <= (WRITERS - rejected_ids.len()) * (PARTIAL_BYTES + 1));
         if !rejected_ids.is_empty() && !fresh_completed {
             let small = br#"{"model":"example-model","messages":[]}"#;
-            let request = [format!("POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nX-Test-Contender: fresh\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", small.len()).into_bytes(), small.to_vec()].concat();
+            let request = [format!("POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nX-Test-Contender: fresh\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", small.len()).into_bytes(), small.to_vec()].concat();
             let response = tokio::time::timeout(
                 Duration::from_secs(5),
                 send_raw(gateway.address(), &request),

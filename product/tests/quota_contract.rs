@@ -8,7 +8,13 @@ fn known(n: u64) -> Limit {
     Limit::Known(n.try_into().unwrap())
 }
 fn ledger(rpm: Limit, tpm: Limit, mode: Accounting) -> Ledger {
-    Ledger::new(Quota { rpm, tpm }, mode, 2, time(0))
+    Ledger::new(
+        Quota { rpm, tpm },
+        mode,
+        2,
+        time(0),
+        std::time::Duration::from_secs(60),
+    )
 }
 fn admitted(l: &mut Ledger, at: u64, cost: u64) -> llmgw::admission::quota::ReservationId {
     match l.admit(time(at), RequestCost::exact_fixture(cost)) {
@@ -215,4 +221,66 @@ fn estimated_cost_addition_cannot_wrap_and_metadata_needs_no_tpm() {
         Decision::EstimateExceedsBudget
     );
     admitted(&mut l, 60, 0);
+}
+
+#[test]
+fn metadata_never_recharges_but_other_zero_costs_keep_late_usage_debt() {
+    for mode in [Accounting::Reserved, Accounting::Actual] {
+        for (cost, expected) in [
+            (RequestCost::Metadata, 0),
+            (RequestCost::exact_fixture(0), 31),
+            (RequestCost::estimated(0, 0), 31),
+        ] {
+            let mut l = ledger(known(10), known(100), mode);
+            let Decision::Admitted(id) = l.admit(time(60), cost) else {
+                panic!("admission")
+            };
+            assert!(l.start(time(60), id));
+            assert!(l.finish(time(121), id, Some(31)));
+            assert_eq!(l.snapshot(time(121)).tpm_debited, expected);
+            assert!(!l.finish(time(121), id, Some(31)));
+        }
+    }
+}
+
+#[test]
+fn configurable_startup_hold_does_not_change_the_sixty_second_quota_window() {
+    for seconds in [0, 5, 3600] {
+        let mut l = Ledger::new(
+            Quota {
+                rpm: known(1),
+                tpm: Limit::Unknown,
+            },
+            Accounting::Actual,
+            1,
+            time(10),
+            time(seconds),
+        );
+        if seconds > 0 {
+            assert_eq!(
+                l.admit(time(10), RequestCost::Metadata),
+                Decision::Wait(Some(time(10 + seconds)))
+            );
+        }
+        let now = 10 + seconds;
+        let id = admitted(&mut l, now, 0);
+        assert!(l.start(time(now), id));
+        assert!(l.finish(time(now), id, None));
+        assert_eq!(
+            l.admit(time(now + 59), RequestCost::Metadata),
+            Decision::Wait(Some(time(now + 60)))
+        );
+        admitted(&mut l, now + 60, 0);
+    }
+    let mut unlimited = Ledger::new(
+        Quota {
+            rpm: Limit::Unlimited,
+            tpm: Limit::Unknown,
+        },
+        Accounting::Actual,
+        1,
+        time(0),
+        time(3600),
+    );
+    admitted(&mut unlimited, 0, 0);
 }

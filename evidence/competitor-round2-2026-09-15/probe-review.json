@@ -1,0 +1,18 @@
+{
+  "reviewer": "round2_minimalist_review",
+  "status": "approved_with_applied_recommendations",
+  "scope": "probe logic and shared helpers; product not executed by reviewer",
+  "changes": [
+    "end-of-measurement binary hash checks",
+    "observed input/output and terminal count assertions",
+    "explicit zero outcome categories",
+    "UTC run timestamps"
+  ],
+  "limitations": [
+    "750ms is client timeout plus RST, not gateway deadline",
+    "upstream does not enforce rate limits",
+    "no-wait pooled 5 process runs x20 samples perarm",
+    "RSS before/after snapshots, not peak"
+  ],
+  "script_sha256": "2dc9165c7f85fb5881b7df85697396e0ff22b63a1915afebf59337d632fa6942"
+}

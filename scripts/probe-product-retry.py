@@ -162,8 +162,8 @@ class Runner:
         config.write_text(text)
         state = Path(json.loads(subprocess.check_output([str(self.binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
         state.mkdir(mode=0o700)
-        self.data_token, self.control_token = secrets.token_hex(32), secrets.token_hex(32)
-        for name, value in (("data-token", self.data_token), ("control-token", self.control_token)):
+        self.control_token = secrets.token_hex(32)
+        for name, value in (("control-token", self.control_token),):
             path = state / name
             path.write_text(value)
             path.chmod(0o600)
@@ -208,7 +208,7 @@ class Runner:
         self.sockets[label] = sock
         self.submitted.append(label)
         head = (f"{method} /r/{root}/v1/{endpoint} HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n"
-                f"X-LLMGW-Token: {self.data_token}\r\nX-Fixture-Request: {label}\r\n"
+                f"X-Fixture-Request: {label}\r\n"
                 f"X-Fixture-Endpoint: {endpoint}\r\nX-Session-Id: child-{label}\r\n"
                 f"Content-Type: application/json\r\nContent-Length: {len(body)}\r\n"
                 "Connection: close\r\n\r\n").encode()
@@ -247,7 +247,7 @@ class Runner:
         trace = self.upstream.recorded()
         check_trace(trace, expected_attempts)
         require(all(value not in stdout + stderr for value in
-                    (self.data_token.encode(), self.control_token.encode(), BODY,
+                    (self.control_token.encode(), BODY,
                      b"retry-probe-sentinel")), "fixture_material_in_output")
         origin = trace[0]["at"]
         return {"ingress": len(self.received), "upstream_attempts": len(trace),

@@ -13,6 +13,8 @@ fn config(cap: u8) -> Config {
     Config {
         listen: "127.0.0.1:0".parse().unwrap(),
         concurrency: cap,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: CancelPolicy::Drain,
         accounting: Accounting::Reserved,
         retry_transient_429: false,
@@ -107,6 +109,62 @@ async fn next_expiry_slack_admits_light_and_keeps_heavy_slot() {
     turn().await;
     assert_eq!(a.snapshot().active, 0);
     assert_eq!(a.snapshot().starts, 3);
+}
+
+#[tokio::test]
+async fn metadata_backfill_keeps_same_root_fifo_and_the_last_execution_slot() {
+    for cap in [1, 2] {
+        let clock = ManualClock::default();
+        let a = Admission::benchmark(&config(cap), Some(clock.clone()), BenchmarkPolicy::Backfill);
+        clock.advance_to(Duration::from_secs(60));
+        seed(&a, 70).await;
+        let heavy = request(&a, 0, 80);
+        turn().await;
+        clock.advance_to(Duration::from_secs(65));
+        turn().await;
+        let metadata = |root| {
+            let a = a.clone();
+            tokio::spawn(async move {
+                a.acquire(
+                    root,
+                    RequestCost::Metadata,
+                    Endpoint::Models,
+                    Duration::from_secs(120),
+                )
+                .await
+            })
+        };
+        let same_root = metadata(0);
+        turn().await;
+        let other_root = metadata(1);
+        turn().await;
+        assert!(
+            !same_root.is_finished(),
+            "metadata cannot skip its own root head"
+        );
+        assert_eq!(other_root.is_finished(), cap == 2);
+        let mut active = if cap == 2 {
+            let mut hold = admitted(other_root).await;
+            hold.start();
+            Some(hold)
+        } else {
+            other_root.abort();
+            assert!(matches!(other_root.await, Err(e) if e.is_cancelled()));
+            None
+        };
+        clock.advance_to(Duration::from_secs(120));
+        turn().await;
+        let mut heavy = admitted(heavy).await;
+        heavy.start();
+        assert_eq!(a.snapshot().active, usize::from(cap));
+        assert!(!same_root.is_finished());
+        same_root.abort();
+        assert!(matches!(same_root.await, Err(e) if e.is_cancelled()));
+        drop(heavy);
+        drop(active.take());
+        turn().await;
+        assert_eq!(a.snapshot().active, 0);
+    }
 }
 
 #[tokio::test]

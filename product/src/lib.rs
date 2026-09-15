@@ -1,5 +1,6 @@
 pub mod admission;
 pub mod autostart;
+mod cache;
 pub mod cli;
 pub mod clients;
 pub mod config;

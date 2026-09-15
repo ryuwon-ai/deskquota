@@ -115,14 +115,13 @@ def reference_clone() -> dict[str, Any]:
     return result
 
 
-def render_models(gateway_base: str, data_token: str) -> str:
+def render_models(gateway_base: str) -> str:
     try:
         raw = TEMPLATE.read_text(encoding="utf-8")
     except OSError as error:
         raise ValueError(f"cannot read Pi models template: {error}") from error
     replacements = {
         "__GATEWAY_BASE_URL__": gateway_base,
-        "__DATA_TOKEN__": data_token,
     }
     for placeholder, value in replacements.items():
         if raw.count(placeholder) == 0:
@@ -576,14 +575,14 @@ def run_flow(
             "unrelated_user_addition_preserved": False,
             "managed_provider_removed": False,
         }
-        data_token = "task4-data-" + os.urandom(18).hex()
+
         control_token = "task4-control-" + os.urandom(18).hex()
         gateway_port = reserve_loopback_port()
         try:
             write_private(config_dir / "config.toml", gateway_config(gateway_port, fixture.server_port))
             state_dir = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config_dir / "config.toml"), "--json"], cwd=cwd, env=env, timeout=10))["state_directory"])
             state_dir.mkdir(mode=0o700)
-            write_private(state_dir / "data-token", data_token)
+
             write_private(state_dir / "control-token", control_token)
             if native_connect:
                 write_private(
@@ -610,7 +609,7 @@ def run_flow(
             else:
                 write_private(
                     agent_dir / "models.json",
-                    render_models(f"http://127.0.0.1:{gateway_port}{LOCAL_PREFIX}", data_token),
+                    render_models(f"http://127.0.0.1:{gateway_port}{LOCAL_PREFIX}"),
                 )
                 write_private(
                     agent_dir / "settings.json",
@@ -663,8 +662,8 @@ def run_flow(
                 adapter["preview_succeeded"] = (
                     preview.returncode == 0
                     and preview_hash is not None
-                    and data_token not in preview.stdout
-                    and data_token not in preview.stderr
+
+
                 )
                 if not adapter["preview_succeeded"]:
                     raise RuntimeError("native Pi connect preview failed or exposed the local token")

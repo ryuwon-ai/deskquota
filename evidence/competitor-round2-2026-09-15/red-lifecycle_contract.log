@@ -1,0 +1,34 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.84s
+     Running tests/lifecycle_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/lifecycle_contract-ad06e9afcd0e4e1c)
+
+running 1 test
+test ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity ... FAILED
+
+failures:
+
+---- ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity stdout ----
+
+thread 'ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity' panicked at tests/lifecycle_contract.rs:106:5:
+gateway: running
+address: "127.0.0.1:58949"; fingerprint: "d7129b9373a9b5d8cffa654664191c0e526d3b388ffbbe78f1e417952a9a71f3"
+quota startup hold: 0 ms; shared cooldown: 0 ms; queued: 0; active: 0
+queue reason (representative): none; protected root: none
+RPM: unlimited; capacity: n/a; local debited: 0
+TPM: unknown; capacity: n/a; local debited: 0; held: 0
+accounting: actual; estimate: TPM unenforced
+client claude: not_connected
+client codex: not_connected
+client pi: not_connected
+autostart registration: disabled; manager: file_absent; scope: user; ownership: absent
+login auth availability: available (current shell is not proof for next login)
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.77s
+
+error: test failed, to rerun pass `--test lifecycle_contract`

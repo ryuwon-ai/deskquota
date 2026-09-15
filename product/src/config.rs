@@ -1,5 +1,5 @@
 mod validate;
-pub(crate) use validate::registered_root_ids;
+pub(crate) use validate::{is_env_name, registered_root_ids};
 
 pub(crate) const MIN_CONCURRENCY: u8 = 1;
 pub(crate) const MAX_CONCURRENCY: u8 = 16;
@@ -11,7 +11,7 @@ use std::net::SocketAddr;
 use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -115,10 +115,34 @@ impl fmt::Debug for Upstream {
     }
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(default, deny_unknown_fields)]
+pub struct CacheConfig {
+    pub ttl_secs: u64,
+    pub max_history: usize,
+}
+
+impl Default for CacheConfig {
+    fn default() -> Self {
+        Self {
+            ttl_secs: 300,
+            max_history: 3,
+        }
+    }
+}
+
+impl CacheConfig {
+    pub fn is_valid(self) -> bool {
+        (1..=3600).contains(&self.ttl_secs) && (1..=64).contains(&self.max_history)
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Config {
     pub listen: SocketAddr,
     pub concurrency: u8,
+    pub startup_hold_secs: u64,
+    pub cache: Option<CacheConfig>,
     pub cancel_policy: CancelPolicy,
     pub accounting: Accounting,
     pub retry_transient_429: bool,
@@ -131,7 +155,6 @@ pub struct Config {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct StatePaths {
     pub directory: PathBuf,
-    pub data_token: PathBuf,
     pub control_token: PathBuf,
     pub runtime_state: PathBuf,
 }
@@ -148,7 +171,6 @@ impl StatePaths {
         })?;
         let directory = parent.join(format!(".llmgw-{}", Self::path_hash(config_path)));
         Ok(Self {
-            data_token: directory.join("data-token"),
             control_token: directory.join("control-token"),
             runtime_state: directory.join("runtime.json"),
             directory,
@@ -297,6 +319,8 @@ fn line_and_column(bytes: &[u8], offset: usize) -> (usize, usize) {
 struct ConfigInput {
     listen: Option<String>,
     concurrency: Option<u8>,
+    startup_hold_secs: Option<u64>,
+    cache: Option<CacheConfig>,
     cancel_policy: Option<String>,
     accounting: Option<String>,
     retry_transient_429: Option<bool>,

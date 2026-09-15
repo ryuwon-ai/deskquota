@@ -1,0 +1,91 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.70s
+     Running tests/cache_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/cache_contract-b6e255907c4e3a7c)
+
+running 16 tests
+test a_hit_returns_while_the_single_request_rpm_window_is_exhausted ... ok
+test abandoned_downstream_drains_without_committing_and_body_errors_never_cache ... ok
+test exact_json_hit_skips_admission_and_scrubs_stale_response_metadata ... ok
+test cache_control_is_checked_before_connection_scrubbing_and_errors_never_cache ... ok
+test first_miss_streams_before_terminal_and_eof_and_only_then_becomes_a_hit ... ok
+test incomplete_tool_or_refusal_json_is_forwarded_but_never_stored ... ok
+test keys_isolate_roots_credentials_query_options_and_original_body ... ok
+test message_stream_lifecycle_and_response_terminal_output_are_validated ... ok
+test messages_and_responses_require_complete_text_and_stateless_requests ... ok
+test missing_usage_can_cache_complete_text_but_incomplete_or_tool_sse_cannot ... ok
+test normal_sse_hit_replays_bytes_but_does_not_double_settle_usage ... ok
+test oversized_chunked_capture_releases_its_budget_before_eof ... ok
+test responses_reject_malformed_intermediate_payloads_before_valid_completion ... ok
+test short_text_eligibility_bypasses_history_tools_unknown_options_and_oversized_requests ... ok
+test typed_server_rejects_out_of_range_cache_settings ... ok
+test expired_entries_miss_and_disabled_cache_does_not_capture ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+
+     Running tests/lifecycle_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/lifecycle_contract-ad06e9afcd0e4e1c)
+
+running 27 tests
+test concurrent_on_has_one_identity ... ok
+test changed_config_requires_restart_and_invalid_edit_can_stop_old_port ... ok
+test control_stop_rejects_a_previous_instance_nonce ... ok
+test deleted_config_never_guesses_a_state_identity ... ok
+test edited_listen_port_off_reaches_recorded_address ... ok
+test empty_queue_reports_shared_cooldown_without_a_new_request ... ok
+test existing_read_only_private_tokens_need_no_permission_changes ... ok
+test held_lock_with_unknown_identity_is_failed_json_and_never_killed ... ok
+test known_quota_is_ready_with_empty_queue_startup_hold ... ok
+test loopback_control_ignores_proxy_environment ... ok
+test mac_extended_acl_is_rejected_before_token_write ... ok
+test mac_existing_token_acl_is_rejected_and_preserved ... ok
+test malformed_stopped_config_never_provisions_tokens ... ok
+test malformed_running_config_requires_restart_without_replacing_worker ... ok
+test occupied_port_does_not_stop_unrelated_listener ... ok
+test ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity ... ok
+test restart_invalid_edit_while_waiting_preserves_existing_identity ... ok
+test restart_path_retarget_while_waiting_never_switches_instance ... ok
+test restart_preflights_ca_without_stopping_authenticated_worker_or_contacting_upstream ... ok
+test restart_valid_edit_while_waiting_uses_latest_fingerprint ... ok
+test same_directory_configs_have_independent_workers ... ok
+test stale_pid_never_kills_an_unrelated_process ... ok
+test stale_port_log_cannot_classify_a_new_config_failure ... ok
+test stale_record_of_owned_unrelated_child_preserves_child_and_lock_file ... ok
+test stopped_is_success_and_off_is_idempotent ... ok
+test weak_existing_state_permissions_are_rejected_without_chmod ... ok
+test off_drains_a_live_request_closes_sockets_and_exposes_draining ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.53s
+
+     Running tests/task5_usage_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/task5_usage_contract-95ceabe946950ffb)
+
+running 28 tests
+test chat_final_usage_must_precede_done ... ok
+test chat_error_cannot_leave_successful_usage_for_refund ... ok
+test chat_missing_choices_usage_is_not_a_final_report ... ok
+test chat_nonempty_choices_usage_is_not_a_final_report ... ok
+test chat_malformed_choices_usage_is_not_a_final_report ... ok
+test chat_null_usage_delta_then_final_report_preserves_cached_subset ... ok
+test chat_numeric_interim_usage_does_not_replace_supported_final_report ... ok
+test consistent_repeated_terminal_reports_and_unknown_events_remain_supported ... ok
+test json_final_usage_reconciles_all_three_endpoints ... ok
+test messages_error_before_final_stop_keeps_reservation ... ok
+test messages_error_after_final_stop_keeps_reservation ... ok
+test messages_named_error_event_without_json_type_keeps_reservation ... ok
+test named_error_event_without_json_error_field_invalidates_chat_usage ... ok
+test named_error_event_without_json_type_invalidates_responses_usage ... ok
+test quality_messages_non_accounting_events_after_stop_preserve_final_usage ... ok
+test quality_messages_ordered_start_delta_stop_settles_known_usage ... ok
+test quality_messages_qualified_usage_then_post_stop_delta_is_unknown ... ok
+test quality_messages_start_stop_delta_cannot_qualify_final_usage ... ok
+test quality_messages_qualified_usage_then_post_stop_start_is_unknown ... ok
+test quality_messages_stop_start_delta_cannot_qualify_final_usage ... ok
+test reserved_accounting_keeps_estimate_with_valid_supported_final_usage ... ok
+test responses_conflicting_nested_status_or_error_keeps_reservation ... ok
+test responses_failed_after_completed_keeps_reservation ... ok
+test responses_error_before_or_after_completed_keeps_reservation ... ok
+test responses_failed_before_completed_keeps_reservation ... ok
+test responses_incomplete_after_completed_keeps_reservation ... ok
+test responses_incomplete_before_completed_keeps_reservation ... ok
+test responses_later_completed_without_usage_cannot_reuse_stale_usage ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

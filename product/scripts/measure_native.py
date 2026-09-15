@@ -152,6 +152,8 @@ def drive_current_wizard(
     choose(run, "same quota shared")
     choose(run, "separate input/output")
     choose(run, "Concurrency")
+    choose(run, "Startup quota hold")
+    choose(run, "Enable exact response cache")
     choose(run, "Setup: Run")
     choose(run, "Local loopback port", f"{port}\r".encode())
     choose(run, "Start at next user login")

@@ -21,20 +21,22 @@ pub(super) fn patches(
     );
     let path = config_dir.join("llmgw.config.toml");
     let ownership_requirement = owned_provider_requirement(request, &path)?;
-    let provider = json!({
+    let mut provider = json!({
         "name": "llmgw",
         "base_url": base,
         "wire_api": "responses",
         "requires_openai_auth": false,
-        "supports_websockets": false,
-        "http_headers": {"X-LLMGW-Token": request.local_data_token}
+        "supports_websockets": false
     });
+    if request.upstream_auth == crate::config::Auth::Forward {
+        provider["env_key"] = json!(request.client_key_env);
+    }
     let edits = vec![
         set_public(&["model"], json!(request.model))?,
         set_public(&["model_provider"], json!("llmgw"))?,
         Edit::Set {
             key: key(&["model_providers", "llmgw"])?,
-            value: EditValue::LocalDataTokenObject(provider),
+            value: EditValue::Public(provider),
         },
     ];
     Ok((

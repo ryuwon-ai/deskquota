@@ -61,7 +61,7 @@ pub fn random_token() -> String {
     s
 }
 pub fn provision_tokens(paths: &StatePaths) -> io::Result<()> {
-    for path in [&paths.data_token, &paths.control_token] {
+    for path in [&paths.control_token] {
         match platform::open(path, false, true) {
             Ok(mut file) => {
                 file.write_all(random_token().as_bytes())?;

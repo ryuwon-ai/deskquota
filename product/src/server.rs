@@ -88,28 +88,18 @@ impl Secret {
 
 #[derive(Clone)]
 pub struct RuntimeCredentials {
-    data_token: Secret,
     control_token: Secret,
     upstream_token: Option<Secret>,
     pub(crate) identity: Option<crate::lifecycle::identity::Identity>,
 }
 
 impl RuntimeCredentials {
-    pub fn new(
-        data_token: &[u8],
-        control_token: &[u8],
-        upstream_token: Option<&[u8]>,
-    ) -> Result<Self, StartError> {
-        let data_token = Secret::new(data_token, "data token")?;
+    pub fn new(control_token: &[u8], upstream_token: Option<&[u8]>) -> Result<Self, StartError> {
         let control_token = Secret::new(control_token, "control token")?;
-        if constant_time_equal(data_token.bytes(), control_token.bytes()) {
-            return Err(StartError::CredentialsMustDiffer);
-        }
         let upstream_token = upstream_token
             .map(|value| Secret::new(value, "upstream credential"))
             .transpose()?;
         Ok(Self {
-            data_token,
             control_token,
             upstream_token,
             identity: None,
@@ -117,7 +107,6 @@ impl RuntimeCredentials {
     }
 
     pub fn load(loaded: &LoadedConfig) -> Result<Self, StartError> {
-        let data = read_secret_file(&loaded.state_paths.data_token)?;
         let control = read_secret_file(&loaded.state_paths.control_token)?;
         let upstream = match &loaded.config.upstream.auth {
             Auth::Env { name, .. } => Some(
@@ -127,7 +116,7 @@ impl RuntimeCredentials {
             ),
             Auth::Forward | Auth::None => None,
         };
-        Self::new(&data, &control, upstream.as_deref())
+        Self::new(&control, upstream.as_deref())
     }
 
     fn validate_for(&self, auth: &Auth) -> Result<(), StartError> {
@@ -198,7 +187,8 @@ pub enum StartError {
     Bind(io::Error),
     HttpClient(crate::transport::upstream::BuildError),
     InvalidCredential(&'static str),
-    CredentialsMustDiffer,
+    InvalidStartupHold,
+    InvalidCache,
     MissingEnvironmentCredential,
     UnexpectedEnvironmentCredential,
     ReservedAuthenticationHeader,
@@ -226,8 +216,11 @@ impl fmt::Display for StartError {
                     "{label} is empty or not a valid HTTP header value"
                 )
             }
-            Self::CredentialsMustDiffer => {
-                formatter.write_str("data and control tokens must be distinct")
+            Self::InvalidCache => {
+                formatter.write_str("cache ttl_secs must be 1..3600 and max_history must be 1..64")
+            }
+            Self::InvalidStartupHold => {
+                formatter.write_str("startup_hold_secs must be between 0 and 3600")
             }
             Self::MissingEnvironmentCredential => {
                 formatter.write_str("configured upstream environment credential is missing")
@@ -260,6 +253,7 @@ impl std::error::Error for StartError {
 }
 
 struct AppState {
+    cache: Option<crate::cache::ExactCache>,
     config: Config,
     credentials: RuntimeCredentials,
     upstream: UpstreamClient,
@@ -288,6 +282,12 @@ impl WorkerSpawner {
 pub fn validate_start_config(config: &Config) -> Result<(), StartError> {
     if !config.listen.ip().is_loopback() {
         return Err(StartError::NonLoopbackListen);
+    }
+    if config.cache.is_some_and(|cache| !cache.is_valid()) {
+        return Err(StartError::InvalidCache);
+    }
+    if config.startup_hold_secs > 3600 {
+        return Err(StartError::InvalidStartupHold);
     }
     if !(MIN_CONCURRENCY..=MAX_CONCURRENCY).contains(&config.concurrency) {
         return Err(StartError::InvalidConcurrency);
@@ -346,6 +346,8 @@ async fn spawn_inner(
         .await
         .map_err(StartError::Bind)?;
     let address = listener.local_addr().map_err(StartError::Bind)?;
+    let mut config = config;
+    config.listen = address;
     let mut credentials = credentials;
     if let Some(identity) = &mut credentials.identity {
         identity.address = address;
@@ -368,6 +370,7 @@ async fn spawn_inner(
     };
     let handle_admission = admission.clone();
     let state = Arc::new(AppState {
+        cache: config.cache.map(crate::cache::ExactCache::new),
         config,
         credentials,
         upstream,
@@ -681,6 +684,12 @@ async fn handle_request(
                     .metrics
                     .status_with_admission(&state.admission, state.bodies.stored_bytes());
                 bytes.pop();
+                bytes.extend_from_slice(b",\"exact_cache\":");
+                serde_json::to_writer(
+                    &mut bytes,
+                    &crate::cache::ExactCache::snapshot(state.cache.as_ref()),
+                )
+                .expect("cache status JSON");
                 bytes.extend_from_slice(if *state.stop.borrow() {
                     b",\"status\":\"ok\",\"state\":\"draining\",\"identity\":"
                 } else {
@@ -701,12 +710,12 @@ async fn handle_request(
         Ok(route) => route,
         Err(error) => return error.into_response(),
     };
-    if !state
-        .credentials
-        .data_token
-        .matches_header(request.headers(), protocol::DATA_TOKEN_HEADER)
-    {
-        return protocol::error(StatusCode::UNAUTHORIZED, "invalid_data_token");
+    if let Err((status, code)) = headers::validate_local_request(
+        request.headers(),
+        request.method(),
+        state.config.listen.port(),
+    ) {
+        return protocol::error(status, code);
     }
     if headers::requests_upgrade(request.headers()) {
         return protocol::error(StatusCode::BAD_REQUEST, "unsupported_upgrade");
@@ -760,12 +769,29 @@ async fn handle_request(
         Ok(cost) => cost,
         Err(error) => return error.into_response(),
     };
+    let allow_cache = state.cache.is_some() && !crate::cache::forbids_reuse(&parts.headers);
     let mut request_headers = parts.headers;
     headers::prepare_request(
         &mut request_headers,
         &state.config.upstream.auth,
         state.credentials.upstream_token.as_ref().map(Secret::bytes),
     );
+    let cache = if allow_cache {
+        state.cache.as_ref().and_then(|cache| {
+            cache.request(
+                route.root_index,
+                &upstream_url,
+                &request_headers,
+                route.endpoint,
+                body.bytes(),
+            )
+        })
+    } else {
+        None
+    };
+    if let Some(hit) = cache.as_ref().and_then(crate::cache::Pending::lookup) {
+        return hit;
+    }
     let queue_deadline = (tokio::time::Instant::now() + state.limits.capacity_wait).min(deadline);
     let mut stop = state.stop.subscribe();
     let admission_hold = tokio::select! {
@@ -789,6 +815,7 @@ async fn handle_request(
     };
     let (head_sender, head_receiver) = tokio::sync::oneshot::channel();
     let worker = stream::forward(ForwardRequest {
+        cache,
         client: state.upstream.clone(),
         method: parts.method,
         url: upstream_url,

@@ -377,12 +377,7 @@ fn canonical_source_fingerprint_and_state_paths_share_the_explicit_location() {
 
     assert_eq!(first.source_path, expected_path);
     assert_eq!(first.state_paths.directory, expected_state_dir);
-    assert!(
-        first
-            .state_paths
-            .data_token
-            .starts_with(&first.state_paths.directory)
-    );
+    assert!(!first.state_paths.directory.join("data-token").exists());
     assert!(
         first
             .state_paths
@@ -446,4 +441,57 @@ fn lossless_query_rejects_a_raw_config_query_that_url_would_transform() {
         "https://api.example.test/team/v1?",
     );
     assert!(error(&empty).contains("query"));
+}
+
+#[test]
+fn defaults_use_actual_and_startup_hold_is_bounded() {
+    let source = VALID_CONFIG.replace("accounting = \"reserved\"", "");
+    let config = llmgw::config::parse(source.as_bytes()).unwrap();
+    assert_eq!(config.accounting, Accounting::Actual);
+    assert_eq!(config.startup_hold_secs, 60);
+    for seconds in [0, 17, 3600] {
+        let parsed =
+            llmgw::config::parse(format!("startup_hold_secs = {seconds}\n{source}").as_bytes())
+                .unwrap();
+        assert_eq!(parsed.startup_hold_secs, seconds);
+    }
+    for value in ["-1", "3601", "18446744073709551615", "1.5"] {
+        assert!(
+            llmgw::config::parse(format!("startup_hold_secs = {value}\n{source}").as_bytes())
+                .is_err()
+        );
+    }
+}
+
+#[test]
+fn exact_cache_table_is_optional_bounded_and_rejects_unknown_fields() {
+    assert!(load(VALID_CONFIG).config.cache.is_none());
+    let configured = |fields: &str| format!("{VALID_CONFIG}\n[cache]\n{fields}\n");
+    assert_eq!(
+        load(&configured("")).config.cache,
+        Some(llmgw::config::CacheConfig::default())
+    );
+    for fields in [
+        "ttl_secs = 0",
+        "ttl_secs = 3601",
+        "ttl_secs = -1",
+        "max_history = 0",
+        "max_history = 65",
+        "capacity = 5",
+        "ttl_secs = 1.5",
+    ] {
+        assert!(
+            llmgw::config::parse(configured(fields).as_bytes()).is_err(),
+            "{fields}"
+        );
+    }
+    assert_eq!(
+        load(&configured("ttl_secs = 1\nmax_history = 64"))
+            .config
+            .cache,
+        Some(llmgw::config::CacheConfig {
+            ttl_secs: 1,
+            max_history: 64
+        })
+    );
 }

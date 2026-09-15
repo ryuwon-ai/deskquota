@@ -210,7 +210,7 @@ async def start_gateway(arm, binary, reference, upstream_port, quota, temp, even
     if paths_process.returncode != 0:
         raise RuntimeError("gateway state path lookup failed")
     state = Path(json.loads(paths_output)["state_directory"]); state.mkdir(mode=0o700)
-    for name in ("data", "control"):
+    for name in ("control",):
         path = state/(name+"-token")
         path.write_text("synthetic-benchmark-"+name)
         path.chmod(0o600)

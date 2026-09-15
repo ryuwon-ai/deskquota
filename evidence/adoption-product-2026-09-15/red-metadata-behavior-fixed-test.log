@@ -1,0 +1,26 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.20s
+     Running unittests src/lib.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/llmgw-4b360da459f374db)
+
+running 2 tests
+
+thread 'admission::quota::backfill_tests::metadata_backfill_is_safe_before_start_and_while_active' panicked at src/admission/quota.rs:439:13:
+assertion failed: l.can_backfill(at(65), cost(80), at(180), RequestCost::Metadata)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test admission::quota::backfill_tests::metadata_backfill_is_safe_before_start_and_while_active ... FAILED
+
+thread 'protocol::request::tests::unmetered_generation_is_not_classified_as_non_generating_metadata' panicked at src/protocol/request.rs:383:17:
+assertion `left == right` failed
+  left: 31
+ right: 0
+test protocol::request::tests::unmetered_generation_is_not_classified_as_non_generating_metadata ... FAILED
+
+failures:
+
+failures:
+    admission::quota::backfill_tests::metadata_backfill_is_safe_before_start_and_while_active
+    protocol::request::tests::unmetered_generation_is_not_classified_as_non_generating_metadata
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

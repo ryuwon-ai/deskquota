@@ -9,6 +9,8 @@ fn config(address: std::net::SocketAddr) -> Config {
     Config {
         listen: "127.0.0.1:0".parse().unwrap(),
         concurrency: 1,
+        startup_hold_secs: 60,
+        cache: None,
         cancel_policy: CancelPolicy::Drain,
         accounting: Accounting::Reserved,
         retry_transient_429: false,
@@ -53,7 +55,7 @@ async fn retry_after_survives_request_deadline_and_new_root_metadata_client() {
     let upstream = UpstreamFixture::start(rejection("Retry-After: 2\r\n", raw)).await;
     let gateway = server::testing::spawn_with_timeouts(
         config(upstream.address()),
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
         Duration::from_millis(150),
         Duration::from_millis(100),
     )
@@ -112,7 +114,7 @@ async fn opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_ch
     let clock = llmgw::admission::ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         config,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
         clock.clone(),
         None,
     )
@@ -142,7 +144,7 @@ async fn one_response_case(body: &[u8], headers: &str, enabled: bool, expected: 
     };
     let gateway = server::spawn(
         c,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -241,7 +243,7 @@ async fn seconds_http_date_and_ms_share_cooldown_even_with_retry_off() {
         let upstream = UpstreamFixture::start(rejection(&header, br#"{"unknown":true}"#)).await;
         let gateway = server::testing::spawn_with_timeouts(
             config(upstream.address()),
-            RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+            RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
             Duration::from_millis(80),
             Duration::from_millis(100),
         )
@@ -323,7 +325,7 @@ async fn real_retry_reenters_known_rpm_and_has_no_slot_while_waiting() {
     let clock = llmgw::admission::ManualClock::default();
     let gateway = server::testing::spawn_with_clock(
         cfg,
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
         clock.clone(),
         None,
     )
@@ -385,9 +387,9 @@ async fn socket_ambiguity_503_redirect_and_partial_stream_have_exactly_one_wire_
         (b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: 999\r\nConnection: close\r\n\r\ndata: {\"error\":{\"code\":\"slow_down\"}}\n\n".to_vec(), 200),
     ] {
         let upstream = UpstreamFixture::start(raw).await;
-        let gateway = server::spawn(opted_config(upstream.address()), RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap()).await.unwrap();
+        let gateway = server::spawn(opted_config(upstream.address()), RuntimeCredentials::new(b"synthetic-control", None).unwrap()).await.unwrap();
         let body = br#"{"model":"fixture","messages":[]}"#;
-        let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len()).into_bytes(), body.to_vec()].concat();
+        let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len()).into_bytes(), body.to_vec()].concat();
         let response = send_raw(gateway.address(), &req).await;
         assert_eq!(status(&response), expected_status);
         assert_eq!(upstream.attempts(), 1);
@@ -409,12 +411,12 @@ async fn canceled_retry_queue_releases_request_body_and_never_starts_a_second_at
     .await;
     let gateway = server::spawn(
         opted_config(upstream.address()),
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
     let body = br#"{"model":"fixture","messages":[],"synthetic_prompt":"task7-prompt-sentinel"}"#;
-    let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nAuthorization: Bearer task7-credential-sentinel\r\nContent-Length: {}\r\n\r\n",body.len()).into_bytes(), body.to_vec()].concat();
+    let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nAuthorization: Bearer task7-credential-sentinel\r\nContent-Length: {}\r\n\r\n",body.len()).into_bytes(), body.to_vec()].concat();
     let client = support::fixture::open_raw(gateway.address(), &req).await;
     tokio::time::timeout(Duration::from_secs(2), async {
         while gateway_status(gateway.address()).await["admission"]["queue_length"] != 1 {
@@ -462,7 +464,7 @@ async fn opted_retry_deadline_keeps_cooldown_for_the_next_client() {
     .await;
     let gateway = server::testing::spawn_with_timeouts(
         opted_config(upstream.address()),
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
         Duration::from_millis(100),
         Duration::from_millis(100),
     )
@@ -495,7 +497,7 @@ async fn chunked_error_observation_overflow_is_transparent_and_never_replayed() 
     let upstream = UpstreamFixture::start(raw).await;
     let gateway = server::spawn(
         opted_config(upstream.address()),
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -553,7 +555,7 @@ async fn full_queue_on_retry_returns_protocol_429_and_is_not_a_deadline() {
     });
     let gateway = server::spawn(
         opted_config(address),
-        RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
     )
     .await
     .unwrap();
@@ -600,7 +602,7 @@ async fn positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with
         let upstream = UpstreamFixture::start(rejection(header, br#"{"unknown":true}"#)).await;
         let gateway = server::testing::spawn_with_timeouts(
             config(upstream.address()),
-            RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+            RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
             Duration::from_millis(80),
             Duration::from_millis(100),
         )
@@ -635,7 +637,7 @@ async fn opted_post_retry_preserves_the_identical_wire_body_and_headers() {
         let clock = llmgw::admission::ManualClock::default();
         let gateway = server::testing::spawn_with_clock(
             cfg,
-            RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+            RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
             clock.clone(),
             None,
         )
@@ -643,7 +645,7 @@ async fn opted_post_retry_preserves_the_identical_wire_body_and_headers() {
         .unwrap();
         clock.advance_to(Duration::from_secs(60));
         let body = br#"{ "model":"fixture", "messages":[], "user":"task7-prompt-sentinel" }"#;
-        let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nAuthorization: Bearer task7-credential-sentinel\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes(), body.to_vec()].concat();
+        let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nAuthorization: Bearer task7-credential-sentinel\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",body.len()).into_bytes(), body.to_vec()].concat();
         assert_eq!(status(&send_raw(gateway.address(), &req).await), 429);
         let captures = upstream.captures(2).await;
         assert_eq!(captures.len(), 2);
@@ -718,14 +720,14 @@ async fn pre_head_rejection_body_failure_returns_502_keeps_cooldown_and_unknown_
                 let clock = llmgw::admission::ManualClock::default();
                 let gateway = server::testing::spawn_with_clock(
                     cfg,
-                    RuntimeCredentials::new(b"synthetic-data", b"synthetic-control", None).unwrap(),
+                    RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
                     clock.clone(),
                     None,
                 )
                 .await
                 .unwrap();
                 clock.advance_to(Duration::from_secs(60));
-                let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len()).into_bytes(), body.to_vec()].concat();
+                let req = [format!("POST /r/a/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nX-LLMGW-Token: synthetic-data\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len()).into_bytes(), body.to_vec()].concat();
                 let mut client = support::fixture::open_raw(gateway.address(), &req).await;
                 received.await.unwrap();
                 let mut response = Vec::new();

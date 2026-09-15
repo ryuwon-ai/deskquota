@@ -133,6 +133,7 @@ def complete(
     registry: list[PtyRun],
     client_config_dir: Path | None = None,
     client_environment: dict[str, str] | None = None,
+    cache_enabled: bool = False,
 ) -> str:
     run = PtyRun(binary, config, registry, client_environment)
     choose(run, "Setup: Environment")
@@ -152,9 +153,14 @@ def complete(
     choose(run, "same quota shared")
     choose(run, "separate input/output")
     choose(run, "Concurrency")
+    choose(run, "Startup quota hold")
+    choose(run, "Enable exact response cache", b"y" if cache_enabled else b"\r")
+    if cache_enabled:
+        choose(run, "Cache TTL in seconds")
+        choose(run, "Cache maximum message history")
     choose(run, "Setup: Run")
     choose(run, "Local loopback port", f"{port}\r".encode())
-    choose(run, "Request start at next login")
+    choose(run, "Start at next user login")
     choose(run, "Setup: Tools")
     choose(run, "Client intents", b" \r" if client_config_dir is not None else b"\r")
     choose(run, "Setup: Apply")
@@ -267,7 +273,7 @@ def main() -> int:
         save_config = root / "저장 only space" / "gateway 설정.toml"
         possible_configs.append(save_config)
         save_config.parent.mkdir()
-        save_log = complete(args.binary, save_config, free_port(), False, runs)
+        save_log = complete(args.binary, save_config, free_port(), False, runs, cache_enabled=True)
         status = subprocess.run([args.binary, "status", "--json", "--config", save_config], check=True, capture_output=True, text=True)
         state = json.loads(status.stdout)
         if state["state"] != "stopped":
@@ -275,7 +281,9 @@ def main() -> int:
         model_unicode = "모델 with space" in save_config.read_text()
         if not model_unicode:
             raise AssertionError("Unicode model input was not preserved")
-        evidence["cases"]["save_only"] = {"exit": 0, "state": "stopped", "model_unicode": True, "log_tail": save_log[-1200:]}
+        if not all(value in save_config.read_text() for value in ("[cache]", "ttl_secs = 300", "max_history = 3")):
+            raise AssertionError("cache wizard choices were not saved")
+        evidence["cases"]["save_only"] = {"exit": 0, "state": "stopped", "model_unicode": True, "exact_cache_enabled": True, "log_tail": save_log[-1200:]}
 
         start_config = root / "저장 and start space" / "gateway 설정.toml"
         possible_configs.append(start_config)

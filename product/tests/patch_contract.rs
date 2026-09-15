@@ -189,7 +189,7 @@ fn jsonc_apply_and_restore_preserve_comments_unrelated_keys_and_hide_tokens() {
                 ),
                 set(
                     key(&["provider", "headers", "X-LLMGW-Token"]),
-                    EditValue::LocalDataToken(DATA_SENTINEL.into()),
+                    EditValue::Public(json!(DATA_SENTINEL)),
                 ),
             ],
         )],
@@ -1016,69 +1016,10 @@ fn apply_and_restore_use_the_same_transaction_lock() {
     assert_eq!(fs::read(path).unwrap(), before);
 }
 
-#[cfg(unix)]
-#[test]
-fn local_token_requires_existing_user_private_file_without_changing_mode() {
-    use std::os::unix::fs::PermissionsExt;
-
-    let fixture = Fixture::new("private-token");
-    let path = fixture.path("client/settings.json");
-    let before = br#"{"env":{}}"#;
-    write_private(&path, before);
-    fs::set_permissions(&path, fs::Permissions::from_mode(0o644)).unwrap();
-    let tx = transaction(
-        fixture.journal(),
-        vec![patch(
-            &path,
-            Format::StrictJson,
-            Scope::UserPrivate,
-            Some(before),
-            vec![set(
-                key(&["env", "X_LLMGW_TOKEN"]),
-                EditValue::LocalDataToken(DATA_SENTINEL.into()),
-            )],
-        )],
-    );
-    let shown = preview(&tx).unwrap();
-    let error = apply(&tx, &shown.hash).unwrap_err().to_string();
-    assert!(error.contains("readable by other users"));
-    assert!(error.contains("correct the permission"));
-    assert_eq!(
-        fs::metadata(&path).unwrap().permissions().mode() & 0o777,
-        0o644
-    );
-    assert_eq!(fs::read(&path).unwrap(), before);
-
-    #[cfg(target_os = "macos")]
-    {
-        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
-        assert!(
-            Command::new("/bin/chmod")
-                .args(["+a", "everyone allow read"])
-                .arg(&path)
-                .status()
-                .unwrap()
-                .success()
-        );
-        let acl = exacl::getfacl(&path, exacl::AclOption::SYMLINK_ACL).unwrap();
-        let error = apply(&tx, &shown.hash).unwrap_err().to_string();
-        assert!(error.contains("extended ACL"));
-        assert_eq!(
-            exacl::getfacl(&path, exacl::AclOption::SYMLINK_ACL).unwrap(),
-            acl
-        );
-        assert_eq!(fs::read(&path).unwrap(), before);
-    }
-}
-
 #[test]
 fn project_shared_token_and_non_data_credentials_are_refused_before_writing() {
     let fixture = Fixture::new("credential-boundary");
     let cases = [
-        (
-            Scope::ProjectShared,
-            EditValue::LocalDataToken(DATA_SENTINEL.into()),
-        ),
         (
             Scope::UserPrivate,
             EditValue::UpstreamCredential(UPSTREAM_SENTINEL.into()),
@@ -1156,11 +1097,11 @@ fn config_patch_redaction_child() {
             Some(before),
             vec![set(
                 key(&["env", "TOKEN"]),
-                EditValue::LocalDataToken(DATA_SENTINEL.into()),
+                EditValue::Public(json!(DATA_SENTINEL)),
             )],
         )],
     );
-    println!("transaction={local:?}");
+    // Only public references enter the transaction; credential variants are rejected below.
     let shown = preview(&local).unwrap();
     println!("preview={shown:?}");
     println!("apply={:?}", apply(&local, &shown.hash).unwrap());
@@ -1726,12 +1667,23 @@ fn ordinary_non_token_patch_preserves_existing_mode_and_macos_acl() {
         vec![patch(
             &path,
             Format::StrictJson,
-            Scope::UserPrivate,
+            Scope::ProjectShared,
             Some(before),
             vec![set(key(&["model"]), EditValue::Public(json!("after")))],
         )],
     );
+    // A deliberately shared public config keeps its original mode and ACL.
     apply_reviewed(&tx);
+    assert_eq!(
+        fs::metadata(&path).unwrap().permissions().mode() & 0o777,
+        0o640
+    );
+    #[cfg(target_os = "macos")]
+    assert_eq!(
+        exacl::getfacl(&path, exacl::AclOption::SYMLINK_ACL).unwrap(),
+        acl_before
+    );
+    restore(fixture.journal()).unwrap();
     assert_eq!(
         fs::metadata(&path).unwrap().permissions().mode() & 0o777,
         0o640
@@ -2028,7 +1980,7 @@ fn disconnect_preserves_user_owned_key_change_but_restores_other_owned_keys() {
                 set(key(&["model"]), EditValue::Public(json!("gateway"))),
                 set(
                     key(&["env", "TOKEN"]),
-                    EditValue::LocalDataToken(DATA_SENTINEL.into()),
+                    EditValue::Public(json!(DATA_SENTINEL)),
                 ),
             ],
         )],
@@ -2091,7 +2043,7 @@ fn newly_created_file_is_removed_only_while_its_exact_bytes_are_owned() {
 }
 
 #[test]
-fn local_data_token_object_is_private_opaque_and_restores_as_one_owned_value() {
+fn public_provider_object_restores_as_one_owned_value() {
     let fixture = Fixture::new("local-token-object");
     let path = fixture.path("client/models.json");
     let before = br#"{"providers":{"other":{"models":[]}}}"#;
@@ -2110,13 +2062,12 @@ fn local_data_token_object_is_private_opaque_and_restores_as_one_owned_value() {
             Some(before),
             vec![set(
                 key(&["providers", "llmgw"]),
-                EditValue::LocalDataTokenObject(provider),
+                EditValue::Public(provider),
             )],
         )],
     );
     let shown = preview(&tx).unwrap();
     assert!(!shown.summary.contains(DATA_SENTINEL));
-    assert!(!format!("{:?}", tx.patches[0].edits[0]).contains(DATA_SENTINEL));
     let alternate_provider = json!({
         "baseUrl": "http://127.0.0.1:4141/r/pi/v1",
         "headers": {"X-LLMGW-Token": "different-local-token"},
@@ -2131,7 +2082,7 @@ fn local_data_token_object_is_private_opaque_and_restores_as_one_owned_value() {
             Some(before),
             vec![set(
                 key(&["providers", "llmgw"]),
-                EditValue::LocalDataTokenObject(alternate_provider),
+                EditValue::Public(alternate_provider),
             )],
         )],
     );

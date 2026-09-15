@@ -73,6 +73,8 @@ fn fresh_setup_draft(port: u16) -> llmgw::setup::SetupDraft {
             shared_with_other_pcs: false,
             separate_input_output: false,
             concurrency: 1,
+            startup_hold_secs: 60,
+            cache: None,
         })
         .run(llmgw::setup::RunAnswers {
             port,
@@ -154,8 +156,8 @@ fn request(
         root: "shared-work".into(),
         model: "example-model".into(),
         protocol,
-        local_data_token: "synthetic-local-data-token".into(),
-        token_source: fixture.path("gateway-state/data-token"),
+        upstream_auth: llmgw::config::Auth::None,
+        client_key_env: "OPENAI_API_KEY".into(),
         journal_path: fixture.path(&format!("gateway-state/clients/{}.json", client.as_str())),
         set_default: true,
         discover_models: false,
@@ -206,7 +208,7 @@ fn pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventi
     assert!(
         plan.preview()
             .text
-            .contains("credential: local data token from")
+            .contains("credential: gateway none/env policy")
     );
     assert!(!plan.preview().text.contains("synthetic-local-data-token"));
     assert!(!format!("{plan:?}").contains("synthetic-local-data-token"));
@@ -231,10 +233,8 @@ fn pi_profile_previews_absolute_files_and_applies_explicit_model_without_inventi
         "http://127.0.0.1:4141/r/shared-work/v1"
     );
     assert_eq!(provider["api"], "openai-completions");
-    assert_eq!(
-        provider["headers"]["X-LLMGW-Token"],
-        "synthetic-local-data-token"
-    );
+    assert!(provider["headers"].get("X-LLMGW-Token").is_none());
+    assert_eq!(provider["apiKey"], "llmgw-local-only");
     assert_eq!(provider["models"][0]["contextWindow"], 4096);
     assert_eq!(provider["models"][0]["maxTokens"], 32);
     let defaults: serde_json::Value =
@@ -333,10 +333,7 @@ fn claude_preserves_existing_env_and_headers_in_private_user_settings() {
     );
     assert_eq!(value["env"]["ANTHROPIC_MODEL"], "example-model");
     assert_eq!(value["env"]["ANTHROPIC_API_KEY"], "llmgw-local-only");
-    assert_eq!(
-        value["env"]["ANTHROPIC_CUSTOM_HEADERS"],
-        "X-Existing: keep\nX-LLMGW-Token: synthetic-local-data-token"
-    );
+    assert_eq!(value["env"]["ANTHROPIC_CUSTOM_HEADERS"], "X-Existing: keep");
     disconnect(&input.journal_path).unwrap();
     let restored: serde_json::Value = serde_json::from_slice(&fs::read(settings).unwrap()).unwrap();
     assert_eq!(
@@ -390,7 +387,7 @@ fn claude_native_directory_accepts_a_safe_canonical_parent_alias() {
     assert!(
         fs::read_to_string(target)
             .unwrap()
-            .contains("X-LLMGW-Token")
+            .contains("ANTHROPIC_BASE_URL")
     );
 }
 
@@ -473,12 +470,6 @@ models = ["example-model"]
     fs::set_permissions(
         &loaded.state_paths.directory,
         fs::Permissions::from_mode(0o700),
-    )
-    .unwrap();
-    fs::write(&loaded.state_paths.data_token, b"synthetic-data-token").unwrap();
-    fs::set_permissions(
-        &loaded.state_paths.data_token,
-        fs::Permissions::from_mode(0o600),
     )
     .unwrap();
     let claude = fixture.private_file(
@@ -714,10 +705,12 @@ fn codex_uses_a_separate_responses_profile_and_static_native_header() {
         value["model_providers"]["llmgw"]["supports_websockets"].as_bool(),
         Some(false)
     );
-    assert_eq!(
-        value["model_providers"]["llmgw"]["http_headers"]["X-LLMGW-Token"].as_str(),
-        Some("synthetic-local-data-token")
+    assert!(
+        value["model_providers"]["llmgw"]
+            .get("http_headers")
+            .is_none()
     );
+    assert!(value["model_providers"]["llmgw"].get("env_key").is_none());
     assert_eq!(value["notify"][0].as_str(), Some("keep"));
 
     let restored = disconnect(&input.journal_path).unwrap();
@@ -1109,16 +1102,6 @@ models = ["example-model"]
         fs::Permissions::from_mode(0o700),
     )
     .unwrap();
-    fs::write(
-        &loaded.state_paths.data_token,
-        b"synthetic-local-data-token",
-    )
-    .unwrap();
-    fs::set_permissions(
-        &loaded.state_paths.data_token,
-        fs::Permissions::from_mode(0o600),
-    )
-    .unwrap();
     let pi = fixture.private_file("bin/pi", b"#!/bin/sh\nprintf '%s\\n' '0.84.2'\n");
     fs::set_permissions(&pi, fs::Permissions::from_mode(0o700)).unwrap();
     let native = fixture.path("native-pi-agent");
@@ -1250,16 +1233,6 @@ models = ["example-model"]
         fs::Permissions::from_mode(0o700),
     )
     .unwrap();
-    fs::write(
-        &loaded.state_paths.data_token,
-        b"synthetic-local-data-token",
-    )
-    .unwrap();
-    fs::set_permissions(
-        &loaded.state_paths.data_token,
-        fs::Permissions::from_mode(0o600),
-    )
-    .unwrap();
     let pi = fixture.private_file("bin/pi", b"#!/bin/sh\nprintf '%s\\n' '0.84.2'\n");
     fs::set_permissions(&pi, fs::Permissions::from_mode(0o700)).unwrap();
     let home = fixture.path("client-home");
@@ -1377,16 +1350,12 @@ models = ["example-model"]
         fs::Permissions::from_mode(0o700),
     )
     .unwrap();
-    for (path, value) in [
-        (&loaded.state_paths.data_token, b"synthetic-data".as_slice()),
-        (
-            &loaded.state_paths.control_token,
-            b"synthetic-control".as_slice(),
-        ),
-    ] {
-        fs::write(path, value).unwrap();
-        fs::set_permissions(path, fs::Permissions::from_mode(0o600)).unwrap();
-    }
+    fs::write(&loaded.state_paths.control_token, b"synthetic-control").unwrap();
+    fs::set_permissions(
+        &loaded.state_paths.control_token,
+        fs::Permissions::from_mode(0o600),
+    )
+    .unwrap();
     let pi = fixture.private_file("bin/pi", b"#!/bin/sh\nprintf '%s\\n' '0.84.2'\n");
     fs::set_permissions(&pi, fs::Permissions::from_mode(0o700)).unwrap();
     let home = fixture.path("client-home");
@@ -1631,4 +1600,240 @@ fn fresh_setup_save_only_allows_all_client_previews_without_manual_token_seeding
     }
 
     assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+#[test]
+fn forward_profiles_reference_standard_environment_keys_without_copying_credentials() {
+    for (client, version, protocol) in [
+        (ClientKind::Pi, "0.84.2", Protocol::OpenAiCompletions),
+        (ClientKind::Codex, "0.154.0", Protocol::OpenAiResponses),
+    ] {
+        let fixture = Fixture::new("forward-standard-key");
+        let mut input = request(&fixture, client, version, protocol);
+        input.upstream_auth = llmgw::config::Auth::Forward;
+        input.client_key_env = "COMPANY_LLM_KEY".into();
+        let plan = prepare(&input).unwrap();
+        assert!(plan.preview().text.contains("COMPANY_LLM_KEY"));
+        apply_reviewed(&plan, &plan.preview().hash).unwrap();
+        let text = fs::read_to_string(&plan.target_paths()[0]).unwrap();
+        assert!(!text.to_ascii_lowercase().contains("x-llmgw-token"));
+        if client == ClientKind::Pi {
+            let value: serde_json::Value = serde_json::from_str(&text).unwrap();
+            assert_eq!(value["providers"]["llmgw"]["apiKey"], "$COMPANY_LLM_KEY");
+        } else {
+            let value: toml_edit::DocumentMut = text.parse().unwrap();
+            assert_eq!(
+                value["model_providers"]["llmgw"]["env_key"].as_str(),
+                Some("COMPANY_LLM_KEY")
+            );
+            assert_eq!(
+                value["model_providers"]["llmgw"]["requires_openai_auth"].as_bool(),
+                Some(false)
+            );
+        }
+        disconnect(&input.journal_path).unwrap();
+        input.client_key_env = "not-an-env-name".into();
+        assert!(
+            prepare(&input)
+                .unwrap_err()
+                .to_string()
+                .contains("environment variable")
+        );
+    }
+}
+
+#[test]
+fn claude_forward_preserves_native_credentials_and_custom_headers() {
+    let fixture = Fixture::new("claude-forward");
+    let before = br#"{"env":{"ANTHROPIC_API_KEY":"opaque-native-key","ANTHROPIC_AUTH_TOKEN":"opaque-native-token","ANTHROPIC_CUSTOM_HEADERS":"X-Existing: keep"}}"#;
+    let settings = fixture.private_file("client/settings.json", before);
+    let mut input = request(
+        &fixture,
+        ClientKind::Claude,
+        "2.1.63",
+        Protocol::AnthropicMessages,
+    );
+    input.config_dir = settings.parent().unwrap().to_path_buf();
+    input.upstream_auth = llmgw::config::Auth::Forward;
+    input
+        .effective_environment
+        .insert("ANTHROPIC_API_KEY".into(), "opaque-process-key".into());
+    let plan = prepare(&input).unwrap();
+    for secret in [
+        "opaque-native-key",
+        "opaque-native-token",
+        "opaque-process-key",
+    ] {
+        assert!(!plan.preview().text.contains(secret));
+        assert!(!format!("{plan:?}").contains(secret));
+    }
+    apply_reviewed(&plan, &plan.preview().hash).unwrap();
+    let value: serde_json::Value = serde_json::from_slice(&fs::read(&settings).unwrap()).unwrap();
+    assert_eq!(value["env"]["ANTHROPIC_API_KEY"], "opaque-native-key");
+    assert_eq!(value["env"]["ANTHROPIC_AUTH_TOKEN"], "opaque-native-token");
+    assert_eq!(value["env"]["ANTHROPIC_CUSTOM_HEADERS"], "X-Existing: keep");
+    disconnect(&input.journal_path).unwrap();
+    let restored: serde_json::Value = serde_json::from_slice(&fs::read(settings).unwrap()).unwrap();
+    assert_eq!(
+        restored,
+        serde_json::from_slice::<serde_json::Value>(before).unwrap()
+    );
+}
+
+#[test]
+fn claude_forward_refuses_implicit_subscription_login_and_accepts_existing_helper_without_execution()
+ {
+    let fixture = Fixture::new("claude-forward-source");
+    let mut input = request(
+        &fixture,
+        ClientKind::Claude,
+        "2.1.63",
+        Protocol::AnthropicMessages,
+    );
+    input.upstream_auth = llmgw::config::Auth::Forward;
+    assert!(
+        prepare(&input)
+            .unwrap_err()
+            .to_string()
+            .contains("implicit saved subscription")
+    );
+    let path = input.config_dir.join("settings.json");
+    fs::create_dir_all(path.parent().unwrap()).unwrap();
+    let before = br#"{"apiKeyHelper":"helper-not-executed-by-profile-preparation"}"#;
+    fs::write(&path, before).unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+    }
+    let plan = prepare(&input).unwrap();
+    assert!(!plan.preview().text.contains("helper-not-executed"));
+    apply_reviewed(&plan, &plan.preview().hash).unwrap();
+    let value: serde_json::Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+    assert_eq!(
+        value["apiKeyHelper"],
+        "helper-not-executed-by-profile-preparation"
+    );
+    disconnect(&input.journal_path).unwrap();
+}
+
+#[test]
+fn claude_project_forward_uses_existing_user_native_credential_source() {
+    let fixture = Fixture::new("claude-project-forward-native");
+    let project = fixture.path("project");
+    fs::create_dir_all(&project).unwrap();
+    minimal_git_repository(&project, false);
+    let native = fixture.private_file(
+        "native-claude/settings.json",
+        br#"{"apiKeyHelper":"native-helper-not-executed"}"#,
+    );
+    let mut input = request(
+        &fixture,
+        ClientKind::Claude,
+        "2.1.63",
+        Protocol::AnthropicMessages,
+    );
+    input.config_dir = native.parent().unwrap().to_path_buf();
+    input.upstream_auth = llmgw::config::Auth::Forward;
+    input.project_local = Some(ProjectLocalApproval {
+        directory: project,
+        user_private_confirmed: true,
+        untracked_confirmed: true,
+    });
+    let before = fs::read(&native).unwrap();
+    let plan = prepare(&input).unwrap();
+    assert!(!plan.preview().text.contains("native-helper-not-executed"));
+    apply_reviewed(&plan, &plan.preview().hash).unwrap();
+    assert_eq!(fs::read(&native).unwrap(), before);
+    let project_settings: serde_json::Value =
+        serde_json::from_slice(&fs::read(&plan.target_paths()[0]).unwrap()).unwrap();
+    assert!(project_settings.get("apiKeyHelper").is_none());
+    disconnect(&input.journal_path).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn claude_disconnect_refuses_to_restore_native_secret_into_widened_permissions() {
+    use std::os::unix::fs::PermissionsExt;
+    let fixture = Fixture::new("claude-restore-private");
+    let before = br#"{"env":{"ANTHROPIC_API_KEY":"original-private-native-key"}}"#;
+    let settings = fixture.private_file("home/.claude/settings.json", before);
+    let input = request(
+        &fixture,
+        ClientKind::Claude,
+        "2.1.63",
+        Protocol::AnthropicMessages,
+    );
+    let plan = prepare(&input).unwrap();
+    apply_reviewed(&plan, &plan.preview().hash).unwrap();
+    let placeholder = fs::read(&settings).unwrap();
+    fs::set_permissions(&settings, fs::Permissions::from_mode(0o644)).unwrap();
+    let error = disconnect(&input.journal_path).unwrap_err().to_string();
+    assert!(error.contains("readable by other users"), "{error}");
+    assert!(!error.contains("original-private-native-key"));
+    assert_eq!(fs::read(&settings).unwrap(), placeholder);
+    assert_eq!(
+        fs::metadata(&settings).unwrap().permissions().mode() & 0o777,
+        0o644
+    );
+    fs::set_permissions(&settings, fs::Permissions::from_mode(0o600)).unwrap();
+    #[cfg(target_os = "macos")]
+    {
+        assert!(
+            Command::new("/bin/chmod")
+                .args(["+a", "everyone allow read"])
+                .arg(&settings)
+                .status()
+                .unwrap()
+                .success()
+        );
+        let error = disconnect(&input.journal_path).unwrap_err().to_string();
+        assert!(error.contains("extended ACL"), "{error}");
+        assert_eq!(fs::read(&settings).unwrap(), placeholder);
+        assert!(
+            Command::new("/bin/chmod")
+                .arg("-N")
+                .arg(&settings)
+                .status()
+                .unwrap()
+                .success()
+        );
+    }
+    disconnect(&input.journal_path).unwrap();
+    let restored: serde_json::Value = serde_json::from_slice(&fs::read(settings).unwrap()).unwrap();
+    assert_eq!(
+        restored["env"]["ANTHROPIC_API_KEY"],
+        "original-private-native-key"
+    );
+}
+
+#[test]
+fn claude_forward_does_not_treat_gateway_placeholder_as_native_authentication() {
+    let fixture = Fixture::new("claude-forward-placeholder");
+    let settings = fixture.private_file(
+        "home/.claude/settings.json",
+        br#"{"env":{"ANTHROPIC_API_KEY":"original-private-native-key"}}"#,
+    );
+    let mut input = request(
+        &fixture,
+        ClientKind::Claude,
+        "2.1.63",
+        Protocol::AnthropicMessages,
+    );
+    let plan = prepare(&input).unwrap();
+    apply_reviewed(&plan, &plan.preview().hash).unwrap();
+    input.upstream_auth = llmgw::config::Auth::Forward;
+    input
+        .effective_environment
+        .insert("ANTHROPIC_AUTH_TOKEN".into(), "llmgw-local-only".into());
+    let error = prepare(&input).unwrap_err().to_string();
+    assert!(error.contains("disconnect"), "{error}");
+    assert!(
+        fs::read_to_string(&settings)
+            .unwrap()
+            .contains("llmgw-local-only")
+    );
+    disconnect(&input.journal_path).unwrap();
+    input.effective_environment.clear();
+    assert!(prepare(&input).is_ok());
 }

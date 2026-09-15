@@ -6,6 +6,8 @@ use axum::http::{Method, Response, StatusCode};
 use crate::config::{Config, Endpoint, Method as ConfigMethod};
 
 mod completions;
+mod json;
+pub(crate) use json::json_usage;
 mod messages;
 mod request;
 mod responses;
@@ -21,6 +23,27 @@ pub struct ObservedUsage {
     pub cache_read_input_tokens: u64,
 }
 
+impl ObservedUsage {
+    /// Reported cache fields remain distinct in metrics. Only Messages' input
+    /// excludes cache creation/read; Chat/Responses cache read is an input subset.
+    pub(crate) fn total(self, endpoint: Endpoint) -> Option<u64> {
+        let total = self.input_tokens.checked_add(self.output_tokens)?;
+        match endpoint {
+            Endpoint::Messages => total
+                .checked_add(self.cache_creation_input_tokens)?
+                .checked_add(self.cache_read_input_tokens),
+            Endpoint::ChatCompletions | Endpoint::Responses
+                if self.cache_read_input_tokens <= self.input_tokens
+                    && self.cache_creation_input_tokens == 0 =>
+            {
+                Some(total)
+            }
+            Endpoint::Models | Endpoint::CountTokens => Some(0),
+            _ => None,
+        }
+    }
+}
+
 pub(crate) struct EndpointObserver {
     inner: EndpointObserverInner,
 }
@@ -33,13 +56,15 @@ enum EndpointObserverInner {
 }
 
 impl EndpointObserver {
-    pub(crate) fn new(endpoint: Endpoint) -> Self {
+    pub(crate) fn new(endpoint: Endpoint, cache: bool) -> Self {
         let inner = match endpoint {
             Endpoint::ChatCompletions => {
-                EndpointObserverInner::Completions(completions::Observer::new())
+                EndpointObserverInner::Completions(completions::Observer::new(cache))
             }
-            Endpoint::Responses => EndpointObserverInner::Responses(responses::Observer::new()),
-            Endpoint::Messages => EndpointObserverInner::Messages(messages::Observer::new()),
+            Endpoint::Responses => {
+                EndpointObserverInner::Responses(responses::Observer::new(cache))
+            }
+            Endpoint::Messages => EndpointObserverInner::Messages(messages::Observer::new(cache)),
             Endpoint::CountTokens | Endpoint::Models => EndpointObserverInner::Unsupported,
         };
         Self { inner }
@@ -80,6 +105,15 @@ impl EndpointObserver {
             EndpointObserverInner::Completions(observer) => observer.terminal_marker(),
             EndpointObserverInner::Responses(observer) => observer.terminal_marker(),
             EndpointObserverInner::Messages(observer) => observer.terminal_marker(),
+            EndpointObserverInner::Unsupported => false,
+        }
+    }
+
+    pub(crate) fn cache_complete(&self) -> bool {
+        match &self.inner {
+            EndpointObserverInner::Completions(observer) => observer.cache_complete(),
+            EndpointObserverInner::Responses(observer) => observer.cache_complete(),
+            EndpointObserverInner::Messages(observer) => observer.cache_complete(),
             EndpointObserverInner::Unsupported => false,
         }
     }

@@ -145,6 +145,7 @@ impl Admission {
             config.accounting,
             config.concurrency,
             clock.now(),
+            std::time::Duration::from_secs(config.startup_hold_secs),
         );
         Self {
             inner: Arc::new(Inner {
@@ -394,31 +395,13 @@ impl Drop for Hold {
             ledger.finish(
                 inner.clock.now(),
                 self.id,
-                self.usage.and_then(|u| usage_total(self.endpoint, u)),
+                self.usage.and_then(|u| u.total(self.endpoint)),
             );
         } else {
             ledger.cancel(inner.clock.now(), self.id);
         }
         drop(queue);
         inner.notify.notify_waiters();
-    }
-}
-/// Reported cache fields remain distinct in metrics. Only Messages' input
-/// excludes cache creation/read; Chat/Responses cache read is an input subset.
-fn usage_total(endpoint: Endpoint, usage: ObservedUsage) -> Option<u64> {
-    let total = usage.input_tokens.checked_add(usage.output_tokens)?;
-    match endpoint {
-        Endpoint::Messages => total
-            .checked_add(usage.cache_creation_input_tokens)?
-            .checked_add(usage.cache_read_input_tokens),
-        Endpoint::ChatCompletions | Endpoint::Responses
-            if usage.cache_read_input_tokens <= usage.input_tokens
-                && usage.cache_creation_input_tokens == 0 =>
-        {
-            Some(total)
-        }
-        Endpoint::Models | Endpoint::CountTokens => Some(0),
-        _ => None,
     }
 }
 
@@ -431,6 +414,8 @@ mod tests {
         let config = Config {
             listen: "127.0.0.1:0".parse().unwrap(),
             concurrency: 1,
+            startup_hold_secs: 60,
+            cache: None,
             cancel_policy: CancelPolicy::Drain,
             accounting: Accounting::Reserved,
             retry_transient_429: false,
@@ -476,6 +461,8 @@ mod tests {
         let config = Config {
             listen: "127.0.0.1:0".parse().unwrap(),
             concurrency: 2,
+            startup_hold_secs: 60,
+            cache: None,
             cancel_policy: CancelPolicy::Drain,
             accounting: Accounting::Reserved,
             retry_transient_429: false,
@@ -535,6 +522,8 @@ mod tests {
         let config = Config {
             listen: "127.0.0.1:0".parse().unwrap(),
             concurrency: 2,
+            startup_hold_secs: 60,
+            cache: None,
             cancel_policy: CancelPolicy::Drain,
             accounting: Accounting::Actual,
             retry_transient_429: false,

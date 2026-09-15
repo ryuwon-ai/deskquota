@@ -76,8 +76,8 @@ def main():
             command = [str(binary), "run", "--config", str(config)]
             state = Path(json.loads(subprocess.check_output([str(binary), "doctor", "--config", str(config), "--json"], timeout=10))["state_directory"])
             state.mkdir(mode=0o700)
-            data_token, control_token = secrets.token_hex(32), secrets.token_hex(32)
-            for name, value in (("data-token", data_token), ("control-token", control_token)):
+            wrong_control, control_token = secrets.token_hex(32), secrets.token_hex(32)
+            for name, value in (("control-token", control_token),):
                 target = state / name
                 target.write_text(value)
                 target.chmod(0o600)
@@ -86,8 +86,9 @@ def main():
             def request(method, path, token, payload=None, extra=None):
                 connection = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
                 try:
-                    header = "X-LLMGW-Control-Token" if path.startswith("/_llmgw/") else "X-LLMGW-Token"
-                    headers = {header: token, "Connection": "close", **(extra or {})}
+                    headers = {"Connection": "close", **(extra or {})}
+                    if path.startswith("/_llmgw/"):
+                        headers["X-LLMGW-Control-Token"] = token
                     connection.request(method, path, payload, headers)
                     response = connection.getresponse()
                     return response.status, response.read()
@@ -104,10 +105,10 @@ def main():
                 except ConnectionRefusedError:
                     assert time.monotonic() < deadline, "startup deadline exceeded"
                     time.sleep(0.02)
-            status, _ = request("GET", "/_llmgw/status", data_token)
+            status, _ = request("GET", "/_llmgw/status", wrong_control)
             assert status == 401, "data credential authorized control"
             status, response = request(
-                "POST", "/r/pi-work/v1/chat/completions?request-key=a%2Bb", data_token, body,
+                "POST", "/r/pi-work/v1/chat/completions?request-key=a%2Bb", wrong_control, body,
                 {"Content-Type": "application/json", "Authorization": "synthetic-old",
                  "x-api-key": "synthetic-old", "X-LLMGW-Control-Token": control_token},
             )
@@ -120,7 +121,7 @@ def main():
             assert status == 200 and json.loads(response)["status"] == "stopping"
             stdout, stderr = process.communicate(timeout=15)
             assert process.returncode == 0, "control stop did not exit cleanly"
-            for value in (data_token.encode(), control_token.encode(), body):
+            for value in (wrong_control.encode(), control_token.encode(), body):
                 assert value not in stdout + stderr, "sensitive fixture material reached output"
             result = {
                 "check": "actual_foreground_binary_loopback_only",

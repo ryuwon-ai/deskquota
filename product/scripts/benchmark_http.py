@@ -33,7 +33,7 @@ class Client:
     async def exchange(self, method, path, body, headers):
         if self.writer is None:
             self.reader, self.writer = await asyncio.open_connection("127.0.0.1", self.port)
-        fields = {"Host": "127.0.0.1", "Content-Length": str(len(body)), "Content-Type": "application/json", "Connection": "keep-alive", **headers}
+        fields = {"Host": f"127.0.0.1:{self.port}", "Content-Length": str(len(body)), "Content-Type": "application/json", "Connection": "keep-alive", **headers}
         request = (f"{method} {path} HTTP/1.1\r\n"+"".join(f"{k}: {v}\r\n" for k,v in fields.items())+"\r\n").encode()+body
         self.writer.write(request)
         await self.writer.drain()
@@ -63,7 +63,8 @@ class Client:
                 data = frame[6:]
                 if data == b"[DONE]": result["terminal_marker_s"] = now; continue
                 event = json.loads(data)
-                if "usage" in event:
+                # OpenAI-compatible streams may send usage:null before the final usage object.
+                if event.get("usage") is not None:
                     usage = event["usage"]
                     if result["terminal_marker_s"] is not None:
                         result["usage"] = {"status": "invalid", "reason": "usage_after_terminal"}
@@ -228,7 +229,7 @@ async def request_once(row, port, arm, origin, client=None):
     body = b"" if metadata else encode({"model":"synthetic","messages":[{"role":"user","content":"x"*row["input_bytes"]}],"max_tokens":row["output_reservation"],"stream":True})
     endpoint = "/models" if metadata else "/chat/completions"
     path = "/v1"+endpoint if arm=="direct" else f"/r/r{row['root']}/v1"+endpoint
-    headers = {"x-benchmark-ingress": row["id"], "x-llmgw-token": "synthetic-benchmark-data"}
+    headers = {"x-benchmark-ingress": row["id"]}
     cancellation = row.get("cancel_after_ms")
     try:
         response = await asyncio.wait_for(client.exchange("GET" if metadata else "POST",path,body,headers), cancellation/1000 if cancellation else row.get("timeout_s",125))

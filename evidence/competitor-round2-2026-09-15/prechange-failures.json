@@ -1,0 +1,59 @@
+[
+  {
+    "command": [
+      "rtk",
+      "env",
+      "CARGO_TARGET_DIR=/Users/ryuwon/Library/Caches/llmgw-cargo",
+      "CARGO_BUILD_JOBS=2",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--test",
+      "task5_usage_contract",
+      "json_final_usage_reconciles_all_three_endpoints",
+      "--",
+      "--exact",
+      "--test-threads=2"
+    ],
+    "exit_code": 101,
+    "log": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/competitor-round2-2026-09-15/red-task5_usage_contract.log"
+  },
+  {
+    "command": [
+      "rtk",
+      "env",
+      "CARGO_TARGET_DIR=/Users/ryuwon/Library/Caches/llmgw-cargo",
+      "CARGO_BUILD_JOBS=2",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--test",
+      "cache_contract",
+      "exact_json_hit_skips_admission_and_scrubs_stale_response_metadata",
+      "--",
+      "--exact",
+      "--test-threads=2"
+    ],
+    "exit_code": 101,
+    "log": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/competitor-round2-2026-09-15/red-cache_contract.log"
+  },
+  {
+    "command": [
+      "rtk",
+      "env",
+      "CARGO_TARGET_DIR=/Users/ryuwon/Library/Caches/llmgw-cargo",
+      "CARGO_BUILD_JOBS=2",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--test",
+      "lifecycle_contract",
+      "ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity",
+      "--",
+      "--exact",
+      "--test-threads=2"
+    ],
+    "exit_code": 101,
+    "log": "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/competitor-round2-2026-09-15/red-lifecycle_contract.log"
+  }
+]

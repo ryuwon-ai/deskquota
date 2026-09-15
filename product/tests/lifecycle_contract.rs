@@ -81,6 +81,33 @@ fn stopped_is_success_and_off_is_idempotent() {
     assert!(f.call("off").status.success());
 }
 #[test]
+fn ordinary_status_exposes_quota_modes_without_inventing_remaining_capacity() {
+    let f = Fixture::new(0);
+    assert!(f.call("on").status.success());
+    let output = f.call("status");
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        text.contains("RPM: unlimited; capacity: n/a; local debited: 0"),
+        "{text}"
+    );
+    assert!(
+        text.contains("TPM: unknown; capacity: n/a; local debited: 0; held: 0"),
+        "{text}"
+    );
+    assert!(
+        text.contains("queue reason (representative): none; protected root: none"),
+        "{text}"
+    );
+    assert!(
+        text.contains("accounting: actual; estimate: TPM unenforced"),
+        "{text}"
+    );
+    assert!(text.contains("exact cache: disabled; hits: 0; eligible misses: 0; entries: 0; retained: 0/4194304 bytes"), "{text}");
+    assert!(!text.contains("remaining"));
+    assert!(!text.contains("null"));
+}
+#[test]
 fn concurrent_on_has_one_identity() {
     let f = Fixture::new(0);
     let mut a = f
@@ -234,7 +261,7 @@ fn malformed_stopped_config_never_provisions_tokens() {
     fs::write(&f.config, "invalid = [").unwrap();
     for _ in 0..2 {
         assert_eq!(f.call("on").status.code(), Some(2));
-        assert!(!paths.data_token.exists());
+        assert!(!paths.directory.join("data-token").exists());
         assert!(!paths.control_token.exists());
         assert_eq!(f.ok("status")["state"], "stopped");
     }
@@ -283,6 +310,13 @@ fn known_quota_is_ready_with_empty_queue_startup_hold() {
         Some("disabled" | "registered" | "unknown" | "blocked")
     ));
     assert_eq!(s["autostart"]["current_shell_auth_is_login_proof"], false);
+    let output = f.call("status");
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        text.contains("RPM: known; capacity: 60; local debited: 0"),
+        "{text}"
+    );
 }
 #[test]
 fn same_directory_configs_have_independent_workers() {
@@ -414,8 +448,7 @@ fn off_drains_a_live_request_closes_sockets_and_exposes_draining() {
     .unwrap();
     assert!(f.call("on").status.success());
     let s = f.ok("status");
-    let dir = PathBuf::from(s["state_directory"].as_str().unwrap());
-    let token = fs::read_to_string(dir.join("data-token")).unwrap();
+    let address = s["identity"]["address"].as_str().unwrap();
     let mut downstream =
         std::net::TcpStream::connect(s["identity"]["address"].as_str().unwrap()).unwrap();
     downstream
@@ -423,7 +456,7 @@ fn off_drains_a_live_request_closes_sockets_and_exposes_draining() {
         .unwrap();
     write!(
         downstream,
-        "GET /r/fixture/v1/models HTTP/1.1\r\nHost: localhost\r\nx-llmgw-token: {token}\r\n\r\n"
+        "GET /r/fixture/v1/models HTTP/1.1\r\nHost: {address}\r\n\r\n"
     )
     .unwrap();
     let deadline = Instant::now() + Duration::from_secs(3);
@@ -537,7 +570,7 @@ fn empty_queue_reports_shared_cooldown_without_a_new_request() {
     assert!(f.call("on").status.success());
     let s = f.ok("status");
     let token = fs::read_to_string(
-        PathBuf::from(s["state_directory"].as_str().unwrap()).join("data-token"),
+        PathBuf::from(s["state_directory"].as_str().unwrap()).join("control-token"),
     )
     .unwrap();
     let handle = std::thread::spawn(move || {
@@ -616,7 +649,7 @@ fn mac_extended_acl_is_rejected_before_token_write() {
         "extended ACL must not be accepted as private"
     );
     assert!(
-        !paths.data_token.exists(),
+        !paths.directory.join("data-token").exists(),
         "reject unsafe directory before writing a token"
     );
 }
@@ -627,7 +660,7 @@ fn mac_existing_token_acl_is_rejected_and_preserved() {
     assert!(f.call("on").status.success());
     let s = f.ok("status");
     assert!(f.call("off").status.success());
-    let token = PathBuf::from(s["state_directory"].as_str().unwrap()).join("data-token");
+    let token = PathBuf::from(s["state_directory"].as_str().unwrap()).join("control-token");
     assert!(
         Command::new("/bin/chmod")
             .args(["+a", "everyone allow read"])
@@ -659,7 +692,7 @@ fn existing_read_only_private_tokens_need_no_permission_changes() {
     assert!(f.call("on").status.success());
     let s = f.ok("status");
     assert!(f.call("off").status.success());
-    let token = PathBuf::from(s["state_directory"].as_str().unwrap()).join("data-token");
+    let token = PathBuf::from(s["state_directory"].as_str().unwrap()).join("control-token");
     fs::set_permissions(&token, fs::Permissions::from_mode(0o400)).unwrap();
     let result = f.call("on");
     assert_eq!(

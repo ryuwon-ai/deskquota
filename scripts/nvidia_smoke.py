@@ -98,7 +98,7 @@ class SSE:
         return r["content_seen"] and r["done"] and r["finished"] and not r["stream_error"] and not self.pending.strip()
 
 
-def request_worker(pipe, base, body, key, gateway_key):
+def request_worker(pipe, base, body, key):
     started = time.monotonic()
     result = {"outcome": "error", "http_status": None, "bytes_received": 0,
               "first_content_ms": None, "headers_ms": None}
@@ -109,15 +109,13 @@ def request_worker(pipe, base, body, key, gateway_key):
         connection = connection_type(url.hostname, url.port, timeout=DEADLINE)
         headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json",
                    "Accept": "text/event-stream", "Accept-Encoding": "identity"}
-        if gateway_key:
-            headers["X-LLMGW-Token"] = gateway_key
         connection.request("POST", url.path + "/chat/completions", body, headers)
         response = connection.getresponse()
         result.update(http_status=response.status, headers_ms=(time.monotonic()-started)*1000)
         result["rate_headers"] = {
             k.lower(): v for k, v in response.getheaders()
             if k.lower() in NUMERIC_HEADERS and re.fullmatch(r"[0-9]{1,16}(?:\.[0-9]{1,6})?", v)
-            and not any(secret in v for secret in (key, gateway_key) if secret)
+            and key not in v
         }
         pipe.send(result)
         if response.status != 200:
@@ -127,7 +125,7 @@ def request_worker(pipe, base, body, key, gateway_key):
         elif response.getheader("Content-Encoding", "identity").lower() != "identity":
             result["outcome"] = "encoded_response"
         else:
-            parser = SSE(tuple(s for s in (key, gateway_key) if s))
+            parser = SSE((key,))
             while chunk := response.read1(16384):
                 result["bytes_received"] += len(chunk)
                 if result["bytes_received"] > LIMIT:
@@ -150,11 +148,11 @@ def request_worker(pipe, base, body, key, gateway_key):
         pipe.close()
 
 
-def request(base, body, key, gateway_key="", deadline=DEADLINE):
+def request(base, body, key, deadline=DEADLINE):
     # Native spawn works on Windows too; a trickling socket cannot extend the wall limit.
     context = multiprocessing.get_context("spawn")
     receiver, sender = context.Pipe(duplex=False)
-    process = context.Process(target=request_worker, args=(sender, base, body, key, gateway_key))
+    process = context.Process(target=request_worker, args=(sender, base, body, key))
     started = time.monotonic()
     result = {"outcome": "worker_failed"}
     try:
@@ -190,12 +188,10 @@ def execute(args):
         raise ValueError("one or two distinct valid models required")
     if args.gateway_base:
         gateway_base(args.gateway_base)
-    key, local_key = "", ""
+    key = ""
     if args.live:
         key = credential(args.key_env)
-        if args.gateway_base:
-            local_key = credential(args.gateway_key_env)
-        if any(secret in model for secret in (key, local_key) if secret for model in models):
+        if any(key in model for model in models):
             raise ValueError("model contains credential")
     arms = ["direct", "gateway", "gateway", "direct"] if args.gateway_base else ["direct", "direct"]
     report = {"status": "dry_run", "models": models, "arm_order_per_model": arms,
@@ -228,7 +224,7 @@ def execute(args):
                     row = {"arm": arm, "model": model, "payload_sha256": hashlib.sha256(body).hexdigest(), "outcome": "started"}
                     report["requests"].append(row)
                     save()
-                    row.update(request(DIRECT if arm == "direct" else args.gateway_base, body, key, local_key if arm == "gateway" else ""))
+                    row.update(request(DIRECT if arm == "direct" else args.gateway_base, body, key))
                     save()
                     if row["outcome"] != "completed":
                         report["status"] = "stopped_on_failure"
@@ -251,7 +247,6 @@ def main():
     parser.add_argument("--model", action="append")
     parser.add_argument("--gateway-base")
     parser.add_argument("--key-env", default="NVIDIA_API_KEY")
-    parser.add_argument("--gateway-key-env", default="LLMGW_DATA_TOKEN")
     parser.add_argument("--output", type=Path, required=True)
     try:
         report = execute(parser.parse_args())

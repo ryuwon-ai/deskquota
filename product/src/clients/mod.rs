@@ -122,8 +122,8 @@ pub struct ProfileRequest {
     pub root: String,
     pub model: String,
     pub protocol: Protocol,
-    pub local_data_token: String,
-    pub token_source: PathBuf,
+    pub upstream_auth: crate::config::Auth,
+    pub client_key_env: String,
     pub journal_path: PathBuf,
     pub set_default: bool,
     pub discover_models: bool,
@@ -282,7 +282,6 @@ pub fn prepare(request: &ProfileRequest) -> Result<PreparedProfile, Error> {
         .map(|warning| format!("warning: {warning}"))
         .collect::<Vec<_>>()
         .join("\n");
-    let token_source = absolute(&request.token_source)?;
     let scope_label = match scope {
         Scope::UserPrivate => "user-private",
         Scope::ProjectShared => "project-shared",
@@ -311,7 +310,7 @@ pub fn prepare(request: &ProfileRequest) -> Result<PreparedProfile, Error> {
         .map(|byte| format!("{byte:02x}"))
         .collect::<String>();
     let text = format!(
-        "client: {} {}\nscope: {}\nnative config directory: {} ({})\npublic URL: {}\ngateway config fingerprint: {}\nroot: {} (all clients on this root share one FIFO/fairness share)\nmodel: {}\nprotocol: {}\ntarget files:\n{}\nowned keys:\n{}\ncredential: local data token from {} [REDACTED]\npreview hash: {}\ndisconnect: llmgw disconnect {} --journal {}\nlisting: {}\nselection: configured\ninference: unverified\ntools: {}\n{}{}",
+        "client: {} {}\nscope: {}\nnative config directory: {} ({})\npublic URL: {}\ngateway config fingerprint: {}\nroot: {} (all clients on this root share one FIFO/fairness share)\nmodel: {}\nprotocol: {}\ntarget files:\n{}\nowned keys:\n{}\ncredential: {}\npreview hash: {}\ndisconnect: llmgw disconnect {} --journal {}\nlisting: {}\nselection: configured\ninference: unverified\ntools: {}\n{}{}",
         request.client,
         request.installed_version,
         scope_label,
@@ -324,7 +323,16 @@ pub fn prepare(request: &ProfileRequest) -> Result<PreparedProfile, Error> {
         request.protocol.as_str(),
         target_lines,
         generic.summary,
-        token_source.display(),
+        match (&request.upstream_auth, request.client) {
+            (crate::config::Auth::Forward, ClientKind::Claude) =>
+                "existing native Anthropic API key/auth token (unchanged)".to_owned(),
+            (crate::config::Auth::Forward, _) => format!(
+                "standard API key from environment {} (value never read)",
+                request.client_key_env
+            ),
+            _ => "gateway none/env policy (client credentials replaced or removed upstream)"
+                .to_owned(),
+        },
         bound_hash,
         request.client,
         transaction.journal_path.display(),
@@ -412,13 +420,14 @@ pub fn disconnect(journal_path: impl AsRef<Path>) -> Result<RestoreReport, Error
 }
 
 fn validate_common(request: &ProfileRequest) -> Result<(), Error> {
-    if request.root.is_empty()
-        || request.model.is_empty()
-        || request.local_data_token.is_empty()
-        || request.root.contains('/')
-    {
+    if request.root.is_empty() || request.model.is_empty() || request.root.contains('/') {
         return Err(Error::message(
-            "root, model, and local data token must be nonempty; root cannot contain '/'",
+            "root and model must be nonempty; root cannot contain '/'",
+        ));
+    }
+    if !crate::config::is_env_name(&request.client_key_env) {
+        return Err(Error::message(
+            "client_key_env must be a valid environment variable name",
         ));
     }
     let origin = url::Url::parse(&request.gateway_origin)
@@ -461,13 +470,6 @@ fn set_public(parts: &[&str], value: serde_json::Value) -> Result<Edit, Error> {
     Ok(Edit::Set {
         key: key(parts)?,
         value: EditValue::Public(value),
-    })
-}
-
-fn set_token(parts: &[&str], token: &str) -> Result<Edit, Error> {
-    Ok(Edit::Set {
-        key: key(parts)?,
-        value: EditValue::LocalDataToken(token.to_owned()),
     })
 }
 

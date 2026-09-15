@@ -1,8 +1,10 @@
 # `llmgw` runtime contract
 
 This package implements typed configuration and a native loopback HTTP gateway
-with bounded streaming and worker-owned upstream lifetimes. Core behavior is
-unchanged except that authenticated control remains available during shutdown.
+with bounded streaming and worker-owned upstream lifetimes. Data requests use
+standard upstream authentication; authenticated control remains separate and
+available during shutdown. Actual usage settlement is the default, and startup
+admission hold is configurable independently of the quota window.
 Native Tasks 1–6 add lifecycle control, first-run setup, explicit upstream
 transport settings, bounded doctor network checks, reversible client profiles,
 user-login autostart registration, and checksum-verified thin installers. Model
@@ -99,7 +101,7 @@ uses `http://127.0.0.1:4141/r/pi-work` and appends `/v1/messages` exactly once.
 Sessions sharing that configured root share one root budget.
 
 Final apply writes the config and pending sidecar and initializes the protected,
-config-scoped data and control token files. Preview and cancellation create no
+the config-scoped control token file. Preview and cancellation create no
 state. Save only starts no worker, changes no client file or registration, and
 preserves any running worker and every existing token byte. A changed config
 then remains pending for an explicit restart. Before the
@@ -114,7 +116,7 @@ If the worker fingerprint cannot be authenticated, Save and start refuses
 before writing or restarting while Save only remains non-disruptive. Setup
 rechecks the typed decision during apply, so a newly discovered mismatch whose
 restart impact was not previewed is also refused. Readiness is separate from the
-known-quota admission hold, which can still last 60 seconds.
+known-quota admission hold, which defaults to 60 seconds and is configurable.
 
 New config directories are created privately on Unix and new config and pending
 files use mode 0600. Final apply takes a persistent private
@@ -232,7 +234,7 @@ lock paths are never unlinked. A separate operation lock serializes on/off/resta
 with a bounded 17-second busy wait. On confirms readiness within five seconds
 of spawn through authenticated health, checking path hash, immutable fingerprint,
 nonce, bound address and start timestamp. Readiness is independent of the
-60-second known-quota startup hold and shared cooldown, both reported even with
+configured known-quota startup hold and shared cooldown, both reported even with
 an empty queue. Changed bytes set `pending_restart`; on checks the authenticated
 running identity before parsing saved edits and returns exit 1 with
 `restart_required`, including for malformed TOML. New/stopped configuration is
@@ -293,14 +295,15 @@ Tokio monotonic time in production. `known` is a nonzero local budget,
 Unknown is never evidence that the provider allows unlimited usage. Other
 machines' consumption and the provider's own window or accounting remain unknown.
 
-If either quota is known, process startup imposes a full 60-second admission
-hold. `examples/fixture.toml` intentionally has known RPM 60 and therefore waits
-60 seconds before its first data admission. Restart does not assume a full
-remaining provider budget and never replays in-flight work. Each subsequent
+If either quota is known, process startup uses `startup_hold_secs` (default 60,
+range 0–3600). Set 0 to disable this admission hold. A shorter hold accepts
+uncertainty about upstream requests sent before restart; it does not recover a
+provider balance. Unknown/unlimited-only quotas have no startup hold. Restart
+never replays in-flight work. Each subsequent
 window is a local rolling 60 seconds, with no accumulated token-bucket burst
 following elapsed time or resume. OS-specific suspend-clock behavior has not
 been measured. The deterministic library seam advances the same ledger's
-monotonic time; no config, environment variable or HTTP header disables warmup.
+monotonic time; startup hold configuration does not change the quota window.
 
 A waiting request holds no execution slot or quota. Admission obtains all
 resources together. Its provisional RPM/TPM hold has no time expiry until the
@@ -369,8 +372,12 @@ Authenticated `GET /_llmgw/status` preserves existing counters and adds a typed
 Ledger sums being exact does not make the HTTP token estimator exact or prove
 provider compliance. Root labels come only from validated configuration; status
 contains no request bodies, prompts, auth values, or per-request/session labels.
-Existing control-token and Origin restrictions remain in force. A native
-identity-aware `status --json` CLI remains Native Experience Task 1.
+Existing control-token and Origin restrictions remain in force. The native
+identity-aware `status --json` CLI exposes the same fields. Ordinary `status`
+also shows the representative queue reason, protected root, local quota modes,
+capacities/debits/holds, accounting and estimate mode. A representative reason
+is not each request's exact cause or an ETA. Unknown/unlimited capacities appear
+as `n/a`, not zero remaining capacity; local ledger sums are not provider balances.
 
 The Task 6 exact-cost fairness traces use the same Admission/Queue/Ledger library
 as HTTP, with a manual/paused monotonic clock and `exact_fixture` costs. Actual
@@ -393,6 +400,16 @@ model `max_output_tokens` default:
 | Messages | `max_tokens` |
 | Models / Messages count_tokens | No generation reservation, no output bound required; RPM remains 1 |
 
+Models and count_tokens retain a distinct non-generating cost through admission
+and settlement: they cannot acquire positive generation TPM debt from a late
+usage value. Generation with unknown/unlimited TPM is a separate unmetered cost,
+not metadata. Generic zero estimates and fixture costs retain the existing late
+positive usage debit behavior. This distinction lets the experimental
+`bench-harness` backfill consider genuine metadata without treating every zero
+cost as safe. Metadata still uses upstream HTTP, RPM, execution slots, root FIFO,
+cooldown and deadlines; it does not use a local replacement catalog. The default
+policy remains RR with its existing barrier.
+
 Known TPM rejects missing bounds (`output_bound_required`), zero, null, negative,
 fractional or malformed inspected caps (`invalid_output_bound`), wrong-endpoint
 cap fields (`unsupported_output_bound_field`), and ambiguous Chat caps
@@ -413,10 +430,11 @@ requests may themselves contain media because their generation TPM cost is zero.
 Duplicate top-level policy fields, including escaped equivalent keys, are
 rejected; this includes the output caps and endpoint-relevant input/count fields.
 
-Default `accounting = "reserved"` keeps the entire reservation until its original
-expiry even if known final usage is smaller. Explicit `actual` settles the
+Default `accounting = "actual"` settles the
 remaining current-window reservation once at successful response-body EOF from
-supported final SSE usage. Missing, malformed, partial, encoded or unsupported
+supported final SSE or complete JSON usage. Explicit `reserved` keeps the entire reservation
+until its original expiry even if known final usage is smaller. Missing,
+malformed, partial, encoded or unsupported
 usage remains unknown and preserves the original reservation until expiration.
 Larger actual usage produces debt: subsequent candidates wait until they fit.
 An expired reservation can never produce a refund into fresh budget. For a
@@ -429,8 +447,19 @@ Chat/Responses input already includes cached input, so cache-read detail is
 reported separately and is not added again. Messages input excludes cache
 creation/read, so all four reported categories contribute once. Overflow in the
 supported usage sum is unknown rather than wrapping. Reported usage counters
-remain separate from the request estimate. No non-SSE body parsing, decompression,
-provider-policy inference or billing claim is added.
+remain separate from the request estimate. JSON observation requires HTTP 200,
+one valid `application/json` Content-Type and absent or one identity
+Content-Encoding, checked on original headers. Duplicate/conflicting/non-UTF8
+representation headers remain usage-unknown. JSON and SSE use mutually exclusive
+raw observer storage of at most 256 KiB; temporary JSON parse allocations, cache
+capture and delivery buffers are separate. Chunks still forward immediately.
+Oversized, incomplete or malformed JSON keeps its reservation. Complete Chat
+choices require terminal finish reasons; Messages requires a terminal stop reason;
+Responses requires status completed with no error or incomplete marker. Valid
+usage on tool/length stops can settle even when the response cannot be cached.
+Required input/output counts are nonnegative integers (zero is valid); a total
+alone cannot substitute. No decompression, provider-policy inference or billing
+claim is added.
 
 Only active requests and unexpired debits retain identities. Monotonic IDs never
 wrap or reuse an old identity, and duplicate terminal/start/cancel events cannot
@@ -446,6 +475,11 @@ cost constructor also exists only as a doc-hidden library test seam and is never
 read from the wire. A separate paused-Tokio unit test exercises the production
 coordinator clock and start notification; Tokio `test-util` is a development
 feature only.
+
+Ordinary `llmgw status` renders the existing exact-cache snapshot: enabled state,
+hits, eligible misses, entries and retained/budget bytes. Missing data displays
+`n/a`; misses exclude requests that fail cache eligibility. This adds no storage,
+polling or counters.
 
 ## Installed Pi compatibility probe
 
@@ -566,15 +600,22 @@ response bytes without decompression.
 
 ## Credentials and local control
 
-Every data request requires exactly one `X-LLMGW-Token`. The separate
-`X-LLMGW-Control-Token` authenticates only these loopback endpoints:
+Data requests use the client's standard authentication. With upstream
+`auth.mode = "forward"`, `Authorization` and `x-api-key` reach the upstream
+unchanged. Env/none modes replace or remove them according to the explicit
+configuration. No local data token is required or created. The listener is
+loopback-only; data requests reject browser `Origin`, nonlocal `Host`, and POST
+requests without a JSON content type. Native processes on the same PC are
+trusted. The process lock prevents duplicate workers; it is not authentication.
+
+The separate `X-LLMGW-Control-Token` authenticates only these loopback endpoints:
 
 - `GET /_llmgw/health`
 - `GET /_llmgw/status`
 - `POST /_llmgw/stop`
 
-Any `Origin` header rejects a control request. A data token does not authorize
-control access, and control paths never reach the configured upstream. Status
+Any `Origin` header rejects a control request. Upstream credentials do not
+authorize control access, and control paths never reach the configured upstream. Status
 contains bounded aggregate lifecycle, observation, token, and queued-byte
 counters; it contains no request IDs, headers, credential values, or payloads.
 
@@ -589,11 +630,10 @@ Terminal cleanup is held in one RAII guard and records one outcome across EOF,
 transport error, deadline, downstream close, or forced shutdown races.
 
 `cancel_policy = "drain"` is the default. If a downstream connection resets,
-the worker stops delivering bytes, discards subsequent wire data as it arrives,
-continues bounded observation, and retains its permit until upstream body EOF,
-error, or the original absolute 30-minute request deadline. It does not collect
-the discarded response. `cancel_policy = "close"` drops the owned local HTTP
-attempt promptly. The close tests prove that the fixture HTTP socket closes;
+the worker stops delivering bytes and drops cache capture. It retains only bounded
+observer state, discards subsequent delivery data, and retains its permit until
+upstream body EOF, error, or the original absolute 30-minute request deadline.
+`cancel_policy = "close"` drops the owned local HTTP attempt promptly. The close tests prove that the fixture HTTP socket closes;
 they do not prove that a remote provider stops GPU, KV-cache, or billed work.
 
 Reset detection uses Tokio error readiness plus `SO_ERROR` through socket2.
@@ -634,17 +674,19 @@ combined retained buffer allocation is exactly 256 KiB per SSE observer. A
 multiline data event followed by a large unknown event name and unfinished
 comment verifies the aggregate allocation. Temporary JSON parse allocations,
 the current transport chunk, and exact process RSS are separate and remain
-unmeasured here. Overflow, invalid supported usage, encoded content, non-SSE
-content, a missing terminal usage report, or unsupported endpoints produce
+unmeasured here. Supported JSON uses the same raw observer allowance instead of
+SSE storage and is parsed once at clean EOF. Overflow, invalid supported usage,
+encoded or unsupported content, a missing terminal usage report, or unsupported endpoints produce
 usage `unknown` while wire delivery continues unchanged.
 
 Observed instants and counters are named for what the gateway can see:
 `first_body_byte`, `first_observed_output_delta`, `terminal_marker`, and
 `response_body_eof`. A role/comment event is not counted as model output. A
 terminal protocol marker is not treated as HTTP body EOF and does not release
-capacity.
+capacity. JSON observation does not synthesize SSE output-delta or terminal-marker
+counters; its first body byte and HTTP EOF retain their existing meanings.
 
-- Chat Completions accepts only the final `choices: []` usage chunk before
+- Streaming Chat Completions accepts only the final `choices: []` usage chunk before
   `[DONE]` for accounting and reads prompt/completion tokens. Numeric usage in
   nonempty, missing or malformed choices does not qualify as final usage;
   normal null-usage deltas and numeric interim observations may still precede a
@@ -693,18 +735,18 @@ Upstream auth modes have these transport meanings:
   authentication. Unknown end-to-end headers are still preserved.
 
 Runtime credentials have no `Debug` representation and are not printed in
-arguments, diagnostics, stdout, or stderr. The data and control values must be
-nonempty, valid HTTP header values, and distinct.
+arguments, diagnostics, stdout, or stderr. The control credential and any
+configured environment credential must be nonempty, valid HTTP header values.
 
 ## Development run precondition
 
 Run `llmgw setup` to create or review a config. Its final apply provisions the
-local data and control tokens in the protected, config-scoped state directory,
+local control token in the protected, config-scoped state directory,
 including for Save only. Then use `llmgw run` for a foreground development
 process or `llmgw on` for the owned background worker; those lifecycle commands
-also provision missing tokens for an older or hand-written config. Users do not
-create data or control token files by hand. Existing tokens
-must still be nonempty, distinct, bounded, and protected; an invalid token file
+also provision a missing control token for a hand-written config. Users do not
+create control token files by hand. The token
+must still be nonempty, bounded, and protected; an invalid token file
 causes startup to fail without weakening its permissions or following a link.
 Native Windows ACL runtime support remains unverified. Tests use only synthetic
 credentials and temporary state.
@@ -744,8 +786,13 @@ quota group. Unknown TOML fields and unsupported enum values are errors.
   `close`. Unknown values are rejected.
 - `retry_transient_429` is an immutable boolean, default `false`. Explicit `true`
   allows at most one additional qualified rate-rejection attempt as defined below.
-- `accounting` is `reserved` by default or explicit `actual`, with the local
+- `accounting` is `actual` by default or explicit `reserved`, with the local
   rolling-window behavior described above.
+- `startup_hold_secs` defaults to `60`, accepts `0..=3600`, and affects startup
+  admission only; the quota window remains 60 seconds.
+- Optional `[cache]` enables the bounded exact response cache described below.
+  `ttl_secs` defaults to `300` (`1..=3600`), and `max_history` defaults to `3`
+  (`1..=64`). Omitting the table disables the cache.
 - `upstream.api_base` is an HTTP(S) URL whose path and supported losslessly
   encoded, nonempty query are retained. Queries that the URL stack would
   reserialize, including a literal apostrophe or empty trailing `?`, are
@@ -762,11 +809,70 @@ used for parsing. State paths are derived only from that canonical config's
 parent; there is no implicit home-directory lookup.
 
 
+## Optional exact response cache
+
+Enable this for repeated short text calls whose previous result you want to
+reuse. Redis, an embedding model, and a disk database are not required:
+
+```toml
+[cache]
+ttl_secs = 300
+max_history = 3
+```
+
+The cache reuses a previous response to a byte-identical request. It does not
+produce a fresh random sample. The history threshold limits eligibility; it
+does not guarantee model quality or determinism. Restarting the gateway clears
+all entries. Prompts, credentials, and cache contents are not written to disk.
+
+Keys include the root, full composed upstream URL and query, all effective
+request headers including authentication, and the original body. Length framing
+keeps component boundaries distinct. Different credentials, roots, options,
+queries, or body bytes do not share an entry. Headers that change on each call
+can lower the hit rate; they are not silently removed from the key.
+
+Only text generation requests up to 32 KiB and within `max_history` qualify.
+The history limit counts input messages/items; a Responses string input is one
+item. System instructions still contribute to the request byte ceiling.
+Tools, tool results,
+media, multiple generations, unknown generation fields, and stateful requests
+bypass caching. Responses requests must explicitly use `store: false` and
+cannot refer to a previous response or conversation. Bypassed requests still
+follow ordinary forwarding and admission. Request `Cache-Control: no-store`
+or `no-cache` bypasses lookup; response `no-store` or `no-cache`, `Vary: *`,
+`Set-Cookie`, encoding, and non-200 status prevent storage.
+
+Misses stream as chunks arrive. Capture is a separate bounded copy, and only
+a complete, valid text response at HTTP EOF can become an entry. Tool/length
+termination, errors, unfinished SSE tails, meaningful events after completion,
+transport failure, cancellation, and oversized responses are not stored.
+Cache completion and accounting usage are separate: missing usage retains the
+quota reservation even when otherwise complete text can be reused.
+
+Hits return the original body and essential content headers before upstream
+admission. Stale date, request-ID, rate-limit, and retry headers are not replayed.
+Hits do not consume upstream RPM/TPM or add worker/usage observations. Separate
+`exact_cache` status counters describe local reuse; provider prompt-cache token
+counters keep their existing meaning. The cached body retains its original
+usage fields; these describe the reused response, not a new upstream charge.
+
+`exact_cache` includes `enabled`, `hits`, `misses`, `stores`, `evictions`,
+`budget_bypasses`, `entries`, `retained_bytes`, and `budget_bytes`. Hits and
+misses count eligible lookups, not all incoming requests. A miss need not become
+a stored entry. `retained_bytes` includes active captures and replay ownership.
+
+The fixed limits are 4 MiB of retained payload, 256 KiB per capture/entry, and
+128 entries. Payload ownership includes retained headers and remains charged
+while a replay still references an evicted entry. Capture never waits for
+memory: exhausted capacity means ordinary forwarding. These are cache payload
+bounds, not a total process RSS limit. HTTP/TLS buffers and allocator overhead
+remain additional memory.
+
 ## Retry ownership and shared cooldown (Task 7)
 
 The default is zero gateway retries. `retry_transient_429 = true` is explicit
 ownership opt-in, not an assertion that client/SDK retries are disabled. The
-native client configuration wizard is not implemented here. Reqwest automatic
+gateway does not modify the clients' own retry settings. Reqwest automatic
 retries and redirects remain explicitly disabled. Tests count the actual
 loopback upstream requests, including rejected and replayed attempts.
 

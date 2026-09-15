@@ -129,9 +129,8 @@ pub(crate) async fn initialize_setup_state(
     // A worker may already have loaded these credentials. Validate the
     // existing protected files in both branches, but never repair or rotate
     // one under it. Keep an available worker lock through validation.
-    let data = server::read_secret_file(&paths.data_token)?;
     let control = server::read_secret_file(&paths.control_token)?;
-    RuntimeCredentials::new(&data, &control, None)?;
+    RuntimeCredentials::new(&control, None)?;
     Ok(())
 }
 

@@ -12,7 +12,7 @@ python3 -B scripts/nvidia_smoke.py \
   --output product/artifacts/nvidia-dry-run.json
 ```
 
-기본은 네트워크 호출0회의 dry-run이다. 키가 준비되면 `--live`를 명시하며 키 값 대신 `--key-env` 이름을 쓴다. 선택적인 gateway 비교는 `--gateway-base http://127.0.0.1:PORT/r/ROOT/v1` 및 `--gateway-key-env LLMGW_DATA_TOKEN`으로 지정한다. 실제 제품의 로컬 인증 헤더는 `X-LLMGW-Token`이며 provider의 `Authorization: Bearer`와 구별한다. 기존 client 설정을 수정하거나 gateway를 자동 기동하는 도구는 아니다. 비교용 gateway의 목적지·모델·upstream auth·retry 설정은 실제 호출 전에 별도 확인해야 한다.
+기본은 네트워크 호출0회의 dry-run이다. 키가 준비되면 `--live`를 명시하며 키 값 대신 `--key-env` 이름을 쓴다. 선택적인 gateway 비교는 `--gateway-base http://127.0.0.1:PORT/r/ROOT/v1`으로 지정한다. 별도 gateway key는 필요 없으며, `--key-env`에 지정한 provider 키를 표준 `Authorization: Bearer`로 전송한다. 같은 인증을 상위 API로 전달하려면 gateway의 `upstream.auth.mode = "forward"`를 사용한다. 기존 client 설정을 수정하거나 gateway를 자동 기동하는 도구는 아니다. 비교용 gateway의 목적지·모델·upstream auth·retry 설정은 실제 호출 전에 별도 확인해야 한다.
 
 모델당 direct→gateway→gateway→direct 순서, 최대2모델, 요청 종료 후10초 간격이다. gateway를 지정하지 않으면 direct2회/모델만 한다. redirect·자동 retry·환경 proxy는 사용하지 않는다. 요청당 별도 자식 프로세스에150초 wall deadline과1MiB 수신 한도를 적용하며, 첫 HTTP 오류/429/잘못된 SSE에서 전체 실행을 멈춘다. 저장은 HTTP 상태, 수치형 allowlist 제한 헤더, TTFT/완료시각, SSE/usage 상태, 제한된 모델 ID와 payload hash뿐이다. 키·원문·임의 오류 응답·전체 URL은 저장하지 않는다. 출력은0600의 새 파일만 허용하고 각 요청 전후 진행 상태를 남긴다.
 

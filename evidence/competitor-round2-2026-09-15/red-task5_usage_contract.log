@@ -1,0 +1,24 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.54s
+     Running tests/task5_usage_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/task5_usage_contract-95ceabe946950ffb)
+
+running 1 test
+test json_final_usage_reconciles_all_three_endpoints ... FAILED
+
+failures:
+
+---- json_final_usage_reconciles_all_three_endpoints stdout ----
+
+thread 'json_final_usage_reconciles_all_three_endpoints' panicked at tests/task5_usage_contract.rs:99:5:
+assertion `left == right` failed: unsupported final usage must retain the original reservation
+  left: 335
+ right: 23
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    json_final_usage_reconciles_all_three_endpoints
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 27 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test task5_usage_contract`

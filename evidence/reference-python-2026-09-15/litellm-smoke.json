@@ -1,0 +1,76 @@
+{
+  "arm": "litellm",
+  "command": [
+    "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/python/litellm-venv/bin/python",
+    "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/reference-python-2026-09-15/litellm-launch.py"
+  ],
+  "performance_benchmark": false,
+  "cases": [
+    {
+      "name": "json",
+      "status": 200,
+      "wire_bytes": 320,
+      "upstream_attempts": 1,
+      "ingress_forwarded": true,
+      "pass": true
+    },
+    {
+      "name": "sse",
+      "status": 200,
+      "wire_bytes": 356,
+      "upstream_attempts": 1,
+      "ingress_forwarded": true,
+      "pass": true
+    },
+    {
+      "name": "429-no-retry",
+      "status": 429,
+      "wire_bytes": 219,
+      "upstream_attempts": 1,
+      "ingress_forwarded": true,
+      "pass": true
+    }
+  ],
+  "upstream_attempts": [
+    {
+      "path": "/v1/chat/completions",
+      "model": "synthetic",
+      "stream": false,
+      "reject": false,
+      "ingress_header": "smoke-ingress",
+      "agent_header": "smoke"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "synthetic",
+      "stream": true,
+      "reject": false,
+      "ingress_header": "smoke-ingress",
+      "agent_header": "smoke"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "model": "synthetic",
+      "stream": false,
+      "reject": true,
+      "ingress_header": "smoke-ingress",
+      "agent_header": "smoke"
+    }
+  ],
+  "environment_overrides": {
+    "HOME": "[inherited]",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PATH": "[inherited]",
+    "NO_PROXY": "127.0.0.1,localhost",
+    "LITELLM_LOCAL_MODEL_COST_MAP": "True",
+    "DO_NOT_TRACK": "1",
+    "OTEL_SDK_DISABLED": "true",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "LITELLM_MODE": "DEV"
+  },
+  "startup_ready": true,
+  "passed": true,
+  "exit_code": -15
+}

@@ -1,0 +1,39 @@
+{
+  "status": "PASS_WITH_LIMITS",
+  "runs": 44,
+  "totals": {
+    "completed": 2423,
+    "timeout": 28,
+    "submitted": 2496,
+    "attempts": 2466,
+    "warmup": 105,
+    "discovery": 10,
+    "rejected": 45
+  },
+  "native_pairs": [
+    {
+      "cost_contract": "byte_reserved",
+      "identical_submitted": true,
+      "identical_native_binary": true,
+      "features": [],
+      "config_differences": [
+        "accounting",
+        "ephemeral listen/upstream ports"
+      ]
+    },
+    {
+      "cost_contract": "quarter_actual",
+      "identical_submitted": true,
+      "identical_native_binary": true,
+      "features": [],
+      "config_differences": [
+        "accounting",
+        "ephemeral listen/upstream ports"
+      ]
+    }
+  ],
+  "input_check": "Identical request shapes/arrival/cancellation per profile across arms and cost contracts; canonical cost units excluded",
+  "scope": "44 synthetic loopback runs; descriptive results, not real-provider or task-quality evidence",
+  "latency_boundary": "submission_to_upstream includes transport/admission and excludes requests never attempted; not pure queue wait",
+  "resource_boundary": "gateway PID samples only; ps CPU resolution is coarse; no process-tree/continuous-peak assertion"
+}

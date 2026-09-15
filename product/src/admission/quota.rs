@@ -12,6 +12,7 @@ pub struct RequestCost(Cost);
 #[derive(Clone, Copy, Debug)]
 enum Cost {
     Metadata,
+    UnmeteredGeneration,
     Estimated {
         input_bytes: u64,
         output_tokens: u64,
@@ -19,8 +20,12 @@ enum Cost {
     ExactFixture(u64),
 }
 impl RequestCost {
+    /// Models/count_tokens only: never settles as generation TPM usage.
     #[allow(non_upper_case_globals)]
     pub const Metadata: Self = Self(Cost::Metadata);
+    /// Generation with unknown/unlimited TPM still has generation semantics.
+    #[allow(non_upper_case_globals)]
+    pub(crate) const UnmeteredGeneration: Self = Self(Cost::UnmeteredGeneration);
     pub fn estimated(input_bytes: u64, output_tokens: u64) -> Self {
         Self(Cost::Estimated {
             input_bytes,
@@ -34,7 +39,7 @@ impl RequestCost {
     }
     fn tokens(self) -> u128 {
         match self.0 {
-            Cost::Metadata => 0,
+            Cost::Metadata | Cost::UnmeteredGeneration => 0,
             Cost::Estimated {
                 input_bytes,
                 output_tokens,
@@ -65,6 +70,7 @@ struct Entry {
     id: ReservationId,
     active: bool,
     started: bool,
+    metadata: bool,
     tokens: u128,
     rpm_until: Option<Duration>,
     tpm_until: Option<Duration>,
@@ -91,7 +97,13 @@ fn live(until: Option<Duration>, now: Duration) -> bool {
     until.is_some_and(|until| until > now)
 }
 impl Ledger {
-    pub fn new(quota: Quota, accounting: Accounting, concurrency: u8, now: Duration) -> Self {
+    pub fn new(
+        quota: Quota,
+        accounting: Accounting,
+        concurrency: u8,
+        now: Duration,
+        startup_hold: Duration,
+    ) -> Self {
         assert!((1..=16).contains(&concurrency));
         let has_known = known(&quota.rpm).is_some() || known(&quota.tpm).is_some();
         Self {
@@ -99,7 +111,7 @@ impl Ledger {
             accounting,
             concurrency: usize::from(concurrency),
             ready_at: if has_known {
-                now.saturating_add(WINDOW)
+                now.saturating_add(startup_hold)
             } else {
                 now
             },
@@ -204,8 +216,8 @@ impl Ledger {
             return false;
         }
         let tpm = known(&self.quota.tpm);
-        // A zero-token start has no TPM expiry and can recharge positive late usage.
-        if tpm.is_some() && candidate.tokens() == 0 {
+        // Only proven metadata cannot recharge positive usage without a TPM expiry.
+        if tpm.is_some() && candidate.tokens() == 0 && !matches!(candidate.0, Cost::Metadata) {
             return false;
         }
         let (mut rpm_at, mut tpm_at) = (0_u128, 0_u128);
@@ -213,6 +225,7 @@ impl Ledger {
         for e in &self.entries {
             if tpm.is_some()
                 && e.active
+                && !e.metadata
                 && if e.started {
                     !live(e.tpm_until, at)
                 } else {
@@ -247,6 +260,7 @@ impl Ledger {
             id,
             active: true,
             started: false,
+            metadata: matches!(cost.0, Cost::Metadata),
             tokens: if known(&self.quota.tpm).is_some() {
                 tokens
             } else {
@@ -298,7 +312,7 @@ impl Ledger {
             return false;
         };
         e.active = false;
-        if known(&self.quota.tpm).is_some() {
+        if !e.metadata && known(&self.quota.tpm).is_some() {
             if let Some(usage) = usage {
                 if live(e.tpm_until, self.now) {
                     if self.accounting == Accounting::Actual {
@@ -339,6 +353,7 @@ mod backfill_tests {
             Accounting::Reserved,
             4,
             at(0),
+            std::time::Duration::from_secs(60),
         )
     }
     fn reserve(l: &mut Ledger, now: u64, tokens: u64) -> ReservationId {
@@ -398,7 +413,7 @@ mod backfill_tests {
     #[test]
     fn absent_expired_and_future_recharge_ambiguity_decline() {
         let mut l = seeded();
-        assert!(!l.can_backfill(at(65), cost(80), at(180), RequestCost::Metadata));
+        assert!(!l.can_backfill(at(65), cost(80), at(180), cost(0)));
         let zero = reserve(&mut l, 65, 0);
         assert!(
             !l.can_backfill(at(65), cost(80), at(180), cost(20)),
@@ -431,6 +446,43 @@ mod backfill_tests {
         );
         l.finish(at(127), long, Some(31));
         assert!(l.check(at(181), cost(80)).is_err());
+    }
+    #[test]
+    fn metadata_backfill_is_safe_before_start_and_while_active() {
+        let mut l = seeded();
+        for _ in 0..3 {
+            assert!(l.can_backfill(at(65), cost(80), at(180), RequestCost::Metadata));
+            let Decision::Admitted(id) = l.admit(at(65), RequestCost::Metadata) else {
+                panic!("metadata admission")
+            };
+            if l.snapshot(at(65)).active < 3 {
+                assert!(l.can_backfill(at(65), cost(80), at(180), cost(20)));
+            }
+            assert!(l.start(at(65), id));
+        }
+        assert!(
+            !l.can_backfill(at(65), cost(80), at(180), RequestCost::Metadata),
+            "metadata still reserves a slot for the protected head"
+        );
+        assert!(l.check(at(120), cost(80)).is_ok());
+        assert_eq!(l.snapshot(at(120)).tpm_debited, 0);
+
+        let mut l = seeded();
+        l.quota.rpm = known_limit(3);
+        for _ in 0..2 {
+            assert!(l.can_backfill(at(65), cost(80), at(180), RequestCost::Metadata));
+            let Decision::Admitted(id) = l.admit(at(65), RequestCost::Metadata) else {
+                panic!("metadata admission")
+            };
+            l.start(at(65), id);
+            l.finish(at(66), id, Some(500));
+        }
+        assert!(
+            !l.can_backfill(at(66), cost(80), at(180), RequestCost::Metadata),
+            "metadata still consumes RPM cumulatively"
+        );
+        assert!(l.check(at(120), cost(80)).is_ok());
+        assert_eq!(l.snapshot(at(120)).tpm_debited, 0);
     }
     #[test]
     fn projection_counts_unstarted_tokens_and_surviving_rpm_jointly() {
@@ -483,6 +535,7 @@ mod backfill_tests {
             id: ReservationId(id as u64),
             active: false,
             started: true,
+            metadata: false,
             tokens: 0,
             rpm_until: Some(at(125)),
             tpm_until: None,
@@ -493,5 +546,80 @@ mod backfill_tests {
         l.entries.pop();
         assert_eq!(l.snapshot(at(65)).retained, MAX_ENTRIES - 2);
         assert!(l.can_backfill(at(65), cost(80), at(180), cost(20)));
+    }
+
+    #[test]
+    #[ignore = "profiling only: run explicitly in release mode after other builds and workloads stop"]
+    fn profile_full_ledger_admission_scans() {
+        assert!(!cfg!(debug_assertions), "profiling requires --release");
+        const BATCHES: usize = 25;
+        const ITERATIONS_PER_BATCH: usize = 16;
+        const WARMUP_CALLS: usize = 32;
+        let mut rows = Vec::new();
+        for retained in [0, 1, MAX_ENTRIES - 2, MAX_ENTRIES] {
+            for root_heads in [1, 16] {
+                for projection in [false, true] {
+                    let mut l = if retained == 0 { fresh() } else { seeded() };
+                    l.entries.extend((l.entries.len()..retained).map(|i| Entry {
+                        id: ReservationId(i as u64 + 1),
+                        active: false,
+                        started: true,
+                        metadata: false,
+                        tokens: 0,
+                        rpm_until: Some(at(125)),
+                        tpm_until: None,
+                    }));
+                    l.next = retained as u64;
+                    assert_eq!(l.snapshot(at(65)).retained, retained);
+                    let expected = retained < MAX_ENTRIES && (!projection || retained > 0);
+                    let mut call = || {
+                        let ledger = std::hint::black_box(&mut l);
+                        if projection {
+                            ledger.can_backfill(at(65), cost(80), at(180), cost(20))
+                        } else {
+                            ledger.check(at(65), cost(20)).is_ok()
+                        }
+                    };
+                    assert_eq!(call(), expected, "verify the intended admission path");
+                    for _ in 0..WARMUP_CALLS {
+                        std::hint::black_box(call());
+                    }
+                    let mut batch_ns = Vec::with_capacity(BATCHES);
+                    let mut successes = 0;
+                    for _ in 0..BATCHES {
+                        let start = std::time::Instant::now();
+                        for _ in 0..ITERATIONS_PER_BATCH {
+                            // Sequential root-head eligibility checks, not a full Queue::drive.
+                            for _ in 0..root_heads {
+                                successes += usize::from(std::hint::black_box(call()));
+                            }
+                        }
+                        batch_ns.push(start.elapsed().as_nanos() as u64);
+                    }
+                    let calls = BATCHES * ITERATIONS_PER_BATCH * root_heads;
+                    assert_eq!(successes, if expected { calls } else { 0 });
+                    batch_ns.sort_unstable();
+                    rows.push(serde_json::json!({
+                        "retained": retained, "root_heads_simulated": root_heads,
+                        "operation": if projection { "can_backfill" } else { "check" },
+                        "calls": calls, "successful_calls": successes,
+                        "successful_projections": if projection { successes } else { 0 },
+                        "mean_ns_per_call": batch_ns.iter().sum::<u64>() as f64 / calls as f64,
+                        "p95_batch_ns_per_call": batch_ns[(BATCHES * 95).div_ceil(100) - 1] as f64 / (ITERATIONS_PER_BATCH * root_heads) as f64,
+                        "p95_batch_ns_per_root_scan": batch_ns[(BATCHES * 95).div_ceil(100) - 1] as f64 / ITERATIONS_PER_BATCH as f64
+                    }));
+                }
+            }
+        }
+        println!(
+            "{}",
+            serde_json::json!({
+                "kind": "ledger_scan_profile", "entry_size_bytes": std::mem::size_of::<Entry>(),
+                "batches": BATCHES, "iterations_per_batch": ITERATIONS_PER_BATCH,
+                "warmup_calls_per_case": WARMUP_CALLS,
+                "scope": "fixed-time ledger calls only; 1 or 16 sequential identical root heads; excludes queue selection, locks and HTTP",
+                "cases": rows
+            })
+        );
     }
 }

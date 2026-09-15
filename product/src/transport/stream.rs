@@ -2,7 +2,7 @@ use std::io;
 use std::sync::Arc;
 
 use axum::body::{Body, Bytes};
-use axum::http::{HeaderMap, Method, Response};
+use axum::http::{HeaderMap, Method, Response, StatusCode};
 use futures_util::StreamExt;
 use tokio::sync::{OwnedSemaphorePermit, Semaphore, mpsc, oneshot};
 use tokio::time::Instant;
@@ -31,6 +31,7 @@ pub enum HeadError {
 pub type HeadSender = oneshot::Sender<Result<Response<Body>, HeadError>>;
 
 pub struct ForwardRequest {
+    pub cache: Option<crate::cache::Pending>,
     pub client: UpstreamClient,
     pub method: Method,
     pub url: url::Url,
@@ -95,6 +96,7 @@ fn signal_body(sender: &mut Option<oneshot::Sender<BodyTerminal>>, terminal: Bod
 
 pub async fn forward(request: ForwardRequest) {
     let ForwardRequest {
+        cache,
         client,
         method,
         url,
@@ -280,8 +282,11 @@ pub async fn forward(request: ForwardRequest) {
     drop(body);
     let status = response.status();
     let mut response_headers = response.headers().clone();
-    let observe_sse = is_observable_sse(&response_headers);
+    let representation = observable_representation(status, &response_headers);
     headers::prepare_response(&mut response_headers);
+    let mut capture = cache
+        .filter(|_| !disconnected)
+        .and_then(|cache| cache.capture(status, response.headers(), &response_headers));
     let (body_tx, body_rx) = mpsc::channel::<Bytes>(DELIVERY_ITEMS);
     let (body_terminal_tx, body_terminal_rx) = oneshot::channel();
     let mut body_terminal_tx = Some(body_terminal_tx);
@@ -296,7 +301,7 @@ pub async fn forward(request: ForwardRequest) {
         .into_iter()
         .chain(prefix.extra.map(Ok));
     let mut upstream = futures_util::stream::iter(prefix_items).chain(response.bytes_stream());
-    let mut observer = ResponseObserver::new(endpoint, observe_sse);
+    let mut observer = ResponseObserver::new(endpoint, representation, capture.is_some());
     let mut downstream_open = !disconnected;
     let mut first_body_recorded = false;
     let mut output_delta_recorded = false;
@@ -321,6 +326,7 @@ pub async fn forward(request: ForwardRequest) {
                             return;
                         }
                         CancelPolicy::Drain => {
+                            capture = None;
                             downstream_open = false;
                             guard.start_draining();
                             continue;
@@ -335,6 +341,7 @@ pub async fn forward(request: ForwardRequest) {
                             return;
                         }
                         CancelPolicy::Drain => {
+                            capture = None;
                             downstream_open = false;
                             guard.start_draining();
                             continue;
@@ -357,7 +364,12 @@ pub async fn forward(request: ForwardRequest) {
 
         let Some(next) = next else {
             metrics.record_response_body_eof();
-            let usage = observer.finish();
+            let (usage, cache_complete) = observer.finish();
+            if downstream_open && !body_tx.is_closed() && !*downstream_disconnect.borrow() {
+                if let Some(capture) = capture.take() {
+                    capture.commit(cache_complete);
+                }
+            }
             signal_body(&mut body_terminal_tx, BodyTerminal::Eof);
             guard.finish(TerminalReason::BodyEof, usage);
             return;
@@ -376,6 +388,12 @@ pub async fn forward(request: ForwardRequest) {
         if !bytes.is_empty() && !first_body_recorded {
             first_body_recorded = true;
             metrics.record_first_body_byte();
+        }
+        if capture
+            .as_mut()
+            .is_some_and(|capture| !capture.observe(&bytes))
+        {
+            capture = None;
         }
         observer.observe(&bytes);
         if observer.first_output_delta() && !output_delta_recorded {
@@ -404,6 +422,7 @@ pub async fn forward(request: ForwardRequest) {
                         return;
                     }
                     CancelPolicy::Drain => {
+                        capture = None;
                         downstream_open = false;
                         guard.start_draining();
                     }
@@ -573,62 +592,122 @@ impl Drop for WorkerGuard {
     }
 }
 
-fn is_observable_sse(headers: &HeaderMap) -> bool {
-    let event_stream = headers
-        .get("content-type")
-        .and_then(|value| value.to_str().ok())
-        .is_some_and(|value| {
-            value
-                .split(';')
-                .next()
-                .is_some_and(|media| media.trim().eq_ignore_ascii_case("text/event-stream"))
-        });
-    let identity_encoded = headers
-        .get("content-encoding")
-        .and_then(|value| value.to_str().ok())
-        .is_none_or(|value| value.eq_ignore_ascii_case("identity"));
-    event_stream && identity_encoded
+fn observable_representation(status: StatusCode, headers: &HeaderMap) -> Option<&'static str> {
+    if status != StatusCode::OK {
+        return None;
+    }
+    let mut encodings = headers.get_all("content-encoding").iter();
+    if let Some(encoding) = encodings.next() {
+        if !encoding.to_str().ok()?.eq_ignore_ascii_case("identity") || encodings.next().is_some() {
+            return None;
+        }
+    }
+    let mut types = headers.get_all("content-type").iter();
+    let media = types.next()?.to_str().ok()?.split(';').next()?.trim();
+    if types.next().is_some() {
+        return None;
+    }
+    if media.eq_ignore_ascii_case("application/json") {
+        Some("application/json")
+    } else if media.eq_ignore_ascii_case("text/event-stream") {
+        Some("text/event-stream")
+    } else {
+        None
+    }
 }
 
-struct ResponseObserver {
-    sse: Option<SseDecoder>,
+enum ResponseObserver {
+    Sse(SseDecoder),
+    Json {
+        endpoint: Endpoint,
+        storage: Box<[u8]>,
+        used: usize,
+        overflowed: bool,
+        cache: bool,
+    },
+    Unsupported,
 }
 
 impl ResponseObserver {
-    fn new(endpoint: Endpoint, enabled: bool) -> Self {
-        Self {
-            sse: enabled.then(|| SseDecoder::new(endpoint)),
+    fn new(endpoint: Endpoint, representation: Option<&str>, cache: bool) -> Self {
+        if matches!(endpoint, Endpoint::Models | Endpoint::CountTokens) {
+            return Self::Unsupported;
+        }
+        match representation {
+            Some(media) if media.eq_ignore_ascii_case("text/event-stream") => {
+                Self::Sse(SseDecoder::new(endpoint, cache))
+            }
+            Some(media) if media.eq_ignore_ascii_case("application/json") => Self::Json {
+                endpoint,
+                storage: vec![0; MAX_EVENT_METADATA].into_boxed_slice(),
+                used: 0,
+                overflowed: false,
+                cache,
+            },
+            _ => Self::Unsupported,
         }
     }
 
     fn observe(&mut self, bytes: &[u8]) {
-        if let Some(sse) = &mut self.sse {
-            sse.observe(bytes);
+        match self {
+            Self::Sse(sse) => sse.observe(bytes),
+            Self::Json {
+                storage,
+                used,
+                overflowed,
+                ..
+            } if !*overflowed => {
+                if bytes.len() > storage.len() - *used {
+                    *overflowed = true;
+                    return;
+                }
+                storage[*used..*used + bytes.len()].copy_from_slice(bytes);
+                *used += bytes.len();
+            }
+            _ => {}
         }
     }
 
     fn first_output_delta(&self) -> bool {
-        self.sse
-            .as_ref()
-            .is_some_and(|sse| sse.endpoint.first_output_delta())
+        matches!(self, Self::Sse(sse) if sse.endpoint.first_output_delta())
     }
 
     fn terminal_marker(&self) -> bool {
-        self.sse
-            .as_ref()
-            .is_some_and(|sse| sse.endpoint.terminal_marker())
+        matches!(self, Self::Sse(sse) if sse.endpoint.terminal_marker())
     }
 
     fn overflowed(&self) -> bool {
-        self.sse.as_ref().is_some_and(|sse| sse.overflowed)
+        match self {
+            Self::Sse(sse) => sse.overflowed,
+            Self::Json { overflowed, .. } => *overflowed,
+            Self::Unsupported => false,
+        }
     }
 
-    fn finish(&self) -> Option<ObservedUsage> {
-        let sse = self.sse.as_ref()?;
-        if sse.overflowed {
-            None
-        } else {
-            sse.endpoint.finish()
+    // Called only at clean HTTP EOF. JSON parsing never delays the first body chunk.
+    fn finish(&self) -> (Option<ObservedUsage>, bool) {
+        match self {
+            Self::Sse(sse) if !sse.overflowed => (
+                sse.endpoint.finish(),
+                sse.at_event_boundary() && sse.endpoint.cache_complete(),
+            ),
+            Self::Json {
+                endpoint,
+                storage,
+                used,
+                overflowed: false,
+                cache,
+            } => {
+                let Ok(value) = serde_json::from_slice::<serde_json::Value>(&storage[..*used])
+                else {
+                    return (None, false);
+                };
+                (
+                    crate::protocol::json_usage(*endpoint, &value),
+                    *cache && crate::cache::complete_json(*endpoint, &value),
+                )
+            }
+            _ => (None, false),
         }
     }
 }
@@ -700,9 +779,9 @@ impl SseEvent {
 }
 
 impl SseDecoder {
-    fn new(endpoint: Endpoint) -> Self {
+    fn new(endpoint: Endpoint, cache: bool) -> Self {
         Self {
-            endpoint: EndpointObserver::new(endpoint),
+            endpoint: EndpointObserver::new(endpoint, cache),
             storage: vec![0; EVENT_STORAGE_BYTES].into_boxed_slice(),
             used: 0,
             line_start: 0,
@@ -718,6 +797,16 @@ impl SseDecoder {
             bom_prefix_len: 0,
             overflowed: false,
         }
+    }
+
+    fn at_event_boundary(&self) -> bool {
+        self.used == 0
+            && !self.has_data
+            && matches!(self.line_kind, LineKind::Field)
+            && matches!(self.event, SseEvent::Default)
+            && self.event_name_len == 0
+            && self.bom_checked
+            && self.bom_prefix_len == 0
     }
 
     fn observe(&mut self, mut bytes: &[u8]) {
@@ -898,8 +987,45 @@ mod tests {
     use super::{MAX_EVENT_METADATA, SseDecoder};
 
     #[test]
+    fn json_observer_storage_stops_at_limit_and_header_ambiguity_is_unknown() {
+        use super::{ResponseObserver, observable_representation};
+        use axum::http::{HeaderMap, HeaderValue, StatusCode};
+        let mut observer =
+            ResponseObserver::new(Endpoint::ChatCompletions, Some("application/json"), false);
+        observer.observe(&vec![b' '; MAX_EVENT_METADATA]);
+        assert!(!observer.overflowed());
+        observer.observe(b"x");
+        observer.observe(&vec![b'x'; MAX_EVENT_METADATA]);
+        assert!(observer.overflowed());
+        assert!(observer.finish().0.is_none());
+        if let ResponseObserver::Json { storage, used, .. } = observer {
+            assert_eq!(storage.len(), MAX_EVENT_METADATA);
+            assert_eq!(used, MAX_EVENT_METADATA);
+        } else {
+            panic!("JSON observer");
+        }
+        let mut headers = HeaderMap::new();
+        headers.insert("content-type", HeaderValue::from_static("application/json"));
+        assert_eq!(
+            observable_representation(StatusCode::OK, &headers),
+            Some("application/json")
+        );
+        headers.insert(
+            "content-encoding",
+            HeaderValue::from_bytes(b"\xff").unwrap(),
+        );
+        assert!(observable_representation(StatusCode::OK, &headers).is_none());
+        headers.remove("content-encoding");
+        headers.insert(
+            "content-type",
+            HeaderValue::from_bytes(b"application/json;\xff").unwrap(),
+        );
+        assert!(observable_representation(StatusCode::OK, &headers).is_none());
+    }
+
+    #[test]
     fn observer_retained_buffer_capacity_is_bounded_across_fields_and_lines() {
-        let mut decoder = SseDecoder::new(Endpoint::ChatCompletions);
+        let mut decoder = SseDecoder::new(Endpoint::ChatCompletions, false);
         decoder.observe(
             &[
                 b"data: ".to_vec(),

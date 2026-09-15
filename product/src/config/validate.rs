@@ -20,8 +20,15 @@ pub(super) fn validate(input: ConfigInput) -> Result<Config, ConfigError> {
         return invalid("concurrency must be between 1 and 16");
     }
 
+    let startup_hold_secs = input.startup_hold_secs.unwrap_or(60);
+    if startup_hold_secs > 3600 {
+        return invalid("startup_hold_secs must be between 0 and 3600");
+    }
+    if input.cache.is_some_and(|cache| !cache.is_valid()) {
+        return invalid("cache ttl_secs must be 1..3600 and max_history must be 1..64");
+    }
     let cancel_policy = validate_cancel_policy(input.cancel_policy.as_deref().unwrap_or("drain"))?;
-    let accounting = validate_accounting(input.accounting.as_deref().unwrap_or("reserved"))?;
+    let accounting = validate_accounting(input.accounting.as_deref().unwrap_or("actual"))?;
     let upstream = validate_upstream(
         input.upstream.api_base,
         input.upstream.auth,
@@ -38,6 +45,8 @@ pub(super) fn validate(input: ConfigInput) -> Result<Config, ConfigError> {
     Ok(Config {
         listen,
         concurrency,
+        startup_hold_secs,
+        cache: input.cache,
         cancel_policy,
         accounting,
         retry_transient_429: input.retry_transient_429.unwrap_or(false),
@@ -325,7 +334,7 @@ fn is_http_token(value: &str) -> bool {
         })
 }
 
-fn is_env_name(value: &str) -> bool {
+pub(crate) fn is_env_name(value: &str) -> bool {
     let mut bytes = value.bytes();
     let starts_safely = bytes
         .next()

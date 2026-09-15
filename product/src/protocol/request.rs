@@ -45,7 +45,7 @@ pub fn inspect_body(
         return Ok(RequestCost::Metadata);
     }
     let Limit::Known(limit) = config.quota.tpm else {
-        return Ok(RequestCost::Metadata);
+        return Ok(RequestCost::UnmeteredGeneration);
     };
     if i.multimodal {
         return Err(error("unsupported_multimodal_estimate"));
@@ -341,5 +341,82 @@ impl<'de> Visitor<'de> for Scan {
     }
     fn visit_f64<E>(self, _: f64) -> Result<bool, E> {
         Ok(true)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::admission::quota::{Decision, Ledger};
+    use crate::config::{Accounting, Quota};
+    use std::time::Duration;
+
+    #[test]
+    fn unmetered_generation_is_not_classified_as_non_generating_metadata() {
+        let mut config = crate::config::parse(
+            br#"
+listen = "127.0.0.1:4141"
+[upstream]
+api_base = "http://127.0.0.1:9/v1"
+[upstream.auth]
+mode = "none"
+[quota.rpm]
+kind = "unlimited"
+[quota.tpm]
+kind = "unknown"
+[[models]]
+id = "fixture"
+[[roots]]
+id = "test"
+endpoints = ["models", "messages/count_tokens", "chat/completions", "messages", "responses"]
+models = ["fixture"]
+"#,
+        )
+        .unwrap();
+        for tpm in [Limit::Unknown, Limit::Unlimited] {
+            config.quota.tpm = tpm;
+            for endpoint in [
+                Endpoint::Models,
+                Endpoint::CountTokens,
+                Endpoint::ChatCompletions,
+                Endpoint::Messages,
+                Endpoint::Responses,
+            ] {
+                let cost = inspect_body(
+                    &config,
+                    &DataRoute {
+                        root_index: 0,
+                        endpoint,
+                    },
+                    &bytes::Bytes::from_static(br#"{"model":"fixture","messages":[]}"#),
+                )
+                .unwrap_or_else(|_| panic!("valid inspected request"));
+                // A known test ledger exposes whether this cost can ever become
+                // generation usage. The live configuration remains immutable.
+                let mut ledger = Ledger::new(
+                    Quota {
+                        rpm: Limit::Unlimited,
+                        tpm: Limit::Known(100.try_into().unwrap()),
+                    },
+                    Accounting::Reserved,
+                    1,
+                    Duration::ZERO,
+                    std::time::Duration::from_secs(60),
+                );
+                let Decision::Admitted(id) = ledger.admit(Duration::from_secs(60), cost) else {
+                    panic!("admission")
+                };
+                ledger.start(Duration::from_secs(60), id);
+                ledger.finish(Duration::from_secs(121), id, Some(31));
+                assert_eq!(
+                    ledger.snapshot(Duration::from_secs(121)).tpm_debited,
+                    if matches!(endpoint, Endpoint::Models | Endpoint::CountTokens) {
+                        0
+                    } else {
+                        31
+                    }
+                );
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ use serde_json::Value;
 use super::{ObservedUsage, token};
 
 pub(super) struct Observer {
+    cache: Option<crate::cache::StreamCompletion>,
     usage: ObservedUsageParts,
     invalid: bool,
     output_delta: bool,
@@ -19,8 +20,10 @@ struct ObservedUsageParts {
 }
 
 impl Observer {
-    pub(super) fn new() -> Self {
+    pub(super) fn new(cache: bool) -> Self {
         Self {
+            cache: cache
+                .then(|| crate::cache::StreamCompletion::new(crate::config::Endpoint::Messages)),
             usage: ObservedUsageParts::default(),
             invalid: false,
             output_delta: false,
@@ -31,9 +34,15 @@ impl Observer {
 
     pub(super) fn observe(&mut self, event: Option<&str>, data: &[u8]) {
         let Ok(value) = serde_json::from_slice::<Value>(data) else {
+            if let Some(cache) = &mut self.cache {
+                cache.invalidate();
+            }
             self.invalid = true;
             return;
         };
+        if let Some(cache) = &mut self.cache {
+            cache.observe(event, &value);
+        }
         let kind = value.get("type").and_then(Value::as_str).or(event);
         match kind {
             Some("message_start") => {
@@ -101,7 +110,16 @@ impl Observer {
         }
     }
 
+    pub(super) fn cache_complete(&self) -> bool {
+        self.cache
+            .as_ref()
+            .is_some_and(crate::cache::StreamCompletion::complete)
+    }
+
     pub(super) fn mark_invalid(&mut self) {
+        if let Some(cache) = &mut self.cache {
+            cache.invalidate();
+        }
         self.invalid = true;
     }
 

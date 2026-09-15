@@ -20,6 +20,26 @@ pub(super) fn render_preserving(
             Value::from(config.listen.to_string()),
         );
     }
+    if original.cache != config.cache {
+        if let Some(cache) = config.cache {
+            replace(
+                &mut document["cache"]["ttl_secs"],
+                Value::from(cache.ttl_secs as i64),
+            );
+            replace(
+                &mut document["cache"]["max_history"],
+                Value::from(cache.max_history as i64),
+            );
+        } else {
+            document.remove("cache");
+        }
+    }
+    if original.startup_hold_secs != config.startup_hold_secs {
+        replace(
+            &mut document["startup_hold_secs"],
+            Value::from(config.startup_hold_secs as i64),
+        );
+    }
     if original.concurrency != config.concurrency {
         replace(
             &mut document["concurrency"],

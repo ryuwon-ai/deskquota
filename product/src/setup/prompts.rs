@@ -391,12 +391,64 @@ impl PromptIo for DialoguerIo {
                         .write_line("Invalid value: concurrency must be between 1 and 16")
                         .map_err(|e| Error::message(e.to_string()))?;
                 };
+                let startup_hold_secs = self
+                    .validated_text(
+                        "Startup quota hold in seconds (0 disables, maximum 3600)",
+                        draft.config.startup_hold_secs.to_string(),
+                        |value| match value.parse::<u64>() {
+                            Ok(value) if value <= 3600 => Ok(()),
+                            _ => Err(Error::message(
+                                "startup hold must be between 0 and 3600 seconds",
+                            )),
+                        },
+                    )?
+                    .parse()
+                    .expect("validated startup hold");
+                let cache_enabled = Confirm::with_theme(&self.theme)
+                    .with_prompt("Enable exact response cache for short text requests?")
+                    .default(draft.config.cache.is_some())
+                    .interact_on_opt(&self.term)
+                    .map_err(|e| Error::message(e.to_string()))?
+                    .ok_or_else(|| Error::message("cancel"))?;
+                let cache = if cache_enabled {
+                    let previous = draft.config.cache.unwrap_or_default();
+                    let ttl_secs = self
+                        .validated_text(
+                            "Cache TTL in seconds (1..3600)",
+                            previous.ttl_secs.to_string(),
+                            |value| match value.parse::<u64>() {
+                                Ok(value) if (1..=3600).contains(&value) => Ok(()),
+                                _ => Err(Error::message("cache TTL must be 1..3600")),
+                            },
+                        )?
+                        .parse()
+                        .expect("validated cache TTL");
+                    let max_history = self
+                        .validated_text(
+                            "Cache maximum message history (1..64)",
+                            previous.max_history.to_string(),
+                            |value| match value.parse::<usize>() {
+                                Ok(value) if (1..=64).contains(&value) => Ok(()),
+                                _ => Err(Error::message("cache history must be 1..64")),
+                            },
+                        )?
+                        .parse()
+                        .expect("validated cache history");
+                    Some(crate::config::CacheConfig {
+                        ttl_secs,
+                        max_history,
+                    })
+                } else {
+                    None
+                };
                 Ok(Flow::SetQuota(QuotaAnswers {
                     rpm,
                     tpm,
                     shared_with_other_pcs,
                     separate_input_output,
                     concurrency,
+                    startup_hold_secs,
+                    cache,
                 }))
             }
             Step::Run => {

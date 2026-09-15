@@ -1,0 +1,20 @@
+{
+  "scope": "read-only cache timing harness review; gateway execution pending",
+  "reviewer": "comparison_harness_review",
+  "result": "approved after fixes",
+  "checks": [
+    "180 default requests:120 gateway,60 direct;artificial50percent hit rate",
+    "SSE parsed content/terminal/usage preserved",
+    "SSE-only observed usage and JSON unknown contract;no duplicate hit worker accounting",
+    "unread gateway stderr pipe removed",
+    "owned runtime cleaned before temporary state"
+  ],
+  "limits": [
+    "fixed sequential ordering,no warmup",
+    "30 samples p99=max",
+    "before/after RSS not peak or budget proof",
+    "not real user hit rate or model quality"
+  ],
+  "script_sha256": "6449bc9477d6a1070a341aac2b8a07349a8ee91ba7cb26ce0cf8bbf1b0d7d8e0",
+  "parent_followup": "Added exact cache snapshot checks; labeled data ingress separately from control probes; bounded final worker-settlement wait before cumulative counters"
+}

@@ -41,6 +41,41 @@ fn check(ok: i32) -> io::Result<()> {
         Ok(())
     }
 }
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct FileIdentity {
+    volume: u64,
+    file: [u8; 16],
+}
+
+/// Compare volume plus the full file ID, including filesystems with 128-bit IDs.
+/// Unsupported identity queries fail closed; timestamps and length are not identity.
+pub(crate) fn file_identity(file: &File) -> io::Result<FileIdentity> {
+    let handle = file.as_raw_handle();
+    // SAFETY: this borrows a live File handle without transferring ownership.
+    if unsafe { GetFileType(handle) } != FILE_TYPE_DISK {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "file identity requires a disk file",
+        ));
+    }
+    let mut info = FILE_ID_INFO::default();
+    // SAFETY: FileIdInfo selects FILE_ID_INFO; aligned output has the exact size
+    // and lives through the call. No descriptor-owned pointers are returned.
+    unsafe {
+        check(GetFileInformationByHandleEx(
+            handle,
+            FileIdInfo,
+            (&mut info as *mut FILE_ID_INFO).cast(),
+            size_of::<FILE_ID_INFO>() as u32,
+        ))?;
+    }
+    Ok(FileIdentity {
+        volume: info.VolumeSerialNumber,
+        file: info.FileId.Identifier,
+    })
+}
+
 fn wide(path: &Path) -> io::Result<Vec<u16>> {
     let mut s: Vec<u16> = path.as_os_str().encode_wide().collect();
     if s.contains(&0) {

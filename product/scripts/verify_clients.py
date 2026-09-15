@@ -629,9 +629,9 @@ models = ["example-model"]
             )["state_directory"]
         )
         state_dir.mkdir(mode=0o700)
-        data_token = "task4-claude-data-" + os.urandom(18).hex()
+
         control_token = "task4-claude-control-" + os.urandom(18).hex()
-        probe_pi.write_private(state_dir / "data-token", data_token)
+
         probe_pi.write_private(state_dir / "control-token", control_token)
         gateway = subprocess.Popen(
             [str(binary), "run", "--config", str(config)],
@@ -671,8 +671,8 @@ models = ["example-model"]
             preview_ok = (
                 preview.returncode == 0
                 and reviewed_hash is not None
-                and data_token not in preview.stdout
-                and data_token not in preview.stderr
+
+
             )
             applied = (
                 subprocess.run(
@@ -795,7 +795,7 @@ models = ["example-model"]
                 and restored.get("userAddedAfterConnect") is True
                 and restored.get("env") == {"KEEP": "yes"}
                 and restored.get("permissions") == {"allow": []}
-                and data_token not in settings.read_text(encoding="utf-8")
+
             )
             profile_ok = preview_ok and applied is not None and applied.returncode == 0
             result["profile_load"] = {
@@ -953,9 +953,9 @@ models = ["example-model"]
             )["state_directory"]
         )
         state_dir.mkdir(mode=0o700)
-        data_token = "task4-codex-data-" + os.urandom(18).hex()
+
         control_token = "task4-codex-control-" + os.urandom(18).hex()
-        probe_pi.write_private(state_dir / "data-token", data_token)
+
         probe_pi.write_private(state_dir / "control-token", control_token)
         environment = isolated_environment(root, home, "codex", codex_home)
         gateway = subprocess.Popen(
@@ -983,8 +983,8 @@ models = ["example-model"]
             preview_ok = (
                 preview.returncode == 0
                 and reviewed_hash is not None
-                and data_token not in preview.stdout
-                and data_token not in preview.stderr
+
+
             )
             applied = subprocess.run(
                 [*connect, "--apply-hash", str(reviewed_hash)],
@@ -1101,7 +1101,7 @@ models = ["example-model"]
                 and reloaded.returncode == 0
                 and "user_added_after_connect = true" in restored_text
                 and "llmgw" not in restored_text
-                and data_token not in restored_text
+
             )
             result["profile_load"] = {
                 "status": "verified" if profile_ok else "failed",

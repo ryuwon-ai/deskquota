@@ -1,7 +1,8 @@
 listen = "127.0.0.1:4141"
 concurrency = 1
 cancel_policy = "drain"
-accounting = "reserved"
+accounting = "actual"
+startup_hold_secs = 60
 
 [upstream]
 api_base = "http://127.0.0.1:18080/team/v1?api-version=fixture"

@@ -1,15 +1,26 @@
 # Native client compatibility
 
 This phase supports three fixed, version-checked profile formats. The versions
-below were freshly exercised with one checksum-verified macOS arm64 packaged
-binary on the Apple M4 development host. `connect`
+below were exercised with a checksum-verified macOS arm64 packaged
+binary on the Apple M4 development host before the data-token removal. Those
+installed-client results remain historical evidence for Claude and Codex.
+After the data-token removal, the Pi0.84.2 completion and read-tool flows were
+rerun with the current release binary, an isolated loopback fixture, and
+upstream auth `none`: both passed (one and two upstream calls). Real-provider
+authentication and the revised Claude/Codex full native flows remain unverified.
+`connect`
 does not discover providers, sign in, forward a chat
 subscription, or make a paid request. The selected root, model, and endpoint
 are a fixed gateway route. If missing, `connect` adds them through the same
 reviewed `SetupDraft` path used by setup; it never writes a second route format.
-Automatic connection is refused for upstream `auth = "forward"` because an
-existing client subscription credential or display placeholder could otherwise
-reach an arbitrary upstream.
+For upstream `auth.mode = "forward"`, Pi and Codex use an explicit API-key
+environment reference (`OPENAI_API_KEY`, or `--client-key-env NAME`). Claude
+keeps its native API-key/auth-token settings. No key value is copied into a
+generated profile, and connection does not opt into subscription/OAuth forwarding.
+Claude forward connection requires a configured native API credential source;
+a saved claude.ai login alone is not enough. The client still controls its own
+credential selection and any API-key approval prompt. See the official
+[gateway credential mapping](https://code.claude.com/docs/en/llm-gateway-connect#how-the-credential-variable-maps-to-a-header).
 
 | Client | Version | Protocol | Listing | Selection | Tools | OS and scope |
 |---|---:|---|---|---|---|---|
@@ -64,7 +75,7 @@ client bytes unchanged. After an interactive confirmation, llmgw reads fresh
 authenticated worker status. If the required runtime action changed while the
 user was reviewing the preview, the client remains pending until the new impact
 is reviewed. A setup `SaveOnly` result also leaves selected clients pending, but
-final setup apply creates the protected local token material needed to preview a
+final setup apply creates the protected control token material needed to activate a
 client connection later; it does not start the gateway or write a client
 profile. Interactive successful setup separately previews and confirms each selected
 client resource after the gateway reaches readiness. It applies the same
@@ -72,7 +83,9 @@ in-memory reviewed plan after confirmation; the user does not retype its
 64-character hash.
 
 Pi receives one dedicated `providers.llmgw` object with `baseUrl`, explicit API
-type, explicit model metadata, and the native custom `X-LLMGW-Token` header.
+type and model metadata. Forward mode uses an `apiKey` environment reference
+such as `$OPENAI_API_KEY`; env/none modes use a nonsecret client placeholder
+that the gateway replaces or strips. No custom authentication header is added.
 When the real upstream limits are unknown, the written 128000 context and 16384
 output values are labeled Pi client defaults, not verified provider limits.
 An unrelated existing `providers.llmgw` object is never adopted or overwritten.
@@ -82,8 +95,8 @@ existing transaction and resource locks are held before any journal or client
 write. A disconnect that retires the journal invalidates an older prepared
 reconnect even if the old managed bytes are recreated exactly.
 
-Claude preserves other `env` entries and custom-header lines. Its llmgw token
-is never written to shared `.claude/settings.json`. Project-local use requires
+Claude preserves other `env` entries and custom-header lines. It writes no
+local data token. Project-local use requires
 both an explicit private-file confirmation and confirmation that the file is
 not Git-tracked or shared. llmgw also performs read-only `git ls-files` and
 `git check-ignore` checks and verifies an existing `.claude` directory or target
@@ -96,16 +109,18 @@ again immediately before the client write. Safe parent-directory aliases remain
 supported, while aliases into tracked or shared targets are refused. Conflicting
 process environment or supplied managed policy blocks the patch. Discovery is
 opt-in and remains unsupported for the verified 2.1.63 profile. Claude 2.1.63
-also requires a nonempty API-key setting before it starts a headless request. The profile therefore owns the public literal
+also requires a nonempty API-key setting before it starts a headless request.
+For env/none gateway modes, the profile owns the public literal
 `ANTHROPIC_API_KEY=llmgw-local-only` as a client-availability placeholder. It is
-not an upstream credential; automatic connect is limited to gateway auth modes
-that strip incoming client authentication. A previous value is protected and
+not an upstream credential; those gateway modes strip incoming client
+authentication. Forward mode leaves the user's native authentication untouched.
+A previous placeholder-managed value is protected and
 restored on disconnect, and a process environment or managed-policy conflict is
 refused.
 
-Codex receives a separate `llmgw.config.toml` profile. The model-provider
-`http_headers` table carries the local token; MCP server headers and global
-`config.toml` are untouched. The profile uses `wire_api = "responses"`,
+Codex receives a separate `llmgw.config.toml` profile. Forward mode sets the
+model-provider `env_key` to the selected API-key environment variable; MCP
+server headers and global `config.toml` are untouched. The profile uses `wire_api = "responses"`,
 `requires_openai_auth = false`, and `supports_websockets = false`. The gateway
 model list is not treated as a Codex catalog. An unrelated existing
 `model_providers.llmgw` object is refused. Codex reconnects use the same active
@@ -132,8 +147,8 @@ llmgw --config /absolute/gateway/config.toml disconnect pi
 
 Unrelated edits survive. User changes to an owned value are reported as a
 conflict and preserved. A newly created unchanged file can be removed; a
-user-changed created file is preserved. The local data token is shared gateway
-state and is not deleted by disconnect.
+user-changed created file is preserved. Disconnect does not remove the separate
+gateway control token or alter the upstream credentials.
 
 `llmgw off` preserves client URLs and autostart intent. The client will fail
 until `llmgw on` or disconnect restores its prior values. `llmgw status` reports
