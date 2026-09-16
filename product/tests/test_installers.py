@@ -2,15 +2,18 @@
 import contextlib
 import functools
 import hashlib
+import importlib.util
 import http.server
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 
 
 PRODUCT = Path(__file__).resolve().parents[1]
@@ -285,6 +288,27 @@ class PowerShellInstallerStaticTests(unittest.TestCase):
         self.assertNotIn("[System.IO.File]::Move", recovery)
         self.assertNotIn("Remove-Item", recovery)
         self.assertNotIn("$preserveRecovery = $false", recovery)
+
+
+class AcceptanceDiagnosticTests(unittest.TestCase):
+    def test_powershell_child_rebuilds_module_path_without_mutating_parent(self):
+        spec = importlib.util.spec_from_file_location("verify_windows", PRODUCT / "scripts/verify_windows.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        parent = {"PSModulePath": "incompatible-ps7-modules", "PATH": "preserve-path"}
+        with patch.object(module.subprocess, "run", return_value=subprocess.CompletedProcess([], 0)) as child:
+            module.run(["powershell.exe", "-NoProfile"], env=parent)
+            self.assertEqual(child.call_args.kwargs["env"], {"PATH": "preserve-path"})
+            module.run(["other.exe"], env=parent)
+            self.assertEqual(child.call_args.kwargs["env"], parent)
+        self.assertIn("PSModulePath", parent)
+
+    def test_failed_probe_command_preserves_failure_reason(self):
+        spec = importlib.util.spec_from_file_location("verify_windows", PRODUCT / "scripts/verify_windows.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with self.assertRaisesRegex(RuntimeError, "exited 3: synthetic_failure_reason"):
+            module.run([sys.executable, "-c", "import sys; sys.stderr.write('synthetic_failure_reason'); sys.exit(3)"])
 
 
 if __name__ == "__main__":

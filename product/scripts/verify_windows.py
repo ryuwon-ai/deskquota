@@ -20,6 +20,10 @@ def sha(path):
 
 
 def run(argv, *, env=None, check=True):
+    if Path(argv[0]).name.lower() == "powershell.exe":
+        # Python inherits PS7 module paths; PS5 must construct its own defaults.
+        env = {k: v for k, v in (os.environ if env is None else env).items()
+               if k.upper() != "PSMODULEPATH"}
     result = subprocess.run([str(v) for v in argv], env=env, capture_output=True,
                             text=True, encoding="utf-8", errors="replace", timeout=30)
     if check and result.returncode:
