@@ -39,9 +39,10 @@ def credential(name):
 
 
 class SSE:
-    def __init__(self, secrets=()):
+    def __init__(self, secrets=(), content_sink=None):
         self.pending = b""
         self.secrets = secrets
+        self.content_sink = content_sink
         self.result = {"content_seen": False, "done": False, "finished": False,
                        "stream_error": False, "usage": {"status": "missing"}}
 
@@ -86,6 +87,8 @@ class SSE:
                     if not isinstance(content, str):
                         raise ValueError("invalid content delta")
                     self.result["content_seen"] = True
+                    if self.content_sink is not None:
+                        self.content_sink(content)
                 finish = choice.get("finish_reason")
                 if finish is not None:
                     if finish in ("stop", "length"):
@@ -98,7 +101,7 @@ class SSE:
         return r["content_seen"] and r["done"] and r["finished"] and not r["stream_error"] and not self.pending.strip()
 
 
-def request_worker(pipe, base, body, key):
+def request_worker(pipe, base, body, key, check=None):
     started = time.monotonic()
     result = {"outcome": "error", "http_status": None, "bytes_received": 0,
               "first_content_ms": None, "headers_ms": None}
@@ -125,7 +128,8 @@ def request_worker(pipe, base, body, key):
         elif response.getheader("Content-Encoding", "identity").lower() != "identity":
             result["outcome"] = "encoded_response"
         else:
-            parser = SSE((key,))
+            content = []
+            parser = SSE((key,), content.append if check is not None else None)
             while chunk := response.read1(16384):
                 result["bytes_received"] += len(chunk)
                 if result["bytes_received"] > LIMIT:
@@ -138,6 +142,9 @@ def request_worker(pipe, base, body, key):
                 if parser.result["stream_error"]:
                     break
             result["outcome"] = "completed" if parser.success() else "invalid_stream"
+            if check is not None and parser.success():
+                # Task output stays inside the bounded worker; only its verdict leaves.
+                result["task_passed"] = check("".join(content)) is True
     except Exception as error:
         result.update(outcome="error", error_type=type(error).__name__)
     finally:
@@ -148,17 +155,22 @@ def request_worker(pipe, base, body, key):
         pipe.close()
 
 
-def request(base, body, key, deadline=DEADLINE):
+def request(base, body, key, deadline=DEADLINE, check=None, cancel_event=None):
     # Native spawn works on Windows too; a trickling socket cannot extend the wall limit.
     context = multiprocessing.get_context("spawn")
     receiver, sender = context.Pipe(duplex=False)
-    process = context.Process(target=request_worker, args=(sender, base, body, key))
+    process = context.Process(target=request_worker, args=(sender, base, body, key, check))
     started = time.monotonic()
     result = {"outcome": "worker_failed"}
     try:
+        if cancel_event is not None and cancel_event.is_set():
+            return {"outcome": "cancelled", "process_wall_ms": 0}
         process.start()
         sender.close()
         while True:
+            if cancel_event is not None and cancel_event.is_set():
+                result["outcome"] = "cancelled"
+                break
             remaining = deadline - (time.monotonic()-started)
             if remaining <= 0:
                 result["outcome"] = "timeout"
@@ -183,8 +195,8 @@ def request(base, body, key, deadline=DEADLINE):
 
 
 def execute(args):
-    models = args.model or ["meta/llama-3.1-8b-instruct"]
-    if not 1 <= len(models) <= 2 or len(set(models)) != len(models) or not all(MODEL.fullmatch(m) for m in models):
+    models = args.model
+    if not models or not 1 <= len(models) <= 2 or len(set(models)) != len(models) or not all(MODEL.fullmatch(m) for m in models):
         raise ValueError("one or two distinct valid models required")
     if args.gateway_base:
         gateway_base(args.gateway_base)
@@ -244,7 +256,7 @@ def execute(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
-    parser.add_argument("--model", action="append")
+    parser.add_argument("--model", action="append", required=True)
     parser.add_argument("--gateway-base")
     parser.add_argument("--key-env", default="NVIDIA_API_KEY")
     parser.add_argument("--output", type=Path, required=True)

@@ -15,6 +15,10 @@ from unittest.mock import patch
 import nvidia_smoke as probe
 
 
+def check_ok(text):
+    return text == "OK"
+
+
 def stream(finish="stop"):
     return (b'data: {"model":"fixture/model","choices":[{"delta":{"content":"OK"},"finish_reason":null}]}\r\n\r\n'
             + b'data: ' + json.dumps({"choices": [{"delta": {}, "finish_reason": finish}],
@@ -78,6 +82,11 @@ class Checks(unittest.TestCase):
         parser = probe.SSE(("fixture/model",))
         parser.feed(stream())
         self.assertNotIn("reported_model", parser.result)
+        content = []
+        parser = probe.SSE(content_sink=content.append)
+        parser.feed(stream())
+        self.assertEqual(content, ["OK"])
+        self.assertNotIn("content", parser.result)
 
     def test_input_boundaries(self):
         for url in ("https://127.0.0.1:80/v1", "http://localhost:80/v1", "http://127.0.0.1:0/v1",
@@ -128,9 +137,20 @@ class Checks(unittest.TestCase):
                 self.assertEqual(result["rate_headers"], {"retry-after": "3"})
             self.assertEqual(len(observations), 6)  # Redirect and 429 made no extra attempts.
             self.assertTrue(all(auth and no_custom for _, auth, no_custom in observations))
+            checked = probe.request(base + "/ok", b"{}", "synthetic-key", deadline=5, check=check_ok)
+            self.assertEqual(checked["outcome"], "completed")
+            self.assertTrue(checked["task_passed"])
+            self.assertNotIn("OK", json.dumps(checked))
             result = probe.request(base + "/stall", b"{}", "synthetic-key", deadline=.4)
             self.assertEqual(result["outcome"], "timeout")
             self.assertLess(result["process_wall_ms"], 3000)
+            cancelled = threading.Event()
+            timer = threading.Timer(.1, cancelled.set)
+            timer.start()
+            result = probe.request(base + "/stall", b"{}", "synthetic-key", deadline=5, cancel_event=cancelled)
+            timer.join()
+            self.assertEqual(result["outcome"], "cancelled")
+            self.assertLess(result["process_wall_ms"], 1000)
         finally:
             server.shutdown()
             server.server_close()
@@ -141,6 +161,11 @@ class Checks(unittest.TestCase):
             output = Path(temp) / "dry.json"
             args = argparse.Namespace(model=["fixture/a", "fixture/b"], gateway_base="http://127.0.0.1:1/r/smoke/v1",
                                       live=False, key_env="PROBE_KEY", output=output)
+            args.model = None
+            with self.assertRaises(ValueError):
+                probe.execute(args)
+            self.assertFalse(output.exists())
+            args.model = ["fixture/a", "fixture/b"]
             with patch.object(probe, "request", side_effect=AssertionError("dry run called network")):
                 report = probe.execute(args)
             self.assertEqual(report["max_client_requests"], 8)

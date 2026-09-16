@@ -1,0 +1,282 @@
+{
+  "status": "self_check_passed",
+  "scope": "installed Pi fixed public read/edit task; no broad performance claim",
+  "pi_version": "0.84.2",
+  "pi_entry_sha256": "840d1e8e689ed9e4937bcb00b9a810e02a8567d9afb10a47097f11ca93ea1521",
+  "probe_sha256": "8d601f625f322dc0f5604f78cd706a56b4e39136f6216e1ae577a6949de2feb8",
+  "guard_sha256": "f4119053b7d5b315e3bb38a0d8865bd2a995590a2fece2c02b3fba86a1d514d7",
+  "model": null,
+  "max_client_requests": 6,
+  "max_tokens_per_request": 384,
+  "per_arm_deadline_s": 150,
+  "upstream_attempts": null,
+  "usage_scope": "Pi SDK parsed usage; zero fields may represent missing provider usage",
+  "gateway_retries_disabled_operator_confirmed": false,
+  "chat_template_thinking_disabled": false,
+  "arms": [],
+  "self_check": {
+    "passed": true,
+    "cases": [
+      {
+        "case": "repair",
+        "passed": true,
+        "http_requests": 3,
+        "result": {
+          "passed": true,
+          "exit_code": 0,
+          "timed_out": false,
+          "elapsed_ms": 585.9730420052074,
+          "guard": {
+            "loaded": true,
+            "requests_allowed": 3,
+            "request_cap_blocked": false,
+            "payload_rejected": false,
+            "path_rejected": false,
+            "tool_calls": 2,
+            "tools": [
+              {
+                "name": "read",
+                "success": true
+              },
+              {
+                "name": "edit",
+                "success": true
+              }
+            ],
+            "responses": [
+              {
+                "status": 200
+              },
+              {
+                "status": 200
+              },
+              {
+                "status": 200
+              }
+            ],
+            "messages": [
+              {
+                "stop": "toolUse",
+                "text_seen": false,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              },
+              {
+                "stop": "toolUse",
+                "text_seen": false,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              },
+              {
+                "stop": "stop",
+                "text_seen": true,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              }
+            ],
+            "settled": true
+          },
+          "fixture_ast_matches": true,
+          "no_extra_work_files": true,
+          "outside_canary_unchanged": true
+        }
+      },
+      {
+        "case": "path_escape",
+        "passed": true,
+        "http_requests": 1,
+        "result": {
+          "passed": false,
+          "exit_code": 0,
+          "timed_out": false,
+          "elapsed_ms": 484.3063339940272,
+          "guard": {
+            "loaded": true,
+            "requests_allowed": 1,
+            "request_cap_blocked": false,
+            "payload_rejected": false,
+            "path_rejected": true,
+            "tool_calls": 0,
+            "tools": [],
+            "responses": [
+              {
+                "status": 200
+              }
+            ],
+            "messages": [
+              {
+                "stop": "toolUse",
+                "text_seen": false,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              }
+            ],
+            "settled": true
+          },
+          "fixture_ast_matches": false,
+          "no_extra_work_files": true,
+          "outside_canary_unchanged": true
+        }
+      },
+      {
+        "case": "request_cap",
+        "passed": true,
+        "http_requests": 3,
+        "result": {
+          "passed": false,
+          "exit_code": 73,
+          "timed_out": false,
+          "elapsed_ms": 530.3834580117837,
+          "guard": {
+            "loaded": true,
+            "requests_allowed": 3,
+            "request_cap_blocked": true,
+            "payload_rejected": false,
+            "path_rejected": false,
+            "tool_calls": 3,
+            "tools": [
+              {
+                "name": "read",
+                "success": true
+              },
+              {
+                "name": "read",
+                "success": true
+              },
+              {
+                "name": "read",
+                "success": true
+              }
+            ],
+            "responses": [
+              {
+                "status": 200
+              },
+              {
+                "status": 200
+              },
+              {
+                "status": 200
+              }
+            ],
+            "messages": [
+              {
+                "stop": "toolUse",
+                "text_seen": false,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              },
+              {
+                "stop": "toolUse",
+                "text_seen": false,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              },
+              {
+                "stop": "toolUse",
+                "text_seen": false,
+                "usage": {
+                  "input": 32,
+                  "output": 16,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 48
+                }
+              }
+            ],
+            "settled": false
+          },
+          "fixture_ast_matches": false,
+          "no_extra_work_files": true,
+          "outside_canary_unchanged": true
+        }
+      },
+      {
+        "case": "guard_missing",
+        "passed": true,
+        "http_requests": 0,
+        "result": {
+          "passed": false,
+          "exit_code": 1,
+          "timed_out": false,
+          "elapsed_ms": 482.5374579813797,
+          "guard": {
+            "loaded": false
+          },
+          "fixture_ast_matches": false,
+          "no_extra_work_files": true,
+          "outside_canary_unchanged": true
+        }
+      },
+      {
+        "case": "http_429",
+        "passed": true,
+        "http_requests": 1,
+        "result": {
+          "passed": false,
+          "exit_code": 0,
+          "timed_out": false,
+          "elapsed_ms": 476.13754199119285,
+          "guard": {
+            "loaded": true,
+            "requests_allowed": 1,
+            "request_cap_blocked": false,
+            "payload_rejected": false,
+            "path_rejected": false,
+            "tool_calls": 0,
+            "tools": [],
+            "responses": [],
+            "messages": [
+              {
+                "stop": "error",
+                "text_seen": false,
+                "usage": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "totalTokens": 0
+                }
+              }
+            ],
+            "settled": true
+          },
+          "fixture_ast_matches": false,
+          "no_extra_work_files": true,
+          "outside_canary_unchanged": true
+        }
+      }
+    ],
+    "real_api_requests": 0
+  }
+}
