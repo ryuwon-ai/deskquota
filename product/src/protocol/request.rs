@@ -11,9 +11,9 @@ pub fn inspect_body(
     config: &Config,
     route: &DataRoute,
     body: &bytes::Bytes,
-) -> Result<RequestCost, ProtocolError> {
+) -> Result<(RequestCost, Option<usize>), ProtocolError> {
     if route.endpoint == Endpoint::Models {
-        return Ok(RequestCost::Metadata);
+        return Ok((RequestCost::Metadata, None));
     }
     let text =
         std::str::from_utf8(body).map_err(|_| reject(StatusCode::BAD_REQUEST, "invalid_json"))?;
@@ -41,11 +41,16 @@ pub fn inspect_body(
     {
         return Err(error("model_not_allowed"));
     }
+    let model_index = config
+        .models
+        .iter()
+        .position(|m| m.id == model)
+        .ok_or_else(|| error("model_not_allowed"))?;
     if route.endpoint == Endpoint::CountTokens {
-        return Ok(RequestCost::Metadata);
+        return Ok((RequestCost::Metadata, Some(model_index)));
     }
     let Limit::Known(limit) = config.quota.tpm else {
-        return Ok(RequestCost::UnmeteredGeneration);
+        return Ok((RequestCost::UnmeteredGeneration, Some(model_index)));
     };
     if i.multimodal {
         return Err(error("unsupported_multimodal_estimate"));
@@ -80,11 +85,7 @@ pub fn inspect_body(
         }
         Endpoint::Models | Endpoint::CountTokens => unreachable!(),
     };
-    let model = config
-        .models
-        .iter()
-        .find(|m| m.id == model)
-        .ok_or_else(|| error("model_not_allowed"))?;
+    let model = &config.models[model_index];
     let output = cap
         .or_else(|| model.max_output_tokens.map(|n| n.get()))
         .ok_or_else(|| error("output_bound_required"))?;
@@ -98,7 +99,7 @@ pub fn inspect_body(
     {
         return Err(error("estimate_exceeds_budget"));
     }
-    Ok(RequestCost::estimated(input, output))
+    Ok((RequestCost::estimated(input, output), Some(model_index)))
 }
 use serde::Deserializer;
 #[derive(Default)]
@@ -384,7 +385,7 @@ models = ["fixture"]
                 Endpoint::Messages,
                 Endpoint::Responses,
             ] {
-                let cost = inspect_body(
+                let (cost, model_index) = inspect_body(
                     &config,
                     &DataRoute {
                         root_index: 0,
@@ -393,6 +394,7 @@ models = ["fixture"]
                     &bytes::Bytes::from_static(br#"{"model":"fixture","messages":[]}"#),
                 )
                 .unwrap_or_else(|_| panic!("valid inspected request"));
+                assert_eq!(model_index, (endpoint != Endpoint::Models).then_some(0));
                 // A known test ledger exposes whether this cost can ever become
                 // generation usage. The live configuration remains immutable.
                 let mut ledger = Ledger::new(
@@ -489,7 +491,7 @@ models = ["fixture"]
                 for (cap, output) in [(format!(",\"{cap_field}\":19"), 19), (String::new(), 77)] {
                     let body = format!("{{\"model\":\"fixture\",{input}{cap}}}");
                     let expected = mode.estimate(&body, 32).unwrap() + output;
-                    let cost = inspect_body(&config, &route, &body.into())
+                    let (cost, _) = inspect_body(&config, &route, &body.into())
                         .unwrap_or_else(|_| panic!("valid bounds"));
                     assert_eq!(reserved(cost), u128::from(expected));
                 }
@@ -507,6 +509,7 @@ models = ["fixture"]
                         reserved(
                             inspect_body(&config, &route, &body)
                                 .unwrap_or_else(|_| panic!("unmetered"))
+                                .0
                         ),
                         0
                     );

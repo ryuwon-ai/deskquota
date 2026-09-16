@@ -1091,6 +1091,26 @@ fn display(value: &serde_json::Value, off: bool) {
         print!("{}", admission_details(admission));
     }
     println!("{}", cache_details(&value["runtime"]["exact_cache"]));
+    if let Some(cache) = value.pointer("/runtime/exact_cache") {
+        println!(
+            "cache fills: {}; waiting duplicates: {}; coalesced hits: {}; coordination capacity bypasses: {}",
+            cache["inflight_keys"],
+            cache["waiters"],
+            cache["coalesced"],
+            cache["coordination_bypasses"]
+        );
+    }
+    if let Some(circuit) = value.pointer("/runtime/circuit_breaker") {
+        println!(
+            "upstream circuits: {} open, {} probing; failures: {}; rejected calls: {}; recoveries: {}; tracking capacity bypasses: {}",
+            circuit["open"],
+            circuit["half_open"],
+            circuit["failures"],
+            circuit["rejections"],
+            circuit["recoveries"],
+            circuit["capacity_bypasses"]
+        );
+    }
     if let Some(clients) = value.get("clients").and_then(serde_json::Value::as_object) {
         for (client, state) in clients {
             println!(

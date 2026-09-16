@@ -955,20 +955,34 @@ Cache completion and accounting usage are separate: missing usage retains the
 quota reservation even when otherwise complete text can be reused.
 
 Hits return the original body and essential content headers without starting an
-upstream attempt. A request that initially misses also checks for a completed
-entry while waiting for initial admission, including quota, startup hold and
-shared cooldown. Cache completion wakes these waiters without re-enqueuing them
-or resetting FIFO order, aging, cancellation, or deadlines. A final recheck after
-admission returns an unused reservation if it finds a hit. Requests already sent
-upstream and internal retry waits retain their existing behavior; this is not
-full in-flight request coalescing. Stale date, request-ID, rate-limit, and retry headers are not replayed.
+upstream attempt. An eligible miss atomically elects one fill owner per exact
+key before admission. Followers wait for a completed cache entry or an owner
+release, without a worker, execution slot, admission ticket or quota debit.
+They retain bounded ingress/body ownership and the original capacity/overall
+deadline. Notification registration precedes lookup/election. Distinct owners
+use the existing fair admission queue; takeover does not reserve an earlier FIFO
+position. A final lookup after admission returns any unused reservation on a hit.
+
+The owner streams normally; followers wait for complete HTTP EOF, which can
+delay their first token. Errors and partial streams are not shared. Failed or
+cancelled owners release their key. Non-cacheable headers, capture overflow and
+drain without capture release ownership before wire EOF; a replacement may then
+overlap that non-cacheable/draining attempt within normal concurrency limits.
+An explicitly enabled, potentially eligible internal 429 retry retains logical
+fill ownership so its eventual successful response can still populate the cache.
+Cache fills are bounded to 128 keys; new untrackable keys use normal admission
+and record a coordination bypass. Followers are bounded by the existing 128
+HTTP connections and request-body budget, separately from the 64-ticket admission
+queue. Stale date, request-ID, rate-limit, and retry headers are not replayed.
 Hits do not consume upstream RPM/TPM or add worker/usage observations. Separate
 `exact_cache` status counters describe local reuse; provider prompt-cache token
 counters keep their existing meaning. The cached body retains its original
 usage fields; these describe the reused response, not a new upstream charge.
 
 `exact_cache` includes `enabled`, `considered`, `bypasses`, `hits`, `misses`, `stores`, `evictions`,
-`budget_bypasses`, `entries`, `retained_bytes`, and `budget_bytes`. Hits and
+`budget_bypasses`, `entries`, `retained_bytes`, and `budget_bytes`, plus
+`inflight_keys` and `waiters` gauges, `coalesced` waited-then-hit requests and
+`coordination_bypasses` at the flight-key bound. Hits and
 misses count eligible requests, not individual rechecks or all incoming requests.
 A later hit reclassifies that request's initial miss exactly once; unrelated
 cache notifications do not add misses. A miss need not become a stored entry.
@@ -999,6 +1013,58 @@ while a replay still references an evicted entry. Capture never waits for
 memory: exhausted capacity means ordinary forwarding. These are cache payload
 bounds, not a total process RSS limit. HTTP/TLS buffers and allocator overhead
 remain additional memory.
+
+## Upstream circuit protection
+
+The development checkout adds an in-memory circuit breaker; the published
+`v0.1.0-preview.1` predates this feature. No service or configuration table is
+required. Scope keys hash the root, complete upstream URL/query, configured model
+index (model listing has a separate metadata scope), effective `Authorization`,
+`x-api-key`, `api-key`, `OpenAI-Organization`, `OpenAI-Project`, and any custom
+env-auth header. Changing prompts or trace headers does not reset a circuit.
+Custom tenant-routing headers beyond those named are not independently scoped;
+use separate roots when their failure domains differ. Raw keys, credentials,
+URLs and prompts are not exported or persisted.
+
+Three qualifying failures without an intervening completed non-qualifying HTTP
+response open a scope for five seconds. A failure more than 60 seconds after the
+last starts a new streak. HTTP 500/502/503/504 count once at response headers;
+connection failures and non-timeout response-stream errors also count. The
+triggering failure's valid Retry-After seconds/date and Retry-After-Ms extend
+the wait using the existing maximum-value parser; overflowing positive decimal
+waits cannot wrap into an early probe. A later body failure does not double-count
+an already counted error status.
+
+Only deadlines/timeouts before response headers, after the real attempt starts,
+count as timeout failures. All body-stage timeouts/deadlines are unclassified:
+the total timeout includes local downstream backpressure. Client 4xx, 429,
+queued/prestart cancellation, shutdown and local admission errors do not trip
+the breaker. Completed non-qualifying HTTP responses prove responsiveness, not
+semantic model success, and reset the closed circuit's streak. The existing
+shared 429 quota cooldown remains independent.
+
+Cache lookup comes first. Cache misses check the circuit before admission and
+again immediately before each wire attempt, including the optional 429 retry.
+Open scopes return local 503 `upstream_circuit_open` with rounded-up Retry-After;
+they create no wire attempt or quota debit. Already queued requests are rechecked
+at dispatch, without a new queue wake mechanism. The normal bounded queue may
+therefore delay a rejection while another admission constraint is still active.
+
+After cooldown one real request owns a half-open probe. Complete non-qualifying
+HTTP EOF closes it; a qualifying failure reopens it. Cancellation or an ambiguous
+outcome releases the probe for the next real request without declaring recovery.
+Older attempts cannot close a newer open circuit. A fully consumed retryable 429
+finishes its circuit guard before waiting for retry quota, and the retry acquires
+a fresh guard before charging quota. No background generation probe, automatic
+POST replay, or alternate model/provider is introduced.
+
+The table holds at most 128 scopes and evicts only inactive closed entries. If
+all entries are open/probing/in flight, a new scope is forwarded without circuit
+tracking; normal admission still applies and `capacity_bypasses` increments.
+`circuit_breaker` status reports aggregate `scopes`, `open`, `half_open`,
+`tracked_attempts`, `failures`, `opens`, `rejections`, `probes`, `recoveries`, and
+`capacity_bypasses`. Counters reset on worker restart. Fast local failures are
+fault containment, not successful task completion or increased model throughput.
 
 ## Retry ownership and shared cooldown (Task 7)
 

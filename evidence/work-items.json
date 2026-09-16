@@ -606,7 +606,20 @@
         "evidence/native-preview-2026-09-16/public-readback.json"
       ],
       "next_action": "v0.1.0-preview.1 is public at verified c838cdb. Eight release assets match successful native CI and exact local checks. Unsigned preview, no clean-machine policy or real-provider performance claim. Keep NVIDIA completion under V01 and other platform limits under V02."
+    },
+    {
+      "id": "I13",
+      "title": "동시 exact 요청 병합과 범위별 서킷브레이커",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-16-cache-circuit-design.md",
+        "docs/superpowers/plans/2026-09-16-cache-circuit.md",
+        "reports/cache-circuit-improvements-2026-09-16.md",
+        "evidence/cache-circuit-2026-09-16/validation.json",
+        "evidence/cache-circuit-2026-09-16/reviews.json"
+      ],
+      "next_action": "Locally validated: full Rust461, final affected90, Clippy, compaction9; final matrix90/90 runs with900/900 completions; no-wait1000/1000. Cap3 duplicates3→1 calls; staged8duplicates+2distinct5→3 calls,p95217→123ms. No-waitp950.418→0.425ms,p990.444→0.512ms;binary+40608bytes. Native CI pending authorized push at this snapshot; inspect commit checks. Real provider and low-end gains remain unverified. Existing public preview unchanged."
     }
   ],
-  "updated_at": "2026-09-16T05:46:04.674270+00:00"
+  "updated_at": "2026-09-16T07:45:45.641373+00:00"
 }

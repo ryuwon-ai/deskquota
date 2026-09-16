@@ -1,0 +1,115 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Library/Caches/deskquota-worktrees/cache-circuit/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.07s
+     Running tests/cache_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/cache_contract-b0a5bbc39cf38902)
+
+running 27 tests
+test a_hit_returns_while_the_single_request_rpm_window_is_exhausted ... ok
+test abandoned_downstream_drains_without_committing_and_body_errors_never_cache ... ok
+test cache_policy_denominator_includes_bypasses_but_excludes_invalid_ingress ... ok
+test cache_control_is_checked_before_connection_scrubbing_and_errors_never_cache ... ok
+test cancelled_owner_before_headers_releases_follower_while_draining ... ok
+test concurrent_json_exact_requests_share_one_upstream_fill ... ok
+test exact_json_hit_skips_admission_and_scrubs_stale_response_metadata ... ok
+test concurrent_sse_exact_requests_share_one_upstream_fill ... ok
+test failed_owner_releases_follower_for_its_own_attempt_without_sharing_errors ... ok
+test first_miss_streams_before_terminal_and_eof_and_only_then_becomes_a_hit ... ok
+test incomplete_tool_or_refusal_json_is_forwarded_but_never_stored ... ok
+test keys_isolate_roots_credentials_query_options_and_original_body ... ok
+test message_stream_lifecycle_and_response_terminal_output_are_validated ... ok
+test messages_and_responses_require_complete_text_and_stateless_requests ... ok
+test missing_usage_can_cache_complete_text_but_incomplete_or_tool_sse_cannot ... ok
+test normal_sse_hit_replays_bytes_but_does_not_double_settle_usage ... ok
+test original_vary_retry_metadata_forbids_json_and_sse_storage ... ok
+test oversized_chunked_capture_releases_its_budget_before_eof ... ok
+test queued_cache_wait_keeps_the_server_deadline ... ok
+test queued_json_reuses_completion_during_rpm_or_concurrency_wait ... ok
+test queued_reuse_preserves_credentials_cache_control_and_cancellation ... ok
+test queued_sse_reuses_completion_during_rpm_or_concurrency_wait ... ok
+test responses_reject_malformed_intermediate_payloads_before_valid_completion ... ok
+test retry_count_only_reruns_reuse_json_and_sse_and_forward_original_metadata ... ok
+test short_text_eligibility_bypasses_history_tools_unknown_options_and_oversized_requests ... ok
+test typed_server_rejects_out_of_range_cache_settings ... ok
+test expired_entries_miss_and_disabled_cache_does_not_capture ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.10s
+
+     Running tests/circuit_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/circuit_contract-e42878f6d9773899)
+
+running 7 tests
+test body_deadlines_with_slow_downstream_do_not_mark_upstream_unhealthy ... ok
+test coalesced_followers_reuse_success_after_the_owners_authorized_429_retry ... ok
+test consecutive_503_opens_without_an_extra_attempt_or_quota_charge ... ok
+test pre_header_and_body_transport_failures_trip_without_replaying_partial_responses ... ok
+test queued_attempts_recheck_open_circuit_before_quota_start ... ok
+test scopes_isolate_models_roots_credentials_and_client_errors_do_not_trip ... ok
+test cache_hits_survive_open_circuit_and_recovery_admits_one_probe_including_429_retry ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.09s
+
+     Running tests/retry_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/retry_contract-03d2d80eaf2cb452)
+
+running 24 tests
+test chunked_error_observation_overflow_is_transparent_and_never_replayed ... ok
+test canceled_retry_queue_releases_request_body_and_never_starts_a_second_attempt ... ok
+test invalid_delay_does_not_turn_recognized_body_into_an_early_retry ... ok
+test invalid_utf8_in_ignored_error_payload_cannot_qualify_replay ... ok
+test library_retry_wait_has_no_slot_preserves_age_deadline_and_unknown_tpm_debt ... ok
+test opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges ... ok
+test full_queue_on_retry_returns_protocol_429_and_is_not_a_deadline ... ok
+test opted_post_retry_preserves_the_identical_wire_body_and_headers ... ok
+test ordinary_rate_limit_code_accepts_only_compatible_type ... ok
+test permanent_unknown_conflicting_malformed_encoded_and_oversized_errors_are_not_replayed ... ok
+test positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header ... ok
+test opted_retry_deadline_keeps_cooldown_for_the_next_client ... ok
+test real_retry_reenters_known_rpm_and_has_no_slot_while_waiting ... ok
+test pre_head_rejection_body_failure_returns_502_keeps_cooldown_and_unknown_debt ... ok
+test rejection_head_skipped_probe_keeps_429_when_body_later_truncates ... ok
+test rejection_head_streams_when_body_cannot_change_retry_or_cooldown ... ok
+test recognized_without_header_waits_one_second_with_jitter_and_replays_only_once ... ok
+test retry_after_survives_request_deadline_and_new_root_metadata_client ... ok
+test retry_original_queue_deadline_expires_without_acquiring_or_refreshing_age ... ok
+test retry_veto_false_fields_block_replay_without_expanding_true ... ok
+test retry_veto_preserves_cooldown_and_only_skips_unneeded_body_probe ... ok
+test seconds_http_date_and_ms_share_cooldown_even_with_retry_off ... ok
+test rejection_head_waits_when_body_still_decides_retry_or_missing_timing_cooldown ... ok
+test socket_ambiguity_503_redirect_and_partial_stream_have_exactly_one_wire_attempt_even_opted_in ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.56s
+
+     Running tests/stream_lifetime.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/stream_lifetime-76ef7119e087f9a5)
+
+running 32 tests
+test absolute_deadline_covers_silent_upstream_body ... ok
+test absolute_deadline_covers_blocked_downstream_delivery ... ok
+test anthropic_decreasing_cumulative_usage_is_unknown ... ok
+test absolute_deadline_covers_silent_upstream_headers ... ok
+test anthropic_output_usage_is_cumulative_not_summed ... ok
+test anthropic_provisional_output_without_final_delta_usage_is_unknown ... ok
+test chat_cached_usage_is_preserved_without_double_counting_input ... ok
+test chat_empty_choices_final_usage_is_observed ... ok
+test chat_explicit_zero_cached_usage_is_known ... ok
+test close_policy_terminates_socket ... ok
+test chat_malformed_cache_or_decreasing_usage_is_unknown ... ok
+test first_event_arrives_before_eof ... ok
+test forced_shutdown_joins_a_worker_blocked_before_body_eof ... ok
+test disconnect_drains_without_releasing_slot ... ok
+test huge_comment_does_not_poison_later_usage ... ok
+test huge_event_marks_usage_unknown ... ok
+test incomplete_trailing_sse_event_is_not_dispatched ... ok
+test known_tpm_drain_long_stream_charges_late_usage_and_blocks_next_attempt ... ok
+test pre_header_close_policy_closes_upstream_socket ... ok
+test metadata_endpoint_shares_stream_capacity ... ok
+test public_spawn_rejects_constructed_concurrency_outside_fixed_range ... ok
+test pre_header_disconnect_drains_and_holds_slot ... ok
+test request_write_half_close_remains_valid_while_upstream_is_silent ... ok
+test responses_completed_nested_usage_is_observed ... ok
+test responses_malformed_cached_usage_is_unknown ... ok
+test queued_disconnect_never_starts_upstream ... ok
+test split_utf8_and_sse_bytes_preserved ... ok
+test sse_bom_crlf_and_multiline_data_are_observed_without_rewriting ... ok
+test slow_reader_has_a_bounded_application_queue ... ok
+test terminal_cleanup_happens_once ... ok
+test upstream_body_error_is_not_a_clean_downstream_eof ... ok
+test stop_drains_active_worker_before_returning ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s

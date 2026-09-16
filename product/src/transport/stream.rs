@@ -26,12 +26,14 @@ pub enum HeadError {
     Upstream,
     Deadline,
     Admission(crate::admission::AcquireError),
+    Circuit(crate::circuit::Open),
 }
 
 pub type HeadSender = oneshot::Sender<Result<Response<Body>, HeadError>>;
 
 pub struct ForwardRequest {
     pub cache: Option<crate::cache::Pending>,
+    pub circuit: crate::circuit::Scope,
     pub client: UpstreamClient,
     pub method: Method,
     pub url: url::Url,
@@ -96,7 +98,8 @@ fn signal_body(sender: &mut Option<oneshot::Sender<BodyTerminal>>, terminal: Bod
 
 pub async fn forward(request: ForwardRequest) {
     let ForwardRequest {
-        cache,
+        mut cache,
+        circuit,
         client,
         method,
         url,
@@ -116,6 +119,7 @@ pub async fn forward(request: ForwardRequest) {
     let mut guard = WorkerGuard::new(metrics.clone(), admission_hold);
     let mut disconnected = false;
     let mut retried = false;
+    let mut circuit_attempt: Option<crate::circuit::Attempt> = None;
     let (response, prefix) = loop {
         let send = client.send(
             method.clone(),
@@ -129,6 +133,9 @@ pub async fn forward(request: ForwardRequest) {
             tokio::select! {
                 biased;
                 () = tokio::time::sleep_until(deadline) => {
+                    if attempt_started {
+                        if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(std::time::Duration::ZERO); }
+                    }
                     let _ = head.send(Err(HeadError::Deadline));
                     guard.finish(TerminalReason::Deadline, None);
                     return;
@@ -144,7 +151,7 @@ pub async fn forward(request: ForwardRequest) {
                             guard.finish(TerminalReason::DownstreamClose, None);
                             return;
                         }
-                        CancelPolicy::Drain => guard.start_draining(),
+                        CancelPolicy::Drain => { cache = None; guard.start_draining(); },
                     }
                 }
                 () = head.closed(), if !disconnected => {
@@ -158,7 +165,7 @@ pub async fn forward(request: ForwardRequest) {
                             guard.finish(TerminalReason::DownstreamClose, None);
                             return;
                         }
-                        CancelPolicy::Drain => guard.start_draining(),
+                        CancelPolicy::Drain => { cache = None; guard.start_draining(); },
                     }
                 }
                 () = wait_for_signal(&mut stop), if !attempt_started => {
@@ -168,21 +175,42 @@ pub async fn forward(request: ForwardRequest) {
                 response = async {
                     if !attempt_started {
                         if let Some(gate) = prestart_gate.as_mut() { wait_for_signal(gate).await; }
+                        circuit_attempt = Some(circuit.start().map_err(HeadError::Circuit)?);
                         guard.admission_hold.as_mut().expect("worker owns admission").start();
                         attempt_started = true;
                         metrics.record_upstream_attempt();
                     }
-                    send.as_mut().await
+                    send.as_mut().await.map_err(|error| {
+                        if !error.is_builder() {
+                            if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(std::time::Duration::ZERO); }
+                        }
+                        HeadError::Upstream
+                    })
                 } => match response {
                     Ok(response) => break response,
-                    Err(_) => {
-                        let _ = head.send(Err(HeadError::Upstream));
-                        guard.finish(TerminalReason::UpstreamError, None);
+                    Err(error) => {
+                        let reason = if matches!(&error, HeadError::Circuit(_)) { TerminalReason::AdmissionRejected } else { TerminalReason::UpstreamError };
+                        let _ = head.send(Err(error));
+                        guard.finish(reason, None);
                         return;
                     }
                 }
             }
         };
+
+        circuit_attempt
+            .as_mut()
+            .expect("started wire attempt")
+            .headers(response.status(), response.headers());
+        let can_retry = response.status() == StatusCode::TOO_MANY_REQUESTS
+            && retry_transient_429
+            && !retried
+            && !disconnected
+            && !crate::admission::retry::server_forbids_retry(response.headers())
+            && crate::admission::retry::timing_allows_retry(response.headers());
+        if response.status() != StatusCode::OK && !can_retry {
+            cache = None;
+        }
 
         let mut prefix = RetryPrefix::default();
         if response.status() == axum::http::StatusCode::TOO_MANY_REQUESTS {
@@ -197,12 +225,8 @@ pub async fn forward(request: ForwardRequest) {
                     .expect("worker owns admission")
                     .cooldown(delay);
             }
-            let needs_body = crate::admission::retry::missing_timing(response.headers())
-                || (retry_transient_429
-                    && !retried
-                    && !disconnected
-                    && !crate::admission::retry::server_forbids_retry(response.headers())
-                    && crate::admission::retry::timing_allows_retry(response.headers()));
+            let needs_body =
+                crate::admission::retry::missing_timing(response.headers()) || can_retry;
             let probing = async {
                 if needs_body {
                     probe_rejection(&mut response).await
@@ -220,17 +244,22 @@ pub async fn forward(request: ForwardRequest) {
                     }
                     () = head.closed(), if !disconnected => {
                         disconnected = true;
+                        cache = None;
                         if cancel_policy == CancelPolicy::Close { guard.finish(TerminalReason::DownstreamClose, None); return; }
                         guard.start_draining();
                     }
                     () = wait_for_signal(&mut downstream_disconnect), if !disconnected => {
                         disconnected = true;
+                        cache = None;
                         if cancel_policy == CancelPolicy::Close { guard.finish(TerminalReason::DownstreamClose, None); return; }
                         guard.start_draining();
                     }
                     prefix = &mut probing => match prefix {
                         Ok(prefix) => break prefix,
-                        Err(_) => {
+                        Err(error) => {
+                            if !error.is_timeout() {
+                                if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(std::time::Duration::ZERO); }
+                            }
                             let _ = head.send(Err(HeadError::Upstream));
                             guard.finish(TerminalReason::UpstreamError, None);
                             return;
@@ -249,15 +278,13 @@ pub async fn forward(request: ForwardRequest) {
                 .expect("worker owns admission")
                 .cooldown(crate::admission::retry::fallback_delay());
         }
-        if recognized
-            && retry_transient_429
-            && !retried
-            && !disconnected
-            && !crate::admission::retry::server_forbids_retry(response.headers())
-            && crate::admission::retry::timing_allows_retry(response.headers())
-        {
+        if recognized && can_retry && !disconnected {
             // Complete rejected response EOF was observed; drop the local HTTP body before releasing its hold.
             metrics.record_response_body_eof();
+            circuit_attempt
+                .take()
+                .expect("rejected wire attempt")
+                .complete();
             drop(prefix);
             drop(response);
             let previous = guard.admission_hold.take().expect("worker owns admission");
@@ -377,6 +404,10 @@ pub async fn forward(request: ForwardRequest) {
 
         let Some(next) = next else {
             metrics.record_response_body_eof();
+            circuit_attempt
+                .take()
+                .expect("completed wire attempt")
+                .complete();
             let (usage, cache_complete) = observer.finish();
             if downstream_open && !body_tx.is_closed() && !*downstream_disconnect.borrow() {
                 if let Some(capture) = capture.take() {
@@ -389,7 +420,13 @@ pub async fn forward(request: ForwardRequest) {
         };
         let bytes = match next {
             Ok(bytes) => bytes,
-            Err(_) => {
+            Err(error) => {
+                // Total body timeout includes downstream backpressure; it is not an outage signal.
+                if !error.is_timeout() {
+                    if let Some(attempt) = circuit_attempt.as_mut() {
+                        attempt.failure(std::time::Duration::ZERO);
+                    }
+                }
                 signal_body(
                     &mut body_terminal_tx,
                     BodyTerminal::Failure("upstream response stream failed"),

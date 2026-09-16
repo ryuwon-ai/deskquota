@@ -1,5 +1,5 @@
 //! Opt-in exact responses; no request text or credential survives outside its digest.
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -31,6 +31,10 @@ struct Inner {
 #[derive(Default)]
 struct State {
     entries: HashMap<Key, Arc<Entry>>,
+    flights: HashSet<Key>,
+    waiters: usize,
+    coalesced: u64,
+    coordination_bypasses: u64,
     considered: u64,
     bypasses: Bypasses,
     hits: u64,
@@ -83,6 +87,10 @@ pub(crate) struct Snapshot {
     evictions: u64,
     budget_bypasses: u64,
     entries: usize,
+    inflight_keys: usize,
+    waiters: usize,
+    coalesced: u64,
+    coordination_bypasses: u64,
     retained_bytes: usize,
     budget_bytes: usize,
 }
@@ -91,6 +99,15 @@ pub(crate) struct Pending {
     cache: ExactCache,
     key: Key,
     outcome: LookupOutcome,
+    flight: Flight,
+    waited: bool,
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Flight {
+    Unclaimed,
+    Waiting,
+    Owner,
+    Bypass,
 }
 enum LookupOutcome {
     Uncounted,
@@ -168,6 +185,8 @@ impl ExactCache {
             cache: self.clone(),
             key: hash.finalize().into(),
             outcome: LookupOutcome::Uncounted,
+            flight: Flight::Unclaimed,
+            waited: false,
         })
     }
 
@@ -182,6 +201,10 @@ impl ExactCache {
             evictions: 0,
             budget_bypasses: 0,
             entries: 0,
+            inflight_keys: 0,
+            waiters: 0,
+            coalesced: 0,
+            coordination_bypasses: 0,
             retained_bytes: 0,
             budget_bytes: BUDGET_BYTES,
         };
@@ -195,6 +218,10 @@ impl ExactCache {
             result.evictions = state.evictions;
             result.budget_bypasses = state.budget_bypasses;
             result.entries = state.entries.len();
+            result.inflight_keys = state.flights.len();
+            result.waiters = state.waiters;
+            result.coalesced = state.coalesced;
+            result.coordination_bypasses = state.coordination_bypasses;
             result.retained_bytes = BUDGET_BYTES - cache.0.budget.available_permits();
         }
         result
@@ -203,7 +230,12 @@ impl ExactCache {
 
 impl Pending {
     pub(crate) fn lookup(&mut self) -> Option<Response<Body>> {
-        let mut state = self.cache.0.state.lock().expect("cache mutex");
+        let cache = self.cache.clone();
+        let mut state = cache.0.state.lock().expect("cache mutex");
+        self.lookup_in(&mut state)
+    }
+
+    fn lookup_in(&mut self, state: &mut State) -> Option<Response<Body>> {
         state.entries.retain(|_, entry| {
             entry.inserted.elapsed() < Duration::from_secs(self.cache.0.config.ttl_secs)
         });
@@ -222,10 +254,14 @@ impl Pending {
                 state.misses -= 1;
                 state.hits += 1;
                 self.outcome = LookupOutcome::Hit;
+                if self.waited {
+                    state.coalesced = state.coalesced.saturating_add(1);
+                }
             }
             _ => {}
         }
         if let Some(entry) = entry {
+            self.leave_waiters(state);
             let mut response = Response::new(Body::from(Bytes::from_owner(Replay(entry.clone()))));
             *response.headers_mut() = entry.headers.clone();
             Some(response)
@@ -234,14 +270,45 @@ impl Pending {
         }
     }
 
-    pub(crate) async fn wait_for_cached(&mut self) -> Response<Body> {
+    fn leave_waiters(&mut self, state: &mut State) {
+        if self.flight == Flight::Waiting {
+            state.waiters -= 1;
+            self.flight = Flight::Unclaimed;
+        }
+    }
+
+    /// Return a replay, or elect this request to perform the next possible fill.
+    pub(crate) async fn wait_for_turn(&mut self) -> Option<Response<Body>> {
         let cache = self.cache.clone();
         loop {
             let notified = cache.0.filled.notified();
             tokio::pin!(notified);
             notified.as_mut().enable();
-            if let Some(hit) = self.lookup() {
-                return hit;
+            {
+                let mut state = cache.0.state.lock().expect("cache mutex");
+                if let Some(hit) = self.lookup_in(&mut state) {
+                    return Some(hit);
+                }
+                if matches!(self.flight, Flight::Owner | Flight::Bypass) {
+                    return None;
+                }
+                if !state.flights.contains(&self.key) {
+                    self.leave_waiters(&mut state);
+                    if state.flights.len() < MAX_ENTRIES {
+                        state.flights.insert(self.key);
+                        self.flight = Flight::Owner;
+                    } else {
+                        // ponytail: bounded coordination fails open at 128 keys; admission still limits wire work.
+                        state.coordination_bypasses = state.coordination_bypasses.saturating_add(1);
+                        self.flight = Flight::Bypass;
+                    }
+                    return None;
+                }
+                if self.flight != Flight::Waiting {
+                    state.waiters += 1;
+                    self.flight = Flight::Waiting;
+                    self.waited = true;
+                }
             }
             notified.await;
         }
@@ -336,6 +403,25 @@ impl Pending {
     }
 }
 
+impl Drop for Pending {
+    fn drop(&mut self) {
+        if !matches!(self.flight, Flight::Waiting | Flight::Owner) {
+            return;
+        }
+        let mut state = self.cache.0.state.lock().expect("cache mutex");
+        match self.flight {
+            Flight::Waiting => state.waiters -= 1,
+            Flight::Owner => {
+                state.flights.remove(&self.key);
+                drop(state);
+                // A failed, cancelled, or non-cacheable owner must release the next real request.
+                self.cache.0.filled.notify_waiters();
+            }
+            Flight::Unclaimed | Flight::Bypass => {}
+        }
+    }
+}
+
 fn evict(state: &mut State) -> bool {
     // ponytail: scan at most 128 entries; replace only if profiling justifies an LRU list.
     let oldest = state
@@ -380,6 +466,10 @@ impl Capture {
         }
         state.entries.insert(self.pending.key, entry);
         state.stores += 1;
+        if self.pending.flight == Flight::Owner {
+            state.flights.remove(&self.pending.key);
+            self.pending.flight = Flight::Unclaimed;
+        }
         drop(state);
         // ponytail: wake the bounded waiter set; use per-key notifications only if profiling warrants it.
         self.pending.cache.0.filled.notify_waiters();
@@ -895,6 +985,8 @@ mod tests {
             cache: cache.clone(),
             key: digest,
             outcome: LookupOutcome::Uncounted,
+            flight: Flight::Unclaimed,
+            waited: false,
         }
     }
     fn headers() -> HeaderMap {
@@ -926,20 +1018,22 @@ mod tests {
         use std::task::Context;
 
         let cache = ExactCache::new(CacheConfig::default());
+        let mut owner = pending(&cache, 1);
+        assert!(owner.wait_for_turn().await.is_none());
         let mut request = pending(&cache, 1);
         assert!(request.lookup().is_none());
         assert!(request.lookup().is_none());
         let waker = futures_util::task::noop_waker();
         let mut context = Context::from_waker(&waker);
         {
-            let wait = request.wait_for_cached();
+            let wait = request.wait_for_turn();
             tokio::pin!(wait);
             assert!(wait.as_mut().poll(&mut context).is_pending());
             for key in 2..4 {
                 store(&cache, key, false);
                 assert!(wait.as_mut().poll(&mut context).is_pending());
                 let snapshot = ExactCache::snapshot(Some(&cache));
-                assert_eq!(snapshot.misses, 1);
+                assert_eq!(snapshot.misses, 2);
                 assert_eq!(snapshot.hits, 0);
             }
             store(&cache, 1, false);
@@ -947,18 +1041,112 @@ mod tests {
         }
         assert!(request.lookup().is_some());
         let snapshot = ExactCache::snapshot(Some(&cache));
-        assert_eq!(snapshot.misses, 0);
+        assert_eq!(snapshot.misses, 1);
         assert_eq!(snapshot.hits, 1);
+        assert_eq!(snapshot.coalesced, 1);
+        assert_eq!(snapshot.waiters, 0);
+        drop(owner);
 
         let mut late = pending(&cache, 4);
         assert!(late.lookup().is_none());
         store(&cache, 4, false);
-        tokio::time::timeout(Duration::from_secs(1), late.wait_for_cached())
+        tokio::time::timeout(Duration::from_secs(1), late.wait_for_turn())
             .await
             .expect("fill before wait registration must be observed");
         let snapshot = ExactCache::snapshot(Some(&cache));
-        assert_eq!(snapshot.misses, 0);
+        assert_eq!(snapshot.misses, 1);
         assert_eq!(snapshot.hits, 2);
+    }
+
+    #[tokio::test]
+    async fn ownership_releases_on_failure_cancellation_and_uncacheable_capture() {
+        use std::future::Future;
+        use std::task::Context;
+
+        let cache = ExactCache::new(CacheConfig::default());
+        let waker = futures_util::task::noop_waker();
+        let mut context = Context::from_waker(&waker);
+        let mut owner = pending(&cache, 1);
+        assert!(owner.wait_for_turn().await.is_none());
+        let mut cancelled = pending(&cache, 1);
+        {
+            let wait = cancelled.wait_for_turn();
+            tokio::pin!(wait);
+            assert!(wait.as_mut().poll(&mut context).is_pending());
+        }
+        assert_eq!(ExactCache::snapshot(Some(&cache)).waiters, 1);
+        drop(cancelled);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).waiters, 0);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).inflight_keys, 1);
+
+        let mut follower = pending(&cache, 1);
+        {
+            let wait = follower.wait_for_turn();
+            tokio::pin!(wait);
+            assert!(wait.as_mut().poll(&mut context).is_pending());
+            let headers = headers();
+            assert!(
+                owner
+                    .capture(StatusCode::BAD_GATEWAY, &headers, &headers)
+                    .is_none()
+            );
+            assert!(matches!(
+                wait.as_mut().poll(&mut context),
+                std::task::Poll::Ready(None)
+            ));
+        }
+        assert_eq!(ExactCache::snapshot(Some(&cache)).inflight_keys, 1);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).waiters, 0);
+        let mut no_store = headers();
+        no_store.insert("cache-control", "no-store".parse().unwrap());
+        assert!(
+            follower
+                .capture(StatusCode::OK, &no_store, &no_store)
+                .is_none()
+        );
+        assert_eq!(ExactCache::snapshot(Some(&cache)).inflight_keys, 0);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).stores, 0);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).coalesced, 0);
+
+        let mut owner = pending(&cache, 1);
+        assert!(owner.wait_for_turn().await.is_none());
+        let headers = headers();
+        let mut capture = owner.capture(StatusCode::OK, &headers, &headers).unwrap();
+        assert!(!capture.observe(&vec![0; ENTRY_BYTES]));
+        drop(capture);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).inflight_keys, 0);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).retained_bytes, 0);
+    }
+
+    #[tokio::test]
+    async fn bounded_flight_table_keeps_existing_owners_and_releases_capacity() {
+        let cache = ExactCache::new(CacheConfig::default());
+        let mut owners = Vec::new();
+        for key in 0..MAX_ENTRIES as u16 {
+            let mut owner = pending(&cache, key);
+            assert!(owner.wait_for_turn().await.is_none());
+            owners.push(owner);
+        }
+        let mut bypass = pending(&cache, MAX_ENTRIES as u16);
+        assert!(bypass.wait_for_turn().await.is_none());
+        assert!(bypass.wait_for_turn().await.is_none());
+        assert_eq!(
+            ExactCache::snapshot(Some(&cache)).inflight_keys,
+            MAX_ENTRIES
+        );
+        assert_eq!(ExactCache::snapshot(Some(&cache)).coordination_bypasses, 1);
+        drop(bypass);
+        drop(owners.pop());
+        let mut replacement = pending(&cache, MAX_ENTRIES as u16);
+        assert!(replacement.wait_for_turn().await.is_none());
+        assert_eq!(
+            ExactCache::snapshot(Some(&cache)).inflight_keys,
+            MAX_ENTRIES
+        );
+        assert_eq!(ExactCache::snapshot(Some(&cache)).coordination_bypasses, 1);
+        drop(replacement);
+        drop(owners);
+        assert_eq!(ExactCache::snapshot(Some(&cache)).inflight_keys, 0);
     }
 
     #[tokio::test]

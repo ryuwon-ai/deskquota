@@ -805,6 +805,8 @@ async fn absolute_deadline_covers_silent_upstream_headers() {
     upstream.wait_for_disconnect().await;
     let snapshot = wait_for_metric(&gateway, "active", 0).await;
     assert_eq!(snapshot["terminal_deadline"], 1);
+    assert_eq!(snapshot["circuit_breaker"]["failures"], 1);
+    assert_eq!(snapshot["circuit_breaker"]["tracked_attempts"], 0);
     gateway.shutdown().await.expect("shutdown gateway");
 }
 
@@ -829,6 +831,8 @@ async fn absolute_deadline_covers_silent_upstream_body() {
     upstream.wait_for_disconnect().await;
     let snapshot = wait_for_metric(&gateway, "active", 0).await;
     assert_eq!(snapshot["terminal_deadline"], 1);
+    assert_eq!(snapshot["circuit_breaker"]["failures"], 0);
+    assert_eq!(snapshot["circuit_breaker"]["tracked_attempts"], 0);
     abort_socket(downstream);
     gateway.shutdown().await.expect("shutdown gateway");
 }

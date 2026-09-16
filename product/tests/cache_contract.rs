@@ -102,11 +102,21 @@ const PATH: &str = "/r/one/v1/chat/completions";
 async fn wait_for_queue(gateway: &GatewayHandle, length: usize) {
     tokio::time::timeout(Duration::from_secs(2), async {
         while status(gateway).await["admission"]["queue_length"] != length {
-            tokio::task::yield_now().await;
+            tokio::time::sleep(Duration::from_millis(2)).await;
         }
     })
     .await
     .expect("observed expected queue length");
+}
+
+async fn wait_for_cache_waiters(gateway: &GatewayHandle, length: usize) {
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while status(gateway).await["exact_cache"]["waiters"] != length {
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    })
+    .await
+    .expect("observed expected exact-cache waiter count");
 }
 
 async fn queued_reuse(stream: bool, rpm_limited: bool) {
@@ -147,7 +157,8 @@ async fn queued_reuse(stream: bool, rpm_limited: bool) {
             response.bytes().await.unwrap()
         });
     }
-    wait_for_queue(&gateway, 2).await;
+    wait_for_cache_waiters(&gateway, 2).await;
+    wait_for_queue(&gateway, 0).await;
     upstream.release_first();
     upstream.release_final();
     upstream.wait_for_final().await;
@@ -168,6 +179,9 @@ async fn queued_reuse(stream: bool, rpm_limited: bool) {
     assert_eq!(value["exact_cache"]["considered"], 3);
     assert_eq!(value["exact_cache"]["hits"], 2);
     assert_eq!(value["exact_cache"]["misses"], 1);
+    assert_eq!(value["exact_cache"]["coalesced"], 2);
+    assert_eq!(value["exact_cache"]["waiters"], 0);
+    assert_eq!(value["exact_cache"]["inflight_keys"], 0);
     for counter in ["upstream_attempts", "usage_known", "terminal_total"] {
         assert_eq!(value[counter], 1, "{counter}");
     }
@@ -178,6 +192,89 @@ async fn queued_reuse(stream: bool, rpm_limited: bool) {
     assert_eq!(quota.tpm_held, 0);
     assert_eq!(quota.active, 0);
     gateway.shutdown().await.unwrap();
+}
+
+async fn concurrent_reuse(stream: bool) {
+    let output = if stream {
+        [DELTA, STOP, USAGE, DONE].concat()
+    } else {
+        JSON_RESPONSE.to_owned()
+    };
+    let upstream = if stream {
+        GatedUpstreamFixture::start(
+            vec![DELTA.as_bytes().to_vec()],
+            vec![[STOP, USAGE, DONE].concat().into_bytes()],
+        )
+        .await
+    } else {
+        GatedUpstreamFixture::start_json(vec![], vec![output.clone().into_bytes()], false).await
+    };
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 3;
+    let gateway = spawn_gateway(cfg).await;
+    let leader = send(&gateway, PATH, &request(stream), &[]).await;
+    let mut followers = tokio::task::JoinSet::new();
+    for _ in 0..2 {
+        let address = gateway.address();
+        followers.spawn(async move {
+            let response = client()
+                .post(format!("http://{address}{PATH}"))
+                .header("content-type", "application/json")
+                .bearer_auth("synthetic-one")
+                .body(request(stream).to_string())
+                .send()
+                .await
+                .unwrap();
+            assert_eq!(response.status(), 200);
+            response.bytes().await.unwrap()
+        });
+    }
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            let value = status(&gateway).await;
+            if value["exact_cache"]["waiters"] == 2 || upstream.attempts() == 3 {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    })
+    .await
+    .expect("duplicates either coalesce or expose the old three-attempt behavior");
+    upstream.release_first();
+    upstream.release_final();
+    upstream.release_eof();
+    assert_eq!(leader.bytes().await.unwrap(), output);
+    while let Some(result) = followers.join_next().await {
+        assert_eq!(result.unwrap(), output);
+    }
+    assert_eq!(
+        upstream.attempts(),
+        1,
+        "three concurrent exact requests must share one fill"
+    );
+    let value = status(&gateway).await;
+    assert_eq!(value["exact_cache"]["hits"], 2);
+    assert_eq!(value["exact_cache"]["coalesced"], 2);
+    assert_eq!(value["exact_cache"]["waiters"], 0);
+    assert_eq!(value["exact_cache"]["inflight_keys"], 0);
+    assert_eq!(value["upstream_attempts"], 1);
+    let quota = server::testing::quota_snapshot(&gateway);
+    assert_eq!(quota.starts, 1);
+    assert_eq!(quota.rpm_debited, 1);
+    assert_eq!(quota.tpm_debited, 23);
+    assert_eq!(quota.active, 0);
+    assert_eq!(quota.tpm_held, 0);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn concurrent_json_exact_requests_share_one_upstream_fill() {
+    concurrent_reuse(false).await;
+}
+
+#[tokio::test]
+async fn concurrent_sse_exact_requests_share_one_upstream_fill() {
+    concurrent_reuse(true).await;
 }
 
 #[tokio::test]
@@ -218,9 +315,11 @@ async fn queued_reuse_preserves_credentials_cache_control_and_cancellation() {
         );
         sockets.push(open_raw(gateway.address(), raw.as_bytes()).await);
     }
-    wait_for_queue(&gateway, 4).await;
+    wait_for_queue(&gateway, 2).await;
+    wait_for_cache_waiters(&gateway, 2).await;
     abort_socket(sockets.remove(0));
-    wait_for_queue(&gateway, 3).await;
+    wait_for_cache_waiters(&gateway, 1).await;
+    wait_for_queue(&gateway, 2).await;
     upstream.release_first();
     upstream.release_final();
     upstream.release_eof();
@@ -749,10 +848,12 @@ async fn abandoned_downstream_drains_without_committing_and_body_errors_never_ca
         vec![[STOP, USAGE, DONE].concat().into_bytes()],
     )
     .await;
-    let gateway = spawn_gateway(config(upstream.address())).await;
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 3;
+    let gateway = spawn_gateway(cfg).await;
     let body = request(true).to_string();
     let raw = format!(
-        "POST {PATH} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nAuthorization: Bearer synthetic-one\r\nContent-Length: {}\r\n\r\n{body}",
+        "POST {PATH} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nAccept: */*\r\nAuthorization: Bearer synthetic-one\r\nContent-Length: {}\r\n\r\n{body}",
         body.len()
     );
     let mut socket = open_raw(gateway.address(), raw.as_bytes()).await;
@@ -764,29 +865,33 @@ async fn abandoned_downstream_drains_without_committing_and_body_errors_never_ca
             if status(&gateway).await["draining"] == 1 {
                 break;
             }
-            tokio::task::yield_now().await;
+            tokio::time::sleep(Duration::from_millis(2)).await;
         }
     })
     .await
     .unwrap();
+    assert_eq!(status(&gateway).await["exact_cache"]["inflight_keys"], 0);
+    let replacement = send(&gateway, PATH, &request(true), &[]).await;
+    assert_eq!(
+        upstream.attempts(),
+        2,
+        "draining owner must release its exact key before EOF"
+    );
     upstream.release_final();
     upstream.release_eof();
+    replacement.bytes().await.unwrap();
     tokio::time::timeout(Duration::from_secs(2), async {
-        loop {
-            if server::testing::quota_snapshot(&gateway).active == 0 {
-                break;
-            }
-            tokio::task::yield_now().await;
+        while server::testing::quota_snapshot(&gateway).active != 0 {
+            tokio::time::sleep(Duration::from_millis(2)).await;
         }
     })
     .await
     .unwrap();
-    assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
-    send(&gateway, PATH, &request(true), &[])
-        .await
-        .bytes()
-        .await
-        .unwrap();
+    assert_eq!(
+        status(&gateway).await["exact_cache"]["stores"],
+        1,
+        "only the replacement commits"
+    );
     assert_eq!(upstream.attempts(), 2);
     gateway.shutdown().await.unwrap();
 
@@ -811,6 +916,117 @@ async fn abandoned_downstream_drains_without_committing_and_body_errors_never_ca
     assert_eq!(upstream.attempts(), 2);
     assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
     gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn cancelled_owner_before_headers_releases_follower_while_draining() {
+    let upstream = GatedUpstreamFixture::start_before_headers(
+        vec![DELTA.as_bytes().to_vec()],
+        vec![[STOP, USAGE, DONE].concat().into_bytes()],
+    )
+    .await;
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 3;
+    let gateway = spawn_gateway(cfg).await;
+    let body = request(true).to_string();
+    let raw = format!(
+        "POST {PATH} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nAccept: */*\r\nAuthorization: Bearer synthetic-one\r\nContent-Length: {}\r\n\r\n{body}",
+        body.len()
+    );
+    let owner = open_raw(gateway.address(), raw.as_bytes()).await;
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while upstream.attempts() != 1 {
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let mut follower = open_raw(gateway.address(), raw.as_bytes()).await;
+    wait_for_cache_waiters(&gateway, 1).await;
+    abort_socket(owner);
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            let value = status(&gateway).await;
+            if value["draining"] == 1 && upstream.attempts() == 2 {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    })
+    .await
+    .expect("the follower starts while its abandoned owner still drains before headers");
+    assert_eq!(status(&gateway).await["exact_cache"]["waiters"], 0);
+    upstream.release_first();
+    upstream.release_final();
+    upstream.release_eof();
+    read_until(&mut follower, DONE.as_bytes()).await;
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while server::testing::quota_snapshot(&gateway).active != 0 {
+            tokio::time::sleep(Duration::from_millis(2)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let value = status(&gateway).await;
+    assert_eq!(
+        value["exact_cache"]["stores"], 1,
+        "only the live follower stores its response"
+    );
+    assert_eq!(value["exact_cache"]["inflight_keys"], 0);
+    assert_eq!(server::testing::quota_snapshot(&gateway).starts, 2);
+    abort_socket(follower);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn failed_owner_releases_follower_for_its_own_attempt_without_sharing_errors() {
+    for stream in [false, true] {
+        let upstream = if stream {
+            GatedUpstreamFixture::start_with_body_error(
+                vec![DELTA.as_bytes().to_vec()],
+                vec![[STOP, DONE].concat().into_bytes()],
+            )
+            .await
+        } else {
+            GatedUpstreamFixture::start_json(vec![], vec![JSON_RESPONSE.as_bytes().to_vec()], true)
+                .await
+        };
+        let mut cfg = config(upstream.address());
+        cfg.concurrency = 3;
+        let gateway = spawn_gateway(cfg).await;
+        let leader = send(&gateway, PATH, &request(stream), &[]).await;
+        let address = gateway.address();
+        let follower = tokio::spawn(async move {
+            let response = client()
+                .post(format!("http://{address}{PATH}"))
+                .header("content-type", "application/json")
+                .bearer_auth("synthetic-one")
+                .body(request(stream).to_string())
+                .send()
+                .await
+                .unwrap();
+            assert_eq!(response.status(), 200);
+            assert!(response.bytes().await.is_err());
+        });
+        wait_for_cache_waiters(&gateway, 1).await;
+        assert_eq!(upstream.attempts(), 1);
+        upstream.release_first();
+        upstream.release_final();
+        upstream.release_eof();
+        assert!(leader.bytes().await.is_err());
+        tokio::time::timeout(Duration::from_secs(2), follower)
+            .await
+            .unwrap()
+            .unwrap();
+        let value = status(&gateway).await;
+        assert_eq!(upstream.attempts(), 2);
+        assert_eq!(value["exact_cache"]["stores"], 0);
+        assert_eq!(value["exact_cache"]["hits"], 0);
+        assert_eq!(value["exact_cache"]["waiters"], 0);
+        assert_eq!(value["exact_cache"]["inflight_keys"], 0);
+        assert_eq!(server::testing::quota_snapshot(&gateway).starts, 2);
+        gateway.shutdown().await.unwrap();
+    }
 }
 
 #[tokio::test]
@@ -1066,22 +1282,28 @@ async fn oversized_chunked_capture_releases_its_budget_before_eof() {
         vec![[STOP, DONE].concat().into_bytes()],
     )
     .await;
-    let gateway = spawn_gateway(config(upstream.address())).await;
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 3;
+    let gateway = spawn_gateway(cfg).await;
     upstream.release_first();
     let mut response = send(&gateway, PATH, &request(true), &[]).await;
     let mut received = 0;
     while received < oversized.len() {
         received += response.chunk().await.unwrap().unwrap().len();
     }
-    assert_eq!(status(&gateway).await["exact_cache"]["retained_bytes"], 0);
+    let value = status(&gateway).await;
+    assert_eq!(value["exact_cache"]["retained_bytes"], 0);
+    assert_eq!(value["exact_cache"]["inflight_keys"], 0);
+    let replacement = send(&gateway, PATH, &request(true), &[]).await;
+    assert_eq!(
+        upstream.attempts(),
+        2,
+        "overflow releases ownership before EOF"
+    );
     upstream.release_final();
     upstream.release_eof();
     response.bytes().await.unwrap();
-    send(&gateway, PATH, &request(true), &[])
-        .await
-        .bytes()
-        .await
-        .unwrap();
+    replacement.bytes().await.unwrap();
     assert_eq!(upstream.attempts(), 2);
     assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
     gateway.shutdown().await.unwrap();

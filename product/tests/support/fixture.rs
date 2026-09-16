@@ -463,7 +463,7 @@ fn mark_disconnected(disconnected: &AtomicBool, notify: &Notify) {
     notify.notify_waiters();
 }
 
-async fn read_request(socket: &mut TcpStream) -> io::Result<CapturedRequest> {
+pub async fn read_request(socket: &mut TcpStream) -> io::Result<CapturedRequest> {
     let mut received = Vec::new();
     let header_end = loop {
         if let Some(position) = received.windows(4).position(|window| window == b"\r\n\r\n") {

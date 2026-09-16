@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Paired release-HTTP queued-cache mechanism checks; synthetic loopback only."""
+"""Paired queued-cache baseline vs single-flight release HTTP checks; loopback only."""
 import argparse
 import asyncio
 from collections import Counter
@@ -32,6 +32,9 @@ CASES = [
 ] + [
     {"name": f"duplicate_{kind}_cap3", "stream": kind == "sse", "cap": 3,
      "rpm": 100000, "cache": True, "distinct": False} for kind in ("json", "sse")
+] + [
+    {"name": "mixed_json_cap3", "stream": False, "cap": 3,
+     "rpm": 100000, "cache": True, "distinct": False, "duplicates": 8},
 ]
 
 
@@ -40,8 +43,9 @@ def sha(data):
 
 
 def request_body(case, index):
+    unique = case["distinct"] or index >= case.get("duplicates", COUNT)
     return encode({"model": "synthetic", "messages": [{"role": "user", "content":
-                   f"synthetic-{index if case['distinct'] else 0}"}],
+                   f"synthetic-{index if unique else 0}"}],
                    "max_tokens": 16, "temperature": 0, "stream": case["stream"]})
 
 
@@ -242,12 +246,11 @@ async def request(port, case, index, run):
 def validate(run):
     case, rows, attempts = run["case"], run["outcomes"], run["attempts"]
     assert len(rows) == COUNT and {row["id"] for row in rows} == set(range(COUNT)), "terminal denominator mismatch"
-    limited_baseline = case["rpm"] == 1 and run["arm"] == "baseline"
-    expected_completed = 1 if limited_baseline else COUNT
-    assert Counter(row["outcome"] for row in rows) == {"completed": expected_completed, **({"timeout": 9} if limited_baseline else {})}, "unexpected ingress outcomes"
+    expected_completed = COUNT
+    assert Counter(row["outcome"] for row in rows) == {"completed": expected_completed}, "unexpected ingress outcomes"
     assert all(row.get("payload_valid") for row in rows if row["outcome"] == "completed"), "invalid completion"
-    expected_attempts = (1 if limited_baseline else case["cap"] if run["arm"] == "candidate"
-                         and case["cache"] and not case["distinct"] else COUNT)
+    expected_attempts = ((1 if run["arm"] == "candidate" else case["cap"]) + COUNT - case.get("duplicates", COUNT)
+                         if case["cache"] and not case["distinct"] else COUNT)
     assert len(attempts) == expected_attempts, "unexpected actual upstream attempts"
     assert [a["id"] for a in attempts] == list(range(len(attempts))), "duplicate attempt identifiers"
     assert all(a["outcome"] == "completed" for a in attempts), "unfinished upstream attempt"
@@ -270,6 +273,9 @@ def validate(run):
                             "terminal_total": expected_attempts}.items():
         assert after[field] - before[field] == expected, f"replay changed upstream {field}"
     cache = after["exact_cache"]
+    if run["arm"] == "candidate":
+        assert cache["inflight_keys"] == cache["waiters"] == 0, "cache owner/waiter leak"
+        assert after["circuit_breaker"]["failures"] == after["circuit_breaker"]["tracked_attempts"] == 0, "healthy fixture failed circuit accounting"
     expected_hits = expected_completed - expected_attempts
     assert cache["enabled"] == case["cache"] and cache["hits"] == expected_hits, "cache hit accounting mismatch"
     if case["cache"]:
@@ -295,10 +301,24 @@ async def measure(binary, run):
             run["status_before"] = await wait_status(port, lambda _: True, 5)
             run["resources_before"] = await owned_resources(proc.pid)
             run["start_s"] = time.monotonic()
-            tasks = [asyncio.create_task(request(port, run["case"], index, run)) for index in range(COUNT)]
-            cap = run["case"]["cap"]
+            case = run["case"]
+            coalesced = run["arm"] == "candidate" and case["cache"] and not case["distinct"]
+            initial = case.get("duplicates", COUNT)
+            tasks = [asyncio.create_task(request(port, case, index, run)) for index in range(initial)]
+            if initial < COUNT:
+                # Pin the duplicate burst before independent work; TCP accept order is not an arrival contract.
+                initial_cap = 1 if coalesced else case["cap"]
+                await wait_status(port, lambda status:
+                    status["admission"]["active"] == initial_cap
+                    and status["admission"]["queue_length"] == (0 if coalesced else initial - initial_cap)
+                    and (not coalesced or status["exact_cache"]["waiters"] == initial - 1)
+                    and len(fixture.attempts) == initial_cap, .5)
+                tasks.extend(asyncio.create_task(request(port, case, index, run)) for index in range(initial, COUNT))
+            waiters = case.get("duplicates", COUNT) - 1 if coalesced else 0
+            cap = min(case["cap"], COUNT - waiters)
             run["status_at_gate"] = await wait_status(port, lambda status:
-                status["admission"]["active"] == cap and status["admission"]["queue_length"] == COUNT - cap
+                status["admission"]["active"] == cap and status["admission"]["queue_length"] == COUNT - cap - waiters
+                and (not coalesced or status["exact_cache"]["waiters"] == waiters)
                 and len(fixture.attempts) == cap, .5)
             run["resources_at_gate"] = await owned_resources(proc.pid)
             assert not any(task.done() for task in tasks), "request completed before gate release"
@@ -372,7 +392,8 @@ async def self_check(report):
             "status_before": dict(upstream_attempts=0, observed_input_tokens=0, observed_output_tokens=0, usage_known=0, usage_unknown=0, terminal_total=0),
             "status_after": dict(active=0, upstream_attempts=1, observed_input_tokens=3, observed_output_tokens=1, usage_known=1, usage_unknown=0, terminal_total=1,
                 admission=dict(active=0, queue_length=0, tpm_held="0", rpm_debited="1", tpm_debited="4", accounting="actual"),
-                exact_cache=dict(enabled=True, considered=10, hits=9, misses=1, bypasses={}, stores=1, entries=1, retained_bytes=100, budget_bytes=4 * 1024 * 1024))}
+                exact_cache=dict(enabled=True, considered=10, hits=9, misses=1, bypasses={}, stores=1, entries=1, retained_bytes=100, budget_bytes=4 * 1024 * 1024, inflight_keys=0, waiters=0),
+                circuit_breaker=dict(failures=0, tracked_attempts=0))}
     validate(good)
     report["rejected_corruptions"] = []
     for name, mutate in [
@@ -386,6 +407,8 @@ async def self_check(report):
         ("wrong cache hits", lambda value: value["status_after"]["exact_cache"].update(hits=8)),
         ("wrong cache misses", lambda value: value["status_after"]["exact_cache"].update(misses=10)),
         ("wrong considered denominator", lambda value: value["status_after"]["exact_cache"].update(considered=19)),
+        ("cache waiter leak", lambda value: value["status_after"]["exact_cache"].update(waiters=1)),
+        ("circuit ownership leak", lambda value: value["status_after"]["circuit_breaker"].update(tracked_attempts=1)),
     ]:
         broken = copy.deepcopy(good)
         mutate(broken)

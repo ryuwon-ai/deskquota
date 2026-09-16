@@ -1,6 +1,7 @@
 pub mod admission;
 pub mod autostart;
 mod cache;
+mod circuit;
 pub mod cli;
 pub mod clients;
 pub mod config;

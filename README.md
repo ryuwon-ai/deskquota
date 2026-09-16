@@ -189,10 +189,22 @@ alone does not split cache entries; a response that declares `Vary` on that
 header is not stored. Credentials, other effective headers and body bytes still
 separate entries.
 
-If an eligible response finishes while an identical request is waiting for
-capacity or quota, that request can use the completed cache entry immediately.
-Requests already sent upstream continue normally; this does not merge every
-concurrent duplicate.
+**On `develop`:** concurrent eligible requests with the same exact key share one
+cache fill, even when execution slots are free. The leader streams normally;
+followers wait for its complete response without consuming upstream quota or
+execution slots. Failure, cancellation or a non-cacheable response releases
+the next caller. Followers can therefore wait longer for their first token.
+`status` separates waiting duplicates from the admission queue. The published
+`v0.1.0-preview.1` predates this coalescing and the circuit protection below.
+
+The gateway also protects a failing root/model/credential scope: three qualifying
+failures no more than 60 seconds apart open its circuit for five seconds, extended
+by valid retry timing on the triggering failure. Cached responses remain available;
+other calls receive `503 upstream_circuit_open` with `Retry-After`. After the wait,
+one real request probes recovery. No background model calls or model substitution.
+Client errors and `429` do not trip the breaker; ambiguous body-stage timeouts are
+excluded because downstream backpressure can cause them. State is bounded to 128
+scopes; an untrackable new scope still uses normal quota and concurrency limits.
 
 The default macOS executable is **10.20 MB**, down from the previous **59.92 MB**
 release by about **83%**. It uses byte estimates and omits BPE vocabularies. An explicit
@@ -260,14 +272,26 @@ limit, completing every task still took tens of seconds. Keep a local numeric
 cap when that is the budget you need to enforce. Both measured settings disabled
 startup hold; these times exclude the default 60-second startup hold.
 
-The default build now uses **10.20 MB on macOS / 16.38 MB on Windows**, with
+The earlier packaging check recorded **10.20 MB on macOS / 16.38 MB on Windows**, with
 **9.67 MiB idle RSS** observed on this Mac. Default/BPE builds passed **456 tests
 each on macOS**; Windows passed **409 default / 236 focused BPE tests**. These
 overlap rather than adding up to unique checks. Retry-veto, setup, lifecycle and
 compaction checks passed within their documented platform scope.
 [Workflow results, peer controls, build validation and tradeoffs →](reports/workflow-completion-and-lightweight-builds-2026-09-16.md)
 
-The queued-cache change reduced **10 upstream calls to 1** for ten identical
+The current `develop` change also coalesces eligible duplicates when execution
+slots are free. At concurrency 3, ten identical requests used **3 → 1 upstream
+calls**, with essentially unchanged completion time. A staged workload of eight
+duplicates followed by two distinct requests used **5 → 3 calls** and reduced
+submission-to-completion p95 from **217 → 123 ms**. Both arms completed **50/50**
+requests per case across five pairs, with a 100 ms synthetic upstream delay.
+These are small mechanism checks, not production tail or model-speed claims.
+Cache-off no-wait p95 was **0.418 → 0.425 ms**, p99 **0.444 → 0.512 ms**;
+the macOS binary grew by **40,608 bytes**. The new scoped circuit breaker protects
+repeatedly failing upstreams; a fast rejection is still a failed request.
+[Coalescing, circuit protection, raw outcomes and tradeoffs →](reports/cache-circuit-improvements-2026-09-16.md)
+
+The earlier queued-only cache change reduced **10 upstream calls to 1** for ten identical
 JSON or streaming requests at concurrency 1, across five paired runs. All ten
 completed. JSON completion p95 after releasing the upstream gate fell from
 **1,029 to 104 ms** (median of five runs; 100 ms synthetic generation delay).
@@ -364,7 +388,7 @@ performance superiority remains unverified.
 - Reduce avoidable model-list waiting while preserving quota and fairness rules.
 - Validate quota estimation against a real endpoint's accounting contract.
 - Compare independent workloads, including NVIDIA hosted API compatibility checks.
-- Measure how often real workloads can reuse completed responses while queued; consider broader coalescing only if already-started duplicates justify it.
+- Measure real cache eligibility, quota saved by coalescing, and its first-token waiting cost.
 - Validate provider-managed completion and local hard-budget tradeoffs against real endpoint contracts.
 - Extend Windows checks to a fresh non-admin account, Pi, and actual login startup; exercise Linux and lower-resource computers.
 

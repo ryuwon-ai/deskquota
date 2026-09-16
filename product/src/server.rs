@@ -262,6 +262,7 @@ impl std::error::Error for StartError {
 
 struct AppState {
     cache: Option<crate::cache::ExactCache>,
+    circuit: crate::circuit::Circuit,
     config: Config,
     credentials: RuntimeCredentials,
     upstream: UpstreamClient,
@@ -389,6 +390,7 @@ async fn spawn_inner(
     let handle_admission = admission.clone();
     let state = Arc::new(AppState {
         cache: config.cache.map(crate::cache::ExactCache::new),
+        circuit: crate::circuit::Circuit::default(),
         config,
         credentials,
         upstream,
@@ -720,6 +722,9 @@ async fn handle_request(
                     &crate::cache::ExactCache::snapshot(state.cache.as_ref()),
                 )
                 .expect("cache status JSON");
+                bytes.extend_from_slice(b",\"circuit_breaker\":");
+                serde_json::to_writer(&mut bytes, &state.circuit.snapshot())
+                    .expect("circuit status JSON");
                 bytes.extend_from_slice(if *state.stop.borrow() {
                     b",\"status\":\"ok\",\"state\":\"draining\",\"identity\":"
                 } else {
@@ -795,7 +800,7 @@ async fn handle_request(
         }
         Err(_) => return protocol::error(StatusCode::REQUEST_TIMEOUT, "body_read_timeout"),
     };
-    let cost = match protocol::inspect_body(&state.config, &route, body.bytes()) {
+    let (cost, model_index) = match protocol::inspect_body(&state.config, &route, body.bytes()) {
         Ok(cost) => cost,
         Err(error) => return error.into_response(),
     };
@@ -819,8 +824,33 @@ async fn handle_request(
     if let Some(hit) = cache.as_mut().and_then(crate::cache::Pending::lookup) {
         return hit;
     }
+    let circuit = state.circuit.scope(
+        route.root_index,
+        &upstream_url,
+        model_index,
+        &request_headers,
+        &state.config.upstream.auth,
+    );
+    if let Err(open) = circuit.check() {
+        return open.into_response();
+    }
     let queue_deadline = (tokio::time::Instant::now() + state.limits.capacity_wait).min(deadline);
     let mut stop = state.stop.subscribe();
+    if let Some(pending) = cache.as_mut() {
+        let hit = tokio::select! {
+            biased;
+            () = wait_for_stop(&mut stop) => return protocol::error(StatusCode::SERVICE_UNAVAILABLE, "gateway_stopping"),
+            () = wait_for_stop(&mut downstream_disconnect) => return protocol::error(StatusCode::BAD_REQUEST, "downstream_disconnected"),
+            () = tokio::time::sleep_until(queue_deadline) => return protocol::error(StatusCode::GATEWAY_TIMEOUT, "gateway_queue_deadline"),
+            hit = pending.wait_for_turn() => hit,
+        };
+        if let Some(hit) = hit {
+            return hit;
+        }
+        if let Err(open) = circuit.check() {
+            return open.into_response();
+        }
+    }
     let admission_hold = tokio::select! {
         biased;
         () = wait_for_stop(&mut stop) => {
@@ -832,13 +862,7 @@ async fn handle_request(
         () = tokio::time::sleep_until(queue_deadline) => {
             return protocol::error(StatusCode::GATEWAY_TIMEOUT, "gateway_queue_deadline");
         }
-        hit = async {
-            match cache.as_mut() {
-                Some(pending) => pending.wait_for_cached().await,
-                None => std::future::pending().await,
-            }
-        } => return hit,
-        permit = state.admission.acquire(route.root_index, cost, route.endpoint, state.limits.capacity_wait.min(deadline.saturating_duration_since(tokio::time::Instant::now()))) => match permit {
+        permit = state.admission.acquire(route.root_index, cost, route.endpoint, queue_deadline.saturating_duration_since(tokio::time::Instant::now())) => match permit {
             Ok(permit) => permit,
             Err(crate::admission::AcquireError::EstimateExceedsBudget) => return protocol::error(StatusCode::BAD_REQUEST, "estimate_exceeds_budget"),
             Err(crate::admission::AcquireError::QueueFull) => return protocol::error(StatusCode::TOO_MANY_REQUESTS, "gateway_queue_full"),
@@ -853,6 +877,7 @@ async fn handle_request(
     let (head_sender, head_receiver) = tokio::sync::oneshot::channel();
     let worker = stream::forward(ForwardRequest {
         cache,
+        circuit,
         client: state.upstream.clone(),
         method: parts.method,
         url: upstream_url,
@@ -896,6 +921,7 @@ async fn handle_request(
                 protocol::error(StatusCode::NOT_FOUND, "route_not_found")
             }
         },
+        Ok(Ok(Err(HeadError::Circuit(open)))) => open.into_response(),
         Ok(Ok(Err(HeadError::Upstream))) | Ok(Err(_)) => {
             protocol::error(StatusCode::BAD_GATEWAY, "upstream_transport_error")
         }
