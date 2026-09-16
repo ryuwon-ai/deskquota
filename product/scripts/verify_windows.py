@@ -20,8 +20,12 @@ def sha(path):
 
 
 def run(argv, *, env=None, check=True):
-    return subprocess.run([str(v) for v in argv], env=env, capture_output=True,
-                          text=True, encoding="utf-8", errors="replace", timeout=30, check=check)
+    result = subprocess.run([str(v) for v in argv], env=env, capture_output=True,
+                            text=True, encoding="utf-8", errors="replace", timeout=30)
+    if check and result.returncode:
+        # This probe runs only owned synthetic inputs; preserve the actual failure.
+        raise RuntimeError(f"{Path(argv[0]).name} exited {result.returncode}: {result.stderr or result.stdout}")
+    return result
 
 
 def path_registry():

@@ -79,6 +79,7 @@ jobs:
           $imports | Set-Content dist/windows-dependencies.txt
           if (($imports -join "`n") -match '(?i)(vcruntime|msvcp|libgcc|libstdc\+\+|libwinpthread)[^\s]*\.dll') { throw 'non_system_runtime_dependency' }
       - name: Preserve native packages and acceptance evidence
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: native-${{ matrix.target }}
