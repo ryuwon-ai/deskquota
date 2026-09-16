@@ -47,7 +47,8 @@ def resources(pid, env):
             "@{cpu_seconds=$p.TotalProcessorTime.TotalSeconds;working_set_bytes=$p.WorkingSet64;"
             "private_bytes=$p.PrivateMemorySize64;handles=$p.HandleCount;threads=$p.Threads.Count}"
             " | ConvertTo-Json -Compress")
-    return json.loads(run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", code], env=env).stdout)
+    powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+    return json.loads(run([powershell, "-NoProfile", "-NonInteractive", "-Command", code], env=env).stdout)
 
 
 def verify(binary, work, product):
@@ -77,13 +78,15 @@ def verify(binary, work, product):
 
     env = {k: v for k, v in os.environ.items() if k.upper() in
            {"SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP"}}
-    env["PATH"] = str(Path(os.environ["SystemRoot"]) / "System32") + ";" + os.environ["SystemRoot"]
+    # Hosted runners can put Docker in System32: no directory belongs on this PATH.
+    env["PATH"] = ""
     for key, sub in [("USERPROFILE", "home"), ("APPDATA", "home/AppData/Roaming"),
                      ("LOCALAPPDATA", "home/AppData/Local")]:
         env[key] = str(work / sub)
         Path(env[key]).mkdir(parents=True, exist_ok=True)
     run([installed, "--help"], env=env)
-    unavailable = {name: run(["where.exe", name], env=env, check=False).returncode != 0
+    where = Path(os.environ["SystemRoot"]) / "System32/where.exe"
+    unavailable = {name: run([where, name], env=env, check=False).returncode != 0
                    for name in ("cargo", "rustc", "gcc", "node", "python", "docker")}
     assert all(unavailable.values()), unavailable
 
@@ -198,6 +201,7 @@ models = ["synthetic"]
         return {"binary_sha256": sha(binary), "binary_bytes": binary.stat().st_size,
                 "install_reinstall_bad_checksum": "passed", "path_registry_unchanged": True,
                 "installer_preview": "preview only" in first.stdout, "unavailable_on_runtime_path": unavailable,
+                "runtime_path_empty": env["PATH"] == "",
                 "cache": {"requests": 82, "upstream_attempts": len(attempts), "hits": 80, "failures": 0, "samples": samples},
                 "usage": {"rpm_debited": "2", "tpm_debited": "46", "accounting": "actual"},
                 "resources": {"before": before, "idle_64_start": idle_start, "idle_64_end": idle_end, "after": after},

@@ -291,6 +291,16 @@ class PowerShellInstallerStaticTests(unittest.TestCase):
 
 
 class AcceptanceDiagnosticTests(unittest.TestCase):
+    def test_resource_probe_uses_system_executable_with_empty_child_path(self):
+        spec = importlib.util.spec_from_file_location("verify_windows", PRODUCT / "scripts/verify_windows.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        env = {"SYSTEMROOT": "C:/Windows", "PATH": ""}
+        with patch.dict(os.environ, {"SystemRoot": "C:/Windows"}), patch.object(module, "run", return_value=subprocess.CompletedProcess([], 0, stdout="{}")) as child:
+            self.assertEqual(module.resources(1, env), {})
+            self.assertEqual(child.call_args.args[0][0], Path("C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"))
+            self.assertEqual(child.call_args.kwargs["env"], env)
+
     def test_powershell_child_rebuilds_module_path_without_mutating_parent(self):
         spec = importlib.util.spec_from_file_location("verify_windows", PRODUCT / "scripts/verify_windows.py")
         module = importlib.util.module_from_spec(spec)
