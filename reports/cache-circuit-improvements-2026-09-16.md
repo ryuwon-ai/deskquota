@@ -145,8 +145,16 @@ and exact binary hashes are linked from
   [compaction-final.json](../evidence/cache-circuit-2026-09-16/compaction-final.json).
 - Validation snapshot: [validation.json](../evidence/cache-circuit-2026-09-16/validation.json).
   The push triggers the repository's macOS and Windows native package workflow;
-  those results are pending at this pre-commit snapshot. Consult this commit's
-  checks for their final status. No new public release is part of this change.
+  the first run at `c7af8c2` fully passed macOS (461 Rust tests, packaging and
+  installed-binary checks). Windows passed 427 Rust tests (one existing ignored),
+  release build and packaging/install checks, then its first host PowerShell
+  resource query exceeded 30 seconds. DLL inspection was not reached.
+  [The failed run is preserved](../evidence/cache-circuit-2026-09-16/ci-first-attempt.json).
+  The follow-up removes the restricted gateway environment only from that host
+  observer, reusing the existing benchmark observer boundary. Gateway commands
+  retain the empty runtime PATH. This environment diagnosis is an inference until
+  the Windows rerun completes; consult the follow-up commit checks. No new public
+  release is part of this change.
 - **Authenticated provider calls: zero.** NVIDIA/live workload hit rates, outage
   recovery, follower first-token cost, long-running load and low-end hardware
   performance remain unverified. Fast circuit rejection is a failure outcome,

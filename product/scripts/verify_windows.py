@@ -42,13 +42,14 @@ def path_registry():
     return values
 
 
-def resources(pid, env):
+def resources(pid):
     code = (f"$p=Get-Process -Id {pid}; "
             "@{cpu_seconds=$p.TotalProcessorTime.TotalSeconds;working_set_bytes=$p.WorkingSet64;"
             "private_bytes=$p.PrivateMemorySize64;handles=$p.HandleCount;threads=$p.Threads.Count}"
             " | ConvertTo-Json -Compress")
     powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
-    return json.loads(run([powershell, "-NoProfile", "-NonInteractive", "-Command", code], env=env).stdout)
+    # Restrict the gateway's environment, not the host-side measurement tool.
+    return json.loads(run([powershell, "-NoProfile", "-NonInteractive", "-Command", code]).stdout)
 
 
 def verify(binary, work, product):
@@ -153,11 +154,11 @@ models = ["synthetic"]
         assert status["state"] == "running"
         pid = status["identity"]["pid"]
         host, port = status["identity"]["address"].rsplit(":", 1)
-        before = resources(pid, env)
+        before = resources(pid)
         idle_sockets = [socket.create_connection((host, int(port)), timeout=3) for _ in range(64)]
-        idle_start = resources(pid, env)
+        idle_start = resources(pid)
         time.sleep(2)
-        idle_end = resources(pid, env)
+        idle_end = resources(pid)
         for s in idle_sockets:
             s.close()
         idle_sockets.clear()
@@ -193,7 +194,7 @@ models = ["synthetic"]
         assert runtime["admission"]["accounting"] == "actual"
         assert runtime["admission"]["rpm_debited"] == "2"
         assert runtime["admission"]["tpm_debited"] == "46"
-        after = resources(pid, env)
+        after = resources(pid)
         run(cli + ["off"], env=env)
         run(cli + ["off"], env=env)
         assert json.loads(run(cli + ["status", "--json"], env=env).stdout)["state"] == "stopped"

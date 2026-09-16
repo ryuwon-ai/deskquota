@@ -19,4 +19,8 @@
 - [x] Run `cargo test --locked`, `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, `cargo build --locked --release --bin llmgw`, using CARGO_TARGET_DIR outside iCloud, build jobs 2 and incremental disabled. Capture exact outcomes. Review spec then quality, fix findings.
 - [x] Extend `product/scripts/benchmark_queued_cache.py` to observe followers outside admission without weakening old baseline assertions; run five paired trials and independent nonduplicate/cache-off controls. Record all outcomes and footprint rather than latency-only wins.
 - [x] Record report and work-item/loop evidence.
-- [ ] Commit the reviewed change as `feat: coalesce exact requests and protect failing upstreams`, fast-forward `develop`, push `origin develop`, and inspect triggered macOS/Windows native CI. No release publication in this scope.
+- [x] Commit the reviewed change as `feat: coalesce exact requests and protect failing upstreams`, fast-forward `develop`, push `origin develop`, and inspect triggered macOS/Windows native CI. No release publication in this scope.
+
+- [x] Inspect first CI result: macOS passed; Windows observer timed out after successful build/tests/install.
+- [x] Correct only the host observer environment; preserve restricted gateway execution.
+- [ ] Validate the corrected probe on Windows CI after follow-up push.

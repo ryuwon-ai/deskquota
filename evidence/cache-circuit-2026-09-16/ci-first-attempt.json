@@ -1,0 +1,30 @@
+{
+  "run_id": 35070363722,
+  "url": "https://github.com/ryuwon-ai/deskquota/actions/runs/35070363722",
+  "commit": "c7af8c246ffa8598a0d92d6de40982a19f64d49f",
+  "conclusion": "failure",
+  "macos": {
+    "conclusion": "success",
+    "rust_passed": 461,
+    "rust_failed": 0,
+    "rust_ignored": 0,
+    "packaging_checks": 4,
+    "installer_checks": 14,
+    "installed_binary_probe": true
+  },
+  "windows": {
+    "conclusion": "failure",
+    "rust_passed": 427,
+    "rust_failed": 0,
+    "rust_ignored": 1,
+    "release_build": "passed",
+    "packaging_and_installer_checks": "passed",
+    "archive_install_and_hash_check": "passed",
+    "final_acceptance": "failed before synthetic requests: first resource observer Get-Process exceeded30seconds",
+    "dll_inspection": "not reached"
+  },
+  "correction": "Run only the host PowerShell resource observer in its parent environment. Gateway and dependency-absence checks retain empty PATH/pruned env. Existing parent-environment observer pattern reused from benchmark.py.",
+  "causality": "restricted observer environment is the leading hypothesis; not a demonstrated gateway failure; requires Windows rerun",
+  "rerun": "pending push of probe-only fix",
+  "independent_review": "cache_circuit_results_review approved; no timer increase, fallback, runtime code or dependency change"
+}
