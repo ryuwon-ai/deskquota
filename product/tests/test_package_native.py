@@ -5,6 +5,7 @@ from pathlib import Path
 import tarfile
 import tempfile
 import unittest
+import zipfile
 
 
 PRODUCT = Path(__file__).resolve().parents[1]
@@ -52,7 +53,7 @@ class PackageNativeTests(unittest.TestCase):
 
             module.sha256 = replace_after_archive_hash
             try:
-                result = module.package_tar(binary, product, output)
+                result = module.package_native(binary, product, output)
             finally:
                 module.sha256 = original_sha256
 
@@ -76,7 +77,7 @@ class PackageNativeTests(unittest.TestCase):
             binary = root / "llmgw"
             binary.write_bytes(b"fixture-native-binary")
             output = root / "llmgw-test.tar.gz"
-            result = module.package_tar(binary, product, output)
+            result = module.package_native(binary, product, output)
             self.assertEqual(result["members"], module.PACKAGE_MEMBERS)
             with tarfile.open(output, "r:gz") as archive:
                 members = archive.getmembers()
@@ -101,11 +102,41 @@ class PackageNativeTests(unittest.TestCase):
             binary.write_bytes(b"same")
             first = root / "first.tar.gz"
             second = root / "second.tar.gz"
-            module.package_tar(binary, product, first)
-            module.package_tar(binary, product, second)
+            module.package_native(binary, product, first)
+            module.package_native(binary, product, second)
             self.assertEqual(first.read_bytes(), second.read_bytes())
             with self.assertRaises(FileExistsError):
-                module.package_tar(binary, product, first)
+                module.package_native(binary, product, first)
+
+
+    def test_zip_is_deterministic_bounded_and_checksummed(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            product = root / "product"
+            (product / "docs").mkdir(parents=True)
+            for name in module.PACKAGE_MEMBERS[1:]:
+                (product / name).write_text(name, encoding="utf-8")
+            binary = root / "llmgw.exe"
+            binary.write_bytes(b"native-fixture")
+            first, second = root / "first.zip", root / "second.zip"
+            result = module.package_native(binary, product, first)
+            module.package_native(binary, product, second)
+            self.assertEqual(first.read_bytes(), second.read_bytes())
+            with zipfile.ZipFile(first) as archive:
+                self.assertEqual(archive.namelist(), ["llmgw.exe", *module.PACKAGE_MEMBERS[1:]])
+                self.assertEqual(archive.read("llmgw.exe"), binary.read_bytes())
+                self.assertEqual(result["binary_sha256"], hashlib.sha256(archive.read("llmgw.exe")).hexdigest())
+            self.assertEqual(first.with_suffix(".zip.sha256").read_text(),
+                             f"{hashlib.sha256(first.read_bytes()).hexdigest()}  first.zip\n")
+            with self.assertRaises(FileExistsError):
+                module.package_native(binary, product, first)
+            with self.assertRaises(ValueError):
+                module.package_native(binary, product, root / "bad.txt")
+            binary.write_bytes(b"")
+            with self.assertRaises(ValueError):
+                module.package_native(binary, product, root / "empty.zip")
+            self.assertFalse((root / "empty.zip").exists())
 
 
 if __name__ == "__main__":

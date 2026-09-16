@@ -55,6 +55,16 @@ The command is currently **`llmgw`**; DeskQuota is the project name.
 
 ## Get started
 
+### Install a native package
+
+Download the macOS ARM64 or Windows x64 archive, its installer, and their
+`.sha256` files from [v0.1.0-preview.1](https://github.com/ryuwon-ai/deskquota/releases/tag/v0.1.0-preview.1).
+Follow the [checksum-first installation steps](product/docs/installation.md).
+Then run `llmgw setup` and `llmgw on`. No compiler, Docker, or WSL is needed.
+
+This is an unsigned preview (macOS ad-hoc signature only). Follow your OS and
+company security policy; signing and clean-machine acceptance remain unverified.
+
 ### Build from this checkout
 
 A Rust toolchain is needed to build. The installed gateway itself needs no Rust,
@@ -69,9 +79,8 @@ llmgw setup
 ```
 
 The build directory stays outside your checkout. Make sure Cargo's binary
-directory is on your `PATH`. There is no public binary release or hosted install
-script yet; the [installation guide](product/docs/installation.md) also covers
-checksum-verified archives delivered separately.
+directory is on your `PATH`. The [installation guide](product/docs/installation.md)
+also covers offline archive transfer and explicit optional BPE builds.
 
 ### Make it yours
 

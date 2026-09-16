@@ -55,6 +55,16 @@ Linux 실행 검증과 실제 제공자 API를 사용한 성능 비교는 아직
 
 ## 시작하기
 
+### 실행 파일로 설치
+
+[v0.1.0-preview.1](https://github.com/ryuwon-ai/deskquota/releases/tag/v0.1.0-preview.1)에서
+macOS ARM64 또는 Windows x64 아카이브, 설치 스크립트, 각각의 `.sha256` 파일을 받으세요.
+[체크섬 검증·설치 안내](product/docs/installation.md)를 따라 설치한 뒤
+`llmgw setup`, `llmgw on`을 실행합니다. 컴파일러·Docker·WSL은 필요하지 않습니다.
+
+게시자 서명이 없는 사전 릴리스입니다(macOS는 임시 서명만 포함).
+운영체제와 회사의 보안 정책을 따라야 하며, 서명과 새 PC의 보안 정책 통과 여부는 아직 검증하지 않았습니다.
+
 ### 소스에서 설치
 
 빌드하려면 Rust 도구 모음이 필요합니다. 설치한 게이트웨이를 실행할 때는
@@ -69,8 +79,7 @@ llmgw setup
 ```
 
 빌드 결과물은 소스 폴더 밖에 저장됩니다. Cargo 실행 파일 디렉터리가 `PATH`에 포함되어 있어야 합니다.
-아직 바이너리 릴리스나 온라인 설치 스크립트는 공개하지 않았습니다.
-[설치 안내](product/docs/installation.md)에는 별도로 전달받은 아카이브의 체크섬 검증 방법도 있습니다.
+[설치 안내](product/docs/installation.md)에서 오프라인 아카이브 전달과 선택적 BPE 빌드 방법도 확인할 수 있습니다.
 
 ### 내 환경에 맞게 설정
 

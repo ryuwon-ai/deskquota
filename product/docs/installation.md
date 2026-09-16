@@ -5,10 +5,51 @@ manifest. The archive contains `llmgw` (`llmgw.exe` on Windows), this README,
 and the installation, runtime, and client compatibility documents. It does not
 contain source, build targets, test artifacts, caches, or user configuration.
 
-No public release location exists yet. The installers have no built-in registry
-or download URL. Obtain the archive and matching manifest through the delivery
-channel named by the person or system providing the build. Do not turn the
-examples below into a public download one-liner until a public release exists.
+Download the default, BPE-free build from the
+[v0.1.0-preview.1 release](https://github.com/ryuwon-ai/deskquota/releases/tag/v0.1.0-preview.1):
+
+| Platform | Archive | Installer |
+|---|---|---|
+| macOS ARM64 (Apple silicon) | `llmgw-macos-arm64.tar.gz` | `install.sh` |
+| Windows x64 | `llmgw-windows-x64.zip` | `install.ps1` |
+
+Every archive and installer has a separate `.sha256` file. Download the installer,
+its checksum, the archive and its checksum from that same versioned release.
+Check the installer before running it, from the download directory:
+
+```sh
+shasum -a 256 -c install.sh.sha256
+sh install.sh --archive ./llmgw-macos-arm64.tar.gz \
+  --checksum-manifest ./llmgw-macos-arm64.tar.gz.sha256 \
+  --install-dir "$HOME/.local/bin" --path-action preview
+```
+
+On Windows:
+
+```powershell
+$expected = ((Get-Content ./install.ps1.sha256 -Raw).Trim() -split '\s+')[0]
+if ((Get-FileHash ./install.ps1 -Algorithm SHA256).Hash -ne $expected) { throw 'installer_checksum_mismatch' }
+& ./install.ps1 -Archive ./llmgw-windows-x64.zip `
+  -ChecksumManifest ./llmgw-windows-x64.zip.sha256 `
+  -InstallDir "$env:LOCALAPPDATA\Programs\llmgw\bin" -PathAction Preview
+```
+
+After reviewing the printed PATH instructions, run `llmgw setup`, then `llmgw on`.
+If PATH is not configured, run the installed executable by its full path.
+No shell profile or registry PATH is modified by the installer. Offline transfer
+works with the same four files; the destination needs no Internet for installation.
+
+**Preview signing:** macOS has an ad-hoc linker signature, not an Apple Developer ID
+signature or notarization. Windows has no Authenticode signature. Checksums detect
+corruption but do not establish a publisher identity. Follow your OS and company
+policy; do not disable Gatekeeper, SmartScreen, antivirus, or PowerShell policy to
+install. Signing and clean-machine policy acceptance remain release limitations.
+
+These packages contain the default estimator; BPE is an explicit source-build
+feature. Intel macOS and Linux packages are not included in this preview.
+The native workflow builds from the committed lockfile on macOS and Windows,
+then tests and uploads artifacts. Release notes link the exact successful run and
+source commit; a maintainer publishes those artifacts without rebuilding them.
 
 ## macOS and Linux
 

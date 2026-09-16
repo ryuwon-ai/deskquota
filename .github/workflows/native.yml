@@ -1,0 +1,87 @@
+name: Native packages
+
+on:
+  push:
+    branches: [develop]
+    paths: ['product/**', 'scripts/probe-product-cli.py', '.github/workflows/native.yml']
+  pull_request:
+    paths: ['product/**', 'scripts/probe-product-cli.py', '.github/workflows/native.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+            archive: llmgw-macos-arm64.tar.gz
+            executable: llmgw
+            installer: install.sh
+            python: python3
+            rustflags: ''
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            archive: llmgw-windows-x64.zip
+            executable: llmgw.exe
+            installer: install.ps1
+            python: python
+            rustflags: '-C target-feature=+crt-static'
+    env:
+      CARGO_INCREMENTAL: '0'
+      CARGO_BUILD_JOBS: '2'
+      CARGO_TARGET_DIR: ${{ github.workspace }}/native-target
+      RUSTFLAGS: ${{ matrix.rustflags }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install pinned toolchain
+        run: rustup toolchain install 1.88.0 --profile minimal --target ${{ matrix.target }}
+      - name: Locked default-feature tests and release build
+        working-directory: product
+        run: |
+          cargo +1.88.0 test --locked --target ${{ matrix.target }} -- --test-threads=2
+          cargo +1.88.0 build --locked --release --bin llmgw --target ${{ matrix.target }}
+      - name: Packaging and installer checks
+        run: |
+          ${{ matrix.python }} -m unittest discover -s product/tests -p test_package_native.py
+          ${{ matrix.python }} -m unittest discover -s product/tests -p test_installers.py
+          ${{ matrix.python }} product/scripts/package_native.py --binary native-target/${{ matrix.target }}/release/${{ matrix.executable }} --output dist/${{ matrix.archive }} --identity-output dist/package-identity.json
+          ${{ matrix.python }} -c "from pathlib import Path; import hashlib; p=Path('dist/${{ matrix.installer }}'); p.write_bytes(Path('product/packaging/${{ matrix.installer }}').read_bytes()); p.with_name(p.name+'.sha256').write_text(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n', encoding='ascii')"
+      - name: Install exact macOS archive and exercise installed binary
+        if: runner.os == 'macOS'
+        run: |
+          sh product/packaging/install.sh --archive "$PWD/dist/${{ matrix.archive }}" --checksum-manifest "$PWD/dist/${{ matrix.archive }}.sha256" --install-dir "$PWD/native-installed" --path-action none
+          cmp native-installed/llmgw native-target/${{ matrix.target }}/release/llmgw
+          native-installed/llmgw --help
+          python3 scripts/probe-product-cli.py --binary native-installed/llmgw --output dist/native-acceptance.json
+      - name: Install exact Windows archive and exercise installed binary
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & ./product/packaging/install.ps1 -Archive "$PWD/dist/${{ matrix.archive }}" -ChecksumManifest "$PWD/dist/${{ matrix.archive }}.sha256" -InstallDir "$PWD/native-installed" -PathAction None
+          if ((Get-FileHash native-installed/llmgw.exe).Hash -ne (Get-FileHash native-target/${{ matrix.target }}/release/llmgw.exe).Hash) { throw 'installed_binary_mismatch' }
+          python product/scripts/verify_windows.py --binary native-installed/llmgw.exe --work "$env:RUNNER_TEMP/native-acceptance" --output dist/native-acceptance.json
+          if ($LASTEXITCODE -ne 0) { throw 'native_acceptance_failed' }
+          $vs = & "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe" -latest -products '*' -property installationPath
+          $dumpbin = Get-ChildItem "$vs/VC/Tools/MSVC/*/bin/Hostx64/x64/dumpbin.exe" | Sort-Object FullName | Select-Object -Last 1
+          $imports = & $dumpbin.FullName /DEPENDENTS native-installed/llmgw.exe
+          if ($LASTEXITCODE -ne 0) { throw 'dependency_inspection_failed' }
+          $imports | Set-Content dist/windows-dependencies.txt
+          if (($imports -join "`n") -match '(?i)(vcruntime|msvcp|libgcc|libstdc\+\+|libwinpthread)[^\s]*\.dll') { throw 'non_system_runtime_dependency' }
+      - name: Preserve native packages and acceptance evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-${{ matrix.target }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
