@@ -1,0 +1,878 @@
+[
+  {
+    "group": "preflight",
+    "repeat": 1,
+    "arm": "direct",
+    "profile": "usage_contract",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "direct",
+      "--profile",
+      "usage_contract",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/preflight/1-direct-usage_contract"
+    ],
+    "seconds": 0.131484375015134,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/preflight/1-direct-usage_contract/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 66,
+      "all_work_completion_ms": 23.067250003805384,
+      "client_http_attempts": 1,
+      "completed_by_deadline": 1,
+      "completed_by_seconds": {
+        "10": 1,
+        "2": 1,
+        "5": 1
+      },
+      "completed_usage": {
+        "observed": 1
+      },
+      "groups": {
+        "length:short": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 23.064709006575868,
+            "n": 1,
+            "p50": 23.064709006575868,
+            "p95": 23.064709006575868,
+            "p99": 23.064709006575868
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 23.064709006575868,
+            "n": 1,
+            "p50": 23.064709006575868,
+            "p95": 23.064709006575868,
+            "p99": 23.064709006575868
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 1
+      },
+      "planned_nodes": 1,
+      "planned_workflows": 1,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 0.12541699106805027,
+        "n": 1,
+        "p50": 0.12541699106805027,
+        "p95": 0.12541699106805027,
+        "p99": 0.12541699106805027
+      },
+      "success_workflow_latency_ms": {
+        "max": 23.067250003805384,
+        "n": 1,
+        "p50": 23.067250003805384,
+        "p95": 23.067250003805384,
+        "p99": 23.067250003805384
+      },
+      "upstream_attempts": 1,
+      "workflow_outcomes": {
+        "completed": 1
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "preflight",
+    "repeat": 1,
+    "arm": "deskquota_local",
+    "profile": "usage_contract",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "deskquota_local",
+      "--profile",
+      "usage_contract",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/preflight/1-deskquota_local-usage_contract"
+    ],
+    "seconds": 0.33690108300652355,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/preflight/1-deskquota_local-usage_contract/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 66,
+      "all_work_completion_ms": 25.87870799470693,
+      "client_http_attempts": 1,
+      "completed_by_deadline": 1,
+      "completed_by_seconds": {
+        "10": 1,
+        "2": 1,
+        "5": 1
+      },
+      "completed_usage": {
+        "observed": 1
+      },
+      "groups": {
+        "length:short": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 25.87587499874644,
+            "n": 1,
+            "p50": 25.87587499874644,
+            "p95": 25.87587499874644,
+            "p99": 25.87587499874644
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 25.87587499874644,
+            "n": 1,
+            "p50": 25.87587499874644,
+            "p95": 25.87587499874644,
+            "p99": 25.87587499874644
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 1
+      },
+      "planned_nodes": 1,
+      "planned_workflows": 1,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 3.62004098133184,
+        "n": 1,
+        "p50": 3.62004098133184,
+        "p95": 3.62004098133184,
+        "p99": 3.62004098133184
+      },
+      "success_workflow_latency_ms": {
+        "max": 25.87870799470693,
+        "n": 1,
+        "p50": 25.87870799470693,
+        "p95": 25.87870799470693,
+        "p99": 25.87870799470693
+      },
+      "upstream_attempts": 1,
+      "workflow_outcomes": {
+        "completed": 1
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "preflight",
+    "repeat": 1,
+    "arm": "deskquota_managed",
+    "profile": "usage_contract",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "deskquota_managed",
+      "--profile",
+      "usage_contract",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/preflight/1-deskquota_managed-usage_contract"
+    ],
+    "seconds": 0.23666320901247673,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/preflight/1-deskquota_managed-usage_contract/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 66,
+      "all_work_completion_ms": 26.770041993586347,
+      "client_http_attempts": 1,
+      "completed_by_deadline": 1,
+      "completed_by_seconds": {
+        "10": 1,
+        "2": 1,
+        "5": 1
+      },
+      "completed_usage": {
+        "observed": 1
+      },
+      "groups": {
+        "length:short": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 26.76725000492297,
+            "n": 1,
+            "p50": 26.76725000492297,
+            "p95": 26.76725000492297,
+            "p99": 26.76725000492297
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 26.76725000492297,
+            "n": 1,
+            "p50": 26.76725000492297,
+            "p95": 26.76725000492297,
+            "p99": 26.76725000492297
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 1
+      },
+      "planned_nodes": 1,
+      "planned_workflows": 1,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 3.9835420029703528,
+        "n": 1,
+        "p50": 3.9835420029703528,
+        "p95": 3.9835420029703528,
+        "p99": 3.9835420029703528
+      },
+      "success_workflow_latency_ms": {
+        "max": 26.770041993586347,
+        "n": 1,
+        "p50": 26.770041993586347,
+        "p95": 26.770041993586347,
+        "p99": 26.770041993586347
+      },
+      "upstream_attempts": 1,
+      "workflow_outcomes": {
+        "completed": 1
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "preflight",
+    "repeat": 1,
+    "arm": "bifrost",
+    "profile": "usage_contract",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "bifrost",
+      "--profile",
+      "usage_contract",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/preflight/1-bifrost-usage_contract"
+    ],
+    "seconds": 0.4288687919906806,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/preflight/1-bifrost-usage_contract/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 66,
+      "all_work_completion_ms": 28.346666018478572,
+      "client_http_attempts": 1,
+      "completed_by_deadline": 1,
+      "completed_by_seconds": {
+        "10": 1,
+        "2": 1,
+        "5": 1
+      },
+      "completed_usage": {
+        "observed": 1
+      },
+      "groups": {
+        "length:short": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 28.34358302061446,
+            "n": 1,
+            "p50": 28.34358302061446,
+            "p95": 28.34358302061446,
+            "p99": 28.34358302061446
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 28.34358302061446,
+            "n": 1,
+            "p50": 28.34358302061446,
+            "p95": 28.34358302061446,
+            "p99": 28.34358302061446
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 1
+      },
+      "planned_nodes": 1,
+      "planned_workflows": 1,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 3.375541011337191,
+        "n": 1,
+        "p50": 3.375541011337191,
+        "p95": 3.375541011337191,
+        "p99": 3.375541011337191
+      },
+      "success_workflow_latency_ms": {
+        "max": 28.346666018478572,
+        "n": 1,
+        "p50": 28.346666018478572,
+        "p95": 28.346666018478572,
+        "p99": 28.346666018478572
+      },
+      "upstream_attempts": 1,
+      "workflow_outcomes": {
+        "completed": 1
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "preflight",
+    "repeat": 1,
+    "arm": "litellm",
+    "profile": "usage_contract",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "litellm",
+      "--profile",
+      "usage_contract",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/preflight/1-litellm-usage_contract"
+    ],
+    "seconds": 2.5090671250072774,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/preflight/1-litellm-usage_contract/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 66,
+      "all_work_completion_ms": 181.46504100877792,
+      "client_http_attempts": 1,
+      "completed_by_deadline": 1,
+      "completed_by_seconds": {
+        "10": 1,
+        "2": 1,
+        "5": 1
+      },
+      "completed_usage": {
+        "observed": 1
+      },
+      "groups": {
+        "length:short": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 181.4624160178937,
+            "n": 1,
+            "p50": 181.4624160178937,
+            "p95": 181.4624160178937,
+            "p99": 181.4624160178937
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 1
+          },
+          "planned": 1,
+          "success_latency_ms": {
+            "max": 181.4624160178937,
+            "n": 1,
+            "p50": 181.4624160178937,
+            "p95": 181.4624160178937,
+            "p99": 181.4624160178937
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 1
+      },
+      "planned_nodes": 1,
+      "planned_workflows": 1,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 3.5989159950986505,
+        "n": 1,
+        "p50": 3.5989159950986505,
+        "p95": 3.5989159950986505,
+        "p99": 3.5989159950986505
+      },
+      "success_workflow_latency_ms": {
+        "max": 181.46504100877792,
+        "n": 1,
+        "p50": 181.46504100877792,
+        "p95": 181.46504100877792,
+        "p99": 181.46504100877792
+      },
+      "upstream_attempts": 1,
+      "workflow_outcomes": {
+        "completed": 1
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "strict",
+    "repeat": 1,
+    "arm": "direct",
+    "profile": "original18_rolling",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "direct",
+      "--profile",
+      "original18_rolling",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/strict/1-direct-original18_rolling"
+    ],
+    "seconds": 70.32282516700798,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/strict/1-direct-original18_rolling/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 4924,
+      "all_work_completion_ms": 67969.37233398785,
+      "client_http_attempts": 21,
+      "completed_by_deadline": 18,
+      "completed_by_seconds": {
+        "10": 16,
+        "2": 11,
+        "5": 16
+      },
+      "completed_usage": {
+        "observed": 18
+      },
+      "groups": {
+        "length:long": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 35508.38191699586,
+            "n": 4,
+            "p50": 405.1074589951895,
+            "p95": 35508.38191699586,
+            "p99": 35508.38191699586
+          }
+        },
+        "length:short": {
+          "outcomes": {
+            "completed": 14
+          },
+          "planned": 14,
+          "success_latency_ms": {
+            "max": 38512.255124980584,
+            "n": 14,
+            "p50": 407.34604198951274,
+            "p95": 38512.255124980584,
+            "p99": 38512.255124980584
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 5
+          },
+          "planned": 5,
+          "success_latency_ms": {
+            "max": 38512.255124980584,
+            "n": 5,
+            "p50": 611.1313749861438,
+            "p95": 38512.255124980584,
+            "p99": 38512.255124980584
+          }
+        },
+        "root:1": {
+          "outcomes": {
+            "completed": 5
+          },
+          "planned": 5,
+          "success_latency_ms": {
+            "max": 2507.0454589731526,
+            "n": 5,
+            "p50": 406.4032089954708,
+            "p95": 2507.0454589731526,
+            "p99": 2507.0454589731526
+          }
+        },
+        "root:2": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2506.378458987456,
+            "n": 4,
+            "p50": 407.34604198951274,
+            "p95": 2506.378458987456,
+            "p99": 2506.378458987456
+          }
+        },
+        "root:3": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2506.690833979519,
+            "n": 4,
+            "p50": 26.890708977589384,
+            "p95": 2506.690833979519,
+            "p99": 2506.690833979519
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 18
+      },
+      "planned_nodes": 18,
+      "planned_workflows": 18,
+      "provider_rejected_attempts": 3,
+      "scheduling_lag_ms": {
+        "max": 2.368749992456287,
+        "n": 18,
+        "p50": 2.215999993495643,
+        "p95": 2.368749992456287,
+        "p99": 2.368749992456287
+      },
+      "success_workflow_latency_ms": {
+        "max": 38512.27233398822,
+        "n": 18,
+        "p50": 406.773708993569,
+        "p95": 38512.27233398822,
+        "p99": 38512.27233398822
+      },
+      "upstream_attempts": 21,
+      "workflow_outcomes": {
+        "completed": 18
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "paired",
+    "repeat": 1,
+    "arm": "deskquota_local",
+    "profile": "original18_bucket",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "deskquota_local",
+      "--profile",
+      "original18_bucket",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/paired/1-deskquota_local-original18_bucket"
+    ],
+    "seconds": 70.09416183299618,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/paired/1-deskquota_local-original18_bucket/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 4924,
+      "all_work_completion_ms": 67591.61308297189,
+      "client_http_attempts": 18,
+      "completed_by_deadline": 18,
+      "completed_by_seconds": {
+        "10": 16,
+        "2": 11,
+        "5": 16
+      },
+      "completed_usage": {
+        "observed": 18
+      },
+      "groups": {
+        "length:long": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 35195.264167006826,
+            "n": 4,
+            "p50": 407.173541985685,
+            "p95": 35195.264167006826,
+            "p99": 35195.264167006826
+          }
+        },
+        "length:short": {
+          "outcomes": {
+            "completed": 14
+          },
+          "planned": 14,
+          "success_latency_ms": {
+            "max": 38134.48379197507,
+            "n": 14,
+            "p50": 407.77258298476227,
+            "p95": 38134.48379197507,
+            "p99": 38134.48379197507
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 5
+          },
+          "planned": 5,
+          "success_latency_ms": {
+            "max": 38134.48379197507,
+            "n": 5,
+            "p50": 611.7764579830691,
+            "p95": 38134.48379197507,
+            "p99": 38134.48379197507
+          }
+        },
+        "root:1": {
+          "outcomes": {
+            "completed": 5
+          },
+          "planned": 5,
+          "success_latency_ms": {
+            "max": 2506.6205829789396,
+            "n": 5,
+            "p50": 407.52337500452995,
+            "p95": 2506.6205829789396,
+            "p99": 2506.6205829789396
+          }
+        },
+        "root:2": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2507.664416974876,
+            "n": 4,
+            "p50": 407.8550419944804,
+            "p95": 2507.664416974876,
+            "p99": 2507.664416974876
+          }
+        },
+        "root:3": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2508.062249980867,
+            "n": 4,
+            "p50": 26.73537499504164,
+            "p95": 2508.062249980867,
+            "p99": 2508.062249980867
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 18
+      },
+      "planned_nodes": 18,
+      "planned_workflows": 18,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 2.369958005147055,
+        "n": 18,
+        "p50": 2.261457993881777,
+        "p95": 2.369958005147055,
+        "p99": 2.369958005147055
+      },
+      "success_workflow_latency_ms": {
+        "max": 38134.51308297226,
+        "n": 18,
+        "p50": 407.7994999825023,
+        "p95": 38134.51308297226,
+        "p99": 38134.51308297226
+      },
+      "upstream_attempts": 18,
+      "workflow_outcomes": {
+        "completed": 18
+      }
+    },
+    "error": null,
+    "audit_error": null
+  },
+  {
+    "group": "paired",
+    "repeat": 1,
+    "arm": "deskquota_managed",
+    "profile": "original18_bucket",
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "scripts/benchmark-workflow-completion.py",
+      "--arm",
+      "deskquota_managed",
+      "--profile",
+      "original18_bucket",
+      "--binary",
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "--output",
+      "/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/workflow-completion-2026-09-16/measurements/paired/1-deskquota_managed-original18_bucket"
+    ],
+    "seconds": 34.46170700000948,
+    "exit_code": 0,
+    "result": "evidence/workflow-completion-2026-09-16/measurements/paired/1-deskquota_managed-original18_bucket/result.json",
+    "status": "completed",
+    "summary": {
+      "admitted_fixture_token_units": 4924,
+      "all_work_completion_ms": 31964.469875005307,
+      "client_http_attempts": 18,
+      "completed_by_deadline": 18,
+      "completed_by_seconds": {
+        "10": 18,
+        "2": 11,
+        "5": 18
+      },
+      "completed_usage": {
+        "observed": 18
+      },
+      "groups": {
+        "length:long": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2505.413666018285,
+            "n": 4,
+            "p50": 407.7034580113832,
+            "p95": 2505.413666018285,
+            "p99": 2505.413666018285
+          }
+        },
+        "length:short": {
+          "outcomes": {
+            "completed": 14
+          },
+          "planned": 14,
+          "success_latency_ms": {
+            "max": 2508.391125011258,
+            "n": 14,
+            "p50": 408.2933749887161,
+            "p95": 2508.391125011258,
+            "p99": 2508.391125011258
+          }
+        },
+        "root:0": {
+          "outcomes": {
+            "completed": 5
+          },
+          "planned": 5,
+          "success_latency_ms": {
+            "max": 2507.335750007769,
+            "n": 5,
+            "p50": 611.4119160047267,
+            "p95": 2507.335750007769,
+            "p99": 2507.335750007769
+          }
+        },
+        "root:1": {
+          "outcomes": {
+            "completed": 5
+          },
+          "planned": 5,
+          "success_latency_ms": {
+            "max": 2508.1663750170264,
+            "n": 5,
+            "p50": 408.4607500117272,
+            "p95": 2508.1663750170264,
+            "p99": 2508.1663750170264
+          }
+        },
+        "root:2": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2508.391125011258,
+            "n": 4,
+            "p50": 407.7034580113832,
+            "p95": 2508.391125011258,
+            "p99": 2508.391125011258
+          }
+        },
+        "root:3": {
+          "outcomes": {
+            "completed": 4
+          },
+          "planned": 4,
+          "success_latency_ms": {
+            "max": 2506.7369579919614,
+            "n": 4,
+            "p50": 27.88316601072438,
+            "p95": 2506.7369579919614,
+            "p99": 2506.7369579919614
+          }
+        }
+      },
+      "node_outcomes": {
+        "completed": 18
+      },
+      "planned_nodes": 18,
+      "planned_workflows": 18,
+      "provider_rejected_attempts": 0,
+      "scheduling_lag_ms": {
+        "max": 2.386666019447148,
+        "n": 18,
+        "p50": 2.277416002471,
+        "p95": 2.386666019447148,
+        "p99": 2.386666019447148
+      },
+      "success_workflow_latency_ms": {
+        "max": 2508.4247500053607,
+        "n": 18,
+        "p50": 408.3107500046026,
+        "p95": 2508.4247500053607,
+        "p99": 2508.4247500053607
+      },
+      "upstream_attempts": 18,
+      "workflow_outcomes": {
+        "completed": 18
+      }
+    },
+    "error": null,
+    "audit_error": null
+  }
+]

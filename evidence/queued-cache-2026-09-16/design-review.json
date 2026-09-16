@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-16T01:07:38.820309+00:00",
+  "reviewer": "/root/cache_efficiency_audit",
+  "spec": "docs/superpowers/specs/2026-09-16-queued-cache-design.md",
+  "plan": "docs/superpowers/plans/2026-09-16-queued-cache.md",
+  "decision": "APPROVED",
+  "notes": [
+    "Race completed-cache notification against retained initial admission; provisional ticket and unstarted hold cleanup reuse current owners.",
+    "Preserve body/usage and per-request cache denominator.",
+    "Global bounded listener set may include provisional admissions as well as queued tickets.",
+    "Full singleflight and internal retry waits excluded."
+  ]
+}

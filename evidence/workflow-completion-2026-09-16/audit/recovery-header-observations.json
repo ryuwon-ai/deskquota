@@ -1,0 +1,4765 @@
+{
+  "status": "passed",
+  "scope": "Observed headers and retry decisions in these frozen configs only; no source-level universal LiteLLM claim. Same primary client fallback policy, no hidden SDK retries.",
+  "findings": "All LiteLLM recovery failures omit the fixture retry-after-ms header at the client boundary; harness therefore selects seeded_backoff, and early retries occur before the fixture recovery time. Direct/Bifrost/DeskQuota expose the timing header in these responses.",
+  "runs": [
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-direct-recoverable429/result.json",
+      "sha256": "53c8bc224697c6de49b95cc1801c48cd3027c2062ff20fe7233dd196ac92987b",
+      "profile": "recoverable429",
+      "arm": "direct",
+      "repeat": 1,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.0006676669872831553,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 1.0,
+          "next_planned_retry_offset_s": 1.000819542008685
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.10272904200246558,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.000886541994987
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20305158299743198,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0002696669835132
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.30335175001528114,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0006205419776961
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.4033114170015324,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0006354170036502
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.501801250007702,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "499"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "499"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.499,
+          "next_planned_retry_offset_s": 1.001113542006351
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6033012919942848,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.000567624985706
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7031462920131162,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.0004448749823496
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-deskquota_local-recoverable429/result.json",
+      "sha256": "fb6c49c2617e80a8ecf23e1a8eb3a118a1345bdfd9b3cdef2f8a4a6df4eb91e5",
+      "profile": "recoverable429",
+      "arm": "deskquota_local",
+      "repeat": 1,
+      "failed_http_attempts": 1,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.004550292011117563,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0007929590065032
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-deskquota_managed-recoverable429/result.json",
+      "sha256": "1bf0e8a010cee1ecd7b9edb2fc00a4ebad5e5daa4133638e75a8b1ad7d8160e7",
+      "profile": "recoverable429",
+      "arm": "deskquota_managed",
+      "repeat": 1,
+      "failed_http_attempts": 1,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.004414541996084154,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.000661250000121
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-bifrost-recoverable429/result.json",
+      "sha256": "7900eed800e7107e1cf6fb50c4a70891ec2fd00089ebd076eb79b5a083f6bb42",
+      "profile": "recoverable429",
+      "arm": "bifrost",
+      "repeat": 1,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.004651999974157661,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0010303749877494
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.10299749998375773,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0013641659752466
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.2037902909796685,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0015102499746718
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3028163749841042,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "698"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "698"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.698,
+          "next_planned_retry_offset_s": 1.0016267909959424
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.4037240829784423,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0013973329914734
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.5039222079794854,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.007649582985323
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6039896659785882,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0018443329900037
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7034234579768963,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.001106957992306
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-litellm-recoverable429/result.json",
+      "sha256": "aff8c4bac1d825d1117145f4330790ec2bf1d9419a0f26013d22c43e49b77179",
+      "profile": "recoverable429",
+      "arm": "litellm",
+      "repeat": 1,
+      "failed_http_attempts": 13,
+      "absent_client_timing": 13,
+      "retries_planned_before_recovery": 5,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.11893941700691357,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "882"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3799400142524111,
+          "next_planned_retry_offset_s": 0.5247939312539529
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.11908879200927913,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "881"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4634351471972571,
+          "next_planned_retry_offset_s": 0.6114101471903268
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20560254200245254,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "795"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3961029389828815,
+          "next_planned_retry_offset_s": 0.611640480987262
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3059279170120135,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "695"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3790839412839779,
+          "next_planned_retry_offset_s": 0.6982386492891237
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.4065677920007147,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "594"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3754488784213167,
+          "next_planned_retry_offset_s": 0.7983514204388484
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.5080322500143666,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "492"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.48447830176385426,
+          "next_planned_retry_offset_s": 1.0093677597760689
+        },
+        {
+          "node": "n0",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.5279955420119222,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "473"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7545396056112693,
+          "next_planned_retry_offset_s": 1.295096855610609
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6058399169996846,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "395"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4065811366997285,
+          "next_planned_retry_offset_s": 1.0283720117004123
+        },
+        {
+          "node": "n1",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.6247482920007315,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "376"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8409898714997733,
+          "next_planned_retry_offset_s": 1.4830332885030657
+        },
+        {
+          "node": "n2",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.6248405830119736,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "376"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8706776235972495,
+          "next_planned_retry_offset_s": 1.5165464986057486
+        },
+        {
+          "node": "n3",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.7044769579952117,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "296"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8478429498386666,
+          "next_planned_retry_offset_s": 1.5652143668557983
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7127318750135601,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "288"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4726426972823563,
+          "next_planned_retry_offset_s": 1.2007731142803095
+        },
+        {
+          "node": "n4",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.8036910420050845,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "197"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7798547318378999,
+          "next_planned_retry_offset_s": 1.596603481855709
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-deskquota_local-recoverable429/result.json",
+      "sha256": "4602a26e771c55aea7808942a9e80ae976e4bec9fe22256604d74ccfe8500a98",
+      "profile": "recoverable429",
+      "arm": "deskquota_local",
+      "repeat": 2,
+      "failed_http_attempts": 1,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.00440812500892207,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.00063495800714
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-deskquota_managed-recoverable429/result.json",
+      "sha256": "0b297fd0fa477fe6925be8636e9ba61815ceeab83d3362e1645c670801eeb35d",
+      "profile": "recoverable429",
+      "arm": "deskquota_managed",
+      "repeat": 2,
+      "failed_http_attempts": 1,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.0045049170148558915,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0008173330279533
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-bifrost-recoverable429/result.json",
+      "sha256": "0ec9c955eb45939da077887a8cffe83f9c776ae41ecd12c91cb5079f155a5560",
+      "profile": "recoverable429",
+      "arm": "bifrost",
+      "repeat": 2,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.005020667013013735,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.995,
+          "next_planned_retry_offset_s": 1.000439124996774
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.10286954199546017,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0012243749806657
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20367616700241342,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0012740420061164
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3037561670062132,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.001459999999497
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.40343979201861657,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0013332090165932
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.5039625840145163,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.001705167000182
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6038302500091959,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0015231250145007
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7032948750129435,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.001001416996587
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-litellm-recoverable429/result.json",
+      "sha256": "63a534eb258b297869f5e118927792097e5bbb5436a63661b43732d4506d24d8",
+      "profile": "recoverable429",
+      "arm": "litellm",
+      "repeat": 2,
+      "failed_http_attempts": 13,
+      "absent_client_timing": 13,
+      "retries_planned_before_recovery": 5,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.11916316699353047,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "881"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3799400142524111,
+          "next_planned_retry_offset_s": 0.5179296812566463
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.11929954201332293,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "881"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4634351471972571,
+          "next_planned_retry_offset_s": 0.6049218972038943
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20593170801294036,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "795"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3961029389828815,
+          "next_planned_retry_offset_s": 0.6133902309811674
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3062853330047801,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "694"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3790839412839779,
+          "next_planned_retry_offset_s": 0.7002322332991753
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.4064491250028368,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "594"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3754488784213167,
+          "next_planned_retry_offset_s": 0.7984750034229364
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.507886832987424,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "493"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.48447830176385426,
+          "next_planned_retry_offset_s": 1.0093522597744595
+        },
+        {
+          "node": "n0",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.5274069579900242,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "473"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7545396056112693,
+          "next_planned_retry_offset_s": 1.2943736056040507
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6055749169900082,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "395"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4065811366997285,
+          "next_planned_retry_offset_s": 1.0276888866792433
+        },
+        {
+          "node": "n1",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.6230581249983516,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "377"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8409898714997733,
+          "next_planned_retry_offset_s": 1.476226538507035
+        },
+        {
+          "node": "n2",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.6307790419959929,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "370"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8706776235972495,
+          "next_planned_retry_offset_s": 1.5160310406063218
+        },
+        {
+          "node": "n3",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.7061089579947293,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "294"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8478429498386666,
+          "next_planned_retry_offset_s": 1.5671901578607503
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7146436670154799,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "286"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4726426972823563,
+          "next_planned_retry_offset_s": 1.2025328642921522
+        },
+        {
+          "node": "n4",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.8042022500012536,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "196"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7798547318378999,
+          "next_planned_retry_offset_s": 1.5983845238515642
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-direct-recoverable429/result.json",
+      "sha256": "35f9c00c992f847121a8c005a79ecf8face10fa0655056613ad1781f319c896b",
+      "profile": "recoverable429",
+      "arm": "direct",
+      "repeat": 2,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.0006084170017857105,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 1.0,
+          "next_planned_retry_offset_s": 1.0007429590041284
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.10270270900218748,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0008586669864599
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20360916698700748,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0009195839811582
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3033223339880351,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0006007499760017
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.4025156249990687,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "598"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "598"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.598,
+          "next_planned_retry_offset_s": 1.0007696670072619
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.5031725000008009,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.000388791988371
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6032196669839323,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0004451669810805
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7032595420023426,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.0004706670006271
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-deskquota_managed-recoverable429/result.json",
+      "sha256": "3390a67b389a29ab03788c05995660c595d02e5ce5f9f0c284cd3db69b914a78",
+      "profile": "recoverable429",
+      "arm": "deskquota_managed",
+      "repeat": 3,
+      "failed_http_attempts": 1,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.005467375012813136,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.995,
+          "next_planned_retry_offset_s": 1.0007065829995554
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-bifrost-recoverable429/result.json",
+      "sha256": "8805392571cc0b5176413fc83724b65b2c46c61c95bc03b4c10d6348e7a35c7e",
+      "profile": "recoverable429",
+      "arm": "bifrost",
+      "repeat": 3,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.004797208006493747,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0012357080122456
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.10302379200584255,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.897,
+          "next_planned_retry_offset_s": 1.0003976250009146
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20369883300736547,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0012865419848822
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3036403750011232,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.001282249984797
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.4041869580105413,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "596"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "596"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.596,
+          "next_planned_retry_offset_s": 1.0011672499822453
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.5039192500116769,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.00654050000594
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6035115830018185,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.001331792009296
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7037525000050664,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.0014415420009755
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-litellm-recoverable429/result.json",
+      "sha256": "74990aa7e0b91aee0a4bc621fcf56c909f5e1e1f77aaea6cf37f16489c8f2270",
+      "profile": "recoverable429",
+      "arm": "litellm",
+      "repeat": 3,
+      "failed_http_attempts": 13,
+      "absent_client_timing": 13,
+      "retries_planned_before_recovery": 5,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.1193164589931257,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "881"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3799400142524111,
+          "next_planned_retry_offset_s": 0.5178628482390195
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.11945020899293013,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "881"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4634351471972571,
+          "next_planned_retry_offset_s": 0.6048538561735768
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20576358400285244,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "795"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3961029389828815,
+          "next_planned_retry_offset_s": 0.6130365229619201
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.30598095900495537,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "695"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3790839412839779,
+          "next_planned_retry_offset_s": 0.6983248582691886
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.40658549999352545,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "594"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3754488784213167,
+          "next_planned_retry_offset_s": 0.7984158374019898
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.5082533340028021,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "492"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.48447830176385426,
+          "next_planned_retry_offset_s": 1.0099340937740635
+        },
+        {
+          "node": "n0",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.5280309169902466,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "472"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7545396056112693,
+          "next_planned_retry_offset_s": 1.2955588976037689
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6056358339847066,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "395"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4065811366997285,
+          "next_planned_retry_offset_s": 1.0285138036706485
+        },
+        {
+          "node": "n1",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.623972417000914,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "377"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8409898714997733,
+          "next_planned_retry_offset_s": 1.4776238304912113
+        },
+        {
+          "node": "n2",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.6320438339898828,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "368"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8706776235972495,
+          "next_planned_retry_offset_s": 1.5173262486059684
+        },
+        {
+          "node": "n3",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.7048835839959793,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "296"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8478429498386666,
+          "next_planned_retry_offset_s": 1.5653268248424865
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7129168339888565,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "288"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4726426972823563,
+          "next_planned_retry_offset_s": 1.2002718222793192
+        },
+        {
+          "node": "n4",
+          "client_index": 2,
+          "status": 429,
+          "provider_offset_s": 0.803921916987747,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "197"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7798547318378999,
+          "next_planned_retry_offset_s": 1.596001065830933
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-direct-recoverable429/result.json",
+      "sha256": "55f36cc3488b8f53fb6e4df868d9b195017f36b479f957d9fc16dbd0ab6d8d40",
+      "profile": "recoverable429",
+      "arm": "direct",
+      "repeat": 3,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.0005932920030318201,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 1.0,
+          "next_planned_retry_offset_s": 1.0007215420191642
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.10271695800474845,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0008841670060065
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.20287187499343418,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.798,
+          "next_planned_retry_offset_s": 1.0011076670198236
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.3037728750205133,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.001116458006436
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.40347979200305417,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.000892375013791
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.503379292000318,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0006770420004614
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.6032616670127027,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0005314169975463
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.7033737500023562,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.00070666699321
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-deskquota_local-recoverable429/result.json",
+      "sha256": "65e0279e6e22f0fc656a7a224ac8528eac572aed7c5ec2327de3c42924d60ded",
+      "profile": "recoverable429",
+      "arm": "deskquota_local",
+      "repeat": 3,
+      "failed_http_attempts": 1,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 429,
+          "provider_offset_s": 0.004485541983740404,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0007421250047628
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-direct-recoverable503/result.json",
+      "sha256": "676dd58a6449ab7370f12ed6ccae39f73873a31cc71fbf48a1f9da0bea38a684",
+      "profile": "recoverable503",
+      "arm": "direct",
+      "repeat": 1,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.0005861250101588666,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 1.0,
+          "next_planned_retry_offset_s": 1.0007006670057308
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10265166699537076,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0007937089831103
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20290029200259596,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.798,
+          "next_planned_retry_offset_s": 1.0011411670129746
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.303268375020707,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0005262499907985
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4034407090221066,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0007254590163939
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5032102920231409,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0004945420078002
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6034149590122979,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0007231250056066
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7007442089961842,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "300"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "300"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.3,
+          "next_planned_retry_offset_s": 1.00087491699378
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-deskquota_local-recoverable503/result.json",
+      "sha256": "a9ae69a6d101149802745c4e01e62fc1b03c0a485677c43b25de614cc8888edc",
+      "profile": "recoverable503",
+      "arm": "deskquota_local",
+      "repeat": 1,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.004703374987002462,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.00092829199275
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10303245799150318,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.897,
+          "next_planned_retry_offset_s": 1.0003430419892538
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.2037701249937527,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0013992919703014
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30356974998721853,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.00102554197656
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4033401249907911,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0007038750045467
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5034314999938942,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0009399580012541
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6033037919842172,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.000759457994718
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.702798582991818,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.298,
+          "next_planned_retry_offset_s": 1.001102666981751
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-deskquota_managed-recoverable503/result.json",
+      "sha256": "184eeffa0f4553c6a61be0dc3ddf280b96115e011f6dd3b9679416356e6a7ab6",
+      "profile": "recoverable503",
+      "arm": "deskquota_managed",
+      "repeat": 1,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.004399999976158142,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.000649749999866
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.1029260829964187,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.001223166967975
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.2027892499754671,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.798,
+          "next_planned_retry_offset_s": 1.001154083001893
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30343074997654185,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0008357919869013
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40356516698375344,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0009502079919912
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5037462499749381,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.001167207985418
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6028542080020998,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "398"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "398"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.398,
+          "next_planned_retry_offset_s": 1.0012829169863835
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7029290829959791,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.298,
+          "next_planned_retry_offset_s": 1.0012819579860661
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-bifrost-recoverable503/result.json",
+      "sha256": "c769b7260b1dd6352f65605fb630b1a617c2cf220768ab1ccb75de21031d955b",
+      "profile": "recoverable503",
+      "arm": "bifrost",
+      "repeat": 1,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.004779874987434596,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0012213340087328
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10138849998475052,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "899"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "899"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.899,
+          "next_planned_retry_offset_s": 1.0007714999956079
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20336604199837893,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0009561670012772
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30376591699314304,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.001603124983376
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4042035839811433,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "596"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "596"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.596,
+          "next_planned_retry_offset_s": 1.001291124994168
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5036415839858819,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0013748339843005
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6047357500065118,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.396,
+          "next_planned_retry_offset_s": 1.0017756250163075
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7036434999899939,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.001297666982282
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/1-litellm-recoverable503/result.json",
+      "sha256": "ce46ce926c102e0ffe3e4b4e698893ec1d45a592568172b697baae9e92adf14c",
+      "profile": "recoverable503",
+      "arm": "litellm",
+      "repeat": 1,
+      "failed_http_attempts": 13,
+      "absent_client_timing": 13,
+      "retries_planned_before_recovery": 5,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.12020166701404378,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "880"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3799400142524111,
+          "next_planned_retry_offset_s": 0.5186707642569672
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.12032483299844898,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "880"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4634351471972571,
+          "next_planned_retry_offset_s": 0.6055618971877266
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20560937499976717,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "795"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3961029389828815,
+          "next_planned_retry_offset_s": 0.6131898559688125
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.3052560420182999,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "695"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3790839412839779,
+          "next_planned_retry_offset_s": 0.6992185662966222
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4066577499906998,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "594"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3754488784213167,
+          "next_planned_retry_offset_s": 0.7987583364301827
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5081489580043126,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "492"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.48447830176385426,
+          "next_planned_retry_offset_s": 1.0092660097870976
+        },
+        {
+          "node": "n0",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.5273014169943053,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "473"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7545396056112693,
+          "next_planned_retry_offset_s": 1.294586563599296
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6054119170003105,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "395"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4065811366997285,
+          "next_planned_retry_offset_s": 1.026830761693418
+        },
+        {
+          "node": "n1",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.6223519580089487,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "378"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8409898714997733,
+          "next_planned_retry_offset_s": 1.4747204965096898
+        },
+        {
+          "node": "n2",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.6296486670034938,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "371"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8706776235972495,
+          "next_planned_retry_offset_s": 1.5139439566119108
+        },
+        {
+          "node": "n3",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.7054162920103408,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "295"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8478429498386666,
+          "next_planned_retry_offset_s": 1.5664712828584015
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7139360000146553,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "287"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4726426972823563,
+          "next_planned_retry_offset_s": 1.201695364288753
+        },
+        {
+          "node": "n4",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.8043971250008326,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "196"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7798547318378999,
+          "next_planned_retry_offset_s": 1.5981725238380022
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-deskquota_local-recoverable503/result.json",
+      "sha256": "2a5d2de5bd11c16c71f49e48bd9c1fa05938446c7a8e0e1289e78c782aa196f0",
+      "profile": "recoverable503",
+      "arm": "deskquota_local",
+      "repeat": 2,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.004710415989393368,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0009250000002794
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10301029097172432,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.897,
+          "next_planned_retry_offset_s": 1.000283582980046
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.2037214999727439,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0012835829693358
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.3036298329825513,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0011686249636114
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40285512499394827,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "598"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "598"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.598,
+          "next_planned_retry_offset_s": 1.0013476659951266
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5034182909876108,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0009730409947224
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6040192909713369,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.396,
+          "next_planned_retry_offset_s": 1.0006858749839012
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7037404999719001,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.001343415962765
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-deskquota_managed-recoverable503/result.json",
+      "sha256": "f2cf975d05c893f512b7fba216b9b1f0665b6032b3d40d283f136d4cadfbfbaf",
+      "profile": "recoverable503",
+      "arm": "deskquota_managed",
+      "repeat": 2,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.005104333016788587,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.995,
+          "next_planned_retry_offset_s": 1.0003302920085844
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10262262501055375,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.000856416998431
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20252083300147206,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.798,
+          "next_planned_retry_offset_s": 1.0007020830234978
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30261133299791254,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "698"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "698"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.698,
+          "next_planned_retry_offset_s": 1.0007881670026109
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40278733300510794,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "598"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "598"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.598,
+          "next_planned_retry_offset_s": 1.0010752080124803
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5034555830061436,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0008443749975413
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6037293749977835,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0012467080086935
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7034490420192014,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.0008508329920005
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-bifrost-recoverable503/result.json",
+      "sha256": "00dee7c203768d37024b3e9e0e9ce3dba766398ee0c306413889903a45936810",
+      "profile": "recoverable503",
+      "arm": "bifrost",
+      "repeat": 2,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.005541999998968095,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "995"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.995,
+          "next_planned_retry_offset_s": 1.000939624995226
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10276929099927656,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0010719579877332
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20337295799981803,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0009572499839123
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30345658300211653,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0011151659709867
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4040826660057064,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "596"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "596"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.596,
+          "next_planned_retry_offset_s": 1.0009874579845928
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5037960000045132,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0016799579898361
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6039430410019122,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0016612499894109
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7029999159858562,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.298,
+          "next_planned_retry_offset_s": 1.0017764160002116
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-litellm-recoverable503/result.json",
+      "sha256": "4ff27ac7c445729a600b78419110c32ef759a6919a3fbda7c48728565810ef49",
+      "profile": "recoverable503",
+      "arm": "litellm",
+      "repeat": 2,
+      "failed_http_attempts": 13,
+      "absent_client_timing": 13,
+      "retries_planned_before_recovery": 5,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.1212740000046324,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "879"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3799400142524111,
+          "next_planned_retry_offset_s": 0.5239599732449278
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.12115087499842048,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "879"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4634351471972571,
+          "next_planned_retry_offset_s": 0.6039813561947085
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.2048572920029983,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "796"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3961029389828815,
+          "next_planned_retry_offset_s": 0.6124132729601115
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.3061477089941036,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "694"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3790839412839779,
+          "next_planned_retry_offset_s": 0.6999263162724674
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40572566699120216,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "595"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3754488784213167,
+          "next_planned_retry_offset_s": 0.7977918374235742
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5089384589809924,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "492"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.48447830176385426,
+          "next_planned_retry_offset_s": 1.0097459687676746
+        },
+        {
+          "node": "n0",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.5283223339938559,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "472"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7545396056112693,
+          "next_planned_retry_offset_s": 1.2953108556102961
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.604645041981712,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4065811366997285,
+          "next_planned_retry_offset_s": 1.0265288866939954
+        },
+        {
+          "node": "n1",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.6220839589950629,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "378"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8409898714997733,
+          "next_planned_retry_offset_s": 1.4751752885058522
+        },
+        {
+          "node": "n2",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.6298920419940259,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "371"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8706776235972495,
+          "next_planned_retry_offset_s": 1.5153618326003198
+        },
+        {
+          "node": "n3",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.7052765839907806,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "295"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8478429498386666,
+          "next_planned_retry_offset_s": 1.56635399183142
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7137684589833952,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "287"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4726426972823563,
+          "next_planned_retry_offset_s": 1.20170286425855
+        },
+        {
+          "node": "n4",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.8029396249912679,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "198"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7798547318378999,
+          "next_planned_retry_offset_s": 1.5961949408228975
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/2-direct-recoverable503/result.json",
+      "sha256": "f61dcbb5c6cf7a55b1c12f94678a45071f9591cd7e546ca4726615b7f8de80b9",
+      "profile": "recoverable503",
+      "arm": "direct",
+      "repeat": 2,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.0008145410101860762,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 1.0,
+          "next_planned_retry_offset_s": 1.0011145830212627
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.102589041023748,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0007446249946952
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20096950000151992,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "800"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "800"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.8,
+          "next_planned_retry_offset_s": 1.0011309999972582
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30154254101216793,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "699"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "699"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.699,
+          "next_planned_retry_offset_s": 1.0007287909975275
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40330912501667626,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0005912500200793
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5038323330227286,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0012880000285804
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6036460830073338,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.000963666010648
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7031931250239722,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.000472624989925
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-deskquota_managed-recoverable503/result.json",
+      "sha256": "7fe9c614fb2a58ef5a5d12bc9156c96eb315df71b7acdddbf0348c1095aa84f7",
+      "profile": "recoverable503",
+      "arm": "deskquota_managed",
+      "repeat": 3,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.0048104159941431135,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0010482910147402
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10303162498166785,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "897"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.897,
+          "next_planned_retry_offset_s": 1.0003405829775147
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20312216598540545,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0005109999910928
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30314795798039995,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0005344579694793
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4035578749899287,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0011925410071854
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5033364580012858,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0007119579822756
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6032720829825848,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0005954999942333
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.703619207983138,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.0011793329904322
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-bifrost-recoverable503/result.json",
+      "sha256": "fbef091f78b467b89412b699c325b428d3c33ac1083ee9761f52b57c505eff4c",
+      "profile": "recoverable503",
+      "arm": "bifrost",
+      "repeat": 3,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.004474040993954986,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0011124160082545
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.1028700829774607,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0012006249744445
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20380462499451824,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.001403082977049
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30342658297740854,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0009610829874873
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40317362497444265,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0007729580102023
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5036973329843022,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0013230000040494
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6030958329793066,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0006047499773558
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7038736249960493,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "297"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.297,
+          "next_planned_retry_offset_s": 1.0016744159802329
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-litellm-recoverable503/result.json",
+      "sha256": "b404055c50f890c52aca740c76fbed12f9f34e4bc8c9bd0958f7aaf6a550dfb3",
+      "profile": "recoverable503",
+      "arm": "litellm",
+      "repeat": 3,
+      "failed_http_attempts": 13,
+      "absent_client_timing": 13,
+      "retries_planned_before_recovery": 5,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.12069862498901784,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "880"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3799400142524111,
+          "next_planned_retry_offset_s": 0.5206610982422717
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.12080879200948402,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "880"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4634351471972571,
+          "next_planned_retry_offset_s": 0.6077942721894942
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20552220899844542,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "795"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3961029389828815,
+          "next_planned_retry_offset_s": 0.6126564809819683
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.30602854199241847,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "694"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3790839412839779,
+          "next_planned_retry_offset_s": 0.6998580662766472
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.4064182919973973,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "594"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.3754488784213167,
+          "next_planned_retry_offset_s": 0.7979256284306757
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5082548749924172,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "492"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.48447830176385426,
+          "next_planned_retry_offset_s": 1.0096468437695876
+        },
+        {
+          "node": "n0",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.5280836249876302,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "472"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7545396056112693,
+          "next_planned_retry_offset_s": 1.2946905646240339
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6057313340133987,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "395"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4065811366997285,
+          "next_planned_retry_offset_s": 1.0273206366982777
+        },
+        {
+          "node": "n1",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.6236508750007488,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "377"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8409898714997733,
+          "next_planned_retry_offset_s": 1.4821601635194384
+        },
+        {
+          "node": "n2",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.6237594590056688,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "377"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8706776235972495,
+          "next_planned_retry_offset_s": 1.515667957603
+        },
+        {
+          "node": "n3",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.7061633749981411,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "294"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.8478429498386666,
+          "next_planned_retry_offset_s": 1.5665362838481087
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7142814589897171,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "286"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.4726426972823563,
+          "next_planned_retry_offset_s": 1.2019108222739305
+        },
+        {
+          "node": "n4",
+          "client_index": 2,
+          "status": 503,
+          "provider_offset_s": 0.8037383340124507,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "197"
+            ]
+          ],
+          "client_timing": [],
+          "retry_reason": "seeded_backoff",
+          "retry_delay_s": 0.7798547318378999,
+          "next_planned_retry_offset_s": 1.5973997318360489
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-direct-recoverable503/result.json",
+      "sha256": "7fb1c984fd24ae7be82eacec5805730a625040f016cc27d17552d841b94c3c11",
+      "profile": "recoverable503",
+      "arm": "direct",
+      "repeat": 3,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.0006465410115197301,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "1000"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 1.0,
+          "next_planned_retry_offset_s": 1.0007793749973644
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10205058299470693,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.000213833001908
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.20292345801135525,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "798"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.798,
+          "next_planned_retry_offset_s": 1.001137583021773
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.303297291015042,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.000585083005717
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40376545800245367,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.001063083007466
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.5034165410033893,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "497"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.497,
+          "next_planned_retry_offset_s": 1.0006962500046939
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6049524580012076,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "396"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.396,
+          "next_planned_retry_offset_s": 1.0014122080174275
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7013762080168817,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "299"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "299"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.299,
+          "next_planned_retry_offset_s": 1.0006178750190884
+        }
+      ]
+    },
+    {
+      "result": "evidence/workflow-completion-2026-09-16/measurements/short/3-deskquota_local-recoverable503/result.json",
+      "sha256": "5a21d148e6d13a7d5c0272837e3a339c9db9c0ecdfc8d45e6ab96ce589cb9a0e",
+      "profile": "recoverable503",
+      "arm": "deskquota_local",
+      "repeat": 3,
+      "failed_http_attempts": 8,
+      "absent_client_timing": 0,
+      "retries_planned_before_recovery": 0,
+      "observed": [
+        {
+          "node": "n0",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.004395916999783367,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "996"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.996,
+          "next_planned_retry_offset_s": 1.0006341250264086
+        },
+        {
+          "node": "n1",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.10287975001847371,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "898"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.898,
+          "next_planned_retry_offset_s": 1.0011498329986352
+        },
+        {
+          "node": "n2",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.2032748750061728,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "797"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.797,
+          "next_planned_retry_offset_s": 1.0006543330091517
+        },
+        {
+          "node": "n3",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.303193250001641,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "697"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.697,
+          "next_planned_retry_offset_s": 1.0006040000007488
+        },
+        {
+          "node": "n4",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.40336920801200904,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "597"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.597,
+          "next_planned_retry_offset_s": 1.0008952500065789
+        },
+        {
+          "node": "n5",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.501781833008863,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "499"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "499"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.499,
+          "next_planned_retry_offset_s": 1.0012194580049254
+        },
+        {
+          "node": "n6",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.6037058749934658,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "397"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.397,
+          "next_planned_retry_offset_s": 1.0012392080097925
+        },
+        {
+          "node": "n7",
+          "client_index": 1,
+          "status": 503,
+          "provider_offset_s": 0.7024248749949038,
+          "provider_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "client_timing": [
+            [
+              "retry-after-ms",
+              "298"
+            ]
+          ],
+          "retry_reason": "header_max",
+          "retry_delay_s": 0.298,
+          "next_planned_retry_offset_s": 1.0008936670201365
+        }
+      ]
+    }
+  ]
+}

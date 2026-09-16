@@ -1,0 +1,30 @@
+warning: unexpected `cfg` condition value: `bpe`
+    --> tests/setup_contract.rs:1835:11
+     |
+1835 | #[cfg(not(feature = "bpe"))]
+     |           ^^^^^^^^^^^^^^^
+     |
+     = note: expected values for `feature` are: `bench-harness`
+     = help: consider adding `bpe` as a feature in `Cargo.toml`
+     = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+     = note: `#[warn(unexpected_cfgs)]` on by default
+
+warning: `llmgw` (test "setup_contract") generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running tests/setup_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/setup_contract-47fc16e2df3898df)
+
+running 1 test
+
+thread 'default_build_rejects_bpe_draft_before_replacing_existing_config' panicked at tests/setup_contract.rs:1847:73:
+called `Result::unwrap_err()` on an `Ok` value: ApplyResult { mode: SaveOnly, runtime_state: "not_started", worker_processes_started: 0, authenticated_readiness: false, config_path: "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-setup-32736-0-missing-bpe-capability 한글 space/gateway 설정.toml", pending_path: "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/llmgw-setup-32736-0-missing-bpe-capability 한글 space/.gateway 설정.toml.setup-pending.json" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test default_build_rejects_bpe_draft_before_replacing_existing_config ... FAILED
+
+failures:
+
+failures:
+    default_build_rejects_bpe_draft_before_replacing_existing_config
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 50 filtered out; finished in 1.25s
+
+error: test failed, to rerun pass `--test setup_contract`

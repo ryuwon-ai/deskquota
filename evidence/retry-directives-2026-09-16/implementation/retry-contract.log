@@ -1,0 +1,31 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running tests/retry_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/retry_contract-8328da91d5534933)
+
+running 24 tests
+test library_retry_wait_has_no_slot_preserves_age_deadline_and_unknown_tpm_debt ... ok
+test opt_in_replays_recognized_rejection_once_with_exact_body_and_two_rpm_charges ... ok
+test chunked_error_observation_overflow_is_transparent_and_never_replayed ... ok
+test canceled_retry_queue_releases_request_body_and_never_starts_a_second_attempt ... ok
+test opted_post_retry_preserves_the_identical_wire_body_and_headers ... ok
+test ordinary_rate_limit_code_accepts_only_compatible_type ... ok
+test invalid_utf8_in_ignored_error_payload_cannot_qualify_replay ... ok
+test rejection_head_skipped_probe_keeps_429_when_body_later_truncates ... ok
+test invalid_delay_does_not_turn_recognized_body_into_an_early_retry ... ok
+test rejection_head_streams_when_body_cannot_change_retry_or_cooldown ... ok
+test retry_original_queue_deadline_expires_without_acquiring_or_refreshing_age ... ok
+test permanent_unknown_conflicting_malformed_encoded_and_oversized_errors_are_not_replayed ... ok
+test full_queue_on_retry_returns_protocol_429_and_is_not_a_deadline ... ok
+test retry_veto_false_fields_block_replay_without_expanding_true ... ok
+test socket_ambiguity_503_redirect_and_partial_stream_have_exactly_one_wire_attempt_even_opted_in ... ok
+test real_retry_reenters_known_rpm_and_has_no_slot_while_waiting ... ok
+test positive_decimal_overflow_keeps_group_blocked_for_new_clients_even_with_zero_header ... ok
+test opted_retry_deadline_keeps_cooldown_for_the_next_client ... ok
+test retry_veto_preserves_cooldown_and_only_skips_unneeded_body_probe ... ok
+test retry_after_survives_request_deadline_and_new_root_metadata_client ... ok
+test pre_head_rejection_body_failure_returns_502_keeps_cooldown_and_unknown_debt ... ok
+test seconds_http_date_and_ms_share_cooldown_even_with_retry_off ... ok
+test recognized_without_header_waits_one_second_with_jitter_and_replays_only_once ... ok
+test rejection_head_waits_when_body_still_decides_retry_or_missing_timing_cooldown ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.86s
+

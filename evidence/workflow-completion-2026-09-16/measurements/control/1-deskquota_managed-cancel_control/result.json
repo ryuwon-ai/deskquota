@@ -1,0 +1,1202 @@
+{
+  "arm": "deskquota_managed",
+  "audit_valid": true,
+  "budget_samples": [
+    {
+      "accepted": true,
+      "at_s": 214724.08902625,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 0,
+      "rolling_tpm_used": 0,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214724.127971833,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 1,
+      "rolling_tpm_used": 56,
+      "rpm_tokens": null
+    }
+  ],
+  "cache": "off",
+  "cancellation_control": {
+    "cancel_at_s": 214724.127188541,
+    "cancelled_provider_attempts": 0,
+    "gate_released_s": 214724.127608166,
+    "observations": [
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 0,
+          "barrier_root": null,
+          "blocked_reason": null,
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 0,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 0,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 0
+            },
+            {
+              "id": "r1",
+              "queue_length": 0
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.088857291
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 1,
+          "barrier_root": null,
+          "blocked_reason": null,
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 0,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 1,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 0
+            },
+            {
+              "id": "r1",
+              "queue_length": 0
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.101364708
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 1,
+          "barrier_root": null,
+          "blocked_reason": null,
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 0,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 1,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 0
+            },
+            {
+              "id": "r1",
+              "queue_length": 0
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.101740708
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 1,
+          "barrier_root": null,
+          "blocked_reason": "concurrency",
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 1,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 1,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 1
+            },
+            {
+              "id": "r1",
+              "queue_length": 0
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.1143215
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 1,
+          "barrier_root": null,
+          "blocked_reason": "concurrency",
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 1,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 1,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 1
+            },
+            {
+              "id": "r1",
+              "queue_length": 0
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.114687916
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 1,
+          "barrier_root": null,
+          "blocked_reason": "concurrency",
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 2,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 1,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 1
+            },
+            {
+              "id": "r1",
+              "queue_length": 1
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.127186541
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 1,
+          "barrier_root": null,
+          "blocked_reason": "concurrency",
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 1,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 1,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 0
+            },
+            {
+              "id": "r1",
+              "queue_length": 1
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.127604583
+      },
+      {
+        "admission": {
+          "accounting": "actual",
+          "active": 0,
+          "barrier_root": null,
+          "blocked_reason": null,
+          "estimate_mode": "tpm_unenforced",
+          "model_estimators": [
+            {
+              "id": "synthetic",
+              "input_estimator": "cl100k_base",
+              "input_token_overhead": 256
+            }
+          ],
+          "queue_length": 0,
+          "reservation": {
+            "excess_tokens": "0",
+            "observed_tokens": "0",
+            "reserved_tokens": "0",
+            "samples": 0,
+            "shortfall_tokens": "0",
+            "unknown": 0
+          },
+          "retained": 0,
+          "roots": [
+            {
+              "id": "r0",
+              "queue_length": 0
+            },
+            {
+              "id": "r1",
+              "queue_length": 0
+            },
+            {
+              "id": "r2",
+              "queue_length": 0
+            },
+            {
+              "id": "r3",
+              "queue_length": 0
+            }
+          ],
+          "rpm_capacity": null,
+          "rpm_debited": "0",
+          "rpm_mode": "unknown",
+          "shared_cooldown_ms": 0,
+          "startup_hold_ms": 0,
+          "tpm_capacity": null,
+          "tpm_debited": "0",
+          "tpm_held": "0",
+          "tpm_mode": "unknown"
+        },
+        "at_s": 214724.150954375
+      }
+    ],
+    "scope": "functional cap1 control, outside performance denominator",
+    "submitted_at_s": {
+      "n0": 214724.086927958,
+      "n1": 214724.101366875,
+      "n2": 214724.114323625
+    }
+  },
+  "cap": 1,
+  "client_attempt_limit": 4,
+  "client_attempts": [
+    {
+      "ended_s": 214724.127929791,
+      "id": "n0/client1",
+      "index": 1,
+      "node_id": "n0",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214724.127896,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n0\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n0\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n0\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n0\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214724.127858541,
+        "first_http_s": 214724.127826083,
+        "first_output_delta_s": 214724.127858541,
+        "headers": [
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:06:11 GMT"
+          ]
+        ],
+        "output": "fixture:n0",
+        "status": 200,
+        "terminal_marker_s": 214724.127858541,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 48,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214724.08839575,
+      "status": 200
+    },
+    {
+      "ended_s": 214724.127240125,
+      "id": "n1/client1",
+      "index": 1,
+      "node_id": "n1",
+      "outcome": "cancelled",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "sent_s": 214724.101461791
+    },
+    {
+      "ended_s": 214724.150426291,
+      "id": "n2/client1",
+      "index": 1,
+      "node_id": "n2",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214724.150402,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n2\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n2\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n2\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n2\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214724.150375708,
+        "first_http_s": 214724.150364,
+        "first_output_delta_s": 214724.150375708,
+        "headers": [
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:06:11 GMT"
+          ]
+        ],
+        "output": "fixture:n2",
+        "status": 200,
+        "terminal_marker_s": 214724.150375708,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 48,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214724.114412833,
+      "status": 200
+    }
+  ],
+  "discovery_requests": [],
+  "fixture_pending_tasks": 0,
+  "fresh_fixture_and_gateway_instances": true,
+  "gateway": {
+    "binary_sha256": "2c4fd63824d50bd9420ee8b81d36d433d70ef568df2e8f391ce2e7f2adc26b0f",
+    "binary_sha256_after": "2c4fd63824d50bd9420ee8b81d36d433d70ef568df2e8f391ce2e7f2adc26b0f",
+    "command": [
+      "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "run",
+      "--config",
+      "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-qsjbz8jp/gateway.toml"
+    ],
+    "effective_config": {
+      "accounting": "actual",
+      "cancel_policy": "close",
+      "concurrency": 1,
+      "listen": "127.0.0.1:56154",
+      "models": [
+        {
+          "id": "synthetic",
+          "input_estimator": "cl100k_base",
+          "input_token_overhead": 256,
+          "max_output_tokens": 4096
+        }
+      ],
+      "quota": {
+        "rpm": {
+          "kind": "unknown"
+        },
+        "tpm": {
+          "kind": "unknown"
+        }
+      },
+      "retry_transient_429": false,
+      "roots": [
+        {
+          "endpoints": [
+            "chat/completions",
+            "models"
+          ],
+          "id": "r0",
+          "models": [
+            "synthetic"
+          ]
+        },
+        {
+          "endpoints": [
+            "chat/completions",
+            "models"
+          ],
+          "id": "r1",
+          "models": [
+            "synthetic"
+          ]
+        },
+        {
+          "endpoints": [
+            "chat/completions",
+            "models"
+          ],
+          "id": "r2",
+          "models": [
+            "synthetic"
+          ]
+        },
+        {
+          "endpoints": [
+            "chat/completions",
+            "models"
+          ],
+          "id": "r3",
+          "models": [
+            "synthetic"
+          ]
+        }
+      ],
+      "startup_hold_secs": 0,
+      "upstream": {
+        "api_base": "http://127.0.0.1:56153/v1",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    "effective_config_sha256": "d5e139e68236f491f5c18c4ab2802f189f6e43d6e2e724f4c38b030dac3909fa",
+    "features": [
+      "bpe"
+    ],
+    "policy": "deskquota_managed"
+  },
+  "gateway_retries": 0,
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "idle_resource": {
+    "cpu_seconds": 0.0,
+    "monotonic_s": 214724.084440083,
+    "rss_bytes": 10502144
+  },
+  "load_end": [
+    2.75537109375,
+    2.44091796875,
+    2.25048828125
+  ],
+  "load_start": [
+    2.75537109375,
+    2.44091796875,
+    2.25048828125
+  ],
+  "nodes": [
+    {
+      "deadline_s": 214729.08445525,
+      "elapsed_ms": 41.140624991385266,
+      "eligible_s": 214724.086927958,
+      "ended_s": 214724.128068583,
+      "id": "n0",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 1.4150829811114818,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 48,
+        "status": "observed"
+      },
+      "workflow_id": "w0"
+    },
+    {
+      "deadline_s": 214729.08445525,
+      "elapsed_ms": 25.873915990814567,
+      "eligible_s": 214724.101366875,
+      "ended_s": 214724.127240791,
+      "id": "n1",
+      "outcome": "cancelled",
+      "scheduling_lag_ms": 0.07483299123123288,
+      "workflow_id": "w1"
+    },
+    {
+      "deadline_s": 214729.08445525,
+      "elapsed_ms": 36.16508300183341,
+      "eligible_s": 214724.114323625,
+      "ended_s": 214724.150488708,
+      "id": "n2",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 0.07145799463614821,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 48,
+        "status": "observed"
+      },
+      "workflow_id": "w2"
+    }
+  ],
+  "origin_s": 214724.08445525,
+  "owned_gateway_exit_code": 0,
+  "owned_processes_cleaned": true,
+  "peak_provider_service": 1,
+  "profile": "cancel_control",
+  "protocol_errors": [],
+  "quota": {
+    "rpm": 1000000,
+    "tpm": 1000000000
+  },
+  "quota_contract": "rolling_60_seconds",
+  "resource_scope": "gateway PID RSS/CPU; no child RSS aggregation",
+  "resources": [
+    {
+      "cpu_seconds": 0.0,
+      "monotonic_s": 214724.089424333,
+      "rss_bytes": 11141120
+    }
+  ],
+  "reused_sources": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "reused_sources_after": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "scope": "Synthetic completion with original deadlines and client retries; no model quality or real-provider claim",
+  "script_sha256": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "script_sha256_after": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "seed": 101,
+  "started_utc": "2026-09-16T03:06:10Z",
+  "status": "completed",
+  "status_after": {
+    "active": 0,
+    "admission": {
+      "accounting": "actual",
+      "active": 0,
+      "barrier_root": null,
+      "blocked_reason": null,
+      "estimate_mode": "tpm_unenforced",
+      "model_estimators": [
+        {
+          "id": "synthetic",
+          "input_estimator": "cl100k_base",
+          "input_token_overhead": 256
+        }
+      ],
+      "queue_length": 0,
+      "reservation": {
+        "excess_tokens": "0",
+        "observed_tokens": "0",
+        "reserved_tokens": "0",
+        "samples": 0,
+        "shortfall_tokens": "0",
+        "unknown": 0
+      },
+      "retained": 0,
+      "roots": [
+        {
+          "id": "r0",
+          "queue_length": 0
+        },
+        {
+          "id": "r1",
+          "queue_length": 0
+        },
+        {
+          "id": "r2",
+          "queue_length": 0
+        },
+        {
+          "id": "r3",
+          "queue_length": 0
+        }
+      ],
+      "rpm_capacity": null,
+      "rpm_debited": "0",
+      "rpm_mode": "unknown",
+      "shared_cooldown_ms": 0,
+      "startup_hold_ms": 0,
+      "tpm_capacity": null,
+      "tpm_debited": "0",
+      "tpm_held": "0",
+      "tpm_mode": "unknown"
+    },
+    "draining": 0,
+    "exact_cache": {
+      "budget_bypasses": 0,
+      "budget_bytes": 4194304,
+      "bypasses": {
+        "endpoint": 0,
+        "history": 0,
+        "request_cache_control": 0,
+        "size": 0,
+        "tools_state": 0,
+        "unsupported_shape": 0
+      },
+      "considered": 0,
+      "enabled": false,
+      "entries": 0,
+      "evictions": 0,
+      "hits": 0,
+      "misses": 0,
+      "retained_bytes": 0,
+      "stores": 0
+    },
+    "first_body_byte": 2,
+    "first_observed_output_delta": 2,
+    "identity": {
+      "address": "127.0.0.1:56154",
+      "fingerprint": "d5e139e68236f491f5c18c4ab2802f189f6e43d6e2e724f4c38b030dac3909fa",
+      "nonce": "045801a48adb5a1ecff9280d5ef51e1ea99d5af774a1c0140ff93f15088ca584",
+      "path_hash": "0f5ef7fc79174cd5fecb47ef33a17d6bddf0fb800881ff3513c69d37a878e876",
+      "pid": 52557,
+      "started_unix_ms": 1789527970994
+    },
+    "max_queued_response_bytes": 556,
+    "observed_cache_creation_tokens": 0,
+    "observed_cache_read_tokens": 0,
+    "observed_input_tokens": 96,
+    "observed_output_tokens": 16,
+    "observer_overflow": 0,
+    "queued_response_bytes": 0,
+    "requests": 13,
+    "response_body_eof": 2,
+    "state": "running",
+    "status": "ok",
+    "stored_request_bytes": 0,
+    "terminal_admission_rejected": 0,
+    "terminal_body_eof": 2,
+    "terminal_deadline": 0,
+    "terminal_downstream_close": 0,
+    "terminal_marker": 2,
+    "terminal_shutdown": 0,
+    "terminal_total": 2,
+    "terminal_upstream_error": 0,
+    "upstream_attempts": 2,
+    "usage_known": 2,
+    "usage_unknown": 0
+  },
+  "status_before": {
+    "active": 0,
+    "admission": {
+      "accounting": "actual",
+      "active": 0,
+      "barrier_root": null,
+      "blocked_reason": null,
+      "estimate_mode": "tpm_unenforced",
+      "model_estimators": [
+        {
+          "id": "synthetic",
+          "input_estimator": "cl100k_base",
+          "input_token_overhead": 256
+        }
+      ],
+      "queue_length": 0,
+      "reservation": {
+        "excess_tokens": "0",
+        "observed_tokens": "0",
+        "reserved_tokens": "0",
+        "samples": 0,
+        "shortfall_tokens": "0",
+        "unknown": 0
+      },
+      "retained": 0,
+      "roots": [
+        {
+          "id": "r0",
+          "queue_length": 0
+        },
+        {
+          "id": "r1",
+          "queue_length": 0
+        },
+        {
+          "id": "r2",
+          "queue_length": 0
+        },
+        {
+          "id": "r3",
+          "queue_length": 0
+        }
+      ],
+      "rpm_capacity": null,
+      "rpm_debited": "0",
+      "rpm_mode": "unknown",
+      "shared_cooldown_ms": 0,
+      "startup_hold_ms": 0,
+      "tpm_capacity": null,
+      "tpm_debited": "0",
+      "tpm_held": "0",
+      "tpm_mode": "unknown"
+    },
+    "draining": 0,
+    "exact_cache": {
+      "budget_bypasses": 0,
+      "budget_bytes": 4194304,
+      "bypasses": {
+        "endpoint": 0,
+        "history": 0,
+        "request_cache_control": 0,
+        "size": 0,
+        "tools_state": 0,
+        "unsupported_shape": 0
+      },
+      "considered": 0,
+      "enabled": false,
+      "entries": 0,
+      "evictions": 0,
+      "hits": 0,
+      "misses": 0,
+      "retained_bytes": 0,
+      "stores": 0
+    },
+    "first_body_byte": 0,
+    "first_observed_output_delta": 0,
+    "identity": {
+      "address": "127.0.0.1:56154",
+      "fingerprint": "d5e139e68236f491f5c18c4ab2802f189f6e43d6e2e724f4c38b030dac3909fa",
+      "nonce": "045801a48adb5a1ecff9280d5ef51e1ea99d5af774a1c0140ff93f15088ca584",
+      "path_hash": "0f5ef7fc79174cd5fecb47ef33a17d6bddf0fb800881ff3513c69d37a878e876",
+      "pid": 52557,
+      "started_unix_ms": 1789527970994
+    },
+    "max_queued_response_bytes": 0,
+    "observed_cache_creation_tokens": 0,
+    "observed_cache_read_tokens": 0,
+    "observed_input_tokens": 0,
+    "observed_output_tokens": 0,
+    "observer_overflow": 0,
+    "queued_response_bytes": 0,
+    "requests": 1,
+    "response_body_eof": 0,
+    "state": "running",
+    "status": "ok",
+    "stored_request_bytes": 0,
+    "terminal_admission_rejected": 0,
+    "terminal_body_eof": 0,
+    "terminal_deadline": 0,
+    "terminal_downstream_close": 0,
+    "terminal_marker": 0,
+    "terminal_shutdown": 0,
+    "terminal_total": 0,
+    "terminal_upstream_error": 0,
+    "upstream_attempts": 0,
+    "usage_known": 0,
+    "usage_unknown": 0
+  },
+  "submitted": [
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "gated": true,
+      "id": "n0",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 0,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w0"
+    },
+    {
+      "actual_ratio": 0.25,
+      "cancel_by_control": true,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n1",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w1"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n2",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 20,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w2"
+    }
+  ],
+  "summary": {
+    "admitted_fixture_token_units": 112,
+    "all_work_completion_ms": null,
+    "client_http_attempts": 3,
+    "completed_by_deadline": 2,
+    "completed_by_seconds": {
+      "10": 2,
+      "2": 2,
+      "5": 2
+    },
+    "completed_usage": {
+      "observed": 2
+    },
+    "groups": {
+      "length:short": {
+        "outcomes": {
+          "cancelled": 1,
+          "completed": 2
+        },
+        "planned": 3,
+        "success_latency_ms": {
+          "max": 41.140624991385266,
+          "n": 2,
+          "p50": 36.16508300183341,
+          "p95": 41.140624991385266,
+          "p99": 41.140624991385266
+        }
+      },
+      "root:0": {
+        "outcomes": {
+          "cancelled": 1,
+          "completed": 1
+        },
+        "planned": 2,
+        "success_latency_ms": {
+          "max": 41.140624991385266,
+          "n": 1,
+          "p50": 41.140624991385266,
+          "p95": 41.140624991385266,
+          "p99": 41.140624991385266
+        }
+      },
+      "root:1": {
+        "outcomes": {
+          "completed": 1
+        },
+        "planned": 1,
+        "success_latency_ms": {
+          "max": 36.16508300183341,
+          "n": 1,
+          "p50": 36.16508300183341,
+          "p95": 36.16508300183341,
+          "p99": 36.16508300183341
+        }
+      }
+    },
+    "node_outcomes": {
+      "cancelled": 1,
+      "completed": 2
+    },
+    "planned_nodes": 3,
+    "planned_workflows": 3,
+    "provider_rejected_attempts": 0,
+    "scheduling_lag_ms": {
+      "max": 1.4150829811114818,
+      "n": 3,
+      "p50": 0.07483299123123288,
+      "p95": 1.4150829811114818,
+      "p99": 1.4150829811114818
+    },
+    "success_workflow_latency_ms": {
+      "max": 41.140624991385266,
+      "n": 2,
+      "p50": 36.16508300183341,
+      "p95": 41.140624991385266,
+      "p99": 41.140624991385266
+    },
+    "upstream_attempts": 2,
+    "workflow_outcomes": {
+      "cancelled": 1,
+      "completed": 2
+    }
+  },
+  "upstream_attempt_limit": 4,
+  "upstream_attempts": [
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214724.127713416,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214724.127661125,
+      "id": "n0/1",
+      "ingress_id": "n0",
+      "outcome": "completed",
+      "received_s": 214724.08902625,
+      "request_body_exact": true,
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214724.089111041,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214724.150200875,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214724.150118375,
+      "id": "n2/1",
+      "ingress_id": "n2",
+      "outcome": "completed",
+      "received_s": 214724.127971833,
+      "request_body_exact": true,
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214724.128043791,
+      "status": 200
+    }
+  ],
+  "workflows": [
+    {
+      "deadline_s": 214729.08445525,
+      "elapsed_ms": 41.140624991385266,
+      "ended_s": 214724.128068583,
+      "id": "w0",
+      "outcome": "completed",
+      "released_s": 214724.086927958
+    },
+    {
+      "deadline_s": 214729.08445525,
+      "elapsed_ms": 25.873915990814567,
+      "ended_s": 214724.127240791,
+      "id": "w1",
+      "outcome": "cancelled",
+      "released_s": 214724.101366875
+    },
+    {
+      "deadline_s": 214729.08445525,
+      "elapsed_ms": 36.16508300183341,
+      "ended_s": 214724.150488708,
+      "id": "w2",
+      "outcome": "completed",
+      "released_s": 214724.114323625
+    }
+  ],
+  "workload_end_resource": {
+    "cpu_seconds": 0.01,
+    "monotonic_s": 214724.154900916,
+    "rss_bytes": 11550720
+  },
+  "workload_start_resource": {
+    "cpu_seconds": 0.0,
+    "monotonic_s": 214724.086903416,
+    "rss_bytes": 10502144
+  },
+  "written_configs_after": {
+    "gateway.toml": {
+      "sha256": "d5e139e68236f491f5c18c4ab2802f189f6e43d6e2e724f4c38b030dac3909fa",
+      "text": "startup_hold_secs = 0\nlisten = \"127.0.0.1:56154\"\nconcurrency = 1\ncancel_policy = \"close\"\naccounting = \"actual\"\nretry_transient_429 = false\n[upstream]\napi_base = \"http://127.0.0.1:56153/v1\"\n[upstream.auth]\nmode = \"none\"\n\n[quota.rpm]\nkind = \"unknown\"\n\n[quota.tpm]\nkind = \"unknown\"\n\n[[models]]\nid = \"synthetic\"\ninput_estimator = \"cl100k_base\"\ninput_token_overhead = 256\nmax_output_tokens = 4096\n\n[[roots]]\nid = \"r0\"\nendpoints = [\"chat/completions\", \"models\"]\nmodels = [\"synthetic\"]\n\n[[roots]]\nid = \"r1\"\nendpoints = [\"chat/completions\", \"models\"]\nmodels = [\"synthetic\"]\n\n[[roots]]\nid = \"r2\"\nendpoints = [\"chat/completions\", \"models\"]\nmodels = [\"synthetic\"]\n\n[[roots]]\nid = \"r3\"\nendpoints = [\"chat/completions\", \"models\"]\nmodels = [\"synthetic\"]\n"
+    }
+  }
+}

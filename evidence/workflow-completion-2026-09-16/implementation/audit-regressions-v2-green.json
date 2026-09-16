@@ -1,0 +1,25 @@
+{
+  "driver_sha256": "ca57dc410cf3cb9e23620136ae491a49fea654ac0b4604773a9492c0e84ecc45",
+  "cases": [
+    {
+      "case": "extended original deadline",
+      "rejected": true,
+      "reason": "workflow changed original release or deadline"
+    },
+    {
+      "case": "zero node elapsed",
+      "rejected": true,
+      "reason": "node changed original eligibility or elapsed time"
+    },
+    {
+      "case": "hidden gateway retry in one client exchange",
+      "rejected": true,
+      "reason": "gateway or SDK replay despite primary retries zero"
+    },
+    {
+      "case": "cancelled node reaches provider after gate",
+      "rejected": true,
+      "reason": "control cancelled node reached provider or was not cancelled"
+    }
+  ]
+}

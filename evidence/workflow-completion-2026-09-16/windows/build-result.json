@@ -1,0 +1,119 @@
+﻿{
+    "stage":  "windows-workflow-validation",
+    "platform":  "Microsoft Windows NT 10.0.19045.0",
+    "source_archive_sha256":  "0aff89243340bbf4b9f30c9f2477ac1691657f47a3c7730a873461ff975f63c0",
+    "source_manifest_sha256":  "7861a7fc39e830a444d87bf8db9ff89a8149a7b24fb4e3c91904c5e44850e86a",
+    "verified_source_files":  94,
+    "source_mtimes_refreshed_after_verification":  true,
+    "toolchain":  "1.88.0-x86_64-pc-windows-gnu",
+    "build_jobs":  2,
+    "commands":  [
+                     {
+                         "phase":  "test",
+                         "arguments":  [
+                                           "+1.88.0-x86_64-pc-windows-gnu",
+                                           "test",
+                                           "--locked",
+                                           "--target",
+                                           "x86_64-pc-windows-gnu",
+                                           "--",
+                                           "--test-threads=2"
+                                       ],
+                         "program":  "cargo.exe",
+                         "mode":  "default"
+                     },
+                     {
+                         "phase":  "release",
+                         "arguments":  [
+                                           "+1.88.0-x86_64-pc-windows-gnu",
+                                           "build",
+                                           "--locked",
+                                           "--release",
+                                           "--bin",
+                                           "llmgw",
+                                           "--target",
+                                           "x86_64-pc-windows-gnu"
+                                       ],
+                         "program":  "cargo.exe",
+                         "mode":  "default"
+                     },
+                     {
+                         "phase":  "test",
+                         "arguments":  [
+                                           "+1.88.0-x86_64-pc-windows-gnu",
+                                           "test",
+                                           "--locked",
+                                           "--features",
+                                           "bpe",
+                                           "--lib",
+                                           "--test",
+                                           "input_estimation_contract",
+                                           "--test",
+                                           "config_contract",
+                                           "--test",
+                                           "setup_contract",
+                                           "--test",
+                                           "retry_contract",
+                                           "--test",
+                                           "cache_contract",
+                                           "--test",
+                                           "stream_lifetime",
+                                           "--test",
+                                           "wire_contract",
+                                           "--target",
+                                           "x86_64-pc-windows-gnu",
+                                           "--",
+                                           "--test-threads=2"
+                                       ],
+                         "program":  "cargo.exe",
+                         "mode":  "bpe"
+                     },
+                     {
+                         "phase":  "release",
+                         "arguments":  [
+                                           "+1.88.0-x86_64-pc-windows-gnu",
+                                           "build",
+                                           "--locked",
+                                           "--release",
+                                           "--bin",
+                                           "llmgw",
+                                           "--features",
+                                           "bpe",
+                                           "--target",
+                                           "x86_64-pc-windows-gnu"
+                                       ],
+                         "program":  "cargo.exe",
+                         "mode":  "bpe"
+                     }
+                 ],
+    "modes":  [
+                  {
+                      "mode":  "default",
+                      "tests_exit":  0,
+                      "tests_elapsed_seconds":  123.8294095,
+                      "new_mode_regressions_executed":  [
+                                                            "retry_veto_false_fields_block_replay_without_expanding_true",
+                                                            "retry_veto_preserves_cooldown_and_only_skips_unneeded_body_probe",
+                                                            "default_build_rejects_bpe_config_for_every_quota_kind"
+                                                        ],
+                      "release_exit":  0,
+                      "release_elapsed_seconds":  38.246483399999995,
+                      "binary_sha256":  "1f7a9be9be5ebb8429fba2c417b5555613f84261292b6a6484c32606ddfe0a66",
+                      "binary_bytes":  16377290
+                  },
+                  {
+                      "mode":  "bpe",
+                      "tests_exit":  0,
+                      "tests_elapsed_seconds":  54.3708233,
+                      "new_mode_regressions_executed":  [
+                                                            "retry_veto_false_fields_block_replay_without_expanding_true",
+                                                            "retry_veto_preserves_cooldown_and_only_skips_unneeded_body_probe",
+                                                            "explicit_bpe_configuration_is_accepted"
+                                                        ],
+                      "release_exit":  0,
+                      "release_elapsed_seconds":  39.2653357,
+                      "binary_sha256":  "a676016f5483139dc00b8b1f47ab8fe7665f895f274b45e4c3637002a81ea541",
+                      "binary_bytes":  91180246
+                  }
+              ]
+}

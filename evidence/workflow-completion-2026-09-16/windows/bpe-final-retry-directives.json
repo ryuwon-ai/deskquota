@@ -1,0 +1,524 @@
+{
+  "check": "explicit_retry_directives",
+  "at": "2026-09-16T02:28:56.728282+00:00",
+  "expectation": "retry-veto",
+  "scope": "Only retry-veto is adopted; shared 503 pause is an unadopted policy proposal",
+  "binary": "C:\\Users\\ryuwo\\AppData\\Local\\deskquota-windows-lab-20260915\\workflow-20260916\\llmgw-bpe.exe",
+  "binary_sha256": "a676016f5483139dc00b8b1f47ab8fe7665f895f274b45e4c3637002a81ea541",
+  "probe_sha256": "884445428df4a38a0545c600a614919064260c7e7387e254090fea128a5c9a8e",
+  "fixture_sha256": "cfc7a8f14717a70576f28db854cef0899318b477524eadd282f6d6e9bcf67f7c",
+  "cases": [
+    {
+      "name": "503_explicit_ms",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.01599999999598367,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.016,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "503_mixed_timing",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.01599999999598367,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.016,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "503_missing_timing",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.031000000002677552,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.031,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "503_malformed_timing",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.01600000000325963,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.016,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "500_explicit_timing",
+      "status": 500,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.01600000000325963,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 500,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.016,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_false",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_false_missing_timing",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": true,
+      "shared_cooldown_ms": 1188,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_conflicting_true_false",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_true_transient",
+      "status": 429,
+      "expected_attempts": 2,
+      "observed_initial_attempts": 2,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "A1",
+          "at": 0.016,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_true_permanent",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_false_explicit_pause",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": true,
+      "shared_cooldown_ms": 786,
+      "followup_delay_seconds": 0.7969999999986612,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.797,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "binary_unchanged": true,
+  "native_windows_adapter": {
+    "wrapper_sha256": "f1769853df9b93de27e428262002eb7f92bc4dfaba617a0d1a3a927f9970fa63",
+    "changes": [
+      "isolated Windows process environment with system-only PATH",
+      "owned temporary root",
+      "current-user-only protected state ACL",
+      "normalized verbatim doctor state path",
+      "retained SystemRoot for native socket initialization; isolated harness environment map"
+    ],
+    "fixture_semantics_changed": false,
+    "python_utf8_mode": true,
+    "mode": "bpe"
+  },
+  "windows_executed": true,
+  "source_limitations": [
+    "Synthetic loopback contract checks, not latency benchmarks",
+    "One configured upstream shared by two roots",
+    "Unlimited RPM and unknown TPM, no quota-accounting claim",
+    "No real provider, client SDK, Windows, or paid API calls"
+  ],
+  "limitations": [
+    "Native Windows loopback contract checks with a platform adapter",
+    "No real provider, client SDK, paid API or performance comparison",
+    "Unlimited RPM and unknown TPM isolate retry policy from accounting"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "at": "2026-09-16T02:04:07.023729+00:00",
+  "scope": "Adopted A only;503 shared pause deferred",
+  "files": {
+    "product/src/admission/retry.rs": {
+      "sha256": "e93336c07e21b6ea6f6e550b2f6840bc0325fe8542a66b9a1b8e42797b2a31f6",
+      "bytes": 4982
+    },
+    "product/src/transport/stream.rs": {
+      "sha256": "f0a9671572d8bb5fe58a061dbda53702d83123d3fcd6d2e28408cd132a4de4d9",
+      "bytes": 38795
+    },
+    "product/tests/retry_contract.rs": {
+      "sha256": "2d2767dfae31113c92fda5422748fcbc6d3e7bc0ab75d7ab25bfdad03cd2b439",
+      "bytes": 48133
+    }
+  },
+  "reviews": [
+    {
+      "reviewer": "retry_directive_research",
+      "kind": "spec compliance",
+      "result": "APPROVED",
+      "method": "read source, recomputed change diff and hashes, inspected RED/GREEN logs; no new runtime run"
+    },
+    {
+      "reviewer": "retry_veto_quality",
+      "kind": "independent quality",
+      "result": "APPROVED",
+      "method": "read replay guards and lifetime/cooldown flow, verified hashes and logs; no new runtime run"
+    }
+  ],
+  "remaining": [
+    "final normal release native probe",
+    "combined final validation"
+  ]
+}

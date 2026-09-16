@@ -1,0 +1,53 @@
+[
+  {
+    "name": "format-final",
+    "command": [
+      "rtk",
+      "proxy",
+      "env",
+      "CARGO_TARGET_DIR=/Users/ryuwon/Library/Caches/llmgw-cargo",
+      "CARGO_INCREMENTAL=0",
+      "CARGO_BUILD_JOBS=2",
+      "cargo",
+      "+1.88.0",
+      "fmt",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "cache-contract-final",
+    "command": [
+      "rtk",
+      "proxy",
+      "env",
+      "CARGO_TARGET_DIR=/Users/ryuwon/Library/Caches/llmgw-cargo",
+      "CARGO_INCREMENTAL=0",
+      "CARGO_BUILD_JOBS=2",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--test",
+      "cache_contract"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "cache-unit-final",
+    "command": [
+      "rtk",
+      "proxy",
+      "env",
+      "CARGO_TARGET_DIR=/Users/ryuwon/Library/Caches/llmgw-cargo",
+      "CARGO_INCREMENTAL=0",
+      "CARGO_BUILD_JOBS=2",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--lib",
+      "cache::tests"
+    ],
+    "exit_code": 0
+  }
+]

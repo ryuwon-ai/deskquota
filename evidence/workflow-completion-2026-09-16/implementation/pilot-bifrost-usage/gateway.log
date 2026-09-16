@@ -1,0 +1,59 @@
+2026/09/16 11:25:38 maxprocs: Leaving GOMAXPROCS=10: CPU quota undefined
+
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   ██████╗ ██╗███████╗██████╗  ██████╗ ███████╗████████╗   ║
+║   ██╔══██╗██║██╔════╝██╔══██╗██╔═══██╗██╔════╝╚══██╔══╝   ║
+║   ██████╔╝██║█████╗  ██████╔╝██║   ██║███████╗   ██║      ║
+║   ██╔══██╗██║██╔══╝  ██╔══██╗██║   ██║╚════██║   ██║      ║
+║   ██████╔╝██║██║     ██║  ██║╚██████╔╝███████║   ██║      ║
+║   ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝      ║
+║                                                           ║
+║═══════════════════════════════════════════════════════════║
+║                          v2.1.1                           ║
+║═══════════════════════════════════════════════════════════║
+║                 The Fastest LLM Gateway                   ║
+║═══════════════════════════════════════════════════════════║
+║             https://github.com/maximhq/bifrost            ║
+╚═══════════════════════════════════════════════════════════╝
+
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"loading configuration from: /var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-y3h272p8/config.json"}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"config store is nil, skipping token refresh worker"}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"per-user OAuth sweep worker not started: provider or config store is nil"}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"per-user headers credential sweep worker not started: provider or config store is nil"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"pricing sync interval set to 24h0m0s (scheduler checks every 5m0s)"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"initializing model catalog..."}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"model-parameters-sync: no parseable records, keeping existing model parameters and capabilities"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"initializing MCP catalog..."}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"governance plugin requires config store to persist data, running in memory only mode"}
+{"level":"error","time":"2026-09-16T11:25:38+09:00","message":"failed to initialize governance plugin: failed to initialize governance store: failed to load governance data from config memory: governance config is nil"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"bifrost client initialized"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"listing all models and adding to model catalog"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"models added to catalog"}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"batch accounting sweeper not wired: logging plugin not found (err=plugin logging not found)"}
+{"level":"warn","time":"2026-09-16T11:25:38+09:00","message":"prometheus plugin not found, skipping telemetry middleware"}
+{"level":"error","time":"2026-09-16T11:25:38+09:00","message":"auth middleware requires config store, skipping auth middleware initialization"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"background live model refresh is disabled"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"Time spent in Bifrost server bootstrap 28 ms"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"plugin status: governance - error"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"plugin status: compat - active"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"plugin status: model-catalog-resolver - active"}
+{"level":"info","time":"2026-09-16T11:25:38+09:00","message":"successfully started bifrost, serving UI on http://127.0.0.1:51859"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":502,"http.request_duration_ms":2,"http.remote_addr":"127.0.0.1:51866","http.user_agent":"","trace_id":"991943e68bbf4560aefbc73b4640f814","request_id":"b94737bc-8c34-4eae-9eb9-38dc6ed8c354","time":"2026-09-16T11:25:38+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":502,"http.request_duration_ms":3,"http.remote_addr":"127.0.0.1:51871","http.user_agent":"","trace_id":"8ef9024491a647cdb04771de4adbaa39","request_id":"82f542af-2994-4edb-bb32-7005a5fd7a58","time":"2026-09-16T11:25:38+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":502,"http.request_duration_ms":2,"http.remote_addr":"127.0.0.1:51876","http.user_agent":"","trace_id":"dd3f6382fddc4dc68df68e2af537b554","request_id":"25fd28e9-3e18-4828-a57a-f06e748737b1","time":"2026-09-16T11:25:39+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":502,"http.request_duration_ms":2,"http.remote_addr":"127.0.0.1:51883","http.user_agent":"","trace_id":"3cf8d6f4db6b44f69195bf90c26ed5b9","request_id":"4a8bf9c0-99ed-4abc-9f5d-a87e3348e123","time":"2026-09-16T11:25:41+09:00","message":"request completed"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"received signal terminated, initiating graceful shutdown..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"closing realtime transport sessions..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"server gracefully shutdown"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"shutting down bifrost client..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"closing all request channels..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"all request channels closed"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"bifrost client shutdown completed"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"cleaning up storage engines..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"stopping live model refresher..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"closing websocket connection pool..."}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"got context cancel(), stopping webserver"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"storage engines cleanup completed"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"cleanup completed"}
+{"level":"info","time":"2026-09-16T11:25:41+09:00","message":"🏁 server stopped"}

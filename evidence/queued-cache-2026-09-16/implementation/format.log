@@ -1,0 +1,47 @@
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/cache_contract.rs:196:
+ 
+ #[tokio::test]
+ async fn queued_reuse_preserves_credentials_cache_control_and_cancellation() {
+-    let upstream = GatedUpstreamFixture::start_json(
+-        vec![],
+-        vec![JSON_RESPONSE.as_bytes().to_vec()],
+-        false,
+-    )
+-    .await;
++    let upstream =
++        GatedUpstreamFixture::start_json(vec![], vec![JSON_RESPONSE.as_bytes().to_vec()], false)
++            .await;
+     let mut cfg = config(upstream.address());
+     cfg.concurrency = 1;
+     cfg.quota.rpm = config::Limit::Known(1.try_into().unwrap());
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/cache_contract.rs:250:
+ 
+ #[tokio::test]
+ async fn queued_cache_wait_keeps_the_server_deadline() {
+-    let upstream = GatedUpstreamFixture::start_json(
+-        vec![],
+-        vec![JSON_RESPONSE.as_bytes().to_vec()],
+-        false,
+-    )
+-    .await;
++    let upstream =
++        GatedUpstreamFixture::start_json(vec![], vec![JSON_RESPONSE.as_bytes().to_vec()], false)
++            .await;
+     let mut cfg = config(upstream.address());
+     cfg.concurrency = 1;
+     cfg.quota.rpm = config::Limit::Known(1.try_into().unwrap());
+Diff in /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product/tests/cache_contract.rs:270:
+     let leader = send(&gateway, PATH, &request(false), &[]).await;
+     let response = send(&gateway, PATH, &request(false), &[]).await;
+     assert_eq!(response.status(), 504);
+-    assert!(response.text().await.unwrap().contains("gateway_queue_deadline"));
++    assert!(
++        response
++            .text()
++            .await
++            .unwrap()
++            .contains("gateway_queue_deadline")
++    );
+     assert!(leader.bytes().await.is_err());
+     wait_for_queue(&gateway, 0).await;
+     let value = status(&gateway).await;

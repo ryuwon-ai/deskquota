@@ -1,0 +1,42 @@
+{
+  "check": "gated_rejection_head_ordering",
+  "timestamp": "2026-09-16T01:28:30.055668+00:00",
+  "binary": "C:\\Users\\ryuwo\\AppData\\Local\\deskquota-windows-lab-20260915\\queued-cache-20260916\\llmgw.exe",
+  "binary_sha256": "2473279aea81b4ff16831574d53913f17e17ec7ce253e4a319a19449042d2708",
+  "expectation": "stream-ineligible",
+  "cases": [
+    {
+      "name": "direct_json",
+      "direct": true,
+      "retry": false,
+      "media": "application/json",
+      "timing": true,
+      "head_before_body_gate": true,
+      "expected_head_before_gate": true,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": null,
+      "passed": true
+    }
+  ],
+  "passed": false,
+  "limitations": [
+    "Synthetic loopback ordering only; no provider or performance claim",
+    "One request per case; no throughput or general p95 measurement",
+    "Checked released candidate port; no socket activation"
+  ],
+  "error_class": "AssertionError",
+  "check_failed": "state_escaped_temporary_directory",
+  "native_windows_adapter": {
+    "wrapper_sha256": "c4477c0dc46863bda784aa7731574a8d9535c82744920cab28df0e8e3953c40b",
+    "probe_sha256": "40697d0183060f2531cf37e5efe8d9d6061d7294b178d5488e88dbfa697adf92",
+    "changes": [
+      "isolated Windows process environment",
+      "owned temporary directory",
+      "current-user-only protected state ACL",
+      "AST-extracted unchanged free_port avoids unrelated fcntl import"
+    ],
+    "fixture_semantics_changed": false
+  }
+}

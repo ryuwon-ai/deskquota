@@ -1,0 +1,2970 @@
+{
+  "checks": [
+    "independent rolling/bucket/TPM refill trace",
+    "original18 bytes/usage4924/arrival/cancellation preserved",
+    "loopback 429 then200 preserves latency/retry lower bound/logical denominator",
+    "loopback 503 then200 preserves latency/retry lower bound/logical denominator",
+    "permanent400 and duplicate explicitfalse terminate once",
+    "absent-header seeded backoff; response headers additive",
+    "HTTPdate and duplicate timing maximum lower bound",
+    "hint past original deadline never starts second attempt",
+    "partial/missing finish/DONE/wrong usage terminal; missing unrequested usage allowed; requested required",
+    "four local429 client attempts; zero separate provider attempts",
+    "dependency ordering/tool delay/failure descendants and independent workflows",
+    "reject missing workflow",
+    "reject duplicate outcome",
+    "reject unknown upstream",
+    "reject pending provider",
+    "reject changed body",
+    "reject changed output",
+    "reject changed usage",
+    "reject late success",
+    "reject early retry",
+    "reject excess attempts",
+    "reject unaccounted cancellation",
+    "reject pending fixture"
+  ],
+  "gateway_executed": false,
+  "provider_api_calls": 0,
+  "samples": [
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212274.229035,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.19693875,
+            "body_utf8": "{\"error\":{\"type\":\"rate_limit_error\",\"code\":\"rate_limit_exceeded\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212274.196937958,
+            "first_http_s": 212274.196929625,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "114"
+              ],
+              [
+                "retry-after-ms",
+                "30"
+              ]
+            ],
+            "output": "",
+            "status": 429,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_at_s": 212274.226943958,
+          "retry_computed_monotonic_s": 212274.196943958,
+          "retry_computed_wall_s": 1789525521.183397,
+          "retry_delay_s": 0.03,
+          "retry_reason": "header_max",
+          "retry_woke_s": 212274.22903425,
+          "sent_s": 212274.196469291,
+          "status": 429
+        },
+        {
+          "ended_s": 212274.229640125,
+          "id": "check/client2",
+          "index": 2,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.229619333,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212274.229596708,
+            "first_http_s": 212274.229587458,
+            "first_output_delta_s": 212274.229596708,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212274.229596708,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 58,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212274.229035708,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212277.196454041,
+          "elapsed_ms": 33.23441700194962,
+          "eligible_s": 212274.196454041,
+          "ended_s": 212274.229688458,
+          "id": "check",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.0024170149117708206,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 58,
+            "status": "observed"
+          },
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              429,
+              [
+                [
+                  "retry-after-ms",
+                  "30"
+                ]
+              ]
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.196878208,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212274.196850458,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [
+            [
+              "retry-after-ms",
+              "30"
+            ]
+          ],
+          "status": 429
+        },
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.229543541,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212274.22951425,
+          "id": "check/2",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212274.22947025,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212274.229497416,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212277.196454041,
+          "elapsed_ms": 33.23441700194962,
+          "ended_s": 212274.229688458,
+          "id": "check",
+          "outcome": "completed",
+          "released_s": 212274.196454041
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212274.26246025,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.230358958,
+            "body_utf8": "{\"error\":{\"type\":\"api_error\",\"code\":\"fixture_error\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212274.230358291,
+            "first_http_s": 212274.230351583,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "101"
+              ],
+              [
+                "retry-after-ms",
+                "30"
+              ]
+            ],
+            "output": "",
+            "status": 503,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_at_s": 212274.2603625,
+          "retry_computed_monotonic_s": 212274.2303625,
+          "retry_computed_wall_s": 1789525521.216815,
+          "retry_delay_s": 0.03,
+          "retry_reason": "header_max",
+          "retry_woke_s": 212274.262460083,
+          "sent_s": 212274.230007625,
+          "status": 503
+        },
+        {
+          "ended_s": 212274.263028208,
+          "id": "check/client2",
+          "index": 2,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.2630115,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212274.262991833,
+            "first_http_s": 212274.26298375,
+            "first_output_delta_s": 212274.262991833,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212274.262991833,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 58,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212274.262461458,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212277.229997333,
+          "elapsed_ms": 33.08241700869985,
+          "eligible_s": 212274.229997333,
+          "ended_s": 212274.26307975,
+          "id": "check",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.002167013008147478,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 58,
+            "status": "observed"
+          },
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              503,
+              [
+                [
+                  "retry-after-ms",
+                  "30"
+                ]
+              ]
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.230301833,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212274.230275958,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [
+            [
+              "retry-after-ms",
+              "30"
+            ]
+          ],
+          "status": 503
+        },
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.262940166,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212274.26291375,
+          "id": "check/2",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212274.262870083,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212274.262897166,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212277.229997333,
+          "elapsed_ms": 33.08241700869985,
+          "ended_s": 212274.26307975,
+          "id": "check",
+          "outcome": "completed",
+          "released_s": 212274.229997333
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212274.263758208,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.263742625,
+            "body_utf8": "{\"error\":{\"type\":\"api_error\",\"code\":\"fixture_error\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212274.263741875,
+            "first_http_s": 212274.263736,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "101"
+              ]
+            ],
+            "output": "",
+            "status": 400,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_reason": "terminal_status_or_output",
+          "sent_s": 212274.263399708,
+          "status": 400
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212277.263389625,
+          "elapsed_ms": 0.4149579908698797,
+          "eligible_s": 212274.263389625,
+          "ended_s": 212274.263804583,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.0014999823179095984,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              400,
+              []
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.263691708,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212274.263663041,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "status": 400
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212277.263389625,
+          "elapsed_ms": 0.4149579908698797,
+          "ended_s": 212274.263804583,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212274.263389625
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212274.264380708,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.264365916,
+            "body_utf8": "{\"error\":{\"type\":\"rate_limit_error\",\"code\":\"rate_limit_exceeded\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212274.264365333,
+            "first_http_s": 212274.264358666,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "114"
+              ],
+              [
+                "x-should-retry",
+                "true"
+              ],
+              [
+                "x-should-retry",
+                "false"
+              ]
+            ],
+            "output": "",
+            "status": 429,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_reason": "explicit_false",
+          "sent_s": 212274.264035166,
+          "status": 429
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212277.264025333,
+          "elapsed_ms": 0.4012080025859177,
+          "eligible_s": 212274.264025333,
+          "ended_s": 212274.264426541,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.0012920063454657793,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              429,
+              [
+                [
+                  "x-should-retry",
+                  "true"
+                ],
+                [
+                  "x-should-retry",
+                  "\tfalse "
+                ]
+              ]
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.264313541,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212274.264285,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [
+            [
+              "x-should-retry",
+              "true"
+            ],
+            [
+              "x-should-retry",
+              "\tfalse "
+            ]
+          ],
+          "status": 429
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212277.264025333,
+          "elapsed_ms": 0.4012080025859177,
+          "ended_s": 212274.264426541,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212274.264025333
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212274.758089625,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.264962916,
+            "body_utf8": "{\"error\":{\"type\":\"api_error\",\"code\":\"fixture_error\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212274.264962333,
+            "first_http_s": 212274.264957208,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "101"
+              ]
+            ],
+            "output": "",
+            "status": 503,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_at_s": 212274.75584821458,
+          "retry_computed_monotonic_s": 212274.264965791,
+          "retry_computed_wall_s": 1789525521.2514172,
+          "retry_delay_s": 0.49088242360085854,
+          "retry_reason": "seeded_backoff",
+          "retry_woke_s": 212274.75808775,
+          "sent_s": 212274.264653166,
+          "status": 503
+        },
+        {
+          "ended_s": 212274.75953875,
+          "id": "check/client2",
+          "index": 2,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.759495708,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212274.75944225,
+            "first_http_s": 212274.759421375,
+            "first_output_delta_s": 212274.75944225,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212274.75944225,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 58,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212274.758090833,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212277.264643708,
+          "elapsed_ms": 494.98970797867514,
+          "eligible_s": 212274.264643708,
+          "ended_s": 212274.759633416,
+          "id": "check",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.001207983586937189,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 58,
+            "status": "observed"
+          },
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              503,
+              []
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.26491325,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212274.264886416,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "status": 503
+        },
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.759376375,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212274.7593075,
+          "id": "check/2",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212274.759205125,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212274.759281458,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212277.264643708,
+          "elapsed_ms": 494.98970797867514,
+          "ended_s": 212274.759633416,
+          "id": "check",
+          "outcome": "completed",
+          "released_s": 212274.264643708
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.015727458,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212274.761747,
+            "body_utf8": "{\"error\":{\"type\":\"rate_limit_error\",\"code\":\"rate_limit_exceeded\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212274.761745291,
+            "first_http_s": 212274.76172175,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "114"
+              ],
+              [
+                "retry-after",
+                "Wed, 16 Sep 2026 02:25:22 GMT"
+              ],
+              [
+                "retry-after-ms",
+                "20"
+              ]
+            ],
+            "output": "",
+            "status": 429,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_at_s": 212275.0135591293,
+          "retry_computed_monotonic_s": 212274.761756208,
+          "retry_computed_wall_s": 1789525521.748197,
+          "retry_delay_s": 0.251802921295166,
+          "retry_reason": "header_max",
+          "retry_woke_s": 212275.015725916,
+          "sent_s": 212274.761020083,
+          "status": 429
+        },
+        {
+          "ended_s": 212275.017452375,
+          "id": "check/client2",
+          "index": 2,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.017403666,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.017354708,
+            "first_http_s": 212275.017287916,
+            "first_output_delta_s": 212275.017354708,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212275.017354708,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 58,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.015728875,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212277.760977541,
+          "elapsed_ms": 256.6319589968771,
+          "eligible_s": 212274.760977541,
+          "ended_s": 212275.0176095,
+          "id": "check",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.005416979547590017,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 58,
+            "status": "observed"
+          },
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              429,
+              [
+                [
+                  "Retry-After",
+                  "Wed, 16 Sep 2026 02:25:22 GMT"
+                ],
+                [
+                  "retry-after-ms",
+                  "20"
+                ]
+              ]
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212274.7616635,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212274.7615835,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [
+            [
+              "Retry-After",
+              "Wed, 16 Sep 2026 02:25:22 GMT"
+            ],
+            [
+              "retry-after-ms",
+              "20"
+            ]
+          ],
+          "status": 429
+        },
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.017245208,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.0171415,
+          "id": "check/2",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.017035625,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.017109,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212277.760977541,
+          "elapsed_ms": 256.6319589968771,
+          "ended_s": 212275.0176095,
+          "id": "check",
+          "outcome": "completed",
+          "released_s": 212274.760977541
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.019876166,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.019819875,
+            "body_utf8": "{\"error\":{\"type\":\"rate_limit_error\",\"code\":\"rate_limit_exceeded\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212275.019817875,
+            "first_http_s": 212275.01980075,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "114"
+              ],
+              [
+                "retry-after",
+                "10"
+              ]
+            ],
+            "output": "",
+            "status": 429,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_at_s": 212285.019832666,
+          "retry_computed_monotonic_s": 212275.019832666,
+          "retry_computed_wall_s": 1789525522.0062678,
+          "retry_delay_s": 10.0,
+          "retry_reason": "header_max",
+          "retry_suppressed": "hint_past_original_cutoff",
+          "sent_s": 212275.018659166,
+          "status": 429
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212275.118608083,
+          "elapsed_ms": 1.4519579999614507,
+          "eligible_s": 212275.018608083,
+          "ended_s": 212275.020060041,
+          "id": "check",
+          "outcome": "deadline_exceeded",
+          "scheduling_lag_ms": 0.007458002073690295,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              429,
+              [
+                [
+                  "Retry-After",
+                  "10"
+                ]
+              ]
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.019681458,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "rejected",
+          "received_s": 212275.0195715,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [
+            [
+              "Retry-After",
+              "10"
+            ]
+          ],
+          "status": 429
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212275.118608083,
+          "elapsed_ms": 1.4519579999614507,
+          "ended_s": 212275.020060041,
+          "id": "check",
+          "outcome": "deadline_exceeded",
+          "released_s": 212275.018608083
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.022300083,
+          "error": "invalid literal for int() with base 16: b''",
+          "error_type": "ValueError",
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "contract_or_transport_failure",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "sent_s": 212275.020817166
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212278.020774541,
+          "elapsed_ms": 1.5263750101439655,
+          "eligible_s": 212275.020774541,
+          "ended_s": 212275.022300916,
+          "error": "invalid literal for int() with base 16: b''",
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.005584006430581212,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "partial": true,
+          "predecessor": null,
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.021969416,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.021801333,
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.0216985,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.021761,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212278.020774541,
+          "elapsed_ms": 1.5263750101439655,
+          "ended_s": 212275.022300916,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212275.020774541
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.023891208,
+          "error": "output/finish/DONE/EOF mismatch",
+          "error_type": "ValueError",
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "contract_or_transport_failure",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.02380925,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.023774208,
+            "first_http_s": 212275.02375625,
+            "first_output_delta_s": 212275.023774208,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212275.023774208,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 58,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.022948333,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212278.022903666,
+          "elapsed_ms": 0.9883750171866268,
+          "eligible_s": 212275.022903666,
+          "ended_s": 212275.023892041,
+          "error": "output/finish/DONE/EOF mismatch",
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.004375004209578037,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "missing_finish": true,
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.023706041,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.023638958,
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.023561791,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.023617041,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212278.022903666,
+          "elapsed_ms": 0.9883750171866268,
+          "ended_s": 212275.023892041,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212275.022903666
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.025395458,
+          "error": "output/finish/DONE/EOF mismatch",
+          "error_type": "ValueError",
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "contract_or_transport_failure",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.025339291,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66}}\n\n",
+            "first_body_s": 212275.0253085,
+            "first_http_s": 212275.025295041,
+            "first_output_delta_s": 212275.0253085,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": null,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 58,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.024494583,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212278.024457833,
+          "elapsed_ms": 0.9383749857079238,
+          "eligible_s": 212275.024457833,
+          "ended_s": 212275.025396208,
+          "error": "output/finish/DONE/EOF mismatch",
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.0037080026231706142,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "missing_done": true,
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.025258625,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.025203208,
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.025132583,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.025183041,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212278.024457833,
+          "elapsed_ms": 0.9383749857079238,
+          "ended_s": 212275.025396208,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212275.024457833
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.026585625,
+          "error": "usage mismatch",
+          "error_type": "ValueError",
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "contract_or_transport_failure",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.026531958,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.026503083,
+            "first_http_s": 212275.026491291,
+            "first_output_delta_s": 212275.026503083,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212275.026503083,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.025862583,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212278.025843166,
+          "elapsed_ms": 0.7432090060319752,
+          "eligible_s": 212275.025843166,
+          "ended_s": 212275.026586375,
+          "error": "usage mismatch",
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.00270901364274323,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check",
+          "wrong_usage": true
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.026457041,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.026401875,
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.026338458,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.026382166,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212278.025843166,
+          "elapsed_ms": 0.7432090060319752,
+          "ended_s": 212275.026586375,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212275.025843166
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.027800916,
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.027778416,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.027755208,
+            "first_http_s": 212275.027743375,
+            "first_output_delta_s": 212275.027755208,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212275.027755208,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "sent_s": 212275.027050083,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212278.027029833,
+          "elapsed_ms": 0.8721670019440353,
+          "eligible_s": 212275.027029833,
+          "ended_s": 212275.027902,
+          "id": "check",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.0029579969123005867,
+          "usage": {
+            "status": "missing_unrequested"
+          },
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "omit_usage": true,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.027708791,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.027641958,
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.027579,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.027623416,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212278.027029833,
+          "elapsed_ms": 0.8721670019440353,
+          "ended_s": 212275.027902,
+          "id": "check",
+          "outcome": "completed",
+          "released_s": 212275.027029833
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.02937175,
+          "error": "requested usage missing",
+          "error_type": "ValueError",
+          "id": "check/client1",
+          "index": 1,
+          "node_id": "check",
+          "outcome": "contract_or_transport_failure",
+          "request_body_sha256": "62ea47bb2be427a515d1c8a8316d5e3d9614db8d2be59cd0578b38cc642afd27",
+          "response": {
+            "body_eof_s": 212275.029301291,
+            "body_utf8": "data: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:check\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-check\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.029270708,
+            "first_http_s": 212275.029253708,
+            "first_output_delta_s": 212275.029270708,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:check",
+            "status": 200,
+            "terminal_marker_s": 212275.029270708,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "sent_s": 212275.028438166,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212278.028410375,
+          "elapsed_ms": 0.9622499928809702,
+          "eligible_s": 212275.028410375,
+          "ended_s": 212275.029372625,
+          "error": "requested usage missing",
+          "id": "check",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.002749991836026311,
+          "workflow_id": "check"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 58,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "check",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "omit_usage": true,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": true,
+          "workflow_id": "check"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 66,
+          "ended_s": 212275.029164375,
+          "expected_body_sha256": "62ea47bb2be427a515d1c8a8316d5e3d9614db8d2be59cd0578b38cc642afd27",
+          "first_write_s": 212275.029091541,
+          "id": "check/1",
+          "ingress_id": "check",
+          "outcome": "completed",
+          "received_s": 212275.029020708,
+          "request_body_exact": true,
+          "request_body_sha256": "62ea47bb2be427a515d1c8a8316d5e3d9614db8d2be59cd0578b38cc642afd27",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            }
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.029068833,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212278.028410375,
+          "elapsed_ms": 0.9622499928809702,
+          "ended_s": 212275.029372625,
+          "id": "check",
+          "outcome": "permanent_failure",
+          "released_s": 212275.028410375
+        }
+      ]
+    },
+    {
+      "arm": "direct",
+      "client_attempts": [
+        {
+          "ended_s": 212275.039388333,
+          "id": "n0/client1",
+          "index": 1,
+          "node_id": "n0",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.039353833,
+            "body_utf8": "{\"error\":{\"type\":\"api_error\",\"code\":\"fixture_error\",\"message\":\"synthetic complete pre-output error\"}}",
+            "first_body_s": 212275.039352791,
+            "first_http_s": 212275.039342875,
+            "first_output_delta_s": null,
+            "headers": [
+              [
+                "content-type",
+                "application/json"
+              ],
+              [
+                "content-length",
+                "101"
+              ]
+            ],
+            "output": "",
+            "status": 400,
+            "terminal_marker_s": null,
+            "usage": {
+              "status": "missing"
+            }
+          },
+          "retry_reason": "terminal_status_or_output",
+          "sent_s": 212275.037719791,
+          "status": 400
+        },
+        {
+          "ended_s": 212275.039526375,
+          "id": "n3/client1",
+          "index": 1,
+          "node_id": "n3",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.039496,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n3\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n3\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n3\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n3\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.039460083,
+            "first_http_s": 212275.039448625,
+            "first_output_delta_s": 212275.039460083,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n3",
+            "status": 200,
+            "terminal_marker_s": 212275.039460083,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 48,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.037958791,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.039588416,
+          "id": "n6/client1",
+          "index": 1,
+          "node_id": "n6",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.03956725,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n6\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n6\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n6\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n6\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.039544666,
+            "first_http_s": 212275.039536583,
+            "first_output_delta_s": 212275.039544666,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n6",
+            "status": 200,
+            "terminal_marker_s": 212275.039544666,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 48,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.038078375,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.039716083,
+          "id": "n9/client1",
+          "index": 1,
+          "node_id": "n9",
+          "outcome": "response",
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "response": {
+            "body_eof_s": 212275.039696125,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n9\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n9\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n9\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n9\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.039672541,
+            "first_http_s": 212275.039663208,
+            "first_output_delta_s": 212275.039672541,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n9",
+            "status": 200,
+            "terminal_marker_s": 212275.039672541,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 48,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.038213875,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.09380475,
+          "id": "n4/client1",
+          "index": 1,
+          "node_id": "n4",
+          "outcome": "response",
+          "request_body_sha256": "ef35b28aaa05bef8d189b24adde96a5030e351960e5f7a5e091e4b1e00382bef",
+          "response": {
+            "body_eof_s": 212275.093767833,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n4\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n4\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n4\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n4\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.093729833,
+            "first_http_s": 212275.093712375,
+            "first_output_delta_s": 212275.093729833,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n4",
+            "status": 200,
+            "terminal_marker_s": 212275.093729833,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.092040083,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.09388625,
+          "id": "n7/client1",
+          "index": 1,
+          "node_id": "n7",
+          "outcome": "response",
+          "request_body_sha256": "55e2ff028fec3ba36f0a61b492dcbf3c3fcf58a5e2d5ed4f0954417dca3d7d4c",
+          "response": {
+            "body_eof_s": 212275.093863166,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n7\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n7\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n7\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n7\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.093837333,
+            "first_http_s": 212275.093827375,
+            "first_output_delta_s": 212275.093837333,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n7",
+            "status": 200,
+            "terminal_marker_s": 212275.093837333,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.092506666,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.094003875,
+          "id": "n10/client1",
+          "index": 1,
+          "node_id": "n10",
+          "outcome": "response",
+          "request_body_sha256": "a8f5f0c0ff81027bb48605db2956171cb8183396254b9634da00c990f279246a",
+          "response": {
+            "body_eof_s": 212275.093982833,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n10\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n10\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n10\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n10\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.09395775,
+            "first_http_s": 212275.093949083,
+            "first_output_delta_s": 212275.09395775,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n10",
+            "status": 200,
+            "terminal_marker_s": 212275.09395775,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.09264625,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.150002958,
+          "id": "n5/client1",
+          "index": 1,
+          "node_id": "n5",
+          "outcome": "response",
+          "request_body_sha256": "5350f710e232907fa5f831668b96b30093257a0cde21ad9321fa20f804e0d7d2",
+          "response": {
+            "body_eof_s": 212275.149944208,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n5\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n5\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n5\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n5\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.149892208,
+            "first_http_s": 212275.149867375,
+            "first_output_delta_s": 212275.149892208,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n5",
+            "status": 200,
+            "terminal_marker_s": 212275.149892208,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.146462458,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.150121375,
+          "id": "n8/client1",
+          "index": 1,
+          "node_id": "n8",
+          "outcome": "response",
+          "request_body_sha256": "097bda176fa9d9bd1d052e9862ed222c9162ce15efa511a497ae7c6ea57f6801",
+          "response": {
+            "body_eof_s": 212275.150089958,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n8\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n8\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n8\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n8\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.150054166,
+            "first_http_s": 212275.150040833,
+            "first_output_delta_s": 212275.150054166,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n8",
+            "status": 200,
+            "terminal_marker_s": 212275.150054166,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.147034958,
+          "status": 200
+        },
+        {
+          "ended_s": 212275.150334,
+          "id": "n11/client1",
+          "index": 1,
+          "node_id": "n11",
+          "outcome": "response",
+          "request_body_sha256": "3d5db154a2f6f00b2af1d5e4a76e12c97a1fb13bd15191397c50e374d1bf9b2a",
+          "response": {
+            "body_eof_s": 212275.150291875,
+            "body_utf8": "data: {\"id\":\"chatcmpl-n11\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n11\"},\"finish_reason\":null}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n11\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":null}\n\ndata: {\"id\":\"chatcmpl-n11\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"synthetic\",\"choices\":[],\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67}}\n\ndata: [DONE]\n\n",
+            "first_body_s": 212275.150241916,
+            "first_http_s": 212275.150221,
+            "first_output_delta_s": 212275.150241916,
+            "headers": [
+              [
+                "content-type",
+                "text/event-stream"
+              ],
+              [
+                "transfer-encoding",
+                "chunked"
+              ]
+            ],
+            "output": "fixture:n11",
+            "status": 200,
+            "terminal_marker_s": 212275.150241916,
+            "usage": {
+              "completion_tokens": 8,
+              "prompt_tokens": 59,
+              "status": "observed"
+            }
+          },
+          "sent_s": 212275.147290458,
+          "status": 200
+        }
+      ],
+      "fixture_pending_tasks": 0,
+      "nodes": [
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 2.0556660019792616,
+          "eligible_s": 212275.037562,
+          "ended_s": 212275.039617666,
+          "id": "n0",
+          "outcome": "permanent_failure",
+          "scheduling_lag_ms": 0.12408298789523542,
+          "workflow_id": "w0"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "eligible_s": null,
+          "ended_s": 212275.039621583,
+          "id": "n1",
+          "not_started": true,
+          "outcome": "dependency_failed",
+          "workflow_id": "w0"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "eligible_s": null,
+          "ended_s": 212275.039624166,
+          "id": "n2",
+          "not_started": true,
+          "outcome": "dependency_failed",
+          "workflow_id": "w0"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 2.1867499744985253,
+          "eligible_s": 212275.037562,
+          "ended_s": 212275.03974875,
+          "id": "n3",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.3729579912032932,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 48,
+            "status": "observed"
+          },
+          "workflow_id": "w1"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 2.199624985223636,
+          "eligible_s": 212275.037562,
+          "ended_s": 212275.039761625,
+          "id": "n6",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.49762497656047344,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 48,
+            "status": "observed"
+          },
+          "workflow_id": "w2"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 2.2573749884031713,
+          "eligible_s": 212275.037562,
+          "ended_s": 212275.039819375,
+          "id": "n9",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 0.6352909840643406,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 48,
+            "status": "observed"
+          },
+          "workflow_id": "w3"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 4.284250026103109,
+          "eligible_s": 212275.08974874998,
+          "ended_s": 212275.094033,
+          "id": "n4",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 2.1807080192957073,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 59,
+            "status": "observed"
+          },
+          "workflow_id": "w1"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 4.289708012947813,
+          "eligible_s": 212275.089761625,
+          "ended_s": 212275.094051333,
+          "id": "n7",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 2.7079580177087337,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 59,
+            "status": "observed"
+          },
+          "workflow_id": "w2"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 4.271375015377998,
+          "eligible_s": 212275.089819375,
+          "ended_s": 212275.09409075,
+          "id": "n10",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 2.8056660084985197,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 59,
+            "status": "observed"
+          },
+          "workflow_id": "w3"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 6.35358301224187,
+          "eligible_s": 212275.144033,
+          "ended_s": 212275.150386583,
+          "id": "n5",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 2.2385000193025917,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 59,
+            "status": "observed"
+          },
+          "workflow_id": "w1"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 6.364625005517155,
+          "eligible_s": 212275.144051333,
+          "ended_s": 212275.150415958,
+          "id": "n8",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 2.9237080016173422,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 59,
+            "status": "observed"
+          },
+          "workflow_id": "w2"
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 6.392250012140721,
+          "eligible_s": 212275.14409075,
+          "ended_s": 212275.150483,
+          "id": "n11",
+          "outcome": "completed",
+          "payload_valid": true,
+          "scheduling_lag_ms": 3.1665830174461007,
+          "usage": {
+            "completion_tokens": 8,
+            "prompt_tokens": 59,
+            "status": "observed"
+          },
+          "workflow_id": "w3"
+        }
+      ],
+      "protocol_errors": [],
+      "submitted": [
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 48,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n0",
+          "input_bytes": 96,
+          "length": "long",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "responses": [
+            [
+              400,
+              []
+            ]
+          ],
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "w0"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n1",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n0",
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w0"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n2",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n1",
+          "root": 0,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w0"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 48,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n3",
+          "input_bytes": 96,
+          "length": "long",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 1,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "w1"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n4",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n3",
+          "root": 1,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w1"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n5",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n4",
+          "root": 1,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w1"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 48,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n6",
+          "input_bytes": 96,
+          "length": "long",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 2,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "w2"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n7",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n6",
+          "root": 2,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w2"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n8",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n7",
+          "root": 2,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w2"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 48,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n9",
+          "input_bytes": 96,
+          "length": "long",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": null,
+          "root": 3,
+          "service_ms": 0,
+          "tool_delay_s": 0,
+          "usage_required": false,
+          "workflow_id": "w3"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n10",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n9",
+          "root": 3,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w3"
+        },
+        {
+          "actual_ratio": 0.25,
+          "canonical_input_units": 59,
+          "canonical_output_units": 8,
+          "deadline_secs": 5,
+          "id": "n11",
+          "input_bytes": 96,
+          "length": "short",
+          "offset_s": 0,
+          "output_reservation": 32,
+          "predecessor": "n10",
+          "root": 3,
+          "service_ms": 0,
+          "tool_delay_s": 0.05,
+          "usage_required": false,
+          "workflow_id": "w3"
+        }
+      ],
+      "upstream_attempts": [
+        {
+          "actual_cost_fixture_units": 56,
+          "ended_s": 212275.038929791,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "id": "n0/1",
+          "ingress_id": "n0",
+          "outcome": "rejected",
+          "received_s": 212275.038860583,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "status": 400
+        },
+        {
+          "actual_cost_fixture_units": 56,
+          "ended_s": 212275.039170916,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.039088708,
+          "id": "n3/1",
+          "ingress_id": "n3",
+          "outcome": "completed",
+          "received_s": 212275.03895975,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.039003166,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 56,
+          "ended_s": 212275.039212208,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.039174166,
+          "id": "n6/1",
+          "ingress_id": "n6",
+          "outcome": "completed",
+          "received_s": 212275.039031708,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.039067541,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 56,
+          "ended_s": 212275.039337625,
+          "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "first_write_s": 212275.039296333,
+          "id": "n9/1",
+          "ingress_id": "n9",
+          "outcome": "completed",
+          "received_s": 212275.039239875,
+          "request_body_exact": true,
+          "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.039276666,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 67,
+          "ended_s": 212275.093530708,
+          "expected_body_sha256": "ef35b28aaa05bef8d189b24adde96a5030e351960e5f7a5e091e4b1e00382bef",
+          "first_write_s": 212275.093471625,
+          "id": "n4/1",
+          "ingress_id": "n4",
+          "outcome": "completed",
+          "received_s": 212275.093295958,
+          "request_body_exact": true,
+          "request_body_sha256": "ef35b28aaa05bef8d189b24adde96a5030e351960e5f7a5e091e4b1e00382bef",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              },
+              {
+                "content": "fixture:n3",
+                "role": "assistant"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.09336375,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 67,
+          "ended_s": 212275.093571416,
+          "expected_body_sha256": "55e2ff028fec3ba36f0a61b492dcbf3c3fcf58a5e2d5ed4f0954417dca3d7d4c",
+          "first_write_s": 212275.093535208,
+          "id": "n7/1",
+          "ingress_id": "n7",
+          "outcome": "completed",
+          "received_s": 212275.09340125,
+          "request_body_exact": true,
+          "request_body_sha256": "55e2ff028fec3ba36f0a61b492dcbf3c3fcf58a5e2d5ed4f0954417dca3d7d4c",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              },
+              {
+                "content": "fixture:n6",
+                "role": "assistant"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.09344325,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 67,
+          "ended_s": 212275.093690333,
+          "expected_body_sha256": "a8f5f0c0ff81027bb48605db2956171cb8183396254b9634da00c990f279246a",
+          "first_write_s": 212275.093656083,
+          "id": "n10/1",
+          "ingress_id": "n10",
+          "outcome": "completed",
+          "received_s": 212275.093605791,
+          "request_body_exact": true,
+          "request_body_sha256": "a8f5f0c0ff81027bb48605db2956171cb8183396254b9634da00c990f279246a",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              },
+              {
+                "content": "fixture:n9",
+                "role": "assistant"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.093647125,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 67,
+          "ended_s": 212275.149456083,
+          "expected_body_sha256": "5350f710e232907fa5f831668b96b30093257a0cde21ad9321fa20f804e0d7d2",
+          "first_write_s": 212275.149306125,
+          "id": "n5/1",
+          "ingress_id": "n5",
+          "outcome": "completed",
+          "received_s": 212275.148844625,
+          "request_body_exact": true,
+          "request_body_sha256": "5350f710e232907fa5f831668b96b30093257a0cde21ad9321fa20f804e0d7d2",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              },
+              {
+                "content": "fixture:n4",
+                "role": "assistant"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.149012541,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 67,
+          "ended_s": 212275.149564583,
+          "expected_body_sha256": "097bda176fa9d9bd1d052e9862ed222c9162ce15efa511a497ae7c6ea57f6801",
+          "first_write_s": 212275.149470041,
+          "id": "n8/1",
+          "ingress_id": "n8",
+          "outcome": "completed",
+          "received_s": 212275.149109833,
+          "request_body_exact": true,
+          "request_body_sha256": "097bda176fa9d9bd1d052e9862ed222c9162ce15efa511a497ae7c6ea57f6801",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              },
+              {
+                "content": "fixture:n7",
+                "role": "assistant"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.149231666,
+          "status": 200
+        },
+        {
+          "actual_cost_fixture_units": 67,
+          "ended_s": 212275.149819958,
+          "expected_body_sha256": "3d5db154a2f6f00b2af1d5e4a76e12c97a1fb13bd15191397c50e374d1bf9b2a",
+          "first_write_s": 212275.149768625,
+          "id": "n11/1",
+          "ingress_id": "n11",
+          "outcome": "completed",
+          "received_s": 212275.149676541,
+          "request_body_exact": true,
+          "request_body_sha256": "3d5db154a2f6f00b2af1d5e4a76e12c97a1fb13bd15191397c50e374d1bf9b2a",
+          "request_json": {
+            "max_tokens": 32,
+            "messages": [
+              {
+                "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "role": "user"
+              },
+              {
+                "content": "fixture:n10",
+                "role": "assistant"
+              }
+            ],
+            "model": "synthetic",
+            "stream": true
+          },
+          "request_semantic_valid": true,
+          "response_headers": [],
+          "service_started_s": 212275.149749541,
+          "status": 200
+        }
+      ],
+      "workflows": [
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 2.0654999825637788,
+          "ended_s": 212275.0396275,
+          "id": "w0",
+          "outcome": "permanent_failure",
+          "released_s": 212275.037562
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 112.84166597761214,
+          "ended_s": 212275.150403666,
+          "id": "w1",
+          "outcome": "completed",
+          "released_s": 212275.037562
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 112.85841598873958,
+          "ended_s": 212275.150420416,
+          "id": "w2",
+          "outcome": "completed",
+          "released_s": 212275.037562
+        },
+        {
+          "deadline_s": 212280.037562,
+          "elapsed_ms": 112.92512499494478,
+          "ended_s": 212275.150487125,
+          "id": "w3",
+          "outcome": "completed",
+          "released_s": 212275.037562
+        }
+      ]
+    }
+  ],
+  "script_sha256": "e3b7a7834a362a676ff406ccc210744a4dfbf806e6954864dce24a3c0ac3cc1c",
+  "shared_client_sha256": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+  "status": "passed"
+}

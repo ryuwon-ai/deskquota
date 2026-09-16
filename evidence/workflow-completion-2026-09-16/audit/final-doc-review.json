@@ -1,0 +1,64 @@
+{
+  "status": "APPROVED",
+  "reviewer": "workflow_result_audit",
+  "scope": "Final report and current measurement/setup/packaging passages of both READMEs plus latest RESEARCH row; historical reports are retained, not freshly rebenchmarked.",
+  "reviewed_files": {
+    "reports/workflow-completion-and-lightweight-builds-2026-09-16.md": "52f8d7777699644e95e019f7185088f8d4e9ae4588af7f55cc9d71643da20fb1",
+    "README.md": "11d9b92cf631b12a9435192bdc24a461698112569338e8ffe1963efe450f6fe7",
+    "README.ko.md": "7ae4da1b8ce6903c77463ef392d9ff4f0ea5b8019a5dbb1c3b6dea058dadb6e7",
+    "RESEARCH.md": "5601ce5d3ad03a4fe0c127f2144c501cedabcff251259c88c6fa35433f21ad7e"
+  },
+  "independent_raw_verification": {
+    "fresh_runs": 91,
+    "mismatches": 0,
+    "details": "Original18 exact generator/body/cost, full logical/node denominators, original release/deadline/dependencies, raw SSE semantic success/usage, p50/p95/p99/means and group metrics, within2/5/10 deadlines, all-work makespan, per-node client/provider budgets and hidden retries, quota ledger/snapshots, service duration/cap, warmup separation, cancellation and cleanup. No driver validator imported."
+  },
+  "evidence": [
+    "audit/final-raw-audit.json",
+    "audit/self-check.json",
+    "audit/final-source-hold.json",
+    "audit/local-late-admission-cause.json",
+    "audit/recovery-header-observations.json",
+    "validation/results.json",
+    "validation/local-resource-audit.json",
+    "validation/packages/installer-check.json",
+    "windows/final-validation.json"
+  ],
+  "claims_checked": [
+    "Same DeskQuota binary, existing known-to-unknown quota choice only apart from ephemeral bindings; this is configuration/contract effect, not a new scheduler.",
+    "Five paired bucket runs90/90 both,90calls each; workflow p95 median38.133899->2.508425s; short-input mean3.757912->1.213384s.",
+    "Peer3-repeat bucket groups each54/54 with54calls; no broad latency superiority claimed.",
+    "Strict one-run native local quota diagnostics separated and all failures retained.",
+    "All20 short-profile cells agree; shared429 saves43.75percent calls against direct/Bifrost while its p95 is slower than Bifrost.",
+    "LiteLLM lost timing header and seeded early retries are observed in pinned configurations, not generalized.",
+    "Usage missing when unrequested retained as success; five requested-usage preflights pass separately.",
+    "Native sizes/test counts/lifecycle/resources match linked validation records; Mac tests include bench-harness, timing releases do not.",
+    "Actual offsets2.2514..31.7085s and29.4571s span match; prior47sbackfill remains historical.",
+    "Startup hold0 explicitly disclosed in report and both READMEs; default60second restart hold is excluded from measured timing.",
+    "84performance/diagnostic runs:852workflows848completed+4retrybudgetexhausted;972nodes968completed+4;1220client/1201provider. Separate5preflight,6controlnodes,45warmupnodes."
+  ],
+  "resolved_precision_notes": [
+    "Removed unsupported Date-header explanation from short-profile timing variation.",
+    "Scoped local16/6000 tooriginal18.",
+    "Corrected peer table direction.",
+    "Documented bench-harness test versus ordinary release timing split."
+  ],
+  "limits": [
+    "Synthetic fixture outcomes only; no real API/model quality/low-end/general superiority claim.",
+    "Resource results cover a gateway PID, not child-process aggregates.",
+    "Causal RPM attribution uses timestamps plus same-body historical independent tokenizer counts matching current aggregate, not live blocked_reason or separate RPM-only ablation.",
+    "Three short/peer repeats and one original seed do not support population tail or broad workload claims."
+  ],
+  "product_driver_changes_by_reviewer": false,
+  "new_gateway_or_http_runs_by_reviewer": 0,
+  "blocking_findings": [],
+  "separate_performance_totals": {
+    "runs": 84,
+    "planned_workflows": 852,
+    "planned_nodes": 972,
+    "completed_by_deadline": 848,
+    "client_http_attempts": 1220,
+    "upstream_attempts": 1201,
+    "warmup_nodes_excluded": 45
+  }
+}

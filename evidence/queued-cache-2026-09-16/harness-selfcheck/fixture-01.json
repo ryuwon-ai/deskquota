@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "gateway_executed": false,
+  "passed": true,
+  "scope": "synthetic queued-cache mechanism; deliberate gate and service delay are not proxy overhead, model quality or provider performance",
+  "clock": "one host monotonic; original-ingress deadline includes queue/gate; post-release duration separately reported",
+  "attribution": "identical requests have identical headers/body; upstream attempts map to body hash, not individual identical ingress IDs",
+  "resources_scope": "process RSS/CPU snapshots before, while gated, and after; not peak/continuous sampling",
+  "fixture_service_seconds": 0.1,
+  "cases": [
+    {
+      "name": "duplicate_json_high",
+      "stream": false,
+      "cap": 1,
+      "rpm": 100000,
+      "cache": true,
+      "distinct": false
+    },
+    {
+      "name": "duplicate_json_rpm1",
+      "stream": false,
+      "cap": 1,
+      "rpm": 1,
+      "cache": true,
+      "distinct": false
+    },
+    {
+      "name": "duplicate_sse_high",
+      "stream": true,
+      "cap": 1,
+      "rpm": 100000,
+      "cache": true,
+      "distinct": false
+    },
+    {
+      "name": "duplicate_sse_rpm1",
+      "stream": true,
+      "cap": 1,
+      "rpm": 1,
+      "cache": true,
+      "distinct": false
+    },
+    {
+      "name": "distinct_json",
+      "stream": false,
+      "cap": 1,
+      "rpm": 100000,
+      "cache": true,
+      "distinct": true
+    },
+    {
+      "name": "disabled_json",
+      "stream": false,
+      "cap": 1,
+      "rpm": 100000,
+      "cache": false,
+      "distinct": false
+    },
+    {
+      "name": "duplicate_json_cap3",
+      "stream": false,
+      "cap": 3,
+      "rpm": 100000,
+      "cache": true,
+      "distinct": false
+    },
+    {
+      "name": "duplicate_sse_cap3",
+      "stream": true,
+      "cap": 3,
+      "rpm": 100000,
+      "cache": true,
+      "distinct": false
+    }
+  ],
+  "repeats": 5,
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "runs": [],
+  "source_sha256": {
+    "benchmark_queued_cache.py": "b8c87897dac0a44d502509586e0f8a95a3e2518e10b396c7747be02e66bfb09d",
+    "benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "benchmark_cache.py": "068fd55d0807e96d7ab5c77ff759f0bab106ab2007924482d7b7f9147c48e2f6",
+    "benchmark_http.py": "78aa13c0ee7c3c0049efa782bebee0b0586c763fec51b0288516dc2051e49a8d",
+    "measure_native.py": "1d67ac433911b54ac9f5f7c25f0cd5a482e28a36cc2a2c88ba60b82eccca9f4b"
+  },
+  "fixture": {
+    "gated_responses": 2,
+    "json_sse_body_usage_exact": true,
+    "attempts": [
+      {
+        "id": 0,
+        "received_s": 207820.632025333,
+        "request_sha256": "6f77824a23c1c527674cf8140c257b88508de663ae9305a33416e131099c6807",
+        "request_bytes": 121,
+        "outcome": "completed",
+        "fixture_usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 1
+        },
+        "first_write_s": 207820.649804083,
+        "final_write_s": 207820.649832416,
+        "response_sha256": "cef3bd0e9517025090150efb597816b2f8ba61ce8a9a6bd16caa34c281df7c7e"
+      },
+      {
+        "id": 1,
+        "received_s": 207820.632042208,
+        "request_sha256": "d89b2d85949cb7c2297143dd368fad4c46137af4d9f77145abe37e2a29696bce",
+        "request_bytes": 120,
+        "outcome": "completed",
+        "fixture_usage": {
+          "prompt_tokens": 3,
+          "completion_tokens": 1
+        },
+        "first_write_s": 207820.649851333,
+        "final_write_s": 207820.656246541,
+        "response_sha256": "e64ff94d7ec9e8744bc83b93a0b0a1ed0b3a18cb5da06e86f85bd7ec8c2dc78f"
+      }
+    ],
+    "release_s": 207820.6376895
+  },
+  "rejected_corruptions": [
+    "missing terminal",
+    "duplicate terminal",
+    "unvalidated body",
+    "extra upstream attempt",
+    "unknown request",
+    "held TPM leak",
+    "replay usage debit",
+    "wrong cache hits"
+  ]
+}

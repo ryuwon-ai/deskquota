@@ -80,6 +80,19 @@ API format; model IDs; authentication reference; RPM/TPM limits; and concurrency
 It previews changes before applying them. Client connections and login startup
 have their own previews.
 
+Choose what the local gateway should enforce:
+
+| Limit choice | Meaning |
+|---|---|
+| A number | Enforce your own rolling 60-second RPM/TPM cap |
+| `unknown` | Let the upstream enforce its allowance; no additional local cap, upstream limits unverified |
+| `unlimited` | Explicitly impose no local RPM/TPM cap |
+
+Concurrency and shared `429` cooldown still apply in each case. Copying a
+provider's continuously replenished allowance into a local rolling cap can add
+unnecessary waiting. Keep a numeric cap when you need that local budget;
+`unknown` does not guarantee a separate personal allowance.
+
 ```sh
 llmgw on        # Start the background gateway
 llmgw status    # Inspect its state
@@ -143,7 +156,7 @@ do not certify every version, model capability, or real-world coding task.
 Automatic summarization and the next turn passed isolated native tests for
 Pi, Codex and Claude Code, including Claude on Windows. There are still limits:
 `/responses/compact` is unsupported, and known-TPM inspection rejects opaque
-compaction inputs and oversized byte estimates. See the
+compaction inputs and input estimates that exceed the configured budget. See the
 [automatic compaction audit](reports/auto-compaction-audit-2026-09-16.md) before relying on long sessions.
 
 ## Small by design
@@ -161,6 +174,35 @@ alone does not split cache entries; a response that declares `Vary` on that
 header is not stored. Credentials, other effective headers and body bytes still
 separate entries.
 
+If an eligible response finishes while an identical request is waiting for
+capacity or quota, that request can use the completed cache entry immediately.
+Requests already sent upstream continue normally; this does not merge every
+concurrent duplicate.
+
+The default macOS executable is **10.20 MB**, down from the previous **59.92 MB**
+release by about **83%**. It uses byte estimates and omits BPE vocabularies. An explicit
+`--features bpe` build remains one offline executable with the same commands.
+For a model with a known TPM limit, that build's setup can select `cl100k_base` or `o200k_base`
+to reduce byte-based over-reservation. Add these fields to that model's existing
+`[[models]]` entry only after checking the upstream's encoding:
+
+```toml
+input_estimator = "cl100k_base"
+input_token_overhead = 32
+```
+
+This counts the original serialized JSON plus a framing allowance, **not exact
+provider input tokens or a guaranteed upper bound**. An OpenAI-compatible URL
+does not establish tokenizer compatibility. Output caps and request bodies stay
+unchanged. The default `utf8_bytes` mode requires zero overhead. In the measured
+macOS gateway, idle RSS was about **9.9 MiB for bytes, 41.7 MiB for cl100k and
+76.7 MiB for o200k**. The current optional BPE build remains **59.92 MB**;
+only selected encodings initialize for known TPM. A default build rejects
+explicit BPE settings before new startup or saving, rather than changing the
+estimator silently. Existing workers can still be inspected and stopped.
+These size savings do not reduce the memory used by a selected BPE vocabulary.
+[Input estimation measurements and limits →](reports/input-estimation-results-2026-09-16.md)
+
 Status also compares reservations with observed usage for finished upstream
 attempts under a known TPM limit. Missing usage is counted separately. These
 totals explain reservation differences; they are not an exact tokenizer or a
@@ -177,7 +219,7 @@ Some boundaries are deliberate:
 - One instance accounts for its own traffic. Other PCs can consume a shared
   allowance outside its view.
 - Quota estimates are not an exact copy of every provider's limiter. The current
-  in-flight input estimate uses request bytes. Valid final usage from supported JSON and streaming responses corrects
+  default input estimate uses request bytes; selected BPE modes count JSON with an explicit encoding and framing allowance. Valid final usage from supported JSON and streaming responses corrects
   the reservation by default; missing usage retains it. Provider admission
   rules may differ from reported usage.
 - Scheduling can reduce avoidable waiting. It does not increase your provider's
@@ -192,7 +234,48 @@ Some boundaries are deliberate:
 Numbers are useful when their boundaries are visible. These are local
 observations on an **Apple M4 with 32 GiB RAM**, not low-end hardware guarantees.
 
-The current diagnostics update also removes a specific cache miss: two otherwise
+In five paired runs of the original 18-request workload against a **continuously
+replenished RPM fixture**, choosing the existing provider-managed quota setting
+reduced task p95 from **38.13 to 2.51 seconds**. Both settings completed **90/90**
+tasks with **90 upstream calls**. Short-input mean fell from **3.76 to 1.21 seconds**;
+batch completion fell from **67.59 to 31.96 seconds**, including staggered arrivals.
+This removes an unnecessary additional local rolling cap; it is not a new
+scheduler or an increase in provider allowance. With a strict rolling upstream
+limit, completing every task still took tens of seconds. Keep a local numeric
+cap when that is the budget you need to enforce. Both measured settings disabled
+startup hold; these times exclude the default 60-second startup hold.
+
+The default build now uses **10.20 MB on macOS / 16.38 MB on Windows**, with
+**9.67 MiB idle RSS** observed on this Mac. Default/BPE builds passed **456 tests
+each on macOS**; Windows passed **409 default / 236 focused BPE tests**. These
+overlap rather than adding up to unique checks. Retry-veto, setup, lifecycle and
+compaction checks passed within their documented platform scope.
+[Workflow results, peer controls, build validation and tradeoffs →](reports/workflow-completion-and-lightweight-builds-2026-09-16.md)
+
+The queued-cache change reduced **10 upstream calls to 1** for ten identical
+JSON or streaming requests at concurrency 1, across five paired runs. All ten
+completed. JSON completion p95 after releasing the upstream gate fell from
+**1,029 to 104 ms** (median of five runs; 100 ms synthetic generation delay).
+With RPM 1, completions within a 750 ms client deadline rose from **1/10 to 10/10**.
+Concurrency 3 retained three already-started calls; distinct-request and cache-off
+controls retained all ten. This is completed-response reuse, not faster generation.
+Cache-off no-wait p95 medians were **0.345 → 0.359 ms**, with about **10 MiB idle RSS**.
+Native Windows contract checks passed; real-provider and low-end gains remain unverified.
+[Queued-cache results, 429 delivery, tradeoffs and peer review →](reports/efficiency-improvements-and-debate-2026-09-16.md)
+
+With `cl100k_base` explicitly selected, three paired TPM-constrained synthetic
+runs completed **10/12 → 12/12** burst requests and **4/6 → 6/6** growing-history
+requests within a 1.5-second per-request deadline, with no upstream 429s. The
+existing 18-request fixture's p95 fell from **40.63 to 38.13 seconds**, retaining
+18/18 completions and 16 in the first minute. A separate, single run with a larger
+framing allowance retained that p95 without under-reserving the fixture's input.
+Burst success means increased, and a deliberately mismatched encoding contract
+produced 429s. These are selected-mode admission results, not universal latency
+gains or a new competitor comparison; no-wait large-request p95 increased from
+about 0.37 to 1.06 ms.
+[Paired results, counterexamples and resource costs →](reports/input-estimation-results-2026-09-16.md)
+
+The earlier diagnostics update also removes a specific cache miss: two otherwise
 identical requests with different SDK retry-count metadata used **one upstream
 call instead of two**, for both JSON and streaming responses. A matching `Vary`
 control still used two. These are synthetic reruns, not a measured SDK retry
@@ -266,7 +349,8 @@ performance superiority remains unverified.
 - Reduce avoidable model-list waiting while preserving quota and fairness rules.
 - Validate quota estimation against a real endpoint's accounting contract.
 - Compare independent workloads, including NVIDIA hosted API compatibility checks.
-- Reduce duplicate upstream calls during concurrent cold cache misses; verify quota and cancellation behavior.
+- Measure how often real workloads can reuse completed responses while queued; consider broader coalescing only if already-started duplicates justify it.
+- Validate provider-managed completion and local hard-budget tradeoffs against real endpoint contracts.
 - Extend Windows checks to a fresh non-admin account, Pi, and actual login startup; exercise Linux and lower-resource computers.
 
 A useful contribution is a small reproducible case: the configured limits,

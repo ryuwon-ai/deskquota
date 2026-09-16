@@ -1,0 +1,2828 @@
+{
+  "arm": "bifrost",
+  "audit_valid": true,
+  "budget_samples": [
+    {
+      "accepted": true,
+      "at_s": 214703.705612666,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 0,
+      "rolling_tpm_used": 0,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214703.705721916,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 1,
+      "rolling_tpm_used": 56,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.111189708,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 2,
+      "rolling_tpm_used": 112,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.11142175,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 3,
+      "rolling_tpm_used": 168,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.5154425,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 4,
+      "rolling_tpm_used": 224,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.515661458,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 5,
+      "rolling_tpm_used": 291,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.568139541,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 6,
+      "rolling_tpm_used": 358,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.568280416,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 7,
+      "rolling_tpm_used": 425,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.592808625,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 8,
+      "rolling_tpm_used": 492,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.593000916,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 9,
+      "rolling_tpm_used": 559,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.646454541,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 10,
+      "rolling_tpm_used": 626,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214704.646669166,
+      "cost": 67,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 11,
+      "rolling_tpm_used": 693,
+      "rpm_tokens": null
+    }
+  ],
+  "cache": "off",
+  "cap": 2,
+  "client_attempt_limit": 4,
+  "client_attempts": [
+    {
+      "ended_s": 214704.1109115,
+      "id": "n0/client1",
+      "index": 1,
+      "node_id": "n0",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214704.110812,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n0\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n0\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":403,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n0\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":403,\"upstream_latency\":403,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.110705958,
+        "first_http_s": 214704.110611208,
+        "first_output_delta_s": 214704.110705958,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "353bdbcc-a5e2-4a7b-94b1-8532d6ced5ed"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "5885e0aac2df404bac90536678adf1bb"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "403.237"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n0",
+        "status": 200,
+        "terminal_marker_s": 214704.110802208,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 48,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214703.701781791,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.515109416,
+      "id": "n3/client1",
+      "index": 1,
+      "node_id": "n3",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214704.515070208,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n3\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n3\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":404,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n3\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":404,\"upstream_latency\":404,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.515025875,
+        "first_http_s": 214704.514987583,
+        "first_output_delta_s": 214704.515025875,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "b1979713-a4e6-4cfc-b5e4-ff30f84b04e9"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "d4608996996d4caaa5495b6b7aeb1aa9"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "404.433"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n3",
+        "status": 200,
+        "terminal_marker_s": 214704.515063833,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 48,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214703.701922875,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.11107675,
+      "id": "n6/client1",
+      "index": 1,
+      "node_id": "n6",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214704.111032375,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n6\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n6\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":403,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n6\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":403,\"upstream_latency\":403,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.110982291,
+        "first_http_s": 214704.110942416,
+        "first_output_delta_s": 214704.110982291,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "4508ce3e-bc94-4813-8fa5-3f8d095707ba"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "ef4ac4f28c16424b95ce3317c4c62405"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "403.126"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n6",
+        "status": 200,
+        "terminal_marker_s": 214704.111024458,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 48,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214703.70197725,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.5147635,
+      "id": "n9/client1",
+      "index": 1,
+      "node_id": "n9",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214704.514686291,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n9\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n9\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":404,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n9\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":8,\"total_tokens\":56},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":404,\"upstream_latency\":404,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.514590083,
+        "first_http_s": 214704.514500791,
+        "first_output_delta_s": 214704.514590083,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "7886e95a-da68-4fa2-9986-f631ee317016"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "4ab61e211f2a41adb665564c7f508ffb"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "404.358"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n9",
+        "status": 200,
+        "terminal_marker_s": 214704.514679791,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 48,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214703.702020583,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.538271625,
+      "id": "n1/client1",
+      "index": 1,
+      "node_id": "n1",
+      "outcome": "response",
+      "request_body_sha256": "675c9406601dfc5e773dc68d4adac3f1b828c306d12b62f2e388cdd0c7753607",
+      "response": {
+        "body_eof_s": 214704.538244458,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n1\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n1\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n1\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"upstream_latency\":23,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.53821075,
+        "first_http_s": 214704.538186125,
+        "first_output_delta_s": 214704.53821075,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "100ec4ad-b427-40aa-a10a-c05a2120d5c2"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "7d49ea2016dd4da89bdf6f140974f0d0"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "23.207"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n1",
+        "status": 200,
+        "terminal_marker_s": 214704.538239541,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.163821375,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.538167625,
+      "id": "n7/client1",
+      "index": 1,
+      "node_id": "n7",
+      "outcome": "response",
+      "request_body_sha256": "55e2ff028fec3ba36f0a61b492dcbf3c3fcf58a5e2d5ed4f0954417dca3d7d4c",
+      "response": {
+        "body_eof_s": 214704.53811025,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n7\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n7\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n7\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"upstream_latency\":23,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.538026375,
+        "first_http_s": 214704.537964208,
+        "first_output_delta_s": 214704.538026375,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "95f153b5-038e-4b34-8808-02d364156585"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "5d6f20d54b25444fa70b86814cfd262f"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "23.139"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n7",
+        "status": 200,
+        "terminal_marker_s": 214704.538103541,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.164354083,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.591655041,
+      "id": "n10/client1",
+      "index": 1,
+      "node_id": "n10",
+      "outcome": "response",
+      "request_body_sha256": "a8f5f0c0ff81027bb48605db2956171cb8183396254b9634da00c990f279246a",
+      "response": {
+        "body_eof_s": 214704.591618125,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n10\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n10\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n10\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"upstream_latency\":23,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.591559708,
+        "first_http_s": 214704.591525375,
+        "first_output_delta_s": 214704.591559708,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "fffb9af7-06ca-48cd-b52b-be29e00c4da8"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "39805c04bf4343f1ba116f62ad88681b"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "23.029"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n10",
+        "status": 200,
+        "terminal_marker_s": 214704.5916105,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.566258166,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.591445666,
+      "id": "n4/client1",
+      "index": 1,
+      "node_id": "n4",
+      "outcome": "response",
+      "request_body_sha256": "ef35b28aaa05bef8d189b24adde96a5030e351960e5f7a5e091e4b1e00382bef",
+      "response": {
+        "body_eof_s": 214704.591392833,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n4\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n4\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n4\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"upstream_latency\":22,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.591325583,
+        "first_http_s": 214704.591263416,
+        "first_output_delta_s": 214704.591325583,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "31555698-27ed-47e3-bfbd-5ed9acb85575"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "dc13d141ab6d47a89706e11ccb4cf35b"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "22.924"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n4",
+        "status": 200,
+        "terminal_marker_s": 214704.591385083,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.566731416,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.614836208,
+      "id": "n8/client1",
+      "index": 1,
+      "node_id": "n8",
+      "outcome": "response",
+      "request_body_sha256": "097bda176fa9d9bd1d052e9862ed222c9162ce15efa511a497ae7c6ea57f6801",
+      "response": {
+        "body_eof_s": 214704.614782708,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n8\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n8\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":21,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n8\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":22,\"upstream_latency\":21,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.614709,
+        "first_http_s": 214704.614655416,
+        "first_output_delta_s": 214704.614709,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "b104d95e-7889-4b8c-b8ca-2b2af866ab49"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "e5ea93d0e57a48259f0044c6389680fd"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "21.864"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n8",
+        "status": 200,
+        "terminal_marker_s": 214704.614775375,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.590678958,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.615026583,
+      "id": "n2/client1",
+      "index": 1,
+      "node_id": "n2",
+      "outcome": "response",
+      "request_body_sha256": "ae2f93d21c8a9a4b831391969943bfe1e608a03cefadaeb3b5fa8857ba397895",
+      "response": {
+        "body_eof_s": 214704.614979791,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n2\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n2\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":21,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n2\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":21,\"upstream_latency\":21,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.614937791,
+        "first_http_s": 214704.61490125,
+        "first_output_delta_s": 214704.614937791,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:50 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "2e73ab63-f0b5-4e1f-8fe3-3fea7304b62f"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "36d6ec5fb7cf4abdb54f61e3456aee2e"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "21.801"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n2",
+        "status": 200,
+        "terminal_marker_s": 214704.614973916,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.591003708,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.670747541,
+      "id": "n5/client1",
+      "index": 1,
+      "node_id": "n5",
+      "outcome": "response",
+      "request_body_sha256": "5350f710e232907fa5f831668b96b30093257a0cde21ad9321fa20f804e0d7d2",
+      "response": {
+        "body_eof_s": 214704.67067825,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n5\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n5\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n5\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"upstream_latency\":23,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.670572625,
+        "first_http_s": 214704.670510291,
+        "first_output_delta_s": 214704.670572625,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:51 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "8e58c61c-eec0-433c-bbf5-f94a3782717e"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "1232353320b8485aa1361749ce685075"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "23.355"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n5",
+        "status": 200,
+        "terminal_marker_s": 214704.670668916,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.64418025,
+      "status": 200
+    },
+    {
+      "ended_s": 214704.670324125,
+      "id": "n11/client1",
+      "index": 1,
+      "node_id": "n11",
+      "outcome": "response",
+      "request_body_sha256": "3d5db154a2f6f00b2af1d5e4a76e12c97a1fb13bd15191397c50e374d1bf9b2a",
+      "response": {
+        "body_eof_s": 214704.670232041,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n11\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n11\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n11\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":59,\"completion_tokens\":8,\"total_tokens\":67},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":23,\"upstream_latency\":23,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214704.670114208,
+        "first_http_s": 214704.6700265,
+        "first_output_delta_s": 214704.670114208,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:05:51 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "e0699eba-94ed-46f9-b8f9-88bd9ea60e33"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "b0c1b4b6fb77469cb6faf5dbfa280e95"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "23.317"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n11",
+        "status": 200,
+        "terminal_marker_s": 214704.670221416,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 59,
+          "status": "observed"
+        }
+      },
+      "sent_s": 214704.644726791,
+      "status": 200
+    }
+  ],
+  "discovery_requests": [
+    {
+      "at_s": 214703.554393833,
+      "path": "/v1/models"
+    },
+    {
+      "at_s": 214703.554440875,
+      "path": "/v1/models"
+    }
+  ],
+  "fixture_pending_tasks": 0,
+  "fresh_fixture_and_gateway_instances": true,
+  "gateway": {
+    "binary_sha256": "e1a89310241d2c59ce9075dd60d2725272737288697c7c20ca32b640b27bab43",
+    "binary_sha256_after": "e1a89310241d2c59ce9075dd60d2725272737288697c7c20ca32b640b27bab43",
+    "command": [
+      "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-http-source",
+      "-app-dir",
+      "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-0tlpjn71",
+      "-host",
+      "127.0.0.1",
+      "-port",
+      "55790"
+    ],
+    "config_note": "provider contracts differ; see preparation reports",
+    "effective_config": {
+      "$schema": "file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-v2.1.1/transports/config.schema.json",
+      "client": {
+        "compat": {
+          "convert_chat_to_responses": false,
+          "convert_text_to_chat": false,
+          "should_convert_params": false,
+          "should_drop_params": false
+        },
+        "disable_content_logging": true,
+        "drop_excess_requests": true,
+        "enable_logging": false,
+        "enforce_auth_on_inference": false,
+        "header_filter_config": {
+          "allowlist": [
+            "x-benchmark-ingress"
+          ]
+        },
+        "initial_pool_size": 64
+      },
+      "config_store": {
+        "enabled": false
+      },
+      "framework": {
+        "pricing": {
+          "live_models_sync_interval": 0,
+          "mcp_library_sync_interval": 0,
+          "model_parameters_url": "file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/model-parameters.json",
+          "pricing_sync_interval": 86400,
+          "pricing_url": "file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/pricing.json"
+        }
+      },
+      "logs_store": {
+        "enabled": false
+      },
+      "plugins": [
+        {
+          "config": {},
+          "enabled": false,
+          "name": "telemetry"
+        },
+        {
+          "config": {},
+          "enabled": false,
+          "name": "semantic_cache"
+        }
+      ],
+      "providers": {
+        "openai": {
+          "concurrency_and_buffer_size": {
+            "buffer_size": 64,
+            "concurrency": 2
+          },
+          "keys": [
+            {
+              "models": [
+                "synthetic"
+              ],
+              "name": "fixture",
+              "value": "fixture-only-not-a-secret",
+              "weight": 1
+            }
+          ],
+          "network_config": {
+            "base_url": "http://127.0.0.1:55789",
+            "default_request_timeout_in_seconds": 120,
+            "max_retries": 0,
+            "stream_idle_timeout_in_seconds": 120
+          }
+        }
+      },
+      "version": 2
+    },
+    "effective_config_sha256": "4ebd09bdbd0bfc7a7c64e470965cc7cce11d3e97cdb79166553a8de830b8811e",
+    "policy": "provider_managed",
+    "source_manifest": [
+      {
+        "commit": "c193745d2a713e9f58f021d43e138df5eb7e038a",
+        "path": "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-v2.1.1",
+        "remote": "https://github.com/maximhq/bifrost.git",
+        "tracked_changes": ""
+      },
+      {
+        "commit": "5df5802e0e9f4e3a6333c543f13ca66f84b3f7bc",
+        "path": "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/promptforge-v0.2.0",
+        "remote": "https://github.com/cppalliance/promptforge.git",
+        "tracked_changes": ""
+      }
+    ]
+  },
+  "gateway_retries": 0,
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "idle_resource": {
+    "cpu_seconds": 0.03,
+    "monotonic_s": 214703.698343833,
+    "rss_bytes": 62947328
+  },
+  "load_end": [
+    2.35009765625,
+    2.35107421875,
+    2.21533203125
+  ],
+  "load_start": [
+    2.35009765625,
+    2.35107421875,
+    2.21533203125
+  ],
+  "nodes": [
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 413.1936659978237,
+      "eligible_s": 214703.698355,
+      "ended_s": 214704.111548666,
+      "id": "n0",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 3.3871250052470714,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 48,
+        "status": "observed"
+      },
+      "workflow_id": "w0"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 413.21404100744985,
+      "eligible_s": 214703.698355,
+      "ended_s": 214704.111569041,
+      "id": "n6",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 3.6137500137556344,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 48,
+        "status": "observed"
+      },
+      "workflow_id": "w2"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 816.9001660135109,
+      "eligible_s": 214703.698355,
+      "ended_s": 214704.515255166,
+      "id": "n9",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 3.658458008430898,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 48,
+        "status": "observed"
+      },
+      "workflow_id": "w3"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 817.0084159937687,
+      "eligible_s": 214703.698355,
+      "ended_s": 214704.515363416,
+      "id": "n3",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 3.556624986231327,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 48,
+        "status": "observed"
+      },
+      "workflow_id": "w1"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 376.7895420023706,
+      "eligible_s": 214704.161569041,
+      "ended_s": 214704.538358583,
+      "id": "n7",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.7443750004749745,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w2"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 376.84462501783855,
+      "eligible_s": 214704.161548666,
+      "ended_s": 214704.538393291,
+      "id": "n1",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.1630840201396495,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w0"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 26.488584029721096,
+      "eligible_s": 214704.56536341598,
+      "ended_s": 214704.591852,
+      "id": "n4",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 1.3322500162757933,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w1"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 26.650916988728568,
+      "eligible_s": 214704.565255166,
+      "ended_s": 214704.591906083,
+      "id": "n10",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 0.879541999893263,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w3"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 26.70520800165832,
+      "eligible_s": 214704.588358583,
+      "ended_s": 214704.615063791,
+      "id": "n8",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.270249999128282,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w2"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 26.737667009001598,
+      "eligible_s": 214704.588393291,
+      "ended_s": 214704.615130958,
+      "id": "n2",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.572875004261732,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w0"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 28.90358300646767,
+      "eligible_s": 214704.64190608298,
+      "ended_s": 214704.670809666,
+      "id": "n11",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.7711250295396894,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w3"
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 29.03425000840798,
+      "eligible_s": 214704.641852,
+      "ended_s": 214704.67088625,
+      "id": "n5",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.195040986407548,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 59,
+        "status": "observed"
+      },
+      "workflow_id": "w1"
+    }
+  ],
+  "origin_s": 214703.698355,
+  "owned_gateway_exit_code": 0,
+  "owned_processes_cleaned": true,
+  "peak_provider_service": 2,
+  "profile": "chains",
+  "protocol_errors": [],
+  "quota": {
+    "rpm": 1000000,
+    "tpm": 1000000000
+  },
+  "quota_contract": "rolling_60_seconds",
+  "resource_scope": "gateway PID RSS/CPU; no child RSS aggregation",
+  "resources": [
+    {
+      "cpu_seconds": 0.03,
+      "monotonic_s": 214703.702841458,
+      "rss_bytes": 63094784
+    },
+    {
+      "cpu_seconds": 0.05,
+      "monotonic_s": 214704.211346291,
+      "rss_bytes": 68812800
+    }
+  ],
+  "reused_sources": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "reused_sources_after": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "scope": "Synthetic completion with original deadlines and client retries; no model quality or real-provider claim",
+  "script_sha256": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "script_sha256_after": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "seed": 101,
+  "started_utc": "2026-09-16T03:05:50Z",
+  "status": "completed",
+  "submitted": [
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n0",
+      "input_bytes": 96,
+      "length": "long",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 400,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w0"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n1",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n0",
+      "root": 0,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w0"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n2",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n1",
+      "root": 0,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w0"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n3",
+      "input_bytes": 96,
+      "length": "long",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 400,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w1"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n4",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n3",
+      "root": 1,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w1"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n5",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n4",
+      "root": 1,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w1"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n6",
+      "input_bytes": 96,
+      "length": "long",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 400,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w2"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n7",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n6",
+      "root": 2,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w2"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n8",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n7",
+      "root": 2,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w2"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n9",
+      "input_bytes": 96,
+      "length": "long",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 400,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w3"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n10",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n9",
+      "root": 3,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w3"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 59,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n11",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": "n10",
+      "root": 3,
+      "service_ms": 20,
+      "tool_delay_s": 0.05,
+      "usage_required": false,
+      "workflow_id": "w3"
+    }
+  ],
+  "summary": {
+    "admitted_fixture_token_units": 760,
+    "all_work_completion_ms": 972.536624991335,
+    "client_http_attempts": 12,
+    "completed_by_deadline": 4,
+    "completed_by_seconds": {
+      "10": 4,
+      "2": 4,
+      "5": 4
+    },
+    "completed_usage": {
+      "observed": 12
+    },
+    "groups": {
+      "length:long": {
+        "outcomes": {
+          "completed": 4
+        },
+        "planned": 4,
+        "success_latency_ms": {
+          "max": 817.0084159937687,
+          "n": 4,
+          "p50": 413.21404100744985,
+          "p95": 817.0084159937687,
+          "p99": 817.0084159937687
+        }
+      },
+      "length:short": {
+        "outcomes": {
+          "completed": 8
+        },
+        "planned": 8,
+        "success_latency_ms": {
+          "max": 376.84462501783855,
+          "n": 8,
+          "p50": 26.737667009001598,
+          "p95": 376.84462501783855,
+          "p99": 376.84462501783855
+        }
+      },
+      "root:0": {
+        "outcomes": {
+          "completed": 3
+        },
+        "planned": 3,
+        "success_latency_ms": {
+          "max": 413.1936659978237,
+          "n": 3,
+          "p50": 376.84462501783855,
+          "p95": 413.1936659978237,
+          "p99": 413.1936659978237
+        }
+      },
+      "root:1": {
+        "outcomes": {
+          "completed": 3
+        },
+        "planned": 3,
+        "success_latency_ms": {
+          "max": 817.0084159937687,
+          "n": 3,
+          "p50": 29.03425000840798,
+          "p95": 817.0084159937687,
+          "p99": 817.0084159937687
+        }
+      },
+      "root:2": {
+        "outcomes": {
+          "completed": 3
+        },
+        "planned": 3,
+        "success_latency_ms": {
+          "max": 413.21404100744985,
+          "n": 3,
+          "p50": 376.7895420023706,
+          "p95": 413.21404100744985,
+          "p99": 413.21404100744985
+        }
+      },
+      "root:3": {
+        "outcomes": {
+          "completed": 3
+        },
+        "planned": 3,
+        "success_latency_ms": {
+          "max": 816.9001660135109,
+          "n": 3,
+          "p50": 28.90358300646767,
+          "p95": 816.9001660135109,
+          "p99": 816.9001660135109
+        }
+      }
+    },
+    "node_outcomes": {
+      "completed": 12
+    },
+    "planned_nodes": 12,
+    "planned_workflows": 4,
+    "provider_rejected_attempts": 0,
+    "scheduling_lag_ms": {
+      "max": 3.658458008430898,
+      "n": 12,
+      "p50": 2.572875004261732,
+      "p95": 3.658458008430898,
+      "p99": 3.658458008430898
+    },
+    "success_workflow_latency_ms": {
+      "max": 972.536624991335,
+      "n": 4,
+      "p50": 916.7828749923501,
+      "p95": 972.536624991335,
+      "p99": 972.536624991335
+    },
+    "upstream_attempts": 12,
+    "workflow_outcomes": {
+      "completed": 4
+    }
+  },
+  "upstream_attempt_limit": 4,
+  "upstream_attempts": [
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214704.108290958,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214704.107949125,
+      "id": "n6/1",
+      "ingress_id": "n6",
+      "outcome": "completed",
+      "received_s": 214703.705612666,
+      "request_body_exact": false,
+      "request_body_sha256": "8dcdda59b2c70e79158ec13a7cdab4f81cf37a9bce73d51077887cb755e326e6",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214703.705708541,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214704.108418833,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214704.108327,
+      "id": "n0/1",
+      "ingress_id": "n0",
+      "outcome": "completed",
+      "received_s": 214703.705721916,
+      "request_body_exact": false,
+      "request_body_sha256": "8dcdda59b2c70e79158ec13a7cdab4f81cf37a9bce73d51077887cb755e326e6",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214703.705759,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214704.513814291,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214704.513530916,
+      "id": "n9/1",
+      "ingress_id": "n9",
+      "outcome": "completed",
+      "received_s": 214704.111189708,
+      "request_body_exact": false,
+      "request_body_sha256": "8dcdda59b2c70e79158ec13a7cdab4f81cf37a9bce73d51077887cb755e326e6",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.111386666,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214704.513900083,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214704.513840291,
+      "id": "n3/1",
+      "ingress_id": "n3",
+      "outcome": "completed",
+      "received_s": 214704.11142175,
+      "request_body_exact": false,
+      "request_body_sha256": "8dcdda59b2c70e79158ec13a7cdab4f81cf37a9bce73d51077887cb755e326e6",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.111506666,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.537246791,
+      "expected_body_sha256": "55e2ff028fec3ba36f0a61b492dcbf3c3fcf58a5e2d5ed4f0954417dca3d7d4c",
+      "first_write_s": 214704.537091375,
+      "id": "n7/1",
+      "ingress_id": "n7",
+      "outcome": "completed",
+      "received_s": 214704.5154425,
+      "request_body_exact": false,
+      "request_body_sha256": "eb73494ba7528fc29b32a6336ee76a4aedcf4e6e5efdb31f640699d1ae406a61",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n6",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.515641458,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.537325958,
+      "expected_body_sha256": "675c9406601dfc5e773dc68d4adac3f1b828c306d12b62f2e388cdd0c7753607",
+      "first_write_s": 214704.537265041,
+      "id": "n1/1",
+      "ingress_id": "n1",
+      "outcome": "completed",
+      "received_s": 214704.515661458,
+      "request_body_exact": false,
+      "request_body_sha256": "c07a545e77dfec29d2c22058dbc0124d749d03cc6a4bfcb033e77caeb9710fcb",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n0",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.515738791,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.590546333,
+      "expected_body_sha256": "ef35b28aaa05bef8d189b24adde96a5030e351960e5f7a5e091e4b1e00382bef",
+      "first_write_s": 214704.590400333,
+      "id": "n4/1",
+      "ingress_id": "n4",
+      "outcome": "completed",
+      "received_s": 214704.568139541,
+      "request_body_exact": false,
+      "request_body_sha256": "4edf2a56b5ef11b42cee70912d1df774388c1af8e12aa9f2f3cb0717919dd152",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n3",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.568256791,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.590614291,
+      "expected_body_sha256": "a8f5f0c0ff81027bb48605db2956171cb8183396254b9634da00c990f279246a",
+      "first_write_s": 214704.590563916,
+      "id": "n10/1",
+      "ingress_id": "n10",
+      "outcome": "completed",
+      "received_s": 214704.568280416,
+      "request_body_exact": false,
+      "request_body_sha256": "501fc1a019cefe5900e48561b7aaa732ee2ea3c909387318aa05b583174e0ea3",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n9",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.568357541,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.614102875,
+      "expected_body_sha256": "097bda176fa9d9bd1d052e9862ed222c9162ce15efa511a497ae7c6ea57f6801",
+      "first_write_s": 214704.61394825,
+      "id": "n8/1",
+      "ingress_id": "n8",
+      "outcome": "completed",
+      "received_s": 214704.592808625,
+      "request_body_exact": false,
+      "request_body_sha256": "3bdc54ce8c7b81d96826a530676214e74c17319fb7f7b11361fef0ea4f57ea77",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n7",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.592976166,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.61417025,
+      "expected_body_sha256": "ae2f93d21c8a9a4b831391969943bfe1e608a03cefadaeb3b5fa8857ba397895",
+      "first_write_s": 214704.614119375,
+      "id": "n2/1",
+      "ingress_id": "n2",
+      "outcome": "completed",
+      "received_s": 214704.593000916,
+      "request_body_exact": false,
+      "request_body_sha256": "b0415d791df13dc25ae04da7d46cdf5c6608f8d55d2745ee4cd8bfa5a8f2daee",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n1",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.593091166,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.669021333,
+      "expected_body_sha256": "5350f710e232907fa5f831668b96b30093257a0cde21ad9321fa20f804e0d7d2",
+      "first_write_s": 214704.668824666,
+      "id": "n5/1",
+      "ingress_id": "n5",
+      "outcome": "completed",
+      "received_s": 214704.646454541,
+      "request_body_exact": false,
+      "request_body_sha256": "2e20feaa7ae1b306075c828742c95c64d1bf951fa3f2bded22714bee3fa6e4ae",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n4",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.646637166,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 67,
+      "ended_s": 214704.669115291,
+      "expected_body_sha256": "3d5db154a2f6f00b2af1d5e4a76e12c97a1fb13bd15191397c50e374d1bf9b2a",
+      "first_write_s": 214704.66904325,
+      "id": "n11/1",
+      "ingress_id": "n11",
+      "outcome": "completed",
+      "received_s": 214704.646669166,
+      "request_body_exact": false,
+      "request_body_sha256": "0d76f7ba95a94c3b2d99b5cdb6e2446b0fe36e5e0f338514738e96c70e1b8606",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          },
+          {
+            "content": "fixture:n10",
+            "role": "assistant"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214704.646753916,
+      "status": 200
+    }
+  ],
+  "workflows": [
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 916.7278750101104,
+      "ended_s": 214704.615082875,
+      "id": "w2",
+      "outcome": "completed",
+      "released_s": 214703.698355
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 916.7828749923501,
+      "ended_s": 214704.615137875,
+      "id": "w0",
+      "outcome": "completed",
+      "released_s": 214703.698355
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 972.4700830120128,
+      "ended_s": 214704.670825083,
+      "id": "w3",
+      "outcome": "completed",
+      "released_s": 214703.698355
+    },
+    {
+      "deadline_s": 214708.698355,
+      "elapsed_ms": 972.536624991335,
+      "ended_s": 214704.670891625,
+      "id": "w1",
+      "outcome": "completed",
+      "released_s": 214703.698355
+    }
+  ],
+  "workload_end_resource": {
+    "cpu_seconds": 0.06,
+    "monotonic_s": 214704.681764041,
+    "rss_bytes": 69795840
+  },
+  "workload_start_resource": {
+    "cpu_seconds": 0.03,
+    "monotonic_s": 214703.70047275,
+    "rss_bytes": 62947328
+  },
+  "written_configs_after": {
+    "config.json": {
+      "sha256": "17ad44170b5d7c552414796840346509c5240812355948147d15a5043f3b59d6",
+      "text": "{\"version\": 2, \"client\": {\"drop_excess_requests\": true, \"initial_pool_size\": 64, \"enable_logging\": false, \"disable_content_logging\": true, \"enforce_auth_on_inference\": false, \"header_filter_config\": {\"allowlist\": [\"x-benchmark-ingress\"]}, \"compat\": {\"convert_text_to_chat\": false, \"convert_chat_to_responses\": false, \"should_drop_params\": false, \"should_convert_params\": false}}, \"config_store\": {\"enabled\": false}, \"logs_store\": {\"enabled\": false}, \"framework\": {\"pricing\": {\"pricing_url\": \"file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/pricing.json\", \"model_parameters_url\": \"file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/model-parameters.json\", \"pricing_sync_interval\": 86400, \"mcp_library_sync_interval\": 0, \"live_models_sync_interval\": 0}}, \"providers\": {\"openai\": {\"keys\": [{\"name\": \"fixture\", \"value\": \"fixture-only-not-a-secret\", \"models\": [\"synthetic\"], \"weight\": 1}], \"network_config\": {\"base_url\": \"http://127.0.0.1:55789\", \"max_retries\": 0, \"default_request_timeout_in_seconds\": 120, \"stream_idle_timeout_in_seconds\": 120}, \"concurrency_and_buffer_size\": {\"concurrency\": 2, \"buffer_size\": 64}}}, \"plugins\": [{\"name\": \"telemetry\", \"enabled\": false, \"config\": {}}, {\"name\": \"semantic_cache\", \"enabled\": false, \"config\": {}}], \"$schema\": \"file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-v2.1.1/transports/config.schema.json\"}"
+    }
+  }
+}

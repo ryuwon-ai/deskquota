@@ -1,0 +1,75 @@
+[
+  {
+    "name": "format",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "fmt",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.33003470799303614,
+    "log": "evidence/queued-cache-2026-09-16/validation/format.log"
+  },
+  {
+    "name": "tests",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--locked",
+      "--all-targets",
+      "--features",
+      "bench-harness"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 82.7679597499955,
+    "log": "evidence/queued-cache-2026-09-16/validation/tests.log",
+    "test_targets": 20,
+    "passed_tests": 453,
+    "failed_tests": 0,
+    "ignored_tests": 1
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "clippy",
+      "--locked",
+      "--all-targets",
+      "--features",
+      "bench-harness",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 4.548047291988041,
+    "log": "evidence/queued-cache-2026-09-16/validation/clippy.log"
+  },
+  {
+    "name": "release",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "build",
+      "--locked",
+      "--release",
+      "--bin",
+      "llmgw"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 12.164722333021928,
+    "log": "evidence/queued-cache-2026-09-16/validation/release.log"
+  }
+]

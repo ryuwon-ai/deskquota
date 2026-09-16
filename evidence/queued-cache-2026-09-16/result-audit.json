@@ -1,0 +1,818 @@
+{
+  "passed": true,
+  "scope": "synthetic loopback; fixed gate and service delay; not a competitor ranking",
+  "binary_sha256": {
+    "baseline": "fec36cfa06bbac56e0ff5ba655c2779f942f22c44b191a384cc4992bdb4af226",
+    "candidate": "e28f3322ff1b0dce11941b27d45b771a0a247437686b9d39493af88839421b77"
+  },
+  "matrix": {
+    "duplicate_json_high": {
+      "baseline": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 512.5021249987185,
+            "median": 514.2025410023052,
+            "max": 515.0917919818312
+          },
+          "p95": {
+            "min": 1027.8262079809792,
+            "median": 1028.7519170087762,
+            "max": 1028.9606250007637
+          },
+          "p99": {
+            "min": 1027.8262079809792,
+            "median": 1028.7519170087762,
+            "max": 1028.9606250007637
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 1038.6893329850864,
+          "median": 1040.4988749942277,
+          "max": 1040.767667000182
+        },
+        "idle_rss_mib": {
+          "min": 9.828125,
+          "median": 9.859375,
+          "max": 9.875
+        },
+        "sampled_max_rss_mib": 11.5625
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 102.11783400154673,
+            "median": 103.39724997174926,
+            "max": 103.62420900491998
+          },
+          "p95": {
+            "min": 102.28483399259858,
+            "median": 103.65937498863786,
+            "max": 103.82054198998958
+          },
+          "p99": {
+            "min": 102.28483399259858,
+            "median": 103.65937498863786,
+            "max": 103.82054198998958
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 112.20320800202899,
+          "median": 113.59312498825602,
+          "max": 114.80395798571408
+        },
+        "idle_rss_mib": {
+          "min": 9.890625,
+          "median": 9.9375,
+          "max": 9.984375
+        },
+        "sampled_max_rss_mib": 11.296875
+      }
+    },
+    "duplicate_json_rpm1": {
+      "baseline": {
+        "outcomes": {
+          "timeout": 45,
+          "completed": 5
+        },
+        "attempts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 102.7121250226628,
+            "median": 102.75745901162736,
+            "max": 105.95816699787974
+          },
+          "p95": {
+            "min": 102.7121250226628,
+            "median": 102.75745901162736,
+            "max": 105.95816699787974
+          },
+          "p99": {
+            "min": 102.7121250226628,
+            "median": 102.75745901162736,
+            "max": 105.95816699787974
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 113.05416701361537,
+          "median": 113.99487502058037,
+          "max": 116.2616670189891
+        },
+        "idle_rss_mib": {
+          "min": 9.8125,
+          "median": 9.84375,
+          "max": 9.890625
+        },
+        "sampled_max_rss_mib": 11.296875
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 102.60358301457018,
+            "median": 103.08116700616665,
+            "max": 103.45525000593625
+          },
+          "p95": {
+            "min": 102.67904101056047,
+            "median": 103.40787499444559,
+            "max": 103.66270801750943
+          },
+          "p99": {
+            "min": 102.67904101056047,
+            "median": 103.40787499444559,
+            "max": 103.66270801750943
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 115.00362498918548,
+          "median": 115.33708299975842,
+          "max": 115.62433402286842
+        },
+        "idle_rss_mib": {
+          "min": 9.9375,
+          "median": 9.953125,
+          "max": 9.96875
+        },
+        "sampled_max_rss_mib": 11.28125
+      }
+    },
+    "duplicate_sse_high": {
+      "baseline": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 542.3790839849971,
+            "median": 545.9224169899244,
+            "max": 546.8140829761978
+          },
+          "p95": {
+            "min": 1086.4267500001006,
+            "median": 1092.5545829813927,
+            "max": 1093.2954579766374
+          },
+          "p99": {
+            "min": 1086.4267500001006,
+            "median": 1092.5545829813927,
+            "max": 1093.2954579766374
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 1096.581458026776,
+          "median": 1103.036707994761,
+          "max": 1104.9889999849256
+        },
+        "idle_rss_mib": {
+          "min": 9.828125,
+          "median": 9.828125,
+          "max": 9.84375
+        },
+        "sampled_max_rss_mib": 11.609375
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 109.55116699915379,
+            "median": 109.75149998557754,
+            "max": 109.97033401508816
+          },
+          "p95": {
+            "min": 109.8272499802988,
+            "median": 110.06862498470582,
+            "max": 110.25825000251643
+          },
+          "p99": {
+            "min": 109.8272499802988,
+            "median": 110.06862498470582,
+            "max": 110.25825000251643
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 120.45191699871793,
+          "median": 121.01079197600484,
+          "max": 122.27258298662491
+        },
+        "idle_rss_mib": {
+          "min": 9.9375,
+          "median": 9.953125,
+          "max": 9.953125
+        },
+        "sampled_max_rss_mib": 11.296875
+      }
+    },
+    "duplicate_sse_rpm1": {
+      "baseline": {
+        "outcomes": {
+          "timeout": 45,
+          "completed": 5
+        },
+        "attempts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 108.97179099265486,
+            "median": 109.0902500145603,
+            "max": 109.2317910224665
+          },
+          "p95": {
+            "min": 108.97179099265486,
+            "median": 109.0902500145603,
+            "max": 109.2317910224665
+          },
+          "p99": {
+            "min": 108.97179099265486,
+            "median": 109.0902500145603,
+            "max": 109.2317910224665
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 119.17400002130307,
+          "median": 119.88516597193666,
+          "max": 121.61162501433864
+        },
+        "idle_rss_mib": {
+          "min": 9.828125,
+          "median": 9.84375,
+          "max": 9.859375
+        },
+        "sampled_max_rss_mib": 11.296875
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 108.93883401877247,
+            "median": 109.5985840074718,
+            "max": 109.70908298622817
+          },
+          "p95": {
+            "min": 109.2624590091873,
+            "median": 109.97283298638649,
+            "max": 110.01454200595617
+          },
+          "p99": {
+            "min": 109.2624590091873,
+            "median": 109.97283298638649,
+            "max": 110.01454200595617
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 120.21566700423136,
+          "median": 120.9028750017751,
+          "max": 121.65708298562095
+        },
+        "idle_rss_mib": {
+          "min": 9.921875,
+          "median": 9.953125,
+          "max": 9.953125
+        },
+        "sampled_max_rss_mib": 11.28125
+      }
+    },
+    "distinct_json": {
+      "baseline": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 512.5440000265371,
+            "median": 514.0392089961097,
+            "max": 515.2412909956183
+          },
+          "p95": {
+            "min": 1025.4765420104377,
+            "median": 1029.3059590039775,
+            "max": 1030.4537500196602
+          },
+          "p99": {
+            "min": 1025.4765420104377,
+            "median": 1029.3059590039775,
+            "max": 1030.4537500196602
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 1037.8565000137314,
+          "median": 1039.494917000411,
+          "max": 1041.7190000007395
+        },
+        "idle_rss_mib": {
+          "min": 9.828125,
+          "median": 9.828125,
+          "max": 9.875
+        },
+        "sampled_max_rss_mib": 11.640625
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 512.952375021996,
+            "median": 514.8587079893332,
+            "max": 515.724416996818
+          },
+          "p95": {
+            "min": 1026.4484159997664,
+            "median": 1029.6906250005122,
+            "max": 1031.1129170004278
+          },
+          "p99": {
+            "min": 1026.4484159997664,
+            "median": 1029.6906250005122,
+            "max": 1031.1129170004278
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 1038.3523329801392,
+          "median": 1041.6534169926308,
+          "max": 1042.9943329945672
+        },
+        "idle_rss_mib": {
+          "min": 9.921875,
+          "median": 9.953125,
+          "max": 9.96875
+        },
+        "sampled_max_rss_mib": 11.546875
+      }
+    },
+    "disabled_json": {
+      "baseline": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 513.050999987172,
+            "median": 513.4167079813778,
+            "max": 515.189375000773
+          },
+          "p95": {
+            "min": 1026.8667909840588,
+            "median": 1027.6760419947095,
+            "max": 1029.770749999443
+          },
+          "p99": {
+            "min": 1026.8667909840588,
+            "median": 1027.6760419947095,
+            "max": 1029.770749999443
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 1038.0249999871012,
+          "median": 1040.00120901037,
+          "max": 1040.594333986519
+        },
+        "idle_rss_mib": {
+          "min": 9.828125,
+          "median": 9.828125,
+          "max": 9.859375
+        },
+        "sampled_max_rss_mib": 11.515625
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 513.6378750030417,
+            "median": 514.8181669937912,
+            "max": 515.7237080275081
+          },
+          "p95": {
+            "min": 1028.2157920009922,
+            "median": 1030.0475419790018,
+            "max": 1031.503584003076
+          },
+          "p99": {
+            "min": 1028.2157920009922,
+            "median": 1030.0475419790018,
+            "max": 1031.503584003076
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 1040.0712080008816,
+          "median": 1040.791209001327,
+          "max": 1042.5689999829046
+        },
+        "idle_rss_mib": {
+          "min": 9.890625,
+          "median": 9.9375,
+          "max": 9.984375
+        },
+        "sampled_max_rss_mib": 11.40625
+      }
+    },
+    "duplicate_json_cap3": {
+      "baseline": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 204.59129099617712,
+            "median": 206.16587498807348,
+            "max": 206.54608300537802
+          },
+          "p95": {
+            "min": 410.92854100861587,
+            "median": 411.5507089882158,
+            "max": 412.4063329945784
+          },
+          "p99": {
+            "min": 410.92854100861587,
+            "median": 411.5507089882158,
+            "max": 412.4063329945784
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 421.7460000072606,
+          "median": 422.6294159889221,
+          "max": 423.20454100263305
+        },
+        "idle_rss_mib": {
+          "min": 9.828125,
+          "median": 9.828125,
+          "max": 9.859375
+        },
+        "sampled_max_rss_mib": 11.8125
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 103.17149999900721,
+            "median": 103.37066699867137,
+            "max": 103.55637499014847
+          },
+          "p95": {
+            "min": 103.48566700122319,
+            "median": 103.58912500669248,
+            "max": 103.96666600718163
+          },
+          "p99": {
+            "min": 103.48566700122319,
+            "median": 103.58912500669248,
+            "max": 103.96666600718163
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 113.91608297708444,
+          "median": 115.46474997885525,
+          "max": 116.37099998188205
+        },
+        "idle_rss_mib": {
+          "min": 9.90625,
+          "median": 9.953125,
+          "max": 10.0
+        },
+        "sampled_max_rss_mib": 11.5625
+      }
+    },
+    "duplicate_sse_cap3": {
+      "baseline": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 218.14429201185703,
+            "median": 218.51720797712915,
+            "max": 218.73933399911039
+          },
+          "p95": {
+            "min": 437.14824999915436,
+            "median": 437.31466701137833,
+            "max": 437.8638329799287
+          },
+          "p99": {
+            "min": 437.14824999915436,
+            "median": 437.31466701137833,
+            "max": 437.8638329799287
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 447.48583299224265,
+          "median": 448.99674999760464,
+          "max": 450.32420798088424
+        },
+        "idle_rss_mib": {
+          "min": 9.8125,
+          "median": 9.828125,
+          "max": 9.921875
+        },
+        "sampled_max_rss_mib": 11.84375
+      },
+      "candidate": {
+        "outcomes": {
+          "completed": 50
+        },
+        "attempts": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "post_gate_success_ms": {
+          "p50": {
+            "min": 108.817625005031,
+            "median": 109.6562089805957,
+            "max": 109.78008300298825
+          },
+          "p95": {
+            "min": 109.28191599668935,
+            "median": 110.03916600020602,
+            "max": 110.12216698145494
+          },
+          "p99": {
+            "min": 109.28191599668935,
+            "median": 110.03916600020602,
+            "max": 110.12216698145494
+          }
+        },
+        "ingress_success_p95_ms": {
+          "min": 120.00991698005237,
+          "median": 121.51587501284666,
+          "max": 122.7884580148384
+        },
+        "idle_rss_mib": {
+          "min": 9.90625,
+          "median": 9.9375,
+          "max": 9.96875
+        },
+        "sampled_max_rss_mib": 11.53125
+      }
+    }
+  },
+  "no_wait": {
+    "baseline": {
+      "measured_completed": 500,
+      "warmup_completed": 25,
+      "p95_ms": {
+        "min": 0.3122909984085709,
+        "median": 0.3446660120971501,
+        "max": 0.3619170165620744
+      },
+      "p99_ms": {
+        "min": 0.34175001201219857,
+        "median": 0.36770798033103347,
+        "max": 0.4058339982293546
+      },
+      "idle_rss_mib": {
+        "min": 9.875,
+        "median": 9.875,
+        "max": 9.890625
+      }
+    },
+    "candidate": {
+      "measured_completed": 500,
+      "warmup_completed": 25,
+      "p95_ms": {
+        "min": 0.3241669910494238,
+        "median": 0.3590830019675195,
+        "max": 0.375375006115064
+      },
+      "p99_ms": {
+        "min": 0.3528329834807664,
+        "median": 0.3778329992201179,
+        "max": 0.4555420018732548
+      },
+      "idle_rss_mib": {
+        "min": 9.9375,
+        "median": 9.953125,
+        "max": 10.015625
+      }
+    }
+  },
+  "sequential_cache": {
+    "baseline": {
+      "all_completed_including_direct": 900,
+      "gateway_completed": 600,
+      "cache_hits": 300,
+      "p95_ms": {
+        "json_direct": {
+          "min": 0.1471659925300628,
+          "median": 0.17483302508480847,
+          "max": 0.1977090141735971
+        },
+        "json_miss": {
+          "min": 0.2744999947026372,
+          "median": 0.29912497848272324,
+          "max": 0.320334016578272
+        },
+        "json_hit": {
+          "min": 0.09445799514651299,
+          "median": 0.11583301238715649,
+          "max": 0.129208987345919
+        },
+        "sse_direct": {
+          "min": 6.91545897279866,
+          "median": 7.007209002040327,
+          "max": 7.2442080127075315
+        },
+        "sse_miss": {
+          "min": 7.203999994089827,
+          "median": 7.637750008143485,
+          "max": 7.880416989792138
+        },
+        "sse_hit": {
+          "min": 0.28983299853280187,
+          "median": 0.3801249840762466,
+          "max": 0.46520799514837563
+        }
+      }
+    },
+    "candidate": {
+      "all_completed_including_direct": 900,
+      "gateway_completed": 600,
+      "cache_hits": 300,
+      "p95_ms": {
+        "json_direct": {
+          "min": 0.14749998808838427,
+          "median": 0.15899998834356666,
+          "max": 0.17766698147170246
+        },
+        "json_miss": {
+          "min": 0.24774999474175274,
+          "median": 0.25854099658317864,
+          "max": 0.330082984874025
+        },
+        "json_hit": {
+          "min": 0.08433300536125898,
+          "median": 0.0968750100582838,
+          "max": 0.12583300122059882
+        },
+        "sse_direct": {
+          "min": 6.8656250077765435,
+          "median": 7.039708987576887,
+          "max": 7.232791977003217
+        },
+        "sse_miss": {
+          "min": 7.185666006989777,
+          "median": 7.521166990045458,
+          "max": 7.916250004200265
+        },
+        "sse_hit": {
+          "min": 0.36750000435858965,
+          "median": 0.4324160108808428,
+          "max": 0.5373749881982803
+        }
+      }
+    }
+  },
+  "rejection_head": {
+    "passed_cases": 6,
+    "gateway_cases": 5,
+    "direct_cases": 1
+  },
+  "matrix_totals": {
+    "completed": 710,
+    "timeout": 90
+  },
+  "input_sha256": {
+    "commands.json": "bdd8ce78a25e00549bf558ee3e2b4e992a71447c1ce2a9149d291fa292b1d63b",
+    "no-wait-1-baseline.json": "435b602161c120b2547db1c4279a3ada6ce5e27b6eecbb90d32c6d5b109f050b",
+    "no-wait-1-candidate.json": "21e803faed39c73ad441632229477da02ea406cab06449ac0e1a9213a3cf4330",
+    "no-wait-2-baseline.json": "5a3960d1e7cf911ddfc95c7ead8c025a8b956bb3f2bfe4294764ce745de90425",
+    "no-wait-2-candidate.json": "560f0088b31d7e10f2bbde9df9f353184829bbcc08be1bcddc2cf080b28417a6",
+    "no-wait-3-baseline.json": "7c388fc1352e893e1d9a5c15f97c3e7588d29470b38715840d5eca0322a7f0c1",
+    "no-wait-3-candidate.json": "0f2f6f7e352e805520b70be9433993f38fe55bb48f8c3eba9a85bda1ade06f84",
+    "no-wait-4-baseline.json": "e23e893a0a3eefda5e3a1ea8594db0fa3d3b6f849bd345dee4e41e729a1e2067",
+    "no-wait-4-candidate.json": "44a20762037f4fa69eb5bcdabc5ecab562e277b69ce69f90c92a18c16f7c3fa1",
+    "no-wait-5-baseline.json": "8243f5d523d69075c499cc7956b34c79be82d40e9814b8785efc49acbc630804",
+    "no-wait-5-candidate.json": "25296c63ee39fc8b76190e93b2be145ce49703dd3553a66522a1f16a97d1e28a",
+    "queued-matrix.json": "a22f57cedf33746e13e1fddeb271a7728a2924ece9ff3f976029b0292f7bd34e",
+    "rejection-head.json": "b365e1c8230faccb901e828666707b36123db1194a7020d4a250be96f4f8a99b",
+    "sequential-cache-1-baseline.json": "6b7c8f14812cb2d6ccde598f252f144a6fb9bb6a7a4078e8ce1b2c3de927cb62",
+    "sequential-cache-1-candidate.json": "f9f214da749869b533a5c57dba5b2c045ade339dac5564826948a94f5fa391b7",
+    "sequential-cache-2-baseline.json": "16d77bb18596369f194906557b194da0480f76b246d1a46bcb75c6ab5a18123c",
+    "sequential-cache-2-candidate.json": "20b62c0b00acb43fe884a64132ddfa5d2dcac7cd76952c2e8be0db2ce85eec5c",
+    "sequential-cache-3-baseline.json": "0af5b0cdff3427703a13cb0b5f59bdd7cf85e1c53361c33bb07669daae560191",
+    "sequential-cache-3-candidate.json": "3abe0c89959d97bdbcd551722c7d551bb95dd52bd449d302a76c62a9563ee205",
+    "sequential-cache-4-baseline.json": "d12ccca9a748fbc9b127e980aa78146857f93a025a78a59db6df0284eefc5add",
+    "sequential-cache-4-candidate.json": "7284a11539ce30ea0a7e88057ee716769122d364d4fe7296ec0117c99ebde407",
+    "sequential-cache-5-baseline.json": "8f3d576979a2c153be028058b7b8f2f6bb8b6bf8b79169ca64953fbf82a1c45d",
+    "sequential-cache-5-candidate.json": "8336b7ff6c3625a40cdb17ba6f3f220d1bf8da964164cfe1de074cec9cdd976f"
+  }
+}

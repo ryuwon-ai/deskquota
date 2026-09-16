@@ -1,0 +1,113 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.64s
+     Running unittests src/lib.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/llmgw-9dcc815a8351296f)
+
+running 39 tests
+test admission::quota::diagnostics_tests::cumulative_diagnostics_saturate_without_wrapping ... ok
+test autostart::manager_snapshot_tests::manager_state_blocks_unknown_and_foreign_but_exposes_owned_disabled ... ok
+test autostart::manager_snapshot_tests::linux_manager_definition_exposes_global_or_foreign_scope ... ok
+test autostart::manager_snapshot_tests::linux_removal_preview_orders_reload_before_reobservation ... ok
+test admission::queue::diagnostics_tests::protected_head_reports_resource_and_empty_cooldown_has_no_blocker ... ok
+test autostart::manager_snapshot_tests::malformed_windows_manager_xml_uses_a_fixed_safe_reason ... ok
+test autostart::manager_snapshot_tests::windows_manager_accepts_numeric_refs_and_rejects_unsupported_refs ... ok
+test admission::tests::status_keeps_wide_debt_decimal_without_loss_or_exact_estimator_claim ... ok
+test admission::tests::unpolled_worker_future_still_owns_and_releases_admission ... ok
+test autostart::manager_snapshot_tests::windows_manager_definition_distinguishes_disabled_and_foreign_tasks ... ok
+test autostart::manager_snapshot_tests::windows_query_failure_is_unknown_except_file_or_path_not_found_hresult ... ok
+test admission::tests::starting_provisional_hold_wakes_waiters_to_schedule_its_expiry ... ok
+test autostart::manager_snapshot_tests::windows_manager_accepts_scheduler_omitted_enabled_defaults ... ok
+test autostart::manager_snapshot_tests::windows_utf16_task_xml_decodes_before_semantic_parsing ... ok
+test cli::status_tests::admission_text_preserves_wide_debt_and_labels_the_representative_barrier ... ok
+test cli::status_tests::cache_status_preserves_available_counts_and_labels_missing_data ... ok
+test autostart::manager_snapshot_tests::windows_manager_requires_one_complete_trigger_principal_and_action ... ok
+test cache::tests::key_frames_all_duplicate_header_values_and_exact_body_bytes ... ok
+test config_patch::storage::tests::opened_snapshot_rejects_a_directory ... ok
+test autostart::manager_snapshot_tests::windows_manager_requires_one_complete_task_document ... ok
+test setup::persist::tests::matching_worker_uses_on_and_unverified_worker_refuses_start ... ok
+test protocol::json::tests::complete_json_counts_preserve_zero_cache_semantics_and_reject_invalid_reports ... ok
+test setup::persist::tests::pending_worker_requires_the_explicit_restart_mode ... ok
+test protocol::request::tests::unmetered_generation_is_not_classified_as_non_generating_metadata ... ok
+test setup::prompts::tests::overhead_prompt_accepts_only_storable_nonnegative_toml_integers ... ok
+test transport::body_budget::tests::permit_lives_until_the_last_bytes_clone ... ok
+test transport::headers::local_request_tests::authority_and_json_boundary_reject_browser_capable_requests ... ok
+test cache::tests::pinned_replays_and_polled_frames_keep_budget_after_eviction ... ok
+test transport::stream::tests::json_observer_storage_stops_at_limit_and_header_ambiguity_is_unknown ... ok
+test transport::stream::retained_delivery_tests::completed_eof_producers_leave_bounded_payload_owned_by_each_response ... ok
+test cache::tests::bypass_reasons_are_fixed_order_and_preserve_short_text_eligibility ... ok
+test cache::tests::captures_reserve_nonblocking_and_entries_trim_unused_bytes_with_count_ceiling ... ok
+test transport::stream::tests::observer_retained_buffer_capacity_is_bounded_across_fields_and_lines ... ok
+test config_patch::storage::tests::equal_bytes_replacement_has_different_snapshot_identity ... ok
+test autostart::manager_snapshot_tests::linux_manager_refuses_dropins_pending_reload_and_incomplete_snapshots ... ok
+test setup::persist::tests::windows_recovery_refuses_stale_source_before_replace ... ok
+test setup::persist::tests::ambiguous_windows_replace_keeps_original_and_candidate_recovery ... ok
+test setup::persist::tests::verified_windows_replace_removes_recovery_copies ... ok
+test protocol::request::tests::selected_estimator_keeps_endpoint_bounds_validation_and_unmetered_bypass ... ok
+
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+     Running tests/input_estimation_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/input_estimation_contract-2b92a5829fd1a955)
+
+running 4 tests
+test explicit_bpe_configuration_is_accepted ... ok
+test estimator_defaults_and_invalid_config_are_explicit ... ok
+test bpe_allows_fitting_json_and_preserves_body_output_and_stream_usage ... ok
+test known_encoding_vectors_and_checked_allowance ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+
+     Running tests/setup_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/setup_contract-47fc16e2df3898df)
+
+running 50 tests
+test client_route_is_added_without_rewriting_existing_routes_or_models ... ok
+test cache_setup_enables_preserves_edits_and_removes_only_the_requested_table ... ok
+test apply_rejects_a_stale_preview_and_preserves_the_concurrent_edit ... ok
+test doctor_missing_terminal_env_keeps_unobserved_login_auth_unknown ... ok
+test doctor_inference_rejects_provider_failed_response ... ok
+test doctor_default_is_offline_and_reports_static_auth_availability ... ok
+test doctor_inference_rejects_http_200_without_generation_evidence ... ok
+test doctor_network_is_one_bounded_models_get_without_inference ... ok
+test doctor_inference_is_one_explicit_bounded_call_and_no_listing ... ok
+test explicit_command_with_missing_config_is_unconfigured_exit_two ... ok
+test explicit_proxy_is_used_for_non_loopback_upstream_without_environment_proxy ... ok
+test editing_first_model_retains_estimator_other_models_routes_and_comments ... ok
+test invalid_base_is_rejected_before_model_listing_network_call ... ok
+test endpoint_and_model_edits_preserve_unrelated_document_comments_and_routes ... ok
+test invalid_config_and_missing_inference_arguments_exit_two ... ok
+test missing_env_is_distinct_from_valid_static_configuration_and_redacts_value ... ok
+test existing_invalid_token_is_preserved_and_reports_partial_state_initialization ... ok
+test non_tty_first_run_exits_two_without_waiting_or_creating_files ... ok
+test edited_existing_config_preserves_its_extended_acl ... ok
+test quota_known_unknown_and_unlimited_are_typed_and_zero_is_rejected ... ok
+test presets_only_supply_defaults_and_never_claim_protocol_or_local_start ... ok
+test explicit_proxy_bypasses_owned_loopback_upstream ... ok
+test edited_existing_config_preserves_its_permissions ... ok
+test fresh_save_only_initializes_private_tokens_without_starting_and_preserves_identity ... ok
+test rerun_noop_preserves_exact_bytes_and_scalar_edit_preserves_inline_comment ... ok
+test explicit_ca_bundle_merges_with_system_trust_for_owned_tls_upstream ... ok
+test rerun_preserves_multiroot_models_retry_and_accounting_until_explicitly_changed ... ok
+test scalar_edit_preserves_valid_inline_auth_and_quota_tables_without_panicking ... ok
+test scripted_wizard_accepts_local_corporate_and_external_presets ... ok
+test bare_configured_command_means_on_and_reaches_authenticated_readiness ... ok
+test listing_404_is_explained_and_manual_model_can_still_be_saved ... ok
+test scripted_wizard_supports_back_and_cancel_without_writes ... ok
+test setup_refuses_a_config_symlink_even_when_target_bytes_are_unchanged ... ok
+test relative_config_is_fixed_from_invocation_directory ... ok
+test structured_edits_preserve_inline_model_and_root_table_forms ... ok
+test save_and_rerun_preserve_minimal_pending_intents_without_credentials ... ok
+test typed_draft_preserves_invalid_api_base_error_until_validation ... ok
+test typed_draft_preserves_invalid_proxy_error_instead_of_dropping_proxy ... ok
+test summary_shows_exact_quota_limits_and_concurrency_before_apply ... ok
+test summary_resolves_paths_and_joins_prefix_and_v1_exactly_once ... ok
+test state_initialization_failure_reports_partial_apply_and_never_starts_worker ... ok
+test setup_writer_lock_rejects_a_second_cooperating_apply ... ok
+test desired_config_matching_worker_avoids_restart_even_when_disk_was_pending ... ok
+test valid_request_bounded_model_needs_no_invented_fallback ... ok
+test save_only_never_repairs_a_missing_token_under_a_running_worker ... ok
+test saved_pending_config_is_detected_from_the_authenticated_worker_fingerprint ... ok
+test pending_restart_without_preview_consent_is_refused_before_apply ... ok
+test save_only_starts_no_process_and_real_on_reaches_authenticated_readiness ... ok
+test unverified_running_worker_refuses_start_or_restart_before_writing ... ok
+test unchanged_save_and_start_keeps_the_authenticated_worker_identity ... ok
+
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.71s
+

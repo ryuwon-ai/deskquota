@@ -1,0 +1,482 @@
+{
+  "arm": "bifrost",
+  "audit_valid": true,
+  "budget_samples": [
+    {
+      "accepted": true,
+      "at_s": 212365.287653708,
+      "cost": 66,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 0,
+      "rolling_tpm_used": 0,
+      "rpm_tokens": null
+    }
+  ],
+  "cache": "off",
+  "cap": 2,
+  "client_attempt_limit": 4,
+  "client_attempts": [
+    {
+      "ended_s": 212365.310400041,
+      "id": "n0/client1",
+      "index": 1,
+      "node_id": "n0",
+      "outcome": "response",
+      "request_body_sha256": "62ea47bb2be427a515d1c8a8316d5e3d9614db8d2be59cd0578b38cc642afd27",
+      "response": {
+        "body_eof_s": 212365.310375125,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n0\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"logprobs\":null,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n0\"}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":null,\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":22,\"chunk_index\":0}}\n\ndata: {\"id\":\"chatcmpl-n0\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"logprobs\":null,\"delta\":{}}],\"created\":1,\"model\":\"synthetic\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":8,\"total_tokens\":66},\"extra_fields\":{\"request_type\":\"chat_completion_stream\",\"routing_info\":{\"provider\":\"openai\",\"model\":\"synthetic\",\"key\":\"fixture\"},\"provider\":\"openai\",\"original_model_requested\":\"synthetic\",\"resolved_model_used\":\"synthetic\",\"latency\":22,\"upstream_latency\":22,\"chunk_index\":1}}\n\ndata: [DONE]\n\n",
+        "first_body_s": 212365.310323,
+        "first_http_s": 212365.310289166,
+        "first_output_delta_s": 212365.310323,
+        "headers": [
+          [
+            "server",
+            "fasthttp"
+          ],
+          [
+            "date",
+            "Wed, 16 Sep 2026 02:26:52 GMT"
+          ],
+          [
+            "content-type",
+            "text/event-stream"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "referrer-policy",
+            "strict-origin-when-cross-origin"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "permissions-policy",
+            "camera=(), microphone=(), geolocation=()"
+          ],
+          [
+            "access-control-allow-origin",
+            "*"
+          ],
+          [
+            "access-control-allow-methods",
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
+          ],
+          [
+            "access-control-allow-headers",
+            "Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID"
+          ],
+          [
+            "access-control-max-age",
+            "86400"
+          ],
+          [
+            "vary",
+            "Origin"
+          ],
+          [
+            "x-request-id",
+            "9e7e3f31-f647-45b9-b16a-1c4253ce30ad"
+          ],
+          [
+            "x-bifrost-trace-id",
+            "94297fde8ced4a0f80605164e9228683"
+          ],
+          [
+            "x-bifrost-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-original-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-resolved-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-request-type",
+            "chat_completion_stream"
+          ],
+          [
+            "x-bifrost-routing-info-provider",
+            "openai"
+          ],
+          [
+            "x-bifrost-routing-info-model",
+            "synthetic"
+          ],
+          [
+            "x-bifrost-routing-info-key",
+            "fixture"
+          ],
+          [
+            "x-bifrost-upstream-latency-ms",
+            "22.455"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "connection",
+            "keep-alive"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n0",
+        "status": 200,
+        "terminal_marker_s": 212365.310371291,
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 58,
+          "status": "observed"
+        }
+      },
+      "sent_s": 212365.285585208,
+      "status": 200
+    }
+  ],
+  "discovery_requests": [
+    {
+      "at_s": 212365.139677958,
+      "path": "/v1/models"
+    },
+    {
+      "at_s": 212365.139719541,
+      "path": "/v1/models"
+    }
+  ],
+  "fixture_pending_tasks": 0,
+  "fresh_fixture_and_gateway_instances": true,
+  "gateway": {
+    "binary_sha256": "e1a89310241d2c59ce9075dd60d2725272737288697c7c20ca32b640b27bab43",
+    "binary_sha256_after": "e1a89310241d2c59ce9075dd60d2725272737288697c7c20ca32b640b27bab43",
+    "command": [
+      "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-http-source",
+      "-app-dir",
+      "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-mmfty908",
+      "-host",
+      "127.0.0.1",
+      "-port",
+      "51970"
+    ],
+    "config_note": "provider contracts differ; see preparation reports",
+    "effective_config": {
+      "$schema": "file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-v2.1.1/transports/config.schema.json",
+      "client": {
+        "compat": {
+          "convert_chat_to_responses": false,
+          "convert_text_to_chat": false,
+          "should_convert_params": false,
+          "should_drop_params": false
+        },
+        "disable_content_logging": true,
+        "drop_excess_requests": true,
+        "enable_logging": false,
+        "enforce_auth_on_inference": false,
+        "header_filter_config": {
+          "allowlist": [
+            "x-benchmark-ingress"
+          ]
+        },
+        "initial_pool_size": 64
+      },
+      "config_store": {
+        "enabled": false
+      },
+      "framework": {
+        "pricing": {
+          "live_models_sync_interval": 0,
+          "mcp_library_sync_interval": 0,
+          "model_parameters_url": "file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/model-parameters.json",
+          "pricing_sync_interval": 86400,
+          "pricing_url": "file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/pricing.json"
+        }
+      },
+      "logs_store": {
+        "enabled": false
+      },
+      "plugins": [
+        {
+          "config": {},
+          "enabled": false,
+          "name": "telemetry"
+        },
+        {
+          "config": {},
+          "enabled": false,
+          "name": "semantic_cache"
+        }
+      ],
+      "providers": {
+        "openai": {
+          "concurrency_and_buffer_size": {
+            "buffer_size": 64,
+            "concurrency": 2
+          },
+          "keys": [
+            {
+              "models": [
+                "synthetic"
+              ],
+              "name": "fixture",
+              "value": "fixture-only-not-a-secret",
+              "weight": 1
+            }
+          ],
+          "network_config": {
+            "base_url": "http://127.0.0.1:51969",
+            "default_request_timeout_in_seconds": 120,
+            "max_retries": 0,
+            "stream_idle_timeout_in_seconds": 120
+          }
+        }
+      },
+      "version": 2
+    },
+    "effective_config_sha256": "9f8363476729f4877afda250caf02cb319bde34e4f215517f5891f6b92e9094e",
+    "policy": "provider_managed",
+    "source_manifest": [
+      {
+        "commit": "c193745d2a713e9f58f021d43e138df5eb7e038a",
+        "path": "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-v2.1.1",
+        "remote": "https://github.com/maximhq/bifrost.git",
+        "tracked_changes": ""
+      },
+      {
+        "commit": "5df5802e0e9f4e3a6333c543f13ca66f84b3f7bc",
+        "path": "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/promptforge-v0.2.0",
+        "remote": "https://github.com/cppalliance/promptforge.git",
+        "tracked_changes": ""
+      }
+    ]
+  },
+  "gateway_retries": 0,
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "idle_resource": {
+    "cpu_seconds": 0.03,
+    "monotonic_s": 212365.281941625,
+    "rss_bytes": 64192512
+  },
+  "load_end": [
+    2.14501953125,
+    2.13623046875,
+    2.0439453125
+  ],
+  "load_start": [
+    2.14501953125,
+    2.13623046875,
+    2.0439453125
+  ],
+  "nodes": [
+    {
+      "deadline_s": 212370.281955416,
+      "elapsed_ms": 28.49254201282747,
+      "eligible_s": 212365.281955416,
+      "ended_s": 212365.310447958,
+      "id": "n0",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 3.5788750101346523,
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 58,
+        "status": "observed"
+      },
+      "workflow_id": "w0"
+    }
+  ],
+  "origin_s": 212365.281955416,
+  "owned_gateway_exit_code": 0,
+  "owned_processes_cleaned": true,
+  "peak_provider_service": 1,
+  "profile": "usage_contract",
+  "protocol_errors": [],
+  "quota": {
+    "rpm": 1000000,
+    "tpm": 1000000000
+  },
+  "quota_contract": "rolling_60_seconds",
+  "resource_scope": "gateway PID RSS/CPU; no child RSS aggregation",
+  "resources": [
+    {
+      "cpu_seconds": 0.03,
+      "monotonic_s": 212365.286631958,
+      "rss_bytes": 64847872
+    }
+  ],
+  "reused_sources": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "reused_sources_after": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "scope": "Synthetic completion with original deadlines and client retries; no model quality or real-provider claim",
+  "script_sha256": "69eae3d47b771eed0289900de7be42048eb2f42c36f2ab7c0d8b85f5c9030981",
+  "script_sha256_after": "69eae3d47b771eed0289900de7be42048eb2f42c36f2ab7c0d8b85f5c9030981",
+  "seed": 101,
+  "started_utc": "2026-09-16T02:26:52Z",
+  "status": "completed",
+  "submitted": [
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 58,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n0",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 20,
+      "tool_delay_s": 0,
+      "usage_required": true,
+      "workflow_id": "w0"
+    }
+  ],
+  "summary": {
+    "admitted_fixture_token_units": 66,
+    "all_work_completion_ms": 28.496417013229802,
+    "client_http_attempts": 1,
+    "completed_by_deadline": 1,
+    "completed_by_seconds": {
+      "10": 1,
+      "2": 1,
+      "5": 1
+    },
+    "completed_usage": {
+      "observed": 1
+    },
+    "groups": {
+      "length:short": {
+        "outcomes": {
+          "completed": 1
+        },
+        "planned": 1,
+        "success_latency_ms": {
+          "max": 28.49254201282747,
+          "n": 1,
+          "p50": 28.49254201282747,
+          "p95": 28.49254201282747,
+          "p99": 28.49254201282747
+        }
+      },
+      "root:0": {
+        "outcomes": {
+          "completed": 1
+        },
+        "planned": 1,
+        "success_latency_ms": {
+          "max": 28.49254201282747,
+          "n": 1,
+          "p50": 28.49254201282747,
+          "p95": 28.49254201282747,
+          "p99": 28.49254201282747
+        }
+      }
+    },
+    "node_outcomes": {
+      "completed": 1
+    },
+    "planned_nodes": 1,
+    "planned_workflows": 1,
+    "provider_rejected_attempts": 0,
+    "scheduling_lag_ms": {
+      "max": 3.5788750101346523,
+      "n": 1,
+      "p50": 3.5788750101346523,
+      "p95": 3.5788750101346523,
+      "p99": 3.5788750101346523
+    },
+    "success_workflow_latency_ms": {
+      "max": 28.496417013229802,
+      "n": 1,
+      "p50": 28.496417013229802,
+      "p95": 28.496417013229802,
+      "p99": 28.496417013229802
+    },
+    "upstream_attempts": 1,
+    "workflow_outcomes": {
+      "completed": 1
+    }
+  },
+  "upstream_attempt_limit": 4,
+  "upstream_attempts": [
+    {
+      "actual_cost_fixture_units": 66,
+      "ended_s": 212365.309809208,
+      "expected_body_sha256": "62ea47bb2be427a515d1c8a8316d5e3d9614db8d2be59cd0578b38cc642afd27",
+      "first_write_s": 212365.309767416,
+      "id": "n0/1",
+      "ingress_id": "n0",
+      "outcome": "completed",
+      "received_s": 212365.287653708,
+      "request_body_exact": false,
+      "request_body_sha256": "8dcdda59b2c70e79158ec13a7cdab4f81cf37a9bce73d51077887cb755e326e6",
+      "request_json": {
+        "max_completion_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 212365.2877385,
+      "status": 200
+    }
+  ],
+  "workflows": [
+    {
+      "deadline_s": 212370.281955416,
+      "elapsed_ms": 28.496417013229802,
+      "ended_s": 212365.310451833,
+      "id": "w0",
+      "outcome": "completed",
+      "released_s": 212365.281955416
+    }
+  ],
+  "workload_end_resource": {
+    "cpu_seconds": 0.04,
+    "monotonic_s": 212365.313510041,
+    "rss_bytes": 66797568
+  },
+  "workload_start_resource": {
+    "cpu_seconds": 0.03,
+    "monotonic_s": 212365.28424675,
+    "rss_bytes": 64192512
+  },
+  "written_configs_after": {
+    "config.json": {
+      "sha256": "a9c4ca4cde3983ec8ccba641e240c958be37266029d083c734f7d413787949c9",
+      "text": "{\"version\": 2, \"client\": {\"drop_excess_requests\": true, \"initial_pool_size\": 64, \"enable_logging\": false, \"disable_content_logging\": true, \"enforce_auth_on_inference\": false, \"header_filter_config\": {\"allowlist\": [\"x-benchmark-ingress\"]}, \"compat\": {\"convert_text_to_chat\": false, \"convert_chat_to_responses\": false, \"should_drop_params\": false, \"should_convert_params\": false}}, \"config_store\": {\"enabled\": false}, \"logs_store\": {\"enabled\": false}, \"framework\": {\"pricing\": {\"pricing_url\": \"file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/pricing.json\", \"model_parameters_url\": \"file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-app/model-parameters.json\", \"pricing_sync_interval\": 86400, \"mcp_library_sync_interval\": 0, \"live_models_sync_interval\": 0}}, \"providers\": {\"openai\": {\"keys\": [{\"name\": \"fixture\", \"value\": \"fixture-only-not-a-secret\", \"models\": [\"synthetic\"], \"weight\": 1}], \"network_config\": {\"base_url\": \"http://127.0.0.1:51969\", \"max_retries\": 0, \"default_request_timeout_in_seconds\": 120, \"stream_idle_timeout_in_seconds\": 120}, \"concurrency_and_buffer_size\": {\"concurrency\": 2, \"buffer_size\": 64}}}, \"plugins\": [{\"name\": \"telemetry\", \"enabled\": false, \"config\": {}}, {\"name\": \"semantic_cache\", \"enabled\": false, \"config\": {}}], \"$schema\": \"file:///Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/native/bifrost-v2.1.1/transports/config.schema.json\"}"
+    }
+  }
+}

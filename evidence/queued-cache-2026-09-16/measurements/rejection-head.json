@@ -1,0 +1,99 @@
+{
+  "check": "gated_rejection_head_ordering",
+  "timestamp": "2026-09-16T01:25:59.967360+00:00",
+  "binary": "/Users/ryuwon/Library/Caches/deskquota-queued-cache-20260916/llmgw-final",
+  "binary_sha256": "e28f3322ff1b0dce11941b27d45b771a0a247437686b9d39493af88839421b77",
+  "expectation": "stream-ineligible",
+  "cases": [
+    {
+      "name": "direct_json",
+      "direct": true,
+      "retry": false,
+      "media": "application/json",
+      "timing": true,
+      "head_before_body_gate": true,
+      "expected_head_before_gate": true,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": null,
+      "passed": true
+    },
+    {
+      "name": "gateway_json_retry_off",
+      "direct": false,
+      "retry": false,
+      "media": "application/json",
+      "timing": true,
+      "head_before_body_gate": true,
+      "expected_head_before_gate": true,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": 1999,
+      "passed": true
+    },
+    {
+      "name": "gateway_text_retry_off",
+      "direct": false,
+      "retry": false,
+      "media": "text/plain",
+      "timing": true,
+      "head_before_body_gate": true,
+      "expected_head_before_gate": true,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": 1999,
+      "passed": true
+    },
+    {
+      "name": "gateway_text_retry_on",
+      "direct": false,
+      "retry": true,
+      "media": "text/plain",
+      "timing": true,
+      "head_before_body_gate": true,
+      "expected_head_before_gate": true,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": 1999,
+      "passed": true
+    },
+    {
+      "name": "gateway_json_no_timing_retry_off",
+      "direct": false,
+      "retry": false,
+      "media": "application/json",
+      "timing": false,
+      "head_before_body_gate": false,
+      "expected_head_before_gate": false,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": 1025,
+      "passed": true
+    },
+    {
+      "name": "gateway_json_retry_on",
+      "direct": false,
+      "retry": true,
+      "media": "application/json",
+      "timing": true,
+      "head_before_body_gate": false,
+      "expected_head_before_gate": false,
+      "body_preserved": true,
+      "status": 429,
+      "attempts": 1,
+      "shared_cooldown_ms": 1688,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "limitations": [
+    "Synthetic loopback ordering only; no provider or performance claim",
+    "One request per case; no throughput or general p95 measurement",
+    "Checked released candidate port; no socket activation"
+  ]
+}

@@ -1,0 +1,3452 @@
+{
+  "arm": "litellm",
+  "audit_valid": true,
+  "budget_samples": [
+    {
+      "accepted": true,
+      "at_s": 214647.380806375,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 0,
+      "rolling_tpm_used": 0,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.387718125,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 1,
+      "rolling_tpm_used": 56,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.5609795,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 2,
+      "rolling_tpm_used": 112,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.657894833,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 3,
+      "rolling_tpm_used": 168,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.846336,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 4,
+      "rolling_tpm_used": 224,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.883091791,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 5,
+      "rolling_tpm_used": 280,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.953039916,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 6,
+      "rolling_tpm_used": 336,
+      "rpm_tokens": null
+    },
+    {
+      "accepted": true,
+      "at_s": 214647.989928125,
+      "cost": 56,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 7,
+      "rolling_tpm_used": 392,
+      "rpm_tokens": null
+    }
+  ],
+  "cache": "off",
+  "cap": 2,
+  "client_attempt_limit": 4,
+  "client_attempts": [
+    {
+      "ended_s": 214646.879441541,
+      "id": "n0/client1",
+      "index": 1,
+      "node_id": "n0",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.49928875,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.499287708,
+        "first_http_s": 214646.499268125,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "5f26a4ce-0761-419d-bbb9-108465e63293"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214646.87923688925,
+      "retry_computed_monotonic_s": 214646.499296875,
+      "retry_computed_wall_s": 1789527893.462788,
+      "retry_delay_s": 0.3799400142524111,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214646.8794395,
+      "sent_s": 214646.357947166,
+      "status": 429
+    },
+    {
+      "ended_s": 214646.967251291,
+      "id": "n1/client1",
+      "index": 1,
+      "node_id": "n1",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.50241375,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.502413125,
+        "first_http_s": 214646.502403416,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "34dfd5ac-8d34-429c-b27a-1adfdc776846"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214646.96585310518,
+      "retry_computed_monotonic_s": 214646.502417958,
+      "retry_computed_wall_s": 1789527893.465909,
+      "retry_delay_s": 0.4634351471972571,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214646.967250708,
+      "sent_s": 214646.456604291,
+      "status": 429
+    },
+    {
+      "ended_s": 214646.967343625,
+      "id": "n2/client1",
+      "index": 1,
+      "node_id": "n2",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.569973625,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.569972458,
+        "first_http_s": 214646.569958708,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "c075e3c7-26a5-4e59-ad6b-89f259b17655"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214646.96608343898,
+      "retry_computed_monotonic_s": 214646.5699805,
+      "retry_computed_wall_s": 1789527893.5334709,
+      "retry_delay_s": 0.3961029389828815,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214646.967343458,
+      "sent_s": 214646.556625541,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.054800375,
+      "id": "n3/client1",
+      "index": 1,
+      "node_id": "n3",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.673587291,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.673586041,
+        "first_http_s": 214646.673565541,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "34123446-19a0-4077-8746-9857c1478a1e"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.05268160728,
+      "retry_computed_monotonic_s": 214646.673597666,
+      "retry_computed_wall_s": 1789527893.637086,
+      "retry_delay_s": 0.3790839412839779,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.0547995,
+      "sent_s": 214646.656644875,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.154916708,
+      "id": "n4/client1",
+      "index": 1,
+      "node_id": "n4",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.7773365,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.777335166,
+        "first_http_s": 214646.777306125,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "62e0bea8-ae13-4d6f-9992-c4406c69005a"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.15279437843,
+      "retry_computed_monotonic_s": 214646.7773455,
+      "retry_computed_wall_s": 1789527893.740833,
+      "retry_delay_s": 0.3754488784213167,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.154916125,
+      "sent_s": 214646.756624666,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.366001041,
+      "id": "n5/client1",
+      "index": 1,
+      "node_id": "n5",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.879318416,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.879317083,
+        "first_http_s": 214646.879282958,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "af1a28e8-12c4-489a-a20c-7dd60c9c7243"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.36381071777,
+      "retry_computed_monotonic_s": 214646.879332416,
+      "retry_computed_wall_s": 1789527893.842819,
+      "retry_delay_s": 0.48447830176385426,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.3659995,
+      "sent_s": 214646.856636958,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.651644333,
+      "id": "n0/client2",
+      "index": 2,
+      "node_id": "n0",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.894994708,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.894993791,
+        "first_http_s": 214646.894979416,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "a1e2f7f4-9073-4352-8b92-9e73a354f0d3"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.6495398136,
+      "retry_computed_monotonic_s": 214646.895000208,
+      "retry_computed_wall_s": 1789527893.8584871,
+      "retry_delay_s": 0.7545396056112693,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.651643583,
+      "sent_s": 214646.879441833,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.383314791,
+      "id": "n6/client1",
+      "index": 1,
+      "node_id": "n6",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.976224833,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.97622375,
+        "first_http_s": 214646.976204458,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "b5bd4bce-c1a0-46c8-a7bb-55d19f65837d"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.3828149697,
+      "retry_computed_monotonic_s": 214646.976233833,
+      "retry_computed_wall_s": 1789527893.939719,
+      "retry_delay_s": 0.4065811366997285,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.383308,
+      "sent_s": 214646.956640166,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.838358666,
+      "id": "n1/client2",
+      "index": 2,
+      "node_id": "n1",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214646.996482041,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214646.996481291,
+        "first_http_s": 214646.99647075,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "e9d75168-f8a7-4a7d-a7f0-75b05a7356e3"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.8374762465,
+      "retry_computed_monotonic_s": 214646.996486375,
+      "retry_computed_wall_s": 1789527893.9599721,
+      "retry_delay_s": 0.8409898714997733,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.838357416,
+      "sent_s": 214646.967251583,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.873150958,
+      "id": "n2/client2",
+      "index": 2,
+      "node_id": "n2",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.000309291,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214647.000308958,
+        "first_http_s": 214647.0003015,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "22b8d4bb-f196-414c-b5d8-ffe7ec36467f"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.8709894566,
+      "retry_computed_monotonic_s": 214647.000311833,
+      "retry_computed_wall_s": 1789527893.963797,
+      "retry_delay_s": 0.8706776235972495,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.873149375,
+      "sent_s": 214646.967343791,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.921836416,
+      "id": "n3/client2",
+      "index": 2,
+      "node_id": "n3",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.071805125,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214647.07180375,
+        "first_http_s": 214647.071783541,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "2bd7b662-a56f-4b40-91cb-7ac3ca5825da"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.91965732485,
+      "retry_computed_monotonic_s": 214647.071814375,
+      "retry_computed_wall_s": 1789527894.035299,
+      "retry_delay_s": 0.8478429498386666,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.921828958,
+      "sent_s": 214647.054801,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.557332541,
+      "id": "n7/client1",
+      "index": 1,
+      "node_id": "n7",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.082568958,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214647.082568166,
+        "first_http_s": 214647.082555375,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "0d1f1011-ce1a-4b95-82c4-6195b006726c"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.55521607227,
+      "retry_computed_monotonic_s": 214647.082573375,
+      "retry_computed_wall_s": 1789527894.046058,
+      "retry_delay_s": 0.4726426972823563,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.557331833,
+      "sent_s": 214647.055009583,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.951690833,
+      "id": "n4/client2",
+      "index": 2,
+      "node_id": "n4",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.171174166,
+        "body_utf8": "{\"error\":{\"message\":\"litellm.RateLimitError: RateLimitError: OpenAIException - synthetic complete pre-output error. Received Model Group=synthetic\\nAvailable Model Group Fallbacks=None\",\"type\":\"throttling_error\",\"param\":null,\"code\":\"429\"}}",
+        "first_body_s": 214647.171172958,
+        "first_http_s": 214647.171154833,
+        "first_output_delta_s": null,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:53 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "2c8185b5-a76b-40f4-9d5e-96e59df671ef"
+          ],
+          [
+            "x-litellm-response-cost",
+            "0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-timeout",
+            "120.0"
+          ],
+          [
+            "content-length",
+            "239"
+          ],
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ]
+        ],
+        "output": "",
+        "status": 429,
+        "terminal_marker_s": null,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "retry_at_s": 214647.95104643985,
+      "retry_computed_monotonic_s": 214647.171191708,
+      "retry_computed_wall_s": 1789527894.134675,
+      "retry_delay_s": 0.7798547318378999,
+      "retry_reason": "seeded_backoff",
+      "retry_woke_s": 214647.95168975,
+      "sent_s": 214647.15491725,
+      "status": 429
+    },
+    {
+      "ended_s": 214647.512831666,
+      "id": "n5/client2",
+      "index": 2,
+      "node_id": "n5",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.512799208,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n5\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n5\"}}]}\n\ndata: {\"id\":\"chatcmpl-n5\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214647.512756166,
+        "first_http_s": 214647.512709125,
+        "first_output_delta_s": 214647.512756166,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "355a4ad9-eca7-4a57-a7e2-a82c32c904d5"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "106.45599999999999"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.618"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n5",
+        "status": 200,
+        "terminal_marker_s": 214647.512793833,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.366002166,
+      "status": 200
+    },
+    {
+      "ended_s": 214647.514853958,
+      "id": "n6/client2",
+      "index": 2,
+      "node_id": "n6",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.514836041,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n6\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n6\"}}]}\n\ndata: {\"id\":\"chatcmpl-n6\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214647.514812291,
+        "first_http_s": 214647.514786583,
+        "first_output_delta_s": 214647.514812291,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "07fe3e15-9397-42f1-89c7-2e4a2fdb63b6"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "110.293"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.01"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n6",
+        "status": 200,
+        "terminal_marker_s": 214647.51483125,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.3833165,
+      "status": 200
+    },
+    {
+      "ended_s": 214647.666433,
+      "id": "n7/client2",
+      "index": 2,
+      "node_id": "n7",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.666403375,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n7\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n7\"}}]}\n\ndata: {\"id\":\"chatcmpl-n7\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214647.666364375,
+        "first_http_s": 214647.666319708,
+        "first_output_delta_s": 214647.666364375,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "f602666a-89a9-4639-b0e7-f9ceb8fb6c9a"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "103.145"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "0.907"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n7",
+        "status": 200,
+        "terminal_marker_s": 214647.666396583,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.557333041,
+      "status": 200
+    },
+    {
+      "ended_s": 214647.767729791,
+      "id": "n0/client3",
+      "index": 3,
+      "node_id": "n0",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.767668,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n0\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n0\"}}]}\n\ndata: {\"id\":\"chatcmpl-n0\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214647.767586958,
+        "first_http_s": 214647.767485416,
+        "first_output_delta_s": 214647.767586958,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "26e248c9-383b-4241-95dc-06aad73e1e53"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "106.062"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.394"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n0",
+        "status": 200,
+        "terminal_marker_s": 214647.767659833,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.65164475,
+      "status": 200
+    },
+    {
+      "ended_s": 214647.957525875,
+      "id": "n1/client3",
+      "index": 3,
+      "node_id": "n1",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.957487875,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n1\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n1\"}}]}\n\ndata: {\"id\":\"chatcmpl-n1\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214647.957437458,
+        "first_http_s": 214647.957366416,
+        "first_output_delta_s": 214647.957437458,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "62b694e1-0d23-46e1-8295-d6c6dd24e86b"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "106.146"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.904"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n1",
+        "status": 200,
+        "terminal_marker_s": 214647.957482166,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.838360166,
+      "status": 200
+    },
+    {
+      "ended_s": 214647.991999625,
+      "id": "n2/client3",
+      "index": 3,
+      "node_id": "n2",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214647.991969208,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n2\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n2\"}}]}\n\ndata: {\"id\":\"chatcmpl-n2\",\"object\":\"chat.completion.chunk\",\"created\":1789527894,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214647.991934041,
+        "first_http_s": 214647.991890833,
+        "first_output_delta_s": 214647.991934041,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "72fec193-af1d-4b40-a8f1-0bb27c1f5f64"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "108.096"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.486"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n2",
+        "status": 200,
+        "terminal_marker_s": 214647.991964083,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.873152208,
+      "status": 200
+    },
+    {
+      "ended_s": 214648.060286666,
+      "id": "n3/client3",
+      "index": 3,
+      "node_id": "n3",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214648.060250708,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n3\",\"object\":\"chat.completion.chunk\",\"created\":1789527895,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n3\"}}]}\n\ndata: {\"id\":\"chatcmpl-n3\",\"object\":\"chat.completion.chunk\",\"created\":1789527895,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214648.060201041,
+        "first_http_s": 214648.060142375,
+        "first_output_delta_s": 214648.060201041,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "db9195ef-4403-45ac-97f0-35666d68f11a"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "106.226"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "2.238"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n3",
+        "status": 200,
+        "terminal_marker_s": 214648.060244541,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.921843458,
+      "status": 200
+    },
+    {
+      "ended_s": 214648.098086791,
+      "id": "n4/client3",
+      "index": 3,
+      "node_id": "n4",
+      "outcome": "response",
+      "request_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "response": {
+        "body_eof_s": 214648.098043958,
+        "body_utf8": "data: {\"id\":\"chatcmpl-n4\",\"object\":\"chat.completion.chunk\",\"created\":1789527895,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:n4\"}}]}\n\ndata: {\"id\":\"chatcmpl-n4\",\"object\":\"chat.completion.chunk\",\"created\":1789527895,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214648.097983,
+        "first_http_s": 214648.097906875,
+        "first_output_delta_s": 214648.097983,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:04:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "a75d7070-0956-44cc-abdf-1ceee69e0f49"
+          ],
+          [
+            "x-litellm-model-id",
+            "f030e6043dd6e271fbd3abbb1224d059c54543bb6ea69f138c18d4857ddcb9a0"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54939/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "106.328"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "2.088"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:n4",
+        "status": 200,
+        "terminal_marker_s": 214648.098036208,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214647.951691708,
+      "status": 200
+    }
+  ],
+  "discovery_requests": [],
+  "fixture_pending_tasks": 0,
+  "fresh_fixture_and_gateway_instances": true,
+  "gateway": {
+    "binary_sha256": "af83801aa6fa5aa2fe5f04231d1c36672192aa455c3bf870b920d88632eb4f16",
+    "binary_sha256_after": "af83801aa6fa5aa2fe5f04231d1c36672192aa455c3bf870b920d88632eb4f16",
+    "command": [
+      "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/python/litellm-venv/bin/litellm",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "54940",
+      "--config",
+      "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-v1t_85c3/litellm-config.yaml",
+      "--telemetry",
+      "False",
+      "--num_workers",
+      "1"
+    ],
+    "dependency_freeze_sha256": "2d6288c0344f0602bc773d702e64fe3a8241d65871a5a57a7745f9232a33a429",
+    "effective_config": {
+      "general_settings": {
+        "disable_spend_logs": true,
+        "forward_client_headers_to_llm_api": true
+      },
+      "litellm_settings": {
+        "cache": false,
+        "num_retries": 0,
+        "request_timeout": 120,
+        "telemetry": false
+      },
+      "model_list": [
+        {
+          "litellm_params": {
+            "api_base": "http://127.0.0.1:54939/v1",
+            "api_key": "synthetic-loopback-only",
+            "max_parallel_requests": 2,
+            "max_retries": 0,
+            "model": "openai/synthetic"
+          },
+          "model_name": "synthetic"
+        }
+      ],
+      "router_settings": {
+        "default_max_parallel_requests": 2,
+        "enable_pre_call_checks": false,
+        "num_retries": 0,
+        "routing_strategy": "simple-shuffle",
+        "timeout": 120
+      }
+    },
+    "effective_config_sha256": "08736079ff1fb4740dc20ff6562901bfc78951c9416367dff358b0a4990b0bef",
+    "policy": "provider_managed"
+  },
+  "gateway_retries": 0,
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "idle_resource": {
+    "cpu_seconds": 1.6,
+    "monotonic_s": 214646.354428333,
+    "rss_bytes": 299532288
+  },
+  "load_end": [
+    2.31591796875,
+    2.33447265625,
+    2.2021484375
+  ],
+  "load_start": [
+    2.4306640625,
+    2.357421875,
+    2.20947265625
+  ],
+  "nodes": [
+    {
+      "deadline_s": 214651.854442958,
+      "elapsed_ms": 658.4646250121295,
+      "eligible_s": 214646.854442958,
+      "ended_s": 214647.512907583,
+      "id": "n5",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.139207994332537,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w5"
+    },
+    {
+      "deadline_s": 214651.954442958,
+      "elapsed_ms": 560.4602500097826,
+      "eligible_s": 214646.954442958,
+      "ended_s": 214647.514903208,
+      "id": "n6",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.153083012672141,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w6"
+    },
+    {
+      "deadline_s": 214652.054442958,
+      "elapsed_ms": 612.0708329835907,
+      "eligible_s": 214647.054442958,
+      "ended_s": 214647.666513791,
+      "id": "n7",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 0.540749984793365,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w7"
+    },
+    {
+      "deadline_s": 214651.354442958,
+      "elapsed_ms": 1413.50620801677,
+      "eligible_s": 214646.354442958,
+      "ended_s": 214647.767949166,
+      "id": "n0",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 3.457875020103529,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w0"
+    },
+    {
+      "deadline_s": 214651.454442958,
+      "elapsed_ms": 1503.1837499991525,
+      "eligible_s": 214646.454442958,
+      "ended_s": 214647.957626708,
+      "id": "n1",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.119792014127597,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w1"
+    },
+    {
+      "deadline_s": 214651.554442958,
+      "elapsed_ms": 1437.6597499940544,
+      "eligible_s": 214646.554442958,
+      "ended_s": 214647.992102708,
+      "id": "n2",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.140750002581626,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w2"
+    },
+    {
+      "deadline_s": 214651.65444295798,
+      "elapsed_ms": 1405.945333011914,
+      "eligible_s": 214646.65444295798,
+      "ended_s": 214648.060388291,
+      "id": "n3",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.14920801226981,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w3"
+    },
+    {
+      "deadline_s": 214651.754442958,
+      "elapsed_ms": 1343.7487500195857,
+      "eligible_s": 214646.754442958,
+      "ended_s": 214648.098191708,
+      "id": "n4",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.137500006938353,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "w4"
+    }
+  ],
+  "origin_s": 214646.354442958,
+  "owned_gateway_exit_code": -15,
+  "owned_processes_cleaned": true,
+  "peak_provider_service": 2,
+  "profile": "recoverable429",
+  "protocol_errors": [],
+  "quota": {
+    "rpm": 1000000,
+    "tpm": 1000000000
+  },
+  "quota_contract": "rolling_60_seconds",
+  "resource_scope": "gateway PID RSS/CPU; no child RSS aggregation",
+  "resources": [
+    {
+      "cpu_seconds": 1.6,
+      "monotonic_s": 214646.358678458,
+      "rss_bytes": 299532288
+    },
+    {
+      "cpu_seconds": 1.79,
+      "monotonic_s": 214646.864653,
+      "rss_bytes": 320946176
+    },
+    {
+      "cpu_seconds": 1.91,
+      "monotonic_s": 214647.377652166,
+      "rss_bytes": 321732608
+    },
+    {
+      "cpu_seconds": 1.99,
+      "monotonic_s": 214647.885699375,
+      "rss_bytes": 322781184
+    }
+  ],
+  "reused_sources": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "reused_sources_after": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "scope": "Synthetic completion with original deadlines and client retries; no model quality or real-provider claim",
+  "script_sha256": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "script_sha256_after": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "seed": 101,
+  "started_utc": "2026-09-16T03:04:51Z",
+  "status": "completed",
+  "submitted": [
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n0",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.0,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w0"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n1",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.1,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w1"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n2",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.2,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w2"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n3",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.3,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w3"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n4",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.4,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w4"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n5",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.5,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w5"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n6",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.6,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w6"
+    },
+    {
+      "actual_ratio": 0.25,
+      "canonical_input_units": 48,
+      "canonical_output_units": 8,
+      "deadline_secs": 5,
+      "id": "n7",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 0.7,
+      "output_reservation": 32,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 100,
+      "tool_delay_s": 0,
+      "usage_required": false,
+      "workflow_id": "w7"
+    }
+  ],
+  "summary": {
+    "admitted_fixture_token_units": 448,
+    "all_work_completion_ms": 1743.7627500039525,
+    "client_http_attempts": 21,
+    "completed_by_deadline": 8,
+    "completed_by_seconds": {
+      "10": 8,
+      "2": 8,
+      "5": 8
+    },
+    "completed_usage": {
+      "missing_unrequested": 8
+    },
+    "groups": {
+      "length:short": {
+        "outcomes": {
+          "completed": 8
+        },
+        "planned": 8,
+        "success_latency_ms": {
+          "max": 1503.1837499991525,
+          "n": 8,
+          "p50": 1343.7487500195857,
+          "p95": 1503.1837499991525,
+          "p99": 1503.1837499991525
+        }
+      },
+      "root:0": {
+        "outcomes": {
+          "completed": 2
+        },
+        "planned": 2,
+        "success_latency_ms": {
+          "max": 1413.50620801677,
+          "n": 2,
+          "p50": 1343.7487500195857,
+          "p95": 1413.50620801677,
+          "p99": 1413.50620801677
+        }
+      },
+      "root:1": {
+        "outcomes": {
+          "completed": 2
+        },
+        "planned": 2,
+        "success_latency_ms": {
+          "max": 1503.1837499991525,
+          "n": 2,
+          "p50": 658.4646250121295,
+          "p95": 1503.1837499991525,
+          "p99": 1503.1837499991525
+        }
+      },
+      "root:2": {
+        "outcomes": {
+          "completed": 2
+        },
+        "planned": 2,
+        "success_latency_ms": {
+          "max": 1437.6597499940544,
+          "n": 2,
+          "p50": 560.4602500097826,
+          "p95": 1437.6597499940544,
+          "p99": 1437.6597499940544
+        }
+      },
+      "root:3": {
+        "outcomes": {
+          "completed": 2
+        },
+        "planned": 2,
+        "success_latency_ms": {
+          "max": 1405.945333011914,
+          "n": 2,
+          "p50": 612.0708329835907,
+          "p95": 1405.945333011914,
+          "p99": 1405.945333011914
+        }
+      }
+    },
+    "node_outcomes": {
+      "completed": 8
+    },
+    "planned_nodes": 8,
+    "planned_workflows": 8,
+    "provider_rejected_attempts": 13,
+    "scheduling_lag_ms": {
+      "max": 3.457875020103529,
+      "n": 8,
+      "p50": 2.139207994332537,
+      "p95": 3.457875020103529,
+      "p99": 3.457875020103529
+    },
+    "success_workflow_latency_ms": {
+      "max": 1503.193749987986,
+      "n": 8,
+      "p50": 1343.7627500097733,
+      "p95": 1503.193749987986,
+      "p99": 1503.193749987986
+    },
+    "upstream_attempts": 21,
+    "workflow_outcomes": {
+      "completed": 8
+    }
+  },
+  "upstream_attempt_limit": 4,
+  "upstream_attempts": [
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.473486958,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n0/1",
+      "ingress_id": "n0",
+      "outcome": "rejected",
+      "received_s": 214646.473382375,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "882"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.473591583,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n1/1",
+      "ingress_id": "n1",
+      "outcome": "rejected",
+      "received_s": 214646.47353175,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "881"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.560127791,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n2/1",
+      "ingress_id": "n2",
+      "outcome": "rejected",
+      "received_s": 214646.5600455,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "795"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.660483541,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n3/1",
+      "ingress_id": "n3",
+      "outcome": "rejected",
+      "received_s": 214646.660370875,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "695"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.761127583,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n4/1",
+      "ingress_id": "n4",
+      "outcome": "rejected",
+      "received_s": 214646.76101075,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "594"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.862708625,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n5/1",
+      "ingress_id": "n5",
+      "outcome": "rejected",
+      "received_s": 214646.862475208,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "492"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.882528916,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n0/2",
+      "ingress_id": "n0",
+      "outcome": "rejected",
+      "received_s": 214646.8824385,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "473"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.960398916,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n6/1",
+      "ingress_id": "n6",
+      "outcome": "rejected",
+      "received_s": 214646.960282875,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "395"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.979270291,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n1/2",
+      "ingress_id": "n1",
+      "outcome": "rejected",
+      "received_s": 214646.97919125,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "376"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214646.979332583,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n2/2",
+      "ingress_id": "n2",
+      "outcome": "rejected",
+      "received_s": 214646.979283541,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "376"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.05901125,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n3/2",
+      "ingress_id": "n3",
+      "outcome": "rejected",
+      "received_s": 214647.058919916,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "296"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.067228916,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n7/1",
+      "ingress_id": "n7",
+      "outcome": "rejected",
+      "received_s": 214647.067174833,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "288"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.158242416,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "id": "n4/2",
+      "ingress_id": "n4",
+      "outcome": "rejected",
+      "received_s": 214647.158134,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [
+        [
+          "retry-after-ms",
+          "197"
+        ]
+      ],
+      "status": 429
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.483473916,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214647.483227541,
+      "id": "n5/2",
+      "ingress_id": "n5",
+      "outcome": "completed",
+      "received_s": 214647.380806375,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.381062333,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.489390333,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214647.4890975,
+      "id": "n6/2",
+      "ingress_id": "n6",
+      "outcome": "completed",
+      "received_s": 214647.387718125,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.387843041,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.661982,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214647.661909541,
+      "id": "n7/2",
+      "ingress_id": "n7",
+      "outcome": "completed",
+      "received_s": 214647.5609795,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.561082958,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.760368041,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214647.760200791,
+      "id": "n0/3",
+      "ingress_id": "n0",
+      "outcome": "completed",
+      "received_s": 214647.657894833,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.658010083,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.94869725,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214647.948584208,
+      "id": "n1/3",
+      "ingress_id": "n1",
+      "outcome": "completed",
+      "received_s": 214647.846336,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.846510458,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214647.985629458,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214647.985471625,
+      "id": "n2/3",
+      "ingress_id": "n2",
+      "outcome": "completed",
+      "received_s": 214647.883091791,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.883351416,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214648.055407708,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214648.055278708,
+      "id": "n3/3",
+      "ingress_id": "n3",
+      "outcome": "completed",
+      "received_s": 214647.953039916,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.953166375,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 56,
+      "ended_s": 214648.092398333,
+      "expected_body_sha256": "23e7a316f788a9f79fbc992c56f9626036c1b52c31308bda4964775b08c14225",
+      "first_write_s": 214648.09221825,
+      "id": "n4/3",
+      "ingress_id": "n4",
+      "outcome": "completed",
+      "received_s": 214647.989928125,
+      "request_body_exact": false,
+      "request_body_sha256": "081c28865a3fdaa17e8cd619a345befb200a3b9db2809a5ce5f58f4705ccbcaa",
+      "request_json": {
+        "max_tokens": 32,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214647.990080291,
+      "status": 200
+    }
+  ],
+  "workflows": [
+    {
+      "deadline_s": 214651.854442958,
+      "elapsed_ms": 658.4720830142032,
+      "ended_s": 214647.512915041,
+      "id": "w5",
+      "outcome": "completed",
+      "released_s": 214646.854442958
+    },
+    {
+      "deadline_s": 214651.954442958,
+      "elapsed_ms": 560.4637080105022,
+      "ended_s": 214647.514906666,
+      "id": "w6",
+      "outcome": "completed",
+      "released_s": 214646.954442958
+    },
+    {
+      "deadline_s": 214652.054442958,
+      "elapsed_ms": 612.0761249912903,
+      "ended_s": 214647.666519083,
+      "id": "w7",
+      "outcome": "completed",
+      "released_s": 214647.054442958
+    },
+    {
+      "deadline_s": 214651.354442958,
+      "elapsed_ms": 1413.5410420130938,
+      "ended_s": 214647.767984,
+      "id": "w0",
+      "outcome": "completed",
+      "released_s": 214646.354442958
+    },
+    {
+      "deadline_s": 214651.454442958,
+      "elapsed_ms": 1503.193749987986,
+      "ended_s": 214647.957636708,
+      "id": "w1",
+      "outcome": "completed",
+      "released_s": 214646.454442958
+    },
+    {
+      "deadline_s": 214651.554442958,
+      "elapsed_ms": 1437.665332981851,
+      "ended_s": 214647.992108291,
+      "id": "w2",
+      "outcome": "completed",
+      "released_s": 214646.554442958
+    },
+    {
+      "deadline_s": 214651.65444295798,
+      "elapsed_ms": 1405.9515830304008,
+      "ended_s": 214648.060394541,
+      "id": "w3",
+      "outcome": "completed",
+      "released_s": 214646.65444295798
+    },
+    {
+      "deadline_s": 214651.754442958,
+      "elapsed_ms": 1343.7627500097733,
+      "ended_s": 214648.098205708,
+      "id": "w4",
+      "outcome": "completed",
+      "released_s": 214646.754442958
+    }
+  ],
+  "workload_end_resource": {
+    "cpu_seconds": 2.02,
+    "monotonic_s": 214648.105596375,
+    "rss_bytes": 322846720
+  },
+  "workload_start_resource": {
+    "cpu_seconds": 1.6,
+    "monotonic_s": 214646.356586958,
+    "rss_bytes": 299532288
+  },
+  "written_configs_after": {
+    "litellm-config.yaml": {
+      "sha256": "08736079ff1fb4740dc20ff6562901bfc78951c9416367dff358b0a4990b0bef",
+      "text": "{\n  \"model_list\": [\n    {\n      \"model_name\": \"synthetic\",\n      \"litellm_params\": {\n        \"model\": \"openai/synthetic\",\n        \"api_base\": \"http://127.0.0.1:54939/v1\",\n        \"api_key\": \"synthetic-loopback-only\",\n        \"max_retries\": 0,\n        \"max_parallel_requests\": 2\n      }\n    }\n  ],\n  \"router_settings\": {\n    \"routing_strategy\": \"simple-shuffle\",\n    \"num_retries\": 0,\n    \"default_max_parallel_requests\": 2,\n    \"timeout\": 120,\n    \"enable_pre_call_checks\": false\n  },\n  \"litellm_settings\": {\n    \"num_retries\": 0,\n    \"cache\": false,\n    \"telemetry\": false,\n    \"request_timeout\": 120\n  },\n  \"general_settings\": {\n    \"forward_client_headers_to_llm_api\": true,\n    \"disable_spend_logs\": true\n  }\n}\n"
+    }
+  }
+}

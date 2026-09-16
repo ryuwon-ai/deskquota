@@ -1,0 +1,53 @@
+[
+  {
+    "name": "full-tests",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "test",
+      "--locked",
+      "--all-targets",
+      "--no-fail-fast",
+      "--features",
+      "bench-harness"
+    ],
+    "exit": 0,
+    "elapsed_s": 83.59168654200039
+  },
+  {
+    "name": "fmt",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit": 0,
+    "elapsed_s": 0.3596855000068899
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "rtk",
+      "proxy",
+      "cargo",
+      "+1.88.0",
+      "clippy",
+      "--locked",
+      "--all-targets",
+      "--features",
+      "bench-harness",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 101,
+    "elapsed_s": 25.01838133300771
+  }
+]

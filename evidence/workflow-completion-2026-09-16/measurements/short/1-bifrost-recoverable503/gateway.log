@@ -1,0 +1,71 @@
+2026/09/16 12:05:20 maxprocs: Leaving GOMAXPROCS=10: CPU quota undefined
+
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   ██████╗ ██╗███████╗██████╗  ██████╗ ███████╗████████╗   ║
+║   ██╔══██╗██║██╔════╝██╔══██╗██╔═══██╗██╔════╝╚══██╔══╝   ║
+║   ██████╔╝██║█████╗  ██████╔╝██║   ██║███████╗   ██║      ║
+║   ██╔══██╗██║██╔══╝  ██╔══██╗██║   ██║╚════██║   ██║      ║
+║   ██████╔╝██║██║     ██║  ██║╚██████╔╝███████║   ██║      ║
+║   ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝      ║
+║                                                           ║
+║═══════════════════════════════════════════════════════════║
+║                          v2.1.1                           ║
+║═══════════════════════════════════════════════════════════║
+║                 The Fastest LLM Gateway                   ║
+║═══════════════════════════════════════════════════════════║
+║             https://github.com/maximhq/bifrost            ║
+╚═══════════════════════════════════════════════════════════╝
+
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"loading configuration from: /var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-afpk1kik/config.json"}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"config store is nil, skipping token refresh worker"}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"per-user OAuth sweep worker not started: provider or config store is nil"}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"per-user headers credential sweep worker not started: provider or config store is nil"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"pricing sync interval set to 24h0m0s (scheduler checks every 5m0s)"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"initializing model catalog..."}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"model-parameters-sync: no parseable records, keeping existing model parameters and capabilities"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"initializing MCP catalog..."}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"governance plugin requires config store to persist data, running in memory only mode"}
+{"level":"error","time":"2026-09-16T12:05:20+09:00","message":"failed to initialize governance plugin: failed to initialize governance store: failed to load governance data from config memory: governance config is nil"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"bifrost client initialized"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"listing all models and adding to model catalog"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"models added to catalog"}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"batch accounting sweeper not wired: logging plugin not found (err=plugin logging not found)"}
+{"level":"warn","time":"2026-09-16T12:05:20+09:00","message":"prometheus plugin not found, skipping telemetry middleware"}
+{"level":"error","time":"2026-09-16T12:05:20+09:00","message":"auth middleware requires config store, skipping auth middleware initialization"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"background live model refresh is disabled"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"Time spent in Bifrost server bootstrap 4 ms"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"plugin status: compat - active"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"plugin status: model-catalog-resolver - active"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"plugin status: governance - error"}
+{"level":"info","time":"2026-09-16T12:05:20+09:00","message":"successfully started bifrost, serving UI on http://127.0.0.1:55340"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":1,"http.remote_addr":"127.0.0.1:55345","http.user_agent":"","trace_id":"60094e870f9b407180b28aeed6652f6e","request_id":"b6806a06-08b3-4554-b944-3df5d04dc175","time":"2026-09-16T12:05:20+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":0,"http.remote_addr":"127.0.0.1:55347","http.user_agent":"","trace_id":"35b01b5697064c51ac0e57db03e81f55","request_id":"d5a62339-e096-443f-806d-70440846b5f3","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":0,"http.remote_addr":"127.0.0.1:55348","http.user_agent":"","trace_id":"176b09defa32439aa5f91ad8cf162ba2","request_id":"4c13ed74-ea48-470f-aa43-4ab1b0b10296","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":1,"http.remote_addr":"127.0.0.1:55351","http.user_agent":"","trace_id":"eda19b54f66b480390f7a4540eafec94","request_id":"9c241324-a9c2-40b0-a85d-5b44f0814ea0","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":1,"http.remote_addr":"127.0.0.1:55352","http.user_agent":"","trace_id":"de25b7b49fd9448dba3c2152f0e81920","request_id":"39687bfe-a870-4b33-a527-955434ba6d10","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":0,"http.remote_addr":"127.0.0.1:55353","http.user_agent":"","trace_id":"5113274b9fa44ac0ad38b8c6ab1db42a","request_id":"ccd7047b-512a-49cc-9e55-bb08356f09b0","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":1,"http.remote_addr":"127.0.0.1:55354","http.user_agent":"","trace_id":"2bcf600703a545d689f49668b345d7ad","request_id":"b8eb25eb-7933-4120-827e-96bf621f3f73","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"error","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":503,"http.request_duration_ms":0,"http.remote_addr":"127.0.0.1:55355","http.user_agent":"","trace_id":"4e2889fe4f1f4996a809c204332557b3","request_id":"fdc69027-33e7-43b1-b548-fb132e86d84f","time":"2026-09-16T12:05:21+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":104,"http.remote_addr":"127.0.0.1:55356","http.user_agent":"","trace_id":"3b2b692cc47b432da8cca5eaa9cd5481","request_id":"902710aa-cae6-4aa2-b788-0cdf64cae900","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":111,"http.remote_addr":"127.0.0.1:55363","http.user_agent":"","trace_id":"1cf5afacaeae4e8694fb0a809d3fd28b","request_id":"b8298fc9-db8c-4336-8dd9-6ca56d3290cd","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":209,"http.remote_addr":"127.0.0.1:55357","http.user_agent":"","trace_id":"df5bb50e7040414f9f7e591cf052465d","request_id":"471b4093-5876-4d0e-b380-5062b2adfe7c","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":213,"http.remote_addr":"127.0.0.1:55358","http.user_agent":"","trace_id":"aeb14abbeaa9428a80e8b483b9d5eb5b","request_id":"7f12c083-31e7-4d93-a3d0-04c79038cf72","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":313,"http.remote_addr":"127.0.0.1:55360","http.user_agent":"","trace_id":"8e94745c50d245a9ba7b3df41635066c","request_id":"e943effe-7433-4b2d-b158-38389d129a28","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":314,"http.remote_addr":"127.0.0.1:55361","http.user_agent":"","trace_id":"d119ff798cd74b1bb67be525ba194a96","request_id":"9868aaa0-7e01-4d61-b73c-6a661d1d720e","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":415,"http.remote_addr":"127.0.0.1:55359","http.user_agent":"","trace_id":"d9f8dd6263aa43c597ed2c3d79c9e56d","request_id":"a001e5b9-911d-43da-9e48-2c6ce2677e29","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/openai/v1/chat/completions","http.status_code":200,"http.request_duration_ms":416,"http.remote_addr":"127.0.0.1:55362","http.user_agent":"","trace_id":"cf2ea04fa40742fe9e64d82586ecae13","request_id":"f873a67c-546c-4574-81a1-95ddbe2fff9f","time":"2026-09-16T12:05:22+09:00","message":"request completed"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"received signal terminated, initiating graceful shutdown..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"closing realtime transport sessions..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"server gracefully shutdown"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"shutting down bifrost client..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"closing all request channels..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"got context cancel(), stopping webserver"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"all request channels closed"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"bifrost client shutdown completed"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"cleaning up storage engines..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"stopping live model refresher..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"closing websocket connection pool..."}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"storage engines cleanup completed"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"cleanup completed"}
+{"level":"info","time":"2026-09-16T12:05:22+09:00","message":"🏁 server stopped"}

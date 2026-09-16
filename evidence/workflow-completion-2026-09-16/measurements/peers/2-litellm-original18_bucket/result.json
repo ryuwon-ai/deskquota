@@ -1,0 +1,4643 @@
+{
+  "arm": "litellm",
+  "audit_valid": true,
+  "budget_samples": [
+    {
+      "accepted": true,
+      "at_s": 214438.359929291,
+      "cost": 112,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 0,
+      "rolling_tpm_used": 0,
+      "rpm_tokens": 16.0
+    },
+    {
+      "accepted": true,
+      "at_s": 214443.282980541,
+      "cost": 288,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 1,
+      "rolling_tpm_used": 112,
+      "rpm_tokens": 16
+    },
+    {
+      "accepted": true,
+      "at_s": 214444.835971,
+      "cost": 112,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 2,
+      "rolling_tpm_used": 400,
+      "rpm_tokens": 15.414130789064803
+    },
+    {
+      "accepted": true,
+      "at_s": 214449.717321708,
+      "cost": 240,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 3,
+      "rolling_tpm_used": 512,
+      "rpm_tokens": 15.715824311203324
+    },
+    {
+      "accepted": true,
+      "at_s": 214450.195583208,
+      "cost": 64,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 4,
+      "rolling_tpm_used": 752,
+      "rpm_tokens": 14.843360711199542
+    },
+    {
+      "accepted": true,
+      "at_s": 214451.041442333,
+      "cost": 563,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 5,
+      "rolling_tpm_used": 816,
+      "rpm_tokens": 14.068923144531437
+    },
+    {
+      "accepted": true,
+      "at_s": 214451.152508,
+      "cost": 416,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 6,
+      "rolling_tpm_used": 1379,
+      "rpm_tokens": 13.098540655733087
+    },
+    {
+      "accepted": true,
+      "at_s": 214451.485491208,
+      "cost": 515,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 7,
+      "rolling_tpm_used": 1795,
+      "rpm_tokens": 12.187336177867838
+    },
+    {
+      "accepted": true,
+      "at_s": 214452.061096916,
+      "cost": 240,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 8,
+      "rolling_tpm_used": 2310,
+      "rpm_tokens": 11.340831033334448
+    },
+    {
+      "accepted": true,
+      "at_s": 214453.657839375,
+      "cost": 112,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 9,
+      "rolling_tpm_used": 2550,
+      "rpm_tokens": 10.766629022398654
+    },
+    {
+      "accepted": true,
+      "at_s": 214456.821061958,
+      "cost": 240,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 10,
+      "rolling_tpm_used": 2662,
+      "rpm_tokens": 10.610155044534865
+    },
+    {
+      "accepted": true,
+      "at_s": 214457.218648083,
+      "cost": 691,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 11,
+      "rolling_tpm_used": 2902,
+      "rpm_tokens": 9.716178011203496
+    },
+    {
+      "accepted": true,
+      "at_s": 214457.3548105,
+      "cost": 112,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 12,
+      "rolling_tpm_used": 3593,
+      "rpm_tokens": 8.752487989064928
+    },
+    {
+      "accepted": true,
+      "at_s": 214458.492875083,
+      "cost": 240,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 13,
+      "rolling_tpm_used": 3705,
+      "rpm_tokens": 8.055971877866737
+    },
+    {
+      "accepted": true,
+      "at_s": 214461.266559208,
+      "cost": 240,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 14,
+      "rolling_tpm_used": 3945,
+      "rpm_tokens": 7.7956209778630505
+    },
+    {
+      "accepted": true,
+      "at_s": 214462.165419125,
+      "cost": 112,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 15,
+      "rolling_tpm_used": 4185,
+      "rpm_tokens": 7.035316955732805
+    },
+    {
+      "accepted": true,
+      "at_s": 214465.51539075,
+      "cost": 515,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 16,
+      "rolling_tpm_used": 4297,
+      "rpm_tokens": 6.9286427223977345
+    },
+    {
+      "accepted": true,
+      "at_s": 214467.6540225,
+      "cost": 112,
+      "retry_delay_s": 0,
+      "rolling_rpm_used": 17,
+      "rolling_tpm_used": 4812,
+      "rpm_tokens": 6.498944522401631
+    }
+  ],
+  "cache": "off",
+  "cap": 2,
+  "client_attempt_limit": 4,
+  "client_attempts": [
+    {
+      "ended_s": 214438.799679958,
+      "id": "g3/client1",
+      "index": 1,
+      "node_id": "g3",
+      "outcome": "response",
+      "request_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "response": {
+        "body_eof_s": 214438.799621125,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g3\",\"object\":\"chat.completion.chunk\",\"created\":1789527685,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g3\"}}]}\n\ndata: {\"id\":\"chatcmpl-g3\",\"object\":\"chat.completion.chunk\",\"created\":1789527685,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214438.799549541,
+        "first_http_s": 214438.799470041,
+        "first_output_delta_s": 214438.799549541,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:24 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "485e24b8-e8af-429e-92dc-35bc2d7445f0"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "553.5029999999999"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "10.757"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g3",
+        "status": 200,
+        "terminal_marker_s": 214438.799614791,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214438.192073583,
+      "status": 200
+    },
+    {
+      "ended_s": 214443.693905041,
+      "id": "g10/client1",
+      "index": 1,
+      "node_id": "g10",
+      "outcome": "response",
+      "request_body_sha256": "de97a5ad3ea392e6b6b43d2c3fec542eeab14fbb32eed712881d955641c75a7c",
+      "response": {
+        "body_eof_s": 214443.693819083,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g10\",\"object\":\"chat.completion.chunk\",\"created\":1789527690,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g10\"}}]}\n\ndata: {\"id\":\"chatcmpl-g10\",\"object\":\"chat.completion.chunk\",\"created\":1789527690,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214443.693711166,
+        "first_http_s": 214443.693598375,
+        "first_output_delta_s": 214443.693711166,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:30 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "2e3a873b-e1b8-4144-ba61-0eaa05ca186d"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "407.6"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "2.21"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g10",
+        "status": 200,
+        "terminal_marker_s": 214443.693800416,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214443.272154458,
+      "status": 200
+    },
+    {
+      "ended_s": 214444.866317666,
+      "id": "g15/client1",
+      "index": 1,
+      "node_id": "g15",
+      "outcome": "response",
+      "request_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "response": {
+        "body_eof_s": 214444.866254708,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g15\",\"object\":\"chat.completion.chunk\",\"created\":1789527691,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g15\"}}]}\n\ndata: {\"id\":\"chatcmpl-g15\",\"object\":\"chat.completion.chunk\",\"created\":1789527691,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214444.866177375,
+        "first_http_s": 214444.866071458,
+        "first_output_delta_s": 214444.866177375,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:31 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "4b86afea-73ce-4a99-940f-87a79a937f3e"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "27.352999999999998"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.857"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g15",
+        "status": 200,
+        "terminal_marker_s": 214444.86624725,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214444.828249583,
+      "status": 200
+    },
+    {
+      "ended_s": 214449.749136958,
+      "id": "g7/client1",
+      "index": 1,
+      "node_id": "g7",
+      "outcome": "response",
+      "request_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "response": {
+        "body_eof_s": 214449.749050833,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g7\",\"object\":\"chat.completion.chunk\",\"created\":1789527696,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g7\"}}]}\n\ndata: {\"id\":\"chatcmpl-g7\",\"object\":\"chat.completion.chunk\",\"created\":1789527696,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214449.748947416,
+        "first_http_s": 214449.748809375,
+        "first_output_delta_s": 214449.748947416,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:36 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "246fd980-8d82-4119-8b57-d912ec6be5ed"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "28.797"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "2.607"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g7",
+        "status": 200,
+        "terminal_marker_s": 214449.749041875,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214449.705512916,
+      "status": 200
+    },
+    {
+      "ended_s": 214450.225067791,
+      "id": "g4/client1",
+      "index": 1,
+      "node_id": "g4",
+      "outcome": "response",
+      "request_body_sha256": "83c56a750efd0430ee26c7ec7a038028518f62bf9538cae9c0e8033d15ad8921",
+      "response": {
+        "body_eof_s": 214450.225005875,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g4\",\"object\":\"chat.completion.chunk\",\"created\":1789527697,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g4\"}}]}\n\ndata: {\"id\":\"chatcmpl-g4\",\"object\":\"chat.completion.chunk\",\"created\":1789527697,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214450.224933958,
+        "first_http_s": 214450.224823625,
+        "first_output_delta_s": 214450.224933958,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:37 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "54d50571-0ff3-4a25-a5eb-baad7f87401b"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "27.123"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.799"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g4",
+        "status": 200,
+        "terminal_marker_s": 214450.224998916,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214450.187322416,
+      "status": 200
+    },
+    {
+      "ended_s": 214451.071421208,
+      "id": "g5/client1",
+      "index": 1,
+      "node_id": "g5",
+      "outcome": "response",
+      "request_body_sha256": "f25b7bcbd85956c415435038beb27f53c40c0dca8ee52bd5171d7b3ebf96e62c",
+      "response": {
+        "body_eof_s": 214451.071367291,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g5\",\"object\":\"chat.completion.chunk\",\"created\":1789527698,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g5\"}}]}\n\ndata: {\"id\":\"chatcmpl-g5\",\"object\":\"chat.completion.chunk\",\"created\":1789527698,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214451.071298791,
+        "first_http_s": 214451.071199416,
+        "first_output_delta_s": 214451.071298791,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:37 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "ab2f81d0-3b64-45d8-8666-b9521cb65a49"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "27.134999999999998"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.716"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g5",
+        "status": 200,
+        "terminal_marker_s": 214451.071360041,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214451.033304666,
+      "status": 200
+    },
+    {
+      "ended_s": 214453.659332416,
+      "id": "g17/client1",
+      "index": 1,
+      "node_id": "g17",
+      "outcome": "response",
+      "request_body_sha256": "f1ec7d6e854db6d12d85b9ddd3d6d1ae31c8a228b96fc81483d138d2e47a8be5",
+      "response": {
+        "body_eof_s": 214453.659303916,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g17\",\"object\":\"chat.completion.chunk\",\"created\":1789527700,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g17\"}}]}\n\ndata: {\"id\":\"chatcmpl-g17\",\"object\":\"chat.completion.chunk\",\"created\":1789527700,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214453.659278,
+        "first_http_s": 214453.659240083,
+        "first_output_delta_s": 214453.659278,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:37 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "28b963a5-44cc-41eb-8ab9-da34782e6de7"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2506.092"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.687"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g17",
+        "status": 200,
+        "terminal_marker_s": 214453.659299833,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214451.144673125,
+      "status": 200
+    },
+    {
+      "ended_s": 214451.894954541,
+      "id": "g2/client1",
+      "index": 1,
+      "node_id": "g2",
+      "outcome": "response",
+      "request_body_sha256": "ddc63f847737b5532fb42263bca301edf1dce42911fdc293d3bddee1125f4b7e",
+      "response": {
+        "body_eof_s": 214451.894890875,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g2\",\"object\":\"chat.completion.chunk\",\"created\":1789527698,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g2\"}}]}\n\ndata: {\"id\":\"chatcmpl-g2\",\"object\":\"chat.completion.chunk\",\"created\":1789527698,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214451.894802875,
+        "first_http_s": 214451.894710583,
+        "first_output_delta_s": 214451.894802875,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:38 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "9b8bc9ef-aaba-4593-91c5-7bf3f0f451f1"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "408.735"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.997"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g2",
+        "status": 200,
+        "terminal_marker_s": 214451.894882916,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214451.475309583,
+      "status": 200
+    },
+    {
+      "ended_s": 214454.570462333,
+      "id": "g1/client1",
+      "index": 1,
+      "node_id": "g1",
+      "outcome": "response",
+      "request_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "response": {
+        "body_eof_s": 214454.5703825,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g1\",\"object\":\"chat.completion.chunk\",\"created\":1789527701,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g1\"}}]}\n\ndata: {\"id\":\"chatcmpl-g1\",\"object\":\"chat.completion.chunk\",\"created\":1789527701,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214454.57028325,
+        "first_http_s": 214454.570164375,
+        "first_output_delta_s": 214454.57028325,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:38 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "8c2c6480-426d-426f-bb58-4340aef708fa"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2506.796"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.927"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g1",
+        "status": 200,
+        "terminal_marker_s": 214454.570374958,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214452.053130375,
+      "status": 200
+    },
+    {
+      "ended_s": 214453.682484291,
+      "id": "g12/client1",
+      "index": 1,
+      "node_id": "g12",
+      "outcome": "response",
+      "request_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "response": {
+        "body_eof_s": 214453.682466625,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g12\",\"object\":\"chat.completion.chunk\",\"created\":1789527700,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g12\"}}]}\n\ndata: {\"id\":\"chatcmpl-g12\",\"object\":\"chat.completion.chunk\",\"created\":1789527700,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214453.682443625,
+        "first_http_s": 214453.682416375,
+        "first_output_delta_s": 214453.682443625,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:39 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "7333874c-71e3-4201-afd6-9446e499f29c"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "24.637"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.457"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g12",
+        "status": 200,
+        "terminal_marker_s": 214453.682462625,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214453.063133833,
+      "status": 200
+    },
+    {
+      "ended_s": 214456.849653458,
+      "id": "g8/client1",
+      "index": 1,
+      "node_id": "g8",
+      "outcome": "response",
+      "request_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "response": {
+        "body_eof_s": 214456.849578208,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g8\",\"object\":\"chat.completion.chunk\",\"created\":1789527703,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g8\"}}]}\n\ndata: {\"id\":\"chatcmpl-g8\",\"object\":\"chat.completion.chunk\",\"created\":1789527703,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214456.8494575,
+        "first_http_s": 214456.849343291,
+        "first_output_delta_s": 214456.8494575,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:43 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "46a72ee8-b110-48a2-8da7-35156d03a1e4"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "25.543"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.551"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g8",
+        "status": 200,
+        "terminal_marker_s": 214456.849570833,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214456.813384125,
+      "status": 200
+    },
+    {
+      "ended_s": 214457.628500958,
+      "id": "g9/client1",
+      "index": 1,
+      "node_id": "g9",
+      "outcome": "response",
+      "request_body_sha256": "23035b12aa53ba31af491da5416b6724c5688bc5b75ab11dd0b020a74557aa71",
+      "response": {
+        "body_eof_s": 214457.628420125,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g9\",\"object\":\"chat.completion.chunk\",\"created\":1789527704,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g9\"}}]}\n\ndata: {\"id\":\"chatcmpl-g9\",\"object\":\"chat.completion.chunk\",\"created\":1789527704,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214457.628320916,
+        "first_http_s": 214457.628208291,
+        "first_output_delta_s": 214457.628320916,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:43 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "195adc68-cf9a-4c1c-a647-c82a17a5c83d"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "406.017"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.251"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g9",
+        "status": 200,
+        "terminal_marker_s": 214457.628412791,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214457.212825208,
+      "status": 200
+    },
+    {
+      "ended_s": 214459.866077583,
+      "id": "g11/client1",
+      "index": 1,
+      "node_id": "g11",
+      "outcome": "response",
+      "request_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "response": {
+        "body_eof_s": 214459.865992666,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g11\",\"object\":\"chat.completion.chunk\",\"created\":1789527706,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g11\"}}]}\n\ndata: {\"id\":\"chatcmpl-g11\",\"object\":\"chat.completion.chunk\",\"created\":1789527706,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214459.865894166,
+        "first_http_s": 214459.865762333,
+        "first_output_delta_s": 214459.865894166,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:44 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "5b8a765c-a7fd-41ba-bf2a-17933fa87655"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2507.7180000000003"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.938"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g11",
+        "status": 200,
+        "terminal_marker_s": 214459.865985541,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214457.346244791,
+      "status": 200
+    },
+    {
+      "ended_s": 214458.903499291,
+      "id": "g13/client1",
+      "index": 1,
+      "node_id": "g13",
+      "outcome": "response",
+      "request_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "response": {
+        "body_eof_s": 214458.903422708,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g13\",\"object\":\"chat.completion.chunk\",\"created\":1789527705,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g13\"}}]}\n\ndata: {\"id\":\"chatcmpl-g13\",\"object\":\"chat.completion.chunk\",\"created\":1789527705,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214458.90333925,
+        "first_http_s": 214458.903228541,
+        "first_output_delta_s": 214458.90333925,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:45 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "2aa0932f-f0bd-49e2-bf36-065b9d9d140c"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "406.188"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.406"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g13",
+        "status": 200,
+        "terminal_marker_s": 214458.903414416,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214458.487430541,
+      "status": 200
+    },
+    {
+      "ended_s": 214463.779261375,
+      "id": "g6/client1",
+      "index": 1,
+      "node_id": "g6",
+      "outcome": "response",
+      "request_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "response": {
+        "body_eof_s": 214463.779160416,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g6\",\"object\":\"chat.completion.chunk\",\"created\":1789527710,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g6\"}}]}\n\ndata: {\"id\":\"chatcmpl-g6\",\"object\":\"chat.completion.chunk\",\"created\":1789527710,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214463.779048708,
+        "first_http_s": 214463.778903916,
+        "first_output_delta_s": 214463.779048708,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:47 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "b2a3efb1-288b-4a48-ab08-c9193ba3d6df"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2507.603"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.856"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g6",
+        "status": 200,
+        "terminal_marker_s": 214463.779151833,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214461.258779458,
+      "status": 200
+    },
+    {
+      "ended_s": 214464.675221583,
+      "id": "g14/client1",
+      "index": 1,
+      "node_id": "g14",
+      "outcome": "response",
+      "request_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "response": {
+        "body_eof_s": 214464.675135291,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g14\",\"object\":\"chat.completion.chunk\",\"created\":1789527711,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g14\"}}]}\n\ndata: {\"id\":\"chatcmpl-g14\",\"object\":\"chat.completion.chunk\",\"created\":1789527711,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214464.67503325,
+        "first_http_s": 214464.674909458,
+        "first_output_delta_s": 214464.67503325,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:48 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "7bdc3491-8ba2-4ed6-b0b4-feceee0b28fc"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2507.237"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.383"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g14",
+        "status": 200,
+        "terminal_marker_s": 214464.675127875,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214462.158845208,
+      "status": 200
+    },
+    {
+      "ended_s": 214468.025457291,
+      "id": "g0/client1",
+      "index": 1,
+      "node_id": "g0",
+      "outcome": "response",
+      "request_body_sha256": "ddc63f847737b5532fb42263bca301edf1dce42911fdc293d3bddee1125f4b7e",
+      "response": {
+        "body_eof_s": 214468.025385041,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g0\",\"object\":\"chat.completion.chunk\",\"created\":1789527714,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g0\"}}]}\n\ndata: {\"id\":\"chatcmpl-g0\",\"object\":\"chat.completion.chunk\",\"created\":1789527714,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214468.025306708,
+        "first_http_s": 214468.025196208,
+        "first_output_delta_s": 214468.025306708,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:52 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "622fbd32-85f0-46fd-bd83-1d140a20e3a4"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2506.8990000000003"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.608"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g0",
+        "status": 200,
+        "terminal_marker_s": 214468.025376083,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214465.5077415,
+      "status": 200
+    },
+    {
+      "ended_s": 214470.164226625,
+      "id": "g16/client1",
+      "index": 1,
+      "node_id": "g16",
+      "outcome": "response",
+      "request_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "response": {
+        "body_eof_s": 214470.16414575,
+        "body_utf8": "data: {\"id\":\"chatcmpl-g16\",\"object\":\"chat.completion.chunk\",\"created\":1789527717,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"fixture:g16\"}}]}\n\ndata: {\"id\":\"chatcmpl-g16\",\"object\":\"chat.completion.chunk\",\"created\":1789527717,\"model\":\"synthetic\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+        "first_body_s": 214470.164045958,
+        "first_http_s": 214470.163915916,
+        "first_output_delta_s": 214470.164045958,
+        "headers": [
+          [
+            "date",
+            "Wed, 16 Sep 2026 03:01:54 GMT"
+          ],
+          [
+            "server",
+            "uvicorn"
+          ],
+          [
+            "x-litellm-call-id",
+            "a94955ac-b3f7-4314-ab27-3feedcc99bec"
+          ],
+          [
+            "x-litellm-model-id",
+            "ab2d41727ebe471d214839410aee1e0994bde46d8a79f8e169009bfac1840ee6"
+          ],
+          [
+            "x-litellm-model-name",
+            "openai/synthetic"
+          ],
+          [
+            "x-litellm-model-api-base",
+            "http://127.0.0.1:54207/v1"
+          ],
+          [
+            "x-litellm-version",
+            "1.100.1"
+          ],
+          [
+            "x-litellm-response-cost-original",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-discount-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-amount",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-margin-percent",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-input",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-output",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-cost-tool-usage",
+            "0.0"
+          ],
+          [
+            "x-litellm-key-spend",
+            "0.0"
+          ],
+          [
+            "x-litellm-response-duration-ms",
+            "2506.304"
+          ],
+          [
+            "x-litellm-overhead-duration-ms",
+            "1.33"
+          ],
+          [
+            "x-litellm-callback-duration-ms",
+            "0.0"
+          ],
+          [
+            "llm_provider-content-type",
+            "text/event-stream"
+          ],
+          [
+            "llm_provider-transfer-encoding",
+            "chunked"
+          ],
+          [
+            "x-litellm-model-group",
+            "synthetic"
+          ],
+          [
+            "x-litellm-attempted-retries",
+            "0"
+          ],
+          [
+            "x-litellm-attempted-fallbacks",
+            "0"
+          ],
+          [
+            "cache-control",
+            "no-cache"
+          ],
+          [
+            "x-accel-buffering",
+            "no"
+          ],
+          [
+            "content-type",
+            "text/event-stream; charset=utf-8"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-security-policy",
+            "frame-ancestors 'none'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "transfer-encoding",
+            "chunked"
+          ]
+        ],
+        "output": "fixture:g16",
+        "status": 200,
+        "terminal_marker_s": 214470.1641395,
+        "usage": {
+          "status": "missing"
+        }
+      },
+      "sent_s": 214467.648766125,
+      "status": 200
+    }
+  ],
+  "discovery_requests": [],
+  "fixture_pending_tasks": 0,
+  "fresh_fixture_and_gateway_instances": true,
+  "gateway": {
+    "binary_sha256": "af83801aa6fa5aa2fe5f04231d1c36672192aa455c3bf870b920d88632eb4f16",
+    "binary_sha256_after": "af83801aa6fa5aa2fe5f04231d1c36672192aa455c3bf870b920d88632eb4f16",
+    "command": [
+      "/Users/ryuwon/Library/Caches/deskquota-reference-runtimes/2026-09-15/python/litellm-venv/bin/litellm",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "54208",
+      "--config",
+      "/var/folders/37/nzgxmm753h9295w3726n7fbc0000gn/T/deskquota-workflow-ol9yqzzn/litellm-config.yaml",
+      "--telemetry",
+      "False",
+      "--num_workers",
+      "1"
+    ],
+    "dependency_freeze_sha256": "2d6288c0344f0602bc773d702e64fe3a8241d65871a5a57a7745f9232a33a429",
+    "effective_config": {
+      "general_settings": {
+        "disable_spend_logs": true,
+        "forward_client_headers_to_llm_api": true
+      },
+      "litellm_settings": {
+        "cache": false,
+        "num_retries": 0,
+        "request_timeout": 120,
+        "telemetry": false
+      },
+      "model_list": [
+        {
+          "litellm_params": {
+            "api_base": "http://127.0.0.1:54207/v1",
+            "api_key": "synthetic-loopback-only",
+            "max_parallel_requests": 2,
+            "max_retries": 0,
+            "model": "openai/synthetic"
+          },
+          "model_name": "synthetic"
+        }
+      ],
+      "router_settings": {
+        "default_max_parallel_requests": 2,
+        "enable_pre_call_checks": false,
+        "num_retries": 0,
+        "routing_strategy": "simple-shuffle",
+        "timeout": 120
+      }
+    },
+    "effective_config_sha256": "3fd81f519af845ac51ceb13204009ba21733e55f74b16a7f948d9895132be896",
+    "policy": "provider_managed"
+  },
+  "gateway_retries": 0,
+  "host": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "idle_resource": {
+    "cpu_seconds": 1.6,
+    "monotonic_s": 214435.937993083,
+    "rss_bytes": 299483136
+  },
+  "load_end": [
+    2.36181640625,
+    2.31884765625,
+    2.17236328125
+  ],
+  "load_start": [
+    2.20556640625,
+    2.27587890625,
+    2.15234375
+  ],
+  "nodes": [
+    {
+      "deadline_s": 214563.189406416,
+      "elapsed_ms": 610.4121670068707,
+      "eligible_s": 214438.189406416,
+      "ended_s": 214438.799818583,
+      "id": "g3",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.3629170027561486,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g3"
+    },
+    {
+      "deadline_s": 214568.269806416,
+      "elapsed_ms": 424.2950000043493,
+      "eligible_s": 214443.269806416,
+      "ended_s": 214443.694101416,
+      "id": "g10",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.0713339908979833,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g10"
+    },
+    {
+      "deadline_s": 214569.825806416,
+      "elapsed_ms": 40.6747090164572,
+      "eligible_s": 214444.825806416,
+      "ended_s": 214444.866481125,
+      "id": "g15",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.269084012368694,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g15"
+    },
+    {
+      "deadline_s": 214574.702906416,
+      "elapsed_ms": 51.749167003436014,
+      "eligible_s": 214449.702906416,
+      "ended_s": 214449.754655583,
+      "id": "g7",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.3340419866144657,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g7"
+    },
+    {
+      "deadline_s": 214575.184806416,
+      "elapsed_ms": 40.44229202554561,
+      "eligible_s": 214450.184806416,
+      "ended_s": 214450.225248708,
+      "id": "g4",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.2859170276205987,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g4"
+    },
+    {
+      "deadline_s": 214576.031806416,
+      "elapsed_ms": 39.76729200803675,
+      "eligible_s": 214451.031806416,
+      "ended_s": 214451.071573708,
+      "id": "g5",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 1.225917018018663,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g5"
+    },
+    {
+      "deadline_s": 214576.472806416,
+      "elapsed_ms": 422.2850420046598,
+      "eligible_s": 214451.472806416,
+      "ended_s": 214451.895091458,
+      "id": "g2",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.1935000258963555,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g2"
+    },
+    {
+      "deadline_s": 214576.142306416,
+      "elapsed_ms": 2517.1009589976165,
+      "eligible_s": 214451.142306416,
+      "ended_s": 214453.659407375,
+      "id": "g17",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.2031249827705324,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g17"
+    },
+    {
+      "deadline_s": 214578.060706416,
+      "elapsed_ms": 621.8327920068987,
+      "eligible_s": 214453.060706416,
+      "ended_s": 214453.682539208,
+      "id": "g12",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.23858401295729,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g12"
+    },
+    {
+      "deadline_s": 214577.050706416,
+      "elapsed_ms": 2519.9288340227213,
+      "eligible_s": 214452.050706416,
+      "ended_s": 214454.57063525,
+      "id": "g1",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.277792023960501,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g1"
+    },
+    {
+      "deadline_s": 214581.81090641598,
+      "elapsed_ms": 38.914250006200746,
+      "eligible_s": 214456.81090641598,
+      "ended_s": 214456.849820666,
+      "id": "g8",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.275334030855447,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g8"
+    },
+    {
+      "deadline_s": 214582.211306416,
+      "elapsed_ms": 417.40245901746675,
+      "eligible_s": 214457.211306416,
+      "ended_s": 214457.628708875,
+      "id": "g9",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 1.3228750030975789,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g9"
+    },
+    {
+      "deadline_s": 214583.485106416,
+      "elapsed_ms": 418.5950840183068,
+      "eligible_s": 214458.485106416,
+      "ended_s": 214458.9037015,
+      "id": "g13",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.1875000093132257,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g13"
+    },
+    {
+      "deadline_s": 214582.343906416,
+      "elapsed_ms": 2522.3657499882393,
+      "eligible_s": 214457.343906416,
+      "ended_s": 214459.866272166,
+      "id": "g11",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.226708980742842,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g11"
+    },
+    {
+      "deadline_s": 214586.256206416,
+      "elapsed_ms": 2523.2933340012096,
+      "eligible_s": 214461.256206416,
+      "ended_s": 214463.77949975,
+      "id": "g6",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.35312498989515,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g6"
+    },
+    {
+      "deadline_s": 214587.158206416,
+      "elapsed_ms": 2517.18987498316,
+      "eligible_s": 214462.158206416,
+      "ended_s": 214464.675396291,
+      "id": "g14",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 0.5151669902261347,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g14"
+    },
+    {
+      "deadline_s": 214590.50520641598,
+      "elapsed_ms": 2520.4431250167545,
+      "eligible_s": 214465.50520641598,
+      "ended_s": 214468.025649541,
+      "id": "g0",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.3234590189531446,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g0"
+    },
+    {
+      "deadline_s": 214592.646506416,
+      "elapsed_ms": 2517.9171669878997,
+      "eligible_s": 214467.646506416,
+      "ended_s": 214470.164423583,
+      "id": "g16",
+      "outcome": "completed",
+      "payload_valid": true,
+      "scheduling_lag_ms": 2.1660419879481196,
+      "usage": {
+        "status": "missing_unrequested"
+      },
+      "workflow_id": "g16"
+    }
+  ],
+  "origin_s": 214435.938006416,
+  "owned_gateway_exit_code": -15,
+  "owned_processes_cleaned": true,
+  "peak_provider_service": 2,
+  "profile": "original18_bucket",
+  "protocol_errors": [],
+  "quota": {
+    "rpm": 16,
+    "tpm": 6000
+  },
+  "quota_contract": "continuous_rpm_bucket_and_rolling_tpm",
+  "resource_scope": "gateway PID RSS/CPU; no child RSS aggregation",
+  "resources": [
+    {
+      "cpu_seconds": 1.6,
+      "monotonic_s": 214435.943113208,
+      "rss_bytes": 299483136
+    },
+    {
+      "cpu_seconds": 1.6,
+      "monotonic_s": 214436.454028666,
+      "rss_bytes": 299483136
+    },
+    {
+      "cpu_seconds": 1.6,
+      "monotonic_s": 214436.967570666,
+      "rss_bytes": 299483136
+    },
+    {
+      "cpu_seconds": 1.6,
+      "monotonic_s": 214437.479844333,
+      "rss_bytes": 299483136
+    },
+    {
+      "cpu_seconds": 1.6,
+      "monotonic_s": 214437.991286291,
+      "rss_bytes": 299483136
+    },
+    {
+      "cpu_seconds": 1.74,
+      "monotonic_s": 214438.498759416,
+      "rss_bytes": 316129280
+    },
+    {
+      "cpu_seconds": 1.78,
+      "monotonic_s": 214439.015840333,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.78,
+      "monotonic_s": 214439.525895375,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.78,
+      "monotonic_s": 214440.037279833,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.78,
+      "monotonic_s": 214440.550073166,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.78,
+      "monotonic_s": 214441.061023916,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.78,
+      "monotonic_s": 214441.572585708,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.79,
+      "monotonic_s": 214442.084118083,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.79,
+      "monotonic_s": 214442.594539583,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.79,
+      "monotonic_s": 214443.105607916,
+      "rss_bytes": 317669376
+    },
+    {
+      "cpu_seconds": 1.8,
+      "monotonic_s": 214443.618851416,
+      "rss_bytes": 317702144
+    },
+    {
+      "cpu_seconds": 1.81,
+      "monotonic_s": 214444.13284825,
+      "rss_bytes": 317751296
+    },
+    {
+      "cpu_seconds": 1.81,
+      "monotonic_s": 214444.645631458,
+      "rss_bytes": 317751296
+    },
+    {
+      "cpu_seconds": 1.82,
+      "monotonic_s": 214445.156469708,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214445.668668125,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214446.180361541,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214446.693322916,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214447.199842708,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214447.713299375,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214448.22484225,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214448.735756166,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.83,
+      "monotonic_s": 214449.24859075,
+      "rss_bytes": 317865984
+    },
+    {
+      "cpu_seconds": 1.85,
+      "monotonic_s": 214449.757677958,
+      "rss_bytes": 317882368
+    },
+    {
+      "cpu_seconds": 1.87,
+      "monotonic_s": 214450.269060916,
+      "rss_bytes": 317882368
+    },
+    {
+      "cpu_seconds": 1.87,
+      "monotonic_s": 214450.781403125,
+      "rss_bytes": 317882368
+    },
+    {
+      "cpu_seconds": 1.89,
+      "monotonic_s": 214451.292984791,
+      "rss_bytes": 317915136
+    },
+    {
+      "cpu_seconds": 1.9,
+      "monotonic_s": 214451.8039335,
+      "rss_bytes": 318029824
+    },
+    {
+      "cpu_seconds": 1.92,
+      "monotonic_s": 214452.316120791,
+      "rss_bytes": 318078976
+    },
+    {
+      "cpu_seconds": 1.92,
+      "monotonic_s": 214452.824671041,
+      "rss_bytes": 318078976
+    },
+    {
+      "cpu_seconds": 1.92,
+      "monotonic_s": 214453.328692916,
+      "rss_bytes": 318160896
+    },
+    {
+      "cpu_seconds": 1.93,
+      "monotonic_s": 214453.83903825,
+      "rss_bytes": 318226432
+    },
+    {
+      "cpu_seconds": 1.93,
+      "monotonic_s": 214454.35140275,
+      "rss_bytes": 318226432
+    },
+    {
+      "cpu_seconds": 1.94,
+      "monotonic_s": 214454.862902916,
+      "rss_bytes": 318226432
+    },
+    {
+      "cpu_seconds": 1.94,
+      "monotonic_s": 214455.373987625,
+      "rss_bytes": 318226432
+    },
+    {
+      "cpu_seconds": 1.94,
+      "monotonic_s": 214455.884347833,
+      "rss_bytes": 318226432
+    },
+    {
+      "cpu_seconds": 1.94,
+      "monotonic_s": 214456.39600125,
+      "rss_bytes": 318226432
+    },
+    {
+      "cpu_seconds": 1.96,
+      "monotonic_s": 214456.906289541,
+      "rss_bytes": 318242816
+    },
+    {
+      "cpu_seconds": 1.97,
+      "monotonic_s": 214457.418010291,
+      "rss_bytes": 318275584
+    },
+    {
+      "cpu_seconds": 1.98,
+      "monotonic_s": 214457.928063625,
+      "rss_bytes": 318275584
+    },
+    {
+      "cpu_seconds": 1.98,
+      "monotonic_s": 214458.437910541,
+      "rss_bytes": 318275584
+    },
+    {
+      "cpu_seconds": 2.0,
+      "monotonic_s": 214458.949158541,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.0,
+      "monotonic_s": 214459.459646458,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.01,
+      "monotonic_s": 214459.969240666,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.01,
+      "monotonic_s": 214460.480368583,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.01,
+      "monotonic_s": 214460.990909833,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.02,
+      "monotonic_s": 214461.499987791,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.02,
+      "monotonic_s": 214462.010397625,
+      "rss_bytes": 318291968
+    },
+    {
+      "cpu_seconds": 2.02,
+      "monotonic_s": 214462.521360041,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.02,
+      "monotonic_s": 214463.032298416,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.03,
+      "monotonic_s": 214463.545028958,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.04,
+      "monotonic_s": 214464.054253416,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.04,
+      "monotonic_s": 214464.565400916,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.05,
+      "monotonic_s": 214465.076779958,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.05,
+      "monotonic_s": 214465.587747875,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.05,
+      "monotonic_s": 214466.097708875,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.06,
+      "monotonic_s": 214466.610195958,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.06,
+      "monotonic_s": 214467.12141325,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.06,
+      "monotonic_s": 214467.630355375,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.07,
+      "monotonic_s": 214468.141725625,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.07,
+      "monotonic_s": 214468.653387375,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.07,
+      "monotonic_s": 214469.162125416,
+      "rss_bytes": 318341120
+    },
+    {
+      "cpu_seconds": 2.07,
+      "monotonic_s": 214469.671739041,
+      "rss_bytes": 318341120
+    }
+  ],
+  "reused_sources": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "reused_sources_after": {
+    "product/scripts/benchmark.py": "9b26fb6959a41085dbeda28f7c0933b734129344d3125c7799bdf16615bb112d",
+    "product/scripts/benchmark_accounting.py": "362f3b833e568ddf72cee5aa953555cd76586d995686fceb8df38b1c58988c86",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f",
+    "scripts/compare-native-gateways.py": "bc7609a07b50f295d9155227566edb04697488b36691ed430c423c134e4523ee"
+  },
+  "scope": "Synthetic completion with original deadlines and client retries; no model quality or real-provider claim",
+  "script_sha256": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "script_sha256_after": "c52f10561072ded5a4f235bd00830d905aec1fc1dea0cbb1c2bd4e3f6ca6a2a5",
+  "seed": 101,
+  "started_utc": "2026-09-16T03:01:21Z",
+  "status": "completed",
+  "submitted": [
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 499,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g0",
+      "input_bytes": 1900,
+      "length": "long",
+      "offset_s": 29.5672,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g0",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 224,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g1",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 16.1127,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g1",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 499,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g2",
+      "input_bytes": 1900,
+      "length": "long",
+      "offset_s": 15.5348,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 400,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g2",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g3",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 2.2514,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 400,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g3",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g4",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 14.2468,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 20,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g4",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 499,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g5",
+      "input_bytes": 1900,
+      "length": "long",
+      "offset_s": 15.0938,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 20,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g5",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 224,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g6",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 25.3182,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g6",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "cancel_after_ms": 100,
+      "canonical_input_units": 224,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g7",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 13.7649,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 20,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g7",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 224,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g8",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 20.8729,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 20,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g8",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 499,
+      "canonical_output_units": 192,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g9",
+      "input_bytes": 1900,
+      "length": "long",
+      "offset_s": 21.2733,
+      "output_reservation": 768,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 400,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g9",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 224,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g10",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 7.3318,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 400,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g10",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g11",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 21.4059,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g11",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g12",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 17.1227,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 20,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g12",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 224,
+      "canonical_output_units": 16,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g13",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 22.5471,
+      "output_reservation": 64,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 400,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g13",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g14",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 26.2202,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 2,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g14",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g15",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 8.8878,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 3,
+      "service_ms": 20,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g15",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 48,
+      "canonical_output_units": 64,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g16",
+      "input_bytes": 96,
+      "length": "short",
+      "offset_s": 31.7085,
+      "output_reservation": 256,
+      "predecessor": null,
+      "root": 0,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g16",
+      "workload": "generation"
+    },
+    {
+      "actual_ratio": 1,
+      "canonical_input_units": 224,
+      "canonical_output_units": 192,
+      "cost_case": "matching",
+      "deadline_secs": 125,
+      "id": "g17",
+      "input_bytes": 800,
+      "length": "short",
+      "offset_s": 15.2043,
+      "output_reservation": 768,
+      "predecessor": null,
+      "root": 1,
+      "service_ms": 2500,
+      "timeout_s": 125,
+      "window": 0,
+      "workflow_id": "g17",
+      "workload": "generation"
+    }
+  ],
+  "summary": {
+    "admitted_fixture_token_units": 4924,
+    "all_work_completion_ms": 31975.048291991698,
+    "client_http_attempts": 18,
+    "completed_by_deadline": 18,
+    "completed_by_seconds": {
+      "10": 18,
+      "2": 11,
+      "5": 18
+    },
+    "completed_usage": {
+      "missing_unrequested": 18
+    },
+    "groups": {
+      "length:long": {
+        "outcomes": {
+          "completed": 4
+        },
+        "planned": 4,
+        "success_latency_ms": {
+          "max": 2520.4431250167545,
+          "n": 4,
+          "p50": 417.40245901746675,
+          "p95": 2520.4431250167545,
+          "p99": 2520.4431250167545
+        }
+      },
+      "length:short": {
+        "outcomes": {
+          "completed": 14
+        },
+        "planned": 14,
+        "success_latency_ms": {
+          "max": 2523.2933340012096,
+          "n": 14,
+          "p50": 610.4121670068707,
+          "p95": 2523.2933340012096,
+          "p99": 2523.2933340012096
+        }
+      },
+      "root:0": {
+        "outcomes": {
+          "completed": 5
+        },
+        "planned": 5,
+        "success_latency_ms": {
+          "max": 2520.4431250167545,
+          "n": 5,
+          "p50": 621.8327920068987,
+          "p95": 2520.4431250167545,
+          "p99": 2520.4431250167545
+        }
+      },
+      "root:1": {
+        "outcomes": {
+          "completed": 5
+        },
+        "planned": 5,
+        "success_latency_ms": {
+          "max": 2519.9288340227213,
+          "n": 5,
+          "p50": 418.5950840183068,
+          "p95": 2519.9288340227213,
+          "p99": 2519.9288340227213
+        }
+      },
+      "root:2": {
+        "outcomes": {
+          "completed": 4
+        },
+        "planned": 4,
+        "success_latency_ms": {
+          "max": 2523.2933340012096,
+          "n": 4,
+          "p50": 424.2950000043493,
+          "p95": 2523.2933340012096,
+          "p99": 2523.2933340012096
+        }
+      },
+      "root:3": {
+        "outcomes": {
+          "completed": 4
+        },
+        "planned": 4,
+        "success_latency_ms": {
+          "max": 2522.3657499882393,
+          "n": 4,
+          "p50": 51.749167003436014,
+          "p95": 2522.3657499882393,
+          "p99": 2522.3657499882393
+        }
+      }
+    },
+    "node_outcomes": {
+      "completed": 18
+    },
+    "planned_nodes": 18,
+    "planned_workflows": 18,
+    "provider_rejected_attempts": 0,
+    "scheduling_lag_ms": {
+      "max": 2.3629170027561486,
+      "n": 18,
+      "p50": 2.226708980742842,
+      "p95": 2.3629170027561486,
+      "p99": 2.3629170027561486
+    },
+    "success_workflow_latency_ms": {
+      "max": 2523.3269589953125,
+      "n": 18,
+      "p50": 424.3200839846395,
+      "p95": 2523.3269589953125,
+      "p99": 2523.3269589953125
+    },
+    "upstream_attempts": 18,
+    "workflow_outcomes": {
+      "completed": 18
+    }
+  },
+  "upstream_attempt_limit": 4,
+  "upstream_attempts": [
+    {
+      "actual_cost_fixture_units": 112,
+      "ended_s": 214438.76261225,
+      "expected_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "first_write_s": 214438.762235875,
+      "id": "g3/1",
+      "ingress_id": "g3",
+      "outcome": "completed",
+      "received_s": 214438.359929291,
+      "request_body_exact": false,
+      "request_body_sha256": "0a286aa12eb7c72e6e21ca396b5c91279ac6a28e85cf2bb28806a84f8018a425",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214438.36002675,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 288,
+      "ended_s": 214443.685745083,
+      "expected_body_sha256": "de97a5ad3ea392e6b6b43d2c3fec542eeab14fbb32eed712881d955641c75a7c",
+      "first_write_s": 214443.685435,
+      "id": "g10/1",
+      "ingress_id": "g10",
+      "outcome": "completed",
+      "received_s": 214443.282980541,
+      "request_body_exact": false,
+      "request_body_sha256": "a3e353ba4a9593b9b908f1303e5bd161991126b40b178997465849131089dc03",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214443.283234333,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 112,
+      "ended_s": 214444.858682625,
+      "expected_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "first_write_s": 214444.858403125,
+      "id": "g15/1",
+      "ingress_id": "g15",
+      "outcome": "completed",
+      "received_s": 214444.835971,
+      "request_body_exact": false,
+      "request_body_sha256": "0a286aa12eb7c72e6e21ca396b5c91279ac6a28e85cf2bb28806a84f8018a425",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214444.836253,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 240,
+      "ended_s": 214449.739862625,
+      "expected_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "first_write_s": 214449.739553541,
+      "id": "g7/1",
+      "ingress_id": "g7",
+      "outcome": "completed",
+      "received_s": 214449.717321708,
+      "request_body_exact": false,
+      "request_body_sha256": "d52436f22e69e5d1a42ab9a1ab6a240ae48be0662fdab875d09c6d56f6827dbb",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214449.71764875,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 64,
+      "ended_s": 214450.218319208,
+      "expected_body_sha256": "83c56a750efd0430ee26c7ec7a038028518f62bf9538cae9c0e8033d15ad8921",
+      "first_write_s": 214450.2180595,
+      "id": "g4/1",
+      "ingress_id": "g4",
+      "outcome": "completed",
+      "received_s": 214450.195583208,
+      "request_body_exact": false,
+      "request_body_sha256": "6f7f552408f9b2d4eb781f2f1f70ccb369fc290944491482460746ab525e46e9",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214450.1958815,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 563,
+      "ended_s": 214451.064237,
+      "expected_body_sha256": "f25b7bcbd85956c415435038beb27f53c40c0dca8ee52bd5171d7b3ebf96e62c",
+      "first_write_s": 214451.063966875,
+      "id": "g5/1",
+      "ingress_id": "g5",
+      "outcome": "completed",
+      "received_s": 214451.041442333,
+      "request_body_exact": false,
+      "request_body_sha256": "303b448b65fcc207e92eee06001f2cc7df4b50c5cb72e5a77a59582c7c486955",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214451.041772458,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 416,
+      "ended_s": 214453.65502975,
+      "expected_body_sha256": "f1ec7d6e854db6d12d85b9ddd3d6d1ae31c8a228b96fc81483d138d2e47a8be5",
+      "first_write_s": 214453.654896416,
+      "id": "g17/1",
+      "ingress_id": "g17",
+      "outcome": "completed",
+      "received_s": 214451.152508,
+      "request_body_exact": false,
+      "request_body_sha256": "fd08c029846276176d86b898240b90219b95c8a596fe620cea894060ec39f92c",
+      "request_json": {
+        "max_tokens": 768,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214451.152736375,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 515,
+      "ended_s": 214451.888283,
+      "expected_body_sha256": "ddc63f847737b5532fb42263bca301edf1dce42911fdc293d3bddee1125f4b7e",
+      "first_write_s": 214451.887992333,
+      "id": "g2/1",
+      "ingress_id": "g2",
+      "outcome": "completed",
+      "received_s": 214451.485491208,
+      "request_body_exact": false,
+      "request_body_sha256": "63f778f1387ad59a84d058760e2f82587881e23bc93934dc8b1c4b15d07a7a9a",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214451.485814583,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 240,
+      "ended_s": 214454.563299333,
+      "expected_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "first_write_s": 214454.562961791,
+      "id": "g1/1",
+      "ingress_id": "g1",
+      "outcome": "completed",
+      "received_s": 214452.061096916,
+      "request_body_exact": false,
+      "request_body_sha256": "d52436f22e69e5d1a42ab9a1ab6a240ae48be0662fdab875d09c6d56f6827dbb",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214452.061385958,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 112,
+      "ended_s": 214453.68011075,
+      "expected_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "first_write_s": 214453.680047166,
+      "id": "g12/1",
+      "ingress_id": "g12",
+      "outcome": "completed",
+      "received_s": 214453.657839375,
+      "request_body_exact": false,
+      "request_body_sha256": "0a286aa12eb7c72e6e21ca396b5c91279ac6a28e85cf2bb28806a84f8018a425",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214453.657969333,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 240,
+      "ended_s": 214456.842383166,
+      "expected_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "first_write_s": 214456.8421075,
+      "id": "g8/1",
+      "ingress_id": "g8",
+      "outcome": "completed",
+      "received_s": 214456.821061958,
+      "request_body_exact": false,
+      "request_body_sha256": "d52436f22e69e5d1a42ab9a1ab6a240ae48be0662fdab875d09c6d56f6827dbb",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214456.8213275,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 691,
+      "ended_s": 214457.621454416,
+      "expected_body_sha256": "23035b12aa53ba31af491da5416b6724c5688bc5b75ab11dd0b020a74557aa71",
+      "first_write_s": 214457.621089333,
+      "id": "g9/1",
+      "ingress_id": "g9",
+      "outcome": "completed",
+      "received_s": 214457.218648083,
+      "request_body_exact": false,
+      "request_body_sha256": "381de92adde405a43e31677f91baf3e4b7a3d4918e52e447d0ac937ba825c5ef",
+      "request_json": {
+        "max_tokens": 768,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214457.218877541,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 112,
+      "ended_s": 214459.857722208,
+      "expected_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "first_write_s": 214459.857280166,
+      "id": "g11/1",
+      "ingress_id": "g11",
+      "outcome": "completed",
+      "received_s": 214457.3548105,
+      "request_body_exact": false,
+      "request_body_sha256": "0a286aa12eb7c72e6e21ca396b5c91279ac6a28e85cf2bb28806a84f8018a425",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214457.355033291,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 240,
+      "ended_s": 214458.895565041,
+      "expected_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "first_write_s": 214458.895262708,
+      "id": "g13/1",
+      "ingress_id": "g13",
+      "outcome": "completed",
+      "received_s": 214458.492875083,
+      "request_body_exact": false,
+      "request_body_sha256": "d52436f22e69e5d1a42ab9a1ab6a240ae48be0662fdab875d09c6d56f6827dbb",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214458.493070166,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 240,
+      "ended_s": 214463.769482291,
+      "expected_body_sha256": "aa3771c4fb81d982fbeb8763e4ce0541f6d2dea783a15fbc710ed8b767b91f83",
+      "first_write_s": 214463.769088,
+      "id": "g6/1",
+      "ingress_id": "g6",
+      "outcome": "completed",
+      "received_s": 214461.266559208,
+      "request_body_exact": false,
+      "request_body_sha256": "d52436f22e69e5d1a42ab9a1ab6a240ae48be0662fdab875d09c6d56f6827dbb",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214461.266860166,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 112,
+      "ended_s": 214464.668089041,
+      "expected_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "first_write_s": 214464.66780225,
+      "id": "g14/1",
+      "ingress_id": "g14",
+      "outcome": "completed",
+      "received_s": 214462.165419125,
+      "request_body_exact": false,
+      "request_body_sha256": "0a286aa12eb7c72e6e21ca396b5c91279ac6a28e85cf2bb28806a84f8018a425",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214462.165593541,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 515,
+      "ended_s": 214468.018178833,
+      "expected_body_sha256": "ddc63f847737b5532fb42263bca301edf1dce42911fdc293d3bddee1125f4b7e",
+      "first_write_s": 214468.017904833,
+      "id": "g0/1",
+      "ingress_id": "g0",
+      "outcome": "completed",
+      "received_s": 214465.51539075,
+      "request_body_exact": false,
+      "request_body_sha256": "63f778f1387ad59a84d058760e2f82587881e23bc93934dc8b1c4b15d07a7a9a",
+      "request_json": {
+        "max_tokens": 64,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214465.515719,
+      "status": 200
+    },
+    {
+      "actual_cost_fixture_units": 112,
+      "ended_s": 214470.156737375,
+      "expected_body_sha256": "121eeb55b7ebf0635341b71b0ef39814b3b14cba71919298d8743f645ac30878",
+      "first_write_s": 214470.15640225,
+      "id": "g16/1",
+      "ingress_id": "g16",
+      "outcome": "completed",
+      "received_s": 214467.6540225,
+      "request_body_exact": false,
+      "request_body_sha256": "0a286aa12eb7c72e6e21ca396b5c91279ac6a28e85cf2bb28806a84f8018a425",
+      "request_json": {
+        "max_tokens": 256,
+        "messages": [
+          {
+            "content": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "role": "user"
+          }
+        ],
+        "model": "synthetic",
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        }
+      },
+      "request_semantic_valid": true,
+      "response_headers": [],
+      "service_started_s": 214467.654180125,
+      "status": 200
+    }
+  ],
+  "workflows": [
+    {
+      "deadline_s": 214563.189406416,
+      "elapsed_ms": 610.4283749882597,
+      "ended_s": 214438.799834791,
+      "id": "g3",
+      "outcome": "completed",
+      "released_s": 214438.189406416
+    },
+    {
+      "deadline_s": 214568.269806416,
+      "elapsed_ms": 424.3200839846395,
+      "ended_s": 214443.6941265,
+      "id": "g10",
+      "outcome": "completed",
+      "released_s": 214443.269806416
+    },
+    {
+      "deadline_s": 214569.825806416,
+      "elapsed_ms": 40.69400002481416,
+      "ended_s": 214444.866500416,
+      "id": "g15",
+      "outcome": "completed",
+      "released_s": 214444.825806416
+    },
+    {
+      "deadline_s": 214574.702906416,
+      "elapsed_ms": 51.77912500221282,
+      "ended_s": 214449.754685541,
+      "id": "g7",
+      "outcome": "completed",
+      "released_s": 214449.702906416
+    },
+    {
+      "deadline_s": 214575.184806416,
+      "elapsed_ms": 40.45425000367686,
+      "ended_s": 214450.225260666,
+      "id": "g4",
+      "outcome": "completed",
+      "released_s": 214450.184806416
+    },
+    {
+      "deadline_s": 214576.031806416,
+      "elapsed_ms": 39.78791701956652,
+      "ended_s": 214451.071594333,
+      "id": "g5",
+      "outcome": "completed",
+      "released_s": 214451.031806416
+    },
+    {
+      "deadline_s": 214576.472806416,
+      "elapsed_ms": 422.29991700151004,
+      "ended_s": 214451.895106333,
+      "id": "g2",
+      "outcome": "completed",
+      "released_s": 214451.472806416
+    },
+    {
+      "deadline_s": 214576.142306416,
+      "elapsed_ms": 2517.1111669915263,
+      "ended_s": 214453.659417583,
+      "id": "g17",
+      "outcome": "completed",
+      "released_s": 214451.142306416
+    },
+    {
+      "deadline_s": 214578.060706416,
+      "elapsed_ms": 621.8357920006383,
+      "ended_s": 214453.682542208,
+      "id": "g12",
+      "outcome": "completed",
+      "released_s": 214453.060706416
+    },
+    {
+      "deadline_s": 214577.050706416,
+      "elapsed_ms": 2519.9547500233166,
+      "ended_s": 214454.570661166,
+      "id": "g1",
+      "outcome": "completed",
+      "released_s": 214452.050706416
+    },
+    {
+      "deadline_s": 214581.81090641598,
+      "elapsed_ms": 38.94279201631434,
+      "ended_s": 214456.849849208,
+      "id": "g8",
+      "outcome": "completed",
+      "released_s": 214456.81090641598
+    },
+    {
+      "deadline_s": 214582.211306416,
+      "elapsed_ms": 417.43354199570604,
+      "ended_s": 214457.628739958,
+      "id": "g9",
+      "outcome": "completed",
+      "released_s": 214457.211306416
+    },
+    {
+      "deadline_s": 214583.485106416,
+      "elapsed_ms": 418.62316700280644,
+      "ended_s": 214458.903729583,
+      "id": "g13",
+      "outcome": "completed",
+      "released_s": 214458.485106416
+    },
+    {
+      "deadline_s": 214582.343906416,
+      "elapsed_ms": 2522.394458996132,
+      "ended_s": 214459.866300875,
+      "id": "g11",
+      "outcome": "completed",
+      "released_s": 214457.343906416
+    },
+    {
+      "deadline_s": 214586.256206416,
+      "elapsed_ms": 2523.3269589953125,
+      "ended_s": 214463.779533375,
+      "id": "g6",
+      "outcome": "completed",
+      "released_s": 214461.256206416
+    },
+    {
+      "deadline_s": 214587.158206416,
+      "elapsed_ms": 2517.2103339864407,
+      "ended_s": 214464.67541675,
+      "id": "g14",
+      "outcome": "completed",
+      "released_s": 214462.158206416
+    },
+    {
+      "deadline_s": 214590.50520641598,
+      "elapsed_ms": 2520.473334006965,
+      "ended_s": 214468.02567975,
+      "id": "g0",
+      "outcome": "completed",
+      "released_s": 214465.50520641598
+    },
+    {
+      "deadline_s": 214592.646506416,
+      "elapsed_ms": 2517.94829199207,
+      "ended_s": 214470.164454708,
+      "id": "g16",
+      "outcome": "completed",
+      "released_s": 214467.646506416
+    }
+  ],
+  "workload_end_resource": {
+    "cpu_seconds": 2.08,
+    "monotonic_s": 214470.176603375,
+    "rss_bytes": 318341120
+  },
+  "workload_start_resource": {
+    "cpu_seconds": 1.6,
+    "monotonic_s": 214435.940280625,
+    "rss_bytes": 299483136
+  },
+  "written_configs_after": {
+    "litellm-config.yaml": {
+      "sha256": "3fd81f519af845ac51ceb13204009ba21733e55f74b16a7f948d9895132be896",
+      "text": "{\n  \"model_list\": [\n    {\n      \"model_name\": \"synthetic\",\n      \"litellm_params\": {\n        \"model\": \"openai/synthetic\",\n        \"api_base\": \"http://127.0.0.1:54207/v1\",\n        \"api_key\": \"synthetic-loopback-only\",\n        \"max_retries\": 0,\n        \"max_parallel_requests\": 2\n      }\n    }\n  ],\n  \"router_settings\": {\n    \"routing_strategy\": \"simple-shuffle\",\n    \"num_retries\": 0,\n    \"default_max_parallel_requests\": 2,\n    \"timeout\": 120,\n    \"enable_pre_call_checks\": false\n  },\n  \"litellm_settings\": {\n    \"num_retries\": 0,\n    \"cache\": false,\n    \"telemetry\": false,\n    \"request_timeout\": 120\n  },\n  \"general_settings\": {\n    \"forward_client_headers_to_llm_api\": true,\n    \"disable_spend_logs\": true\n  }\n}\n"
+    }
+  }
+}

@@ -1,0 +1,307 @@
+{
+  "scope": "Saved HTTP timestamps + source-supported quota reconstruction; no new runtime benchmark",
+  "input_sha256": {
+    "evidence/current-competitor-comparison-2026-09-15/quota-quarter_actual-deskquota_native_actual/result.json": "6a635e9b275b18c0bce11f0b197439b8d4773eb096c6b391c50e665ed8f1090e",
+    "evidence/current-competitor-comparison-2026-09-15/quota-quarter_actual-bifrost/result.json": "b7be102c69f27114cb054b58c42a532265aba51e8a69deaa904381fe2cfa5150",
+    "evidence/current-competitor-comparison-2026-09-15/quota-quarter_actual-litellm/result.json": "937671d34a09f35277b02d1ab5af309d97277d88e44aac82ee32dba1cc735bb6",
+    "evidence/current-competitor-comparison-2026-09-15/quota-quarter_actual-hivemind/result.json": "195da0ffde4f45212161b91620c72bc30a00fa0e4595229141b2368070b58ca2",
+    "evidence/current-competitor-comparison-2026-09-15/quota-quarter_actual-direct/result.json": "a0fe6f7bcf439d08ab26d7268364f03fb63618fb644c458b4997fbfd6b926a68"
+  },
+  "timings": {
+    "g0": {
+      "sent_s": 29.569413582998095,
+      "upstream_s": 67.33783029098413,
+      "root": 0,
+      "completed_s": 69.84103229100583,
+      "before_upstream_s": 37.768416707986034,
+      "after_upstream_s": 2.5032020000217017,
+      "total_s": 40.271618708007736,
+      "reservation_and_actual": [
+        2057,
+        515
+      ]
+    },
+    "g16": {
+      "sent_s": 31.709941999986768,
+      "upstream_s": 69.8412339159986,
+      "root": 0,
+      "completed_s": 72.34413958300138,
+      "before_upstream_s": 38.13129191601183,
+      "after_upstream_s": 2.5029056670027785,
+      "total_s": 40.63419758301461,
+      "reservation_and_actual": [
+        446,
+        112
+      ]
+    },
+    "g11": {
+      "sent_s": 21.40690345800249,
+      "upstream_s": 21.679844083002536,
+      "root": 3,
+      "completed_s": 24.18216399999801,
+      "before_upstream_s": 0.27294062500004657,
+      "after_upstream_s": 2.502319916995475,
+      "total_s": 2.7752605419955216,
+      "reservation_and_actual": [
+        446,
+        112
+      ]
+    }
+  },
+  "ledger_projection": {
+    "both_waiting": {
+      "elapsed_s": 31.710941999976058,
+      "rpm_used": 16,
+      "tpm_used": 4297,
+      "tpm_free": 1703,
+      "active": [],
+      "g0_fits": false,
+      "g16_fits": false
+    },
+    "first_rpm_expiry": {
+      "elapsed_s": 62.257680540991714,
+      "rpm_used": 15,
+      "tpm_used": 4185,
+      "tpm_free": 1815,
+      "active": [],
+      "g0_fits": false,
+      "g16_fits": true
+    },
+    "second_rpm_expiry": {
+      "elapsed_s": 67.3356109999877,
+      "rpm_used": 14,
+      "tpm_used": 3897,
+      "tpm_free": 2103,
+      "active": [],
+      "g0_fits": true,
+      "g16_fits": true
+    },
+    "g0_running": {
+      "elapsed_s": 67.33883029097342,
+      "rpm_used": 15,
+      "tpm_used": 5954,
+      "tpm_free": 46,
+      "active": [
+        "g0"
+      ],
+      "g0_fits": false,
+      "g16_fits": false
+    },
+    "g0_finished": {
+      "elapsed_s": 69.84104229099466,
+      "rpm_used": 14,
+      "tpm_used": 4300,
+      "tpm_free": 1700,
+      "active": [],
+      "g0_fits": false,
+      "g16_fits": true
+    }
+  },
+  "peers": {
+    "bifrost": {
+      "common_success_ids": [
+        "g1",
+        "g10",
+        "g11",
+        "g12",
+        "g13",
+        "g14",
+        "g15",
+        "g17",
+        "g2",
+        "g3",
+        "g4",
+        "g5",
+        "g6",
+        "g7",
+        "g8",
+        "g9"
+      ],
+      "rejected": {
+        "g0": {
+          "status": 429,
+          "elapsed_s": 0.002046832989435643,
+          "upstream_attempts": 0
+        },
+        "g16": {
+          "status": 429,
+          "elapsed_s": 0.00230770799680613,
+          "upstream_attempts": 0
+        }
+      },
+      "deskquota_common_ms": {
+        "n": 16,
+        "p50": 404.0087499888614,
+        "p95": 2775.2605419955216,
+        "p99": 2775.2605419955216,
+        "max": 2775.2605419955216
+      },
+      "peer_common_ms": {
+        "n": 16,
+        "p50": 406.03787498548627,
+        "p95": 2510.880541987717,
+        "p99": 2510.880541987717,
+        "max": 2510.880541987717
+      }
+    },
+    "litellm": {
+      "common_success_ids": [
+        "g1",
+        "g10",
+        "g11",
+        "g12",
+        "g13",
+        "g15",
+        "g17",
+        "g2",
+        "g3",
+        "g4",
+        "g5",
+        "g6",
+        "g7",
+        "g8",
+        "g9"
+      ],
+      "rejected": {
+        "g14": {
+          "status": 429,
+          "elapsed_s": 0.02229033299954608,
+          "upstream_attempts": 0
+        },
+        "g0": {
+          "status": 429,
+          "elapsed_s": 0.014477207994787022,
+          "upstream_attempts": 0
+        },
+        "g16": {
+          "status": 429,
+          "elapsed_s": 0.014378457999555394,
+          "upstream_attempts": 0
+        }
+      },
+      "deskquota_common_ms": {
+        "n": 15,
+        "p50": 404.0087499888614,
+        "p95": 2775.2605419955216,
+        "p99": 2775.2605419955216,
+        "max": 2775.2605419955216
+      },
+      "peer_common_ms": {
+        "n": 15,
+        "p50": 422.7937920077238,
+        "p95": 2521.8534999876283,
+        "p99": 2521.8534999876283,
+        "max": 2521.8534999876283
+      }
+    },
+    "hivemind": {
+      "common_success_ids": [
+        "g0",
+        "g1",
+        "g10",
+        "g11",
+        "g12",
+        "g13",
+        "g14",
+        "g15",
+        "g17",
+        "g2",
+        "g3",
+        "g4",
+        "g5",
+        "g6",
+        "g7",
+        "g8",
+        "g9"
+      ],
+      "rejected": {
+        "g16": {
+          "status": 429,
+          "elapsed_s": 30.554343916999642,
+          "upstream_attempts": 1
+        }
+      },
+      "deskquota_common_ms": {
+        "n": 17,
+        "p50": 404.1221250081435,
+        "p95": 40271.618708007736,
+        "p99": 40271.618708007736,
+        "max": 40271.618708007736
+      },
+      "peer_common_ms": {
+        "n": 17,
+        "p50": 410.89283299515955,
+        "p95": 40277.68262499012,
+        "p99": 40277.68262499012,
+        "max": 40277.68262499012
+      }
+    },
+    "direct": {
+      "common_success_ids": [
+        "g1",
+        "g10",
+        "g11",
+        "g12",
+        "g13",
+        "g14",
+        "g15",
+        "g17",
+        "g2",
+        "g3",
+        "g4",
+        "g5",
+        "g6",
+        "g7",
+        "g8",
+        "g9"
+      ],
+      "rejected": {
+        "g0": {
+          "status": 429,
+          "elapsed_s": 0.0012689170252997428,
+          "upstream_attempts": 1
+        },
+        "g16": {
+          "status": 429,
+          "elapsed_s": 0.0009499169827904552,
+          "upstream_attempts": 1
+        }
+      },
+      "deskquota_common_ms": {
+        "n": 16,
+        "p50": 404.0087499888614,
+        "p95": 2775.2605419955216,
+        "p99": 2775.2605419955216,
+        "max": 2775.2605419955216
+      },
+      "peer_common_ms": {
+        "n": 16,
+        "p50": 403.6740000010468,
+        "p95": 2505.1665409991983,
+        "p99": 2505.1665409991983,
+        "max": 2505.1665409991983
+      }
+    }
+  },
+  "rpm_expiries_s": [
+    62.25767054100288,
+    67.33560099999886
+  ],
+  "g0_extra_wait_after_first_rpm_s": 5.080159749981249,
+  "idealized_tail_costs": {
+    "assumption": "fixture input units + unchanged output caps; first 16 starts held fixed; no transport overhead",
+    "reservations": {
+      "g0": 563,
+      "g16": 304
+    },
+    "latencies_s": {
+      "g0": 35.188256958004786,
+      "g16": 38.12565900001209
+    },
+    "p95_s": 38.12565900001209,
+    "observed_p95_s": 40.63419758301461,
+    "difference_s": 2.508538583002519
+  },
+  "checks": "PASS"
+}
+

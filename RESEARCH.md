@@ -17,6 +17,9 @@
 | 경쟁 패턴 추가 적용 | [JSON 정산·캐시 상태](reports/competitor-round2-2026-09-15.md): 전체 검사427개·독립 검토 통과. 작은 TPM 합성 조건에서 완료5/20→20/20, 무환급 대조군 유지. 실제 제공자 효율은 별도 검증 |
 | 진단 추가 전 일반 release 경쟁 재비교 | [35회 실행·캐시 재확인](reports/current-competitor-comparison-2026-09-15.md): 무대기5반복 p95 0.433–0.556ms·idle9.56–9.66MiB. 한 제한 조건에서 첫 창16/최종18건 완료. 2,680건의 실패·대기와 최신 LiteLLM 버전 미실행 범위 포함 |
 | 공유 한도 진단·retry 헤더 캐시 | [현재 변경과 전후 검사](reports/quota-diagnostics-2026-09-15.md): 캐시 제외·예약/usage 차이·보호 요청 병목 표시. 합성 재실행 호출2→1, Vary 대조군 유지. 전체435검사·독립 검토 통과, 지연 우위는 미확정 |
+| 선택형 입력 추정·38초 하한 분석 | [BPE 측정과 비용](reports/input-estimation-results-2026-09-16.md), [경쟁 quota 계약 비교](reports/quota-policy-deep-dive-2026-09-16.md): 불필요한 TPM 예약 일부 감소. 동일 strict RPM에서18건을 모두 처리하는38초 하한과 빠른 성공 응답만의2초 수치를 구분 |
+| 대기 중 캐시 재사용·429 전달 | [구현·실측·에이전트 토론](reports/efficiency-improvements-and-debate-2026-09-16.md): 동일10건·동시성1에서 호출10→1, RPM1·750ms 마감 내 완료1/10→10/10. 전후5쌍, 고유 요청 대조군 유지. macOS453검사·Windows185관련 검사 통과. 실제 API·저사양 우위는 미확인 |
+| 재시도 포함 완료 시간·기본 빌드 경량화 | [새 검증과 설정 선택](reports/workflow-completion-and-lightweight-builds-2026-09-16.md): 연속 보충 RPM fixture에서 같은 바이너리의 로컬 quota 설정 비교5쌍, p95 38.13→2.51초·양쪽90/90완료·각90호출. 실제 rolling 한도의 긴 대기는 유지. 기본 macOS10.20MB·Windows16.38MB, Mac각456검사·Windows기본409/BPE관련236검사 통과. 제공자 정책에 맞춘 기존 설정의 효과이며 일반 성능 우위는 미입증 |
 | `on/off/status/restart`, 첫 설정, 파일 변경·복원 | Native Task 1–3 수용 |
 | Pi·Claude Code·Codex 연결 | [Native Task 4 수용](evidence/native-task4-accepted.json). 동일 Mac 빌드에서 세 도구의 격리 도구 왕복 확인 |
 | 사용자 로그인 자동 시작 | [Native Task 5 수용](evidence/native-task5-accepted.json). 명세·품질 통과, 실제 계정 등록·로그인 미검증 |
@@ -24,7 +27,7 @@
 | 자동 압축 호환성 | [macOS·Windows 네이티브 대조](reports/auto-compaction-audit-2026-09-16.md): 일반 요약과 다음 턴 통과. 전용 compact endpoint·opaque 입력·큰 바이트 추정 거절은 재현된 미지원 경계 |
 | 실제 Windows/Linux·저사양 PC·사용자 채택 | [Windows 10 x64 GNU 빌드·실행·클라이언트 검사](reports/windows-followup-and-improvements-2026-09-16.md) 진행. Windows 파일 교체의 간헐적 실패 원인, Linux·저사양 성능·사용자 채택은 미검증 |
 
-이전 Native Task 6 산출물은 [macOS ARM 패키지](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz)와 [체크섬](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256)이다. 당시 Rust 테스트 370개와 첫 저장→연결→종료의 독립 재검토를 통과했다. 동일 패키지의 M4 32GiB 개발 PC 관측은 대기 메모리 9.73MiB(10표본), 시작 36.4–63.1ms·종료 35.6–45.3ms(각 5회)다. [측정 범위와 제한](product/artifacts/native-final-integration-package/acceptance/README.md)을 함께 읽는다. 이 수치는 후속 변경본의 성능이나 저사양·처리량 우위를 입증하지 않는다. 현재 소스의 추가 변경과 검증은 위 최신 보고서를, 실행 방법은 [설치 안내](product/docs/installation.md)를 따른다.
+이전 Native Task 6의 macOS ARM 패키지는 별도로 보관한 로컬 산출물이다. 공개 저장소에는 [체크섬](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256)과 검증 기록을 남겼다. 당시 Rust 테스트 370개와 첫 저장→연결→종료의 독립 재검토를 통과했다. 동일 패키지의 M4 32GiB 개발 PC 관측은 대기 메모리 9.73MiB(10표본), 시작 36.4–63.1ms·종료 35.6–45.3ms(각 5회)다. [측정 범위와 제한](product/artifacts/native-final-integration-package/acceptance/README.md)을 함께 읽는다. 이 수치는 후속 변경본의 성능이나 저사양·처리량 우위를 입증하지 않는다. 현재 소스의 추가 변경과 검증은 위 최신 보고서를, 실행 방법은 [설치 안내](product/docs/installation.md)를 따른다.
 
 ## 합의한 경계
 

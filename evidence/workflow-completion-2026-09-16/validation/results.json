@@ -1,0 +1,200 @@
+{
+  "started_at": "2026-09-16T02:16:02.536494+00:00",
+  "rust_source_sha256": "7861a7fc39e830a444d87bf8db9ff89a8149a7b24fb4e3c91904c5e44850e86a",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.37813604102120735,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "test-default",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "test",
+        "--locked",
+        "--all-targets",
+        "--features",
+        "bench-harness",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 80.72911012498662,
+      "log_sha256": "24648bc92703f4a8f368c68a4652e850878487b11a8eac416c2ef1dc2a710eeb",
+      "test_totals": {
+        "passed": 456,
+        "failed": 0,
+        "ignored": 1
+      }
+    },
+    {
+      "name": "test-bpe",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "test",
+        "--locked",
+        "--all-targets",
+        "--features",
+        "bench-harness,bpe",
+        "--",
+        "--test-threads=2"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 87.5798389579868,
+      "log_sha256": "02b42a14af78e64e8d02e8d8f1fd275129e6af6765b22582f1ab7843870a4f27",
+      "test_totals": {
+        "passed": 456,
+        "failed": 0,
+        "ignored": 1
+      }
+    },
+    {
+      "name": "clippy-default",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--features",
+        "bench-harness",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.671927459014114,
+      "log_sha256": "c2e25128faef8fe6c6a6c40e5cb50af0a3097ff516d9d8c3ad3c438179643710"
+    },
+    {
+      "name": "clippy-bpe",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--features",
+        "bench-harness,bpe",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 3.870439582999097,
+      "log_sha256": "c88be8a176ff954107e2ca66884c3f0053732b61374eb691f75b743c6a68ceb9"
+    },
+    {
+      "name": "release-default",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "build",
+        "--locked",
+        "--release",
+        "--bin",
+        "llmgw"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 12.25221999999485,
+      "log_sha256": "a1fabbb03cf912f71399c221482c4d1a115b460a985d812882c84a415a8ab69f"
+    },
+    {
+      "name": "release-bpe",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "build",
+        "--locked",
+        "--release",
+        "--bin",
+        "llmgw",
+        "--features",
+        "bpe"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 11.736499582999386,
+      "log_sha256": "48e1c9bf02c43f369c7f33a0a947b1a3347f945cfb1b97eb48896c84fe4a5034"
+    },
+    {
+      "name": "tree-default",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "tree",
+        "--locked",
+        "--edges",
+        "normal",
+        "--prefix",
+        "none"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.08596383398980834,
+      "log_sha256": "c083e90938cf010d51d62f4436d4e44732fcf5758b0c690d869f35ed426267a5",
+      "bpe_openai_present": false
+    },
+    {
+      "name": "tree-bpe",
+      "command": [
+        "rtk",
+        "proxy",
+        "cargo",
+        "+1.88.0",
+        "tree",
+        "--locked",
+        "--edges",
+        "normal",
+        "--prefix",
+        "none",
+        "--features",
+        "bpe"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.08231362499645911,
+      "log_sha256": "d74de81f51d8fe6c2aacf81860ae5ee76e517c031cad4295f43c1716c9777996",
+      "bpe_openai_present": true
+    }
+  ],
+  "binaries": {
+    "release-default": {
+      "path": "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-default",
+      "bytes": 10197600,
+      "sha256": "5e4a7ca24445a2b5b77b065ff4b23488244240fecf2d6087d43acdf083e4a5d7"
+    },
+    "release-bpe": {
+      "path": "/Users/ryuwon/Library/Caches/deskquota-workflow-20260916/llmgw-bpe",
+      "bytes": 59917120,
+      "sha256": "2c4fd63824d50bd9420ee8b81d36d433d70ef568df2e8f391ce2e7f2adc26b0f"
+    }
+  },
+  "rust_unchanged": true,
+  "finished_at": "2026-09-16T02:19:24.038895+00:00",
+  "status": "PASS"
+}

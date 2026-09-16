@@ -1,0 +1,21 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+error[E0433]: failed to resolve: could not find `poll` in `futures_util`
+   --> src/cache.rs:932:35
+    |
+932 |             assert!(futures_util::poll!(&mut wait).is_pending());
+    |                                   ^^^^ could not find `poll` in `futures_util`
+
+error[E0433]: failed to resolve: could not find `poll` in `futures_util`
+   --> src/cache.rs:935:39
+    |
+935 |                 assert!(futures_util::poll!(&mut wait).is_pending());
+    |                                       ^^^^ could not find `poll` in `futures_util`
+
+error[E0433]: failed to resolve: could not find `poll` in `futures_util`
+   --> src/cache.rs:941:35
+    |
+941 |             assert!(futures_util::poll!(&mut wait).is_ready());
+    |                                   ^^^^ could not find `poll` in `futures_util`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `llmgw` (lib test) due to 3 previous errors

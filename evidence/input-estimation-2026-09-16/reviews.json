@@ -1,0 +1,50 @@
+{
+  "recorded_at": "2026-09-16T00:27:26.535766+00:00",
+  "source": "Independent agent reviews in this task; statuses summarize their returned findings.",
+  "spec": {
+    "reviewer": "input_estimation_spec_review",
+    "status": "approved",
+    "resolved": [
+      "Compaction probe must expect large text to pass under selected BPE while retaining known-byte and opaque-input restrictions."
+    ]
+  },
+  "quality": {
+    "reviewer": "input_estimation_quality_review",
+    "status": "approved",
+    "resolved": [
+      "Setup allowance validation now parses u64 and checks TOML i64 range; negative-zero syntax cannot reach a panicking conversion. Focused regression passed."
+    ]
+  },
+  "harness_and_results": {
+    "reviewer": "input_estimation_harness_review",
+    "status": "approved",
+    "principal_runs": 48,
+    "terminal_outcomes": 2748,
+    "validated_completions": 2730,
+    "client_timeouts": 15,
+    "upstream_429": 3,
+    "warmups_included": 120,
+    "calibrated_control_runs": 1,
+    "checks": [
+      "Independent quota and SSE/body/usage validation",
+      "Single upstream attempt per ingress",
+      "Raw terminal sets and cleanup",
+      "Binary/config/harness hashes; original harness revision reconstructed for pre-overhead records",
+      "Reservation shortfalls and failures retained",
+      "Calibrated input and total reservation shortfall both zero"
+    ]
+  },
+  "final_documents": {
+    "reviewer": "input_estimation_harness_review",
+    "status": "approved",
+    "local_links_checked": 67,
+    "checks": [
+      "English/Korean parity",
+      "Measured gains and differing success sets",
+      "419-token shortfall and single +256 control",
+      "Counterexample 429s and resource costs",
+      "444 full and 93 focused tests not summed as unique tests",
+      "Windows155, native setup8 and compaction9 scope"
+    ]
+  }
+}

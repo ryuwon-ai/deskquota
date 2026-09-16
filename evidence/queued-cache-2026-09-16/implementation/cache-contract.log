@@ -1,0 +1,44 @@
+   Compiling llmgw v0.1.0 (/Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/product)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.79s
+     Running tests/cache_contract.rs (/Users/ryuwon/Library/Caches/llmgw-cargo/debug/deps/cache_contract-d457f525c9e95c19)
+
+running 23 tests
+test a_hit_returns_while_the_single_request_rpm_window_is_exhausted ... ok
+test exact_json_hit_skips_admission_and_scrubs_stale_response_metadata ... ok
+test first_miss_streams_before_terminal_and_eof_and_only_then_becomes_a_hit ... ok
+test abandoned_downstream_drains_without_committing_and_body_errors_never_cache ... ok
+test normal_sse_hit_replays_bytes_but_does_not_double_settle_usage ... ok
+test messages_and_responses_require_complete_text_and_stateless_requests ... ok
+test incomplete_tool_or_refusal_json_is_forwarded_but_never_stored ... ok
+test cache_policy_denominator_includes_bypasses_but_excludes_invalid_ingress ... ok
+test keys_isolate_roots_credentials_query_options_and_original_body ... ok
+test original_vary_retry_metadata_forbids_json_and_sse_storage ... ok
+test oversized_chunked_capture_releases_its_budget_before_eof ... ok
+test queued_json_reuses_completion_during_rpm_or_concurrency_wait ... ok
+test cache_control_is_checked_before_connection_scrubbing_and_errors_never_cache ... ok
+test typed_server_rejects_out_of_range_cache_settings ... ok
+test queued_sse_reuses_completion_during_rpm_or_concurrency_wait ... ok
+test message_stream_lifecycle_and_response_terminal_output_are_validated ... ok
+test retry_count_only_reruns_reuse_json_and_sse_and_forward_original_metadata ... ok
+test short_text_eligibility_bypasses_history_tools_unknown_options_and_oversized_requests ... ok
+test missing_usage_can_cache_complete_text_but_incomplete_or_tool_sse_cannot ... ok
+test responses_reject_malformed_intermediate_payloads_before_valid_completion ... ok
+test queued_cache_wait_keeps_the_server_deadline ... ok
+test expired_entries_miss_and_disabled_cache_does_not_capture ... ok
+test queued_reuse_preserves_credentials_cache_control_and_cancellation ... FAILED
+
+failures:
+
+---- queued_reuse_preserves_credentials_cache_control_and_cancellation stdout ----
+
+thread 'queued_reuse_preserves_credentials_cache_control_and_cancellation' panicked at tests/support/fixture.rs:606:6:
+expected gateway bytes within timeout: Elapsed(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    queued_reuse_preserves_credentials_cache_control_and_cancellation
+
+test result: FAILED. 22 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.03s
+
+error: test failed, to rerun pass `--test cache_contract`

@@ -357,9 +357,11 @@
         "evidence/windows-followup-2026-09-16/autostart.json",
         "evidence/windows-followup-2026-09-16/claude-managed-final.json",
         "evidence/windows-followup-2026-09-16/claude-managed-failure.json",
-        "evidence/windows-followup-2026-09-16/cache-burst.json"
+        "evidence/windows-followup-2026-09-16/cache-burst.json",
+        "evidence/queued-cache-2026-09-16/windows/final-validation.json",
+        "evidence/queued-cache-2026-09-16/compaction-final.json"
       ],
-      "next_action": "404 Windows tests pass; task registration/manual run/non-elevated token/cleanup verified; Claude 2.1.76 native Read passes but final binary also hit intermittent journal ReplaceFileW1175 once. Reproduce and validate safe recovery first, then cache recheck after queue wait (10 identical cold concurrent calls produced10 upstream calls in3runs). Codex native tool policy, fresh non-admin, actual login, Pi Windows, Linux and low-end remain open."
+      "next_action": "Latest scoped Windows GNU validation:185passed/0failed/1ignored, fresh normal release, six-case429probe and queued cache regressions; build tools absent from runtime PATH. Mac Pi/Codex/Claude synthetic auto-compaction continued. Earlier intermittent ReplaceFileW1175 recovery, Codex Windows policy, fresh non-admin, actual login, Pi Windows, Linux and low-end remain open. Latest changes do not resolve those separate gaps."
     },
     {
       "id": "U01",
@@ -462,7 +464,130 @@
         "evidence/quota-diagnostics-2026-09-15/audit.json"
       ],
       "next_action": "Bounded implementation accepted:435Rust checks,fmt/clippy/normalrelease,independent spec/quality/result review;retry-header-only synthetic reruns2→1upstream,Vary control unchanged. No consistent latency improvement in3alternating pairs. Native Windows pending user PC via Tailscale; no Tailscale/global setup,commit/push/release in this turn. Future estimator/scheduler work follows actual quota/cache evidence."
+    },
+    {
+      "id": "R14",
+      "title": "40.63초 성공 p95의 요청별 대기와 경쟁 성공 집합 차이 분석",
+      "status": "done",
+      "evidence": [
+        "reports/latency-tail-root-cause-2026-09-16.md",
+        "evidence/latency-tail-2026-09-16/analyze.py",
+        "evidence/latency-tail-2026-09-16/result.json"
+      ],
+      "next_action": "Saved-record analysis complete: RPM exhaustion plus byte-based overreservation and same-root FIFO explain tail. Tail-only accurate-input arithmetic gives p95~38.126s, not a measured improvement. Next compare the same logical tasks with matched retries/deadlines and validate provider-contract-aware input estimates; no scheduler promotion or product behavior change."
+    },
+    {
+      "id": "I07",
+      "title": "모델별 선택형 BPE 입력 추정으로 과도한 TPM 예약 감소",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-16-input-estimation-design.md",
+        "docs/superpowers/plans/2026-09-16-input-estimation.md",
+        "reports/input-estimation-results-2026-09-16.md",
+        "product/scripts/benchmark_input_estimation.py",
+        "evidence/input-estimation-2026-09-16/summary.json",
+        "evidence/input-estimation-2026-09-16/calibrated-original18-candidate.json",
+        "evidence/input-estimation-2026-09-16/reviews.json",
+        "evidence/input-estimation-2026-09-16/acceptance.json"
+      ],
+      "next_action": "Scoped implementation accepted; default remains bytes/0. Three synthetic pairs: burst10/12→12/12, growing history4/6→6/6, original18 p9540.63→38.13s; one +256 control removes shortfall. Byte-cost mismatch yields429; cl/o idle41.7/76.7MiB and binary59.87MB. Provider contracts, real task completion versus competitors, sustained traces and low-end performance remain unverified. No commit/push; curate new ignored evidence before any approved publication."
+    },
+    {
+      "id": "R15",
+      "title": "38초와2초의 quota 정책·성공 분모·경쟁 소스 심층 비교",
+      "status": "done",
+      "evidence": [
+        "reports/quota-policy-deep-dive-2026-09-16.md",
+        "scripts/probe-quota-policy-gap.py",
+        "evidence/quota-policy-deep-dive-2026-09-16/result.json",
+        "evidence/quota-policy-deep-dive-2026-09-16/source-evidence.json",
+        "evidence/quota-policy-deep-dive-2026-09-16/review.json",
+        "evidence/quota-policy-deep-dive-2026-09-16/hivemind-boundary.json"
+      ],
+      "next_action": "Read-only product analysis completed. All18 rollingRPM16 lower bound38.122911s versus current38.130067s; common successful IDs~2.505s. Prioritize queued cache recheck and one real provider quota contract, then explicit quota-sharing groups and bounded independent-work bypass. No new HTTP ranking or real provider validation; no implementation/commit/push in this turn."
+    },
+    {
+      "id": "I08",
+      "title": "대기 중 완성된 exact cache 재사용으로 중복 quota 소비 제거",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-16-queued-cache-design.md",
+        "docs/superpowers/plans/2026-09-16-queued-cache.md",
+        "evidence/queued-cache-2026-09-16/baseline.json",
+        "reports/efficiency-improvements-and-debate-2026-09-16.md",
+        "evidence/queued-cache-2026-09-16/cache-reviews.json",
+        "evidence/queued-cache-2026-09-16/result-audit.json",
+        "evidence/queued-cache-2026-09-16/validation/results.json",
+        "evidence/queued-cache-2026-09-16/windows/final-validation.json",
+        "evidence/queued-cache-2026-09-16/result-review.json",
+        "evidence/queued-cache-2026-09-16/acceptance.json"
+      ],
+      "next_action": "Implemented and checked: cache completion Notify races retained admission; no new dependency/config. Eight scenarios x five paired runs: duplicate cap1 calls10→1, cap3 calls10→3; RPM1 750ms completion1/10→10/10. Distinct/cache-off controls unchanged. Final independent result review approved; already-started duplicates and internal retry waits unchanged. Real workload/provider/low-end gains stay V01/V02."
+    },
+    {
+      "id": "R16",
+      "title": "모토 기준 다중 에이전트 경쟁 패턴·불필요한 대기·자원비용 재검토",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-16-queued-cache-design.md",
+        "reports/agent-cache-efficiency-2026-09-16.md",
+        "reports/agent-quota-efficiency-2026-09-16.md",
+        "reports/agent-motto-footprint-2026-09-16.md",
+        "reports/efficiency-improvements-and-debate-2026-09-16.md",
+        "evidence/queued-cache-2026-09-16/result-review.json",
+        "evidence/queued-cache-2026-09-16/acceptance.json"
+      ],
+      "next_action": "Three independent source audits and peer debate completed. Adopted queued reuse and conditional429 probe. Prioritize real provider quota contract, BPE packaging, then explicit503 Retry-After and x-should-retry:false repros; full singleflight and per-key registry need workload evidence. Final independent outcome/report review approved. No commit/push/release."
+    },
+    {
+      "id": "I09",
+      "title": "분류 결과가 필요 없는429의 응답 헤더·스트림 전달 지연 제거",
+      "status": "done",
+      "evidence": [
+        "docs/superpowers/specs/2026-09-16-rejection-head-design.md",
+        "docs/superpowers/plans/2026-09-16-rejection-head.md",
+        "evidence/queued-cache-2026-09-16/rejection-design-review.json",
+        "evidence/quota-efficiency-audit-2026-09-16/rejection-head-required-behavior-red.json",
+        "reports/efficiency-improvements-and-debate-2026-09-16.md",
+        "evidence/queued-cache-2026-09-16/rejection-reviews.json",
+        "evidence/queued-cache-2026-09-16/measurements/rejection-head.json",
+        "evidence/queued-cache-2026-09-16/windows/final-validation.json",
+        "evidence/queued-cache-2026-09-16/result-review.json",
+        "evidence/queued-cache-2026-09-16/acceptance.json"
+      ],
+      "next_action": "Implemented and checked: skip only unnecessary429 pre-head body classification, preserve timing cooldown/missing-timing classification and old strict encoding guard. Mac/Windows six-case normal-release probes pass; earlier head means later truncated-body stream error instead of pre-head502 on skipped path. No503 policy or retry expansion. Final independent result review approved."
+    },
+    {
+      "id": "I10",
+      "title": "BPE 사전의 선택형 빌드로 기본 네이티브 패키지 경량화",
+      "status": "done",
+      "evidence": [
+        "evidence/workflow-completion-2026-09-16/baseline.json",
+        "evidence/bpe-packaging-2026-09-16/acceptance.json"
+      ],
+      "next_action": "Accepted scoped implementation with combined R17 report and native validation; no commit/push/release."
+    },
+    {
+      "id": "I11",
+      "title": "서버의 명시적 재시도 금지 지시 반영 및 503 공유 대기 범위 검토",
+      "status": "done",
+      "evidence": [
+        "evidence/workflow-completion-2026-09-16/baseline.json",
+        "evidence/retry-directives-2026-09-16/acceptance.json"
+      ],
+      "next_action": "Accepted scoped implementation with combined R17 report and native validation; no commit/push/release."
+    },
+    {
+      "id": "R17",
+      "title": "재시도 포함 작업 완료 시간으로 경쟁 비교 및 불필요한 로컬 대기 개선",
+      "status": "done",
+      "evidence": [
+        "evidence/workflow-completion-2026-09-16/baseline.json",
+        "evidence/workflow-completion-2026-09-16/acceptance.json",
+        "reports/workflow-completion-and-lightweight-builds-2026-09-16.md"
+      ],
+      "next_action": "Accepted scoped source/native/comparison/doc review. Real-provider contracts and lowend measurements remain unverified; no public advantage/release claim."
     }
   ],
-  "updated_at": "2026-09-15T14:58:29.946903+00:00"
+  "updated_at": "2026-09-16T03:16:03.292968+00:00"
 }

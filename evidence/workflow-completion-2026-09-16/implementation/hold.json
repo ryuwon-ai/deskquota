@@ -1,0 +1,46 @@
+{
+  "status": "HOLD",
+  "at_utc": "2026-09-16T02:28:42Z",
+  "source": {
+    "scripts/benchmark-workflow-completion.py": "7f6e92de548cd44d0b176189f4a257acd205e7d3e208263a1f0e1561d21f180e",
+    "product/scripts/benchmark_http.py": "eb03e219725e725d55bfdf6583405bc333bcacf74df3097696c6f1435f77764f"
+  },
+  "self_check": "self-check-final.json",
+  "cargo_executed_by_this_agent": false,
+  "pilots": {
+    "deskquota_managed": "pilot-deskquota-usage/result.json",
+    "bifrost": "pilot-bifrost-usage-2/result.json",
+    "litellm": "pilot-litellm-usage/result.json"
+  },
+  "preserved_harness_failure": "pilot-bifrost-usage/result.json",
+  "failure_correction": "Accept same-valued max_completion_tokens alias used by pinned Bifrost; strict serialized byte requirement remains DeskQuota only. Invalid requests now recorded before semantic validation.",
+  "skipped": "Optional native-retry secondary matrix; primary ownership stays client4/gateway0. No actual API and no timing matrix run by implementation agent.",
+  "commands": [
+    "python3 scripts/benchmark-workflow-completion.py --self-check --output <new-selfcheck.json>",
+    "python3 scripts/benchmark-workflow-completion.py --arm <arm> --profile <profile> --binary <llmgw-bpe-if-deskquota> --output <new-run-directory>"
+  ],
+  "profiles": [
+    "original18_rolling",
+    "original18_bucket",
+    "not_exhausted",
+    "recoverable429",
+    "recoverable503",
+    "chains",
+    "cancel_control",
+    "usage_contract"
+  ],
+  "arms": [
+    "direct",
+    "deskquota_local",
+    "deskquota_managed",
+    "bifrost",
+    "litellm",
+    "bifrost_native_quota",
+    "litellm_native_quota"
+  ],
+  "limitations": [
+    "Synthetic fixtures only; usage_contract requires a separate fresh invocation before each arm performance series.",
+    "Partial failed exchange cannot expose body/head observations in the existing shared client; it is recorded as unavailable and never replayed.",
+    "RSS/CPU is gateway PID only; native-quotas are diagnostic policies, not matched primary managed arms."
+  ]
+}

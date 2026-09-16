@@ -1,0 +1,45 @@
+{
+  "status": "source_hold",
+  "cargo_ownership": "released_to_parent",
+  "sources": {
+    "product/src/admission/retry.rs": "63976c9e4519189e626f4e68696da44be767a8f88d7715ffc2ca51b5ea0286e6",
+    "product/src/transport/stream.rs": "98a5226f113de1cdc1b5691786ad2546aa07481b985afc590e74728843e7e062",
+    "product/tests/retry_contract.rs": "45851212a1121196096f4678aa5c165f1dca5d1e5702be019751a6e1a08e28d5"
+  },
+  "validation": {
+    "targeted_red": {
+      "passed": 1,
+      "failed": 2
+    },
+    "targeted_green": {
+      "passed": 3,
+      "failed": 0
+    },
+    "final_retry_contract": {
+      "passed": 22,
+      "failed": 0
+    },
+    "final_admission_unit": {
+      "passed": 5,
+      "failed": 0
+    },
+    "final_stream_unit": {
+      "passed": 3,
+      "failed": 0
+    },
+    "fmt_check": true,
+    "git_diff_check": true,
+    "final_isolated_targeted_green": {
+      "passed": 3,
+      "failed": 0
+    },
+    "final_isolated_fmt_check": true
+  },
+  "new_gated_scenarios": 14,
+  "limits": [
+    "Synthetic gated ordering checks only, not a latency benchmark",
+    "No full suite, Clippy, release build, real API, commit or push by implementation worker",
+    "Windows execution and final release probe owned by parent"
+  ],
+  "test_isolation_note": "Final follow-up adds no_proxy only to the new gated fixture client so corporate proxy environment cannot reroute loopback checks. Runtime source hashes unchanged. Targeted 3 tests and fmt passed again; prior full retry/admission/stream results precede this test-only change."
+}
