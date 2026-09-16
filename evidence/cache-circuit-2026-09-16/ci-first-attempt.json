@@ -26,5 +26,13 @@
   "correction": "Run only the host PowerShell resource observer in its parent environment. Gateway and dependency-absence checks retain empty PATH/pruned env. Existing parent-environment observer pattern reused from benchmark.py.",
   "causality": "restricted observer environment is the leading hypothesis; not a demonstrated gateway failure; requires Windows rerun",
   "rerun": "pending push of probe-only fix",
-  "independent_review": "cache_circuit_results_review approved; no timer increase, fallback, runtime code or dependency change"
+  "independent_review": "cache_circuit_results_review approved; no timer increase, fallback, runtime code or dependency change",
+  "followup_attempt": {
+    "run_id": 35071571257,
+    "url": "https://github.com/ryuwon-ai/deskquota/actions/runs/35071571257",
+    "commit": "c748712701c2a8b44dc94e7b7c632cd93ed14123",
+    "observed": "macOS Rust tests/build passed; installer diagnostic test still called resources with old second argument, causing TypeError before package creation. Workflow cancelled after this known failure.",
+    "correction": "Updated the existing diagnostic test caller and host-environment expectation; local14installer and4package tests passed. No runtime change.",
+    "native_probe_environment_fix": "still awaiting a completed Windows run"
+  }
 }

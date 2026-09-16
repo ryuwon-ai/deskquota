@@ -153,8 +153,11 @@ and exact binary hashes are linked from
   The follow-up removes the restricted gateway environment only from that host
   observer, reusing the existing benchmark observer boundary. Gateway commands
   retain the empty runtime PATH. This environment diagnosis is an inference until
-  the Windows rerun completes; consult the follow-up commit checks. No new public
-  release is part of this change.
+  the Windows rerun completes. The `c748712` rerun exposed a missed existing
+  installer-test caller using the old `resources(pid, env)` signature; that test
+  is updated in the next commit, with all 14 installer and four packaging checks
+  passing locally. The known-failing rerun was cancelled. Consult the latest
+  commit checks for final native results. No new public release is part of this change.
 - **Authenticated provider calls: zero.** NVIDIA/live workload hit rates, outage
   recovery, follower first-token cost, long-running load and low-end hardware
   performance remain unverified. Fast circuit rejection is a failure outcome,
