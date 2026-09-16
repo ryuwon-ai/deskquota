@@ -99,6 +99,191 @@ async fn status(gateway: &GatewayHandle) -> Value {
 }
 const PATH: &str = "/r/one/v1/chat/completions";
 
+async fn wait_for_queue(gateway: &GatewayHandle, length: usize) {
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while status(gateway).await["admission"]["queue_length"] != length {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .expect("observed expected queue length");
+}
+
+async fn queued_reuse(stream: bool, rpm_limited: bool) {
+    let output = if stream {
+        [DELTA, STOP, USAGE, DONE].concat()
+    } else {
+        JSON_RESPONSE.to_owned()
+    };
+    let upstream = if stream {
+        GatedUpstreamFixture::start(
+            vec![DELTA.as_bytes().to_vec()],
+            vec![[STOP, USAGE, DONE].concat().into_bytes()],
+        )
+        .await
+    } else {
+        GatedUpstreamFixture::start_json(vec![], vec![output.clone().into_bytes()], false).await
+    };
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 1;
+    if rpm_limited {
+        cfg.quota.rpm = config::Limit::Known(1.try_into().unwrap());
+    }
+    let gateway = spawn_gateway(cfg).await;
+    let leader = send(&gateway, PATH, &request(stream), &[]).await;
+    let mut followers = tokio::task::JoinSet::new();
+    for _ in 0..2 {
+        let address = gateway.address();
+        followers.spawn(async move {
+            let response = client()
+                .post(format!("http://{address}{PATH}"))
+                .header("content-type", "application/json")
+                .bearer_auth("synthetic-one")
+                .body(request(stream).to_string())
+                .send()
+                .await
+                .unwrap();
+            assert_eq!(response.status(), 200);
+            response.bytes().await.unwrap()
+        });
+    }
+    wait_for_queue(&gateway, 2).await;
+    upstream.release_first();
+    upstream.release_final();
+    upstream.wait_for_final().await;
+    assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
+    assert!(followers.try_join_next().is_none(), "no replay before EOF");
+    upstream.release_eof();
+    assert_eq!(leader.bytes().await.unwrap(), output);
+    tokio::time::timeout(Duration::from_secs(1), async {
+        while let Some(result) = followers.join_next().await {
+            assert_eq!(result.unwrap(), output);
+        }
+    })
+    .await
+    .expect("queued duplicates must reuse the committed response without waiting for RPM expiry");
+    wait_for_queue(&gateway, 0).await;
+    let value = status(&gateway).await;
+    assert_eq!(upstream.attempts(), 1);
+    assert_eq!(value["exact_cache"]["considered"], 3);
+    assert_eq!(value["exact_cache"]["hits"], 2);
+    assert_eq!(value["exact_cache"]["misses"], 1);
+    for counter in ["upstream_attempts", "usage_known", "terminal_total"] {
+        assert_eq!(value[counter], 1, "{counter}");
+    }
+    let quota = server::testing::quota_snapshot(&gateway);
+    assert_eq!(quota.starts, 1);
+    assert_eq!(quota.rpm_debited, 1);
+    assert_eq!(quota.tpm_debited, 23);
+    assert_eq!(quota.tpm_held, 0);
+    assert_eq!(quota.active, 0);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn queued_json_reuses_completion_during_rpm_or_concurrency_wait() {
+    for rpm_limited in [true, false] {
+        queued_reuse(false, rpm_limited).await;
+    }
+}
+
+#[tokio::test]
+async fn queued_sse_reuses_completion_during_rpm_or_concurrency_wait() {
+    for rpm_limited in [true, false] {
+        queued_reuse(true, rpm_limited).await;
+    }
+}
+
+#[tokio::test]
+async fn queued_reuse_preserves_credentials_cache_control_and_cancellation() {
+    let upstream =
+        GatedUpstreamFixture::start_json(vec![], vec![JSON_RESPONSE.as_bytes().to_vec()], false)
+            .await;
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 1;
+    cfg.quota.rpm = config::Limit::Known(1.try_into().unwrap());
+    let gateway = spawn_gateway(cfg).await;
+    let leader = send(&gateway, PATH, &request(false), &[]).await;
+    let body = request(false).to_string();
+    let mut sockets = Vec::new();
+    for (credential, extra) in [
+        ("synthetic-one", ""),
+        ("synthetic-two", ""),
+        ("synthetic-one", "Cache-Control: no-store\r\n"),
+        ("synthetic-one", ""),
+    ] {
+        let raw = format!(
+            "POST {PATH} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nAccept: */*\r\nAuthorization: Bearer {credential}\r\n{extra}Content-Length: {}\r\n\r\n{body}",
+            body.len()
+        );
+        sockets.push(open_raw(gateway.address(), raw.as_bytes()).await);
+    }
+    wait_for_queue(&gateway, 4).await;
+    abort_socket(sockets.remove(0));
+    wait_for_queue(&gateway, 3).await;
+    upstream.release_first();
+    upstream.release_final();
+    upstream.release_eof();
+    assert_eq!(leader.bytes().await.unwrap(), JSON_RESPONSE);
+    let mut matched = sockets.pop().unwrap();
+    read_until(&mut matched, JSON_RESPONSE.as_bytes()).await;
+    wait_for_queue(&gateway, 2).await;
+    let value = status(&gateway).await;
+    assert_eq!(value["exact_cache"]["considered"], 5);
+    assert_eq!(value["exact_cache"]["hits"], 1);
+    assert_eq!(value["exact_cache"]["misses"], 3);
+    assert_eq!(value["exact_cache"]["bypasses"]["request_cache_control"], 1);
+    assert_eq!(value["admission"]["active"], 0);
+    assert_eq!(value["admission"]["tpm_held"], "0");
+    assert_eq!(upstream.attempts(), 1);
+    for socket in sockets {
+        abort_socket(socket);
+    }
+    abort_socket(matched);
+    wait_for_queue(&gateway, 0).await;
+    assert_eq!(server::testing::quota_snapshot(&gateway).starts, 1);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn queued_cache_wait_keeps_the_server_deadline() {
+    let upstream =
+        GatedUpstreamFixture::start_json(vec![], vec![JSON_RESPONSE.as_bytes().to_vec()], false)
+            .await;
+    let mut cfg = config(upstream.address());
+    cfg.concurrency = 1;
+    cfg.quota.rpm = config::Limit::Known(1.try_into().unwrap());
+    let gateway = server::testing::spawn_with_timeouts(
+        cfg,
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+        Duration::from_millis(300),
+        Duration::from_secs(1),
+    )
+    .await
+    .unwrap();
+    let leader = send(&gateway, PATH, &request(false), &[]).await;
+    let response = send(&gateway, PATH, &request(false), &[]).await;
+    assert_eq!(response.status(), 504);
+    assert!(
+        response
+            .text()
+            .await
+            .unwrap()
+            .contains("gateway_queue_deadline")
+    );
+    assert!(leader.bytes().await.is_err());
+    wait_for_queue(&gateway, 0).await;
+    let value = status(&gateway).await;
+    assert_eq!(value["exact_cache"]["considered"], 2);
+    assert_eq!(value["exact_cache"]["hits"], 0);
+    assert_eq!(value["exact_cache"]["misses"], 2);
+    assert_eq!(value["exact_cache"]["stores"], 0);
+    assert_eq!(value["admission"]["active"], 0);
+    assert_eq!(value["admission"]["tpm_held"], "0");
+    assert_eq!(upstream.attempts(), 1);
+    gateway.shutdown().await.unwrap();
+}
+
 #[tokio::test]
 async fn retry_count_only_reruns_reuse_json_and_sse_and_forward_original_metadata() {
     for (stream, media, output) in [

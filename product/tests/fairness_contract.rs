@@ -352,6 +352,8 @@ fn wire_config(address: std::net::SocketAddr, roots: usize) -> Config {
     c.upstream.api_base = format!("http://{address}/v1").parse().unwrap();
     c.quota.tpm = Limit::Unknown;
     c.models = vec![llmgw::config::Model {
+        input_estimator: Default::default(),
+        input_token_overhead: 0,
         id: "synthetic".into(),
         max_output_tokens: None,
     }];

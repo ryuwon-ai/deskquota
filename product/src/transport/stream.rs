@@ -197,7 +197,19 @@ pub async fn forward(request: ForwardRequest) {
                     .expect("worker owns admission")
                     .cooldown(delay);
             }
-            let probing = probe_rejection(&mut response);
+            let needs_body = crate::admission::retry::missing_timing(response.headers())
+                || (retry_transient_429
+                    && !retried
+                    && !disconnected
+                    && !crate::admission::retry::server_forbids_retry(response.headers())
+                    && crate::admission::retry::timing_allows_retry(response.headers()));
+            let probing = async {
+                if needs_body {
+                    probe_rejection(&mut response).await
+                } else {
+                    Ok(RetryPrefix::default())
+                }
+            };
             tokio::pin!(probing);
             prefix = loop {
                 tokio::select! {
@@ -241,6 +253,7 @@ pub async fn forward(request: ForwardRequest) {
             && retry_transient_429
             && !retried
             && !disconnected
+            && !crate::admission::retry::server_forbids_retry(response.headers())
             && crate::admission::retry::timing_allows_retry(response.headers())
         {
             // Complete rejected response EOF was observed; drop the local HTTP body before releasing its hold.
@@ -449,14 +462,16 @@ struct RetryPrefix {
 async fn probe_rejection(response: &mut reqwest::Response) -> Result<RetryPrefix, reqwest::Error> {
     use crate::admission::retry::MAX_ERROR_BODY;
     let mut prefix = RetryPrefix::default();
-    // Encoded or declared oversized responses remain purely streaming.
-    if response
-        .content_length()
-        .is_some_and(|len| len > MAX_ERROR_BODY as u64)
+    // Unclassifiable, encoded or declared oversized responses remain purely streaming.
+    if !crate::admission::retry::classifiable_representation(response.headers())
+        || response
+            .content_length()
+            .is_some_and(|len| len > MAX_ERROR_BODY as u64)
         || response
             .headers()
             .get_all("content-encoding")
             .iter()
+            // Keep the probe's stricter spelling rule; the shared classifier is case-insensitive.
             .any(|h| h != "identity")
     {
         return Ok(prefix);

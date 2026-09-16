@@ -134,6 +134,8 @@ def complete(
     client_config_dir: Path | None = None,
     client_environment: dict[str, str] | None = None,
     cache_enabled: bool = False,
+    *,
+    bpe: bool = False,
 ) -> str:
     run = PtyRun(binary, config, registry, client_environment)
     choose(run, "Setup: Environment")
@@ -147,6 +149,8 @@ def complete(
     choose(run, "Manual model ID", "모델 with space\r".encode())
     choose(run, "Set a user-chosen reservation fallback", b"y")
     choose(run, "Nonzero reservation fallback")
+    if bpe:
+        choose(run, "Input estimate for known TPM")
     choose(run, "Setup: Quota")
     choose(run, "RPM")
     choose(run, "TPM")
@@ -223,9 +227,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--bpe", action="store_true", help="The tested executable includes the bpe feature")
     args = parser.parse_args()
     root = Path(tempfile.mkdtemp(prefix="llmgw-native-setup-한글 space-"))
-    evidence: dict[str, object] = {"binary": str(args.binary.resolve()), "cases": {}}
+    evidence: dict[str, object] = {"binary": str(args.binary.resolve()), "bpe": args.bpe, "cases": {}}
     runs: list[PtyRun] = []
     possible_configs: list[Path] = []
     try:
@@ -273,7 +278,7 @@ def main() -> int:
         save_config = root / "저장 only space" / "gateway 설정.toml"
         possible_configs.append(save_config)
         save_config.parent.mkdir()
-        save_log = complete(args.binary, save_config, free_port(), False, runs, cache_enabled=True)
+        save_log = complete(args.binary, save_config, free_port(), False, runs, cache_enabled=True, bpe=args.bpe)
         status = subprocess.run([args.binary, "status", "--json", "--config", save_config], check=True, capture_output=True, text=True)
         state = json.loads(status.stdout)
         if state["state"] != "stopped":
@@ -288,7 +293,7 @@ def main() -> int:
         start_config = root / "저장 and start space" / "gateway 설정.toml"
         possible_configs.append(start_config)
         start_config.parent.mkdir()
-        start_log = complete(args.binary, start_config, free_port(), True, runs)
+        start_log = complete(args.binary, start_config, free_port(), True, runs, bpe=args.bpe)
         status = subprocess.run([args.binary, "status", "--json", "--config", start_config], check=True, capture_output=True, text=True)
         state = json.loads(status.stdout)
         if state["state"] != "running" or not state.get("identity", {}).get("fingerprint"):
@@ -320,6 +325,7 @@ def main() -> int:
             runs,
             client_config_dir=client_config_dir,
             client_environment=client_environment,
+            bpe=args.bpe,
         )
         status = subprocess.run(
             [args.binary, "status", "--json", "--config", client_config],
@@ -361,7 +367,7 @@ def main() -> int:
         possible_configs.append(failure_config)
         failure_config.parent.mkdir()
         try:
-            complete(args.binary, failure_config, free_port(), True, runs)
+            complete(args.binary, failure_config, free_port(), True, runs, bpe=args.bpe)
             raise AssertionError("synthetic harness failure after authenticated start")
         except AssertionError as error:
             if str(error) != "synthetic harness failure after authenticated start":

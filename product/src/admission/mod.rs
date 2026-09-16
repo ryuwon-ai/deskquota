@@ -39,6 +39,7 @@ pub(crate) struct AdmissionStatus {
     blocked_reason: Option<&'static str>,
     barrier_root: Option<String>,
     estimate_mode: &'static str,
+    model_estimators: Vec<ModelEstimatorStatus>,
     rpm_mode: &'static str,
     tpm_mode: &'static str,
     rpm_capacity: Option<String>,
@@ -48,6 +49,12 @@ pub(crate) struct AdmissionStatus {
     tpm_debited: String,
     tpm_held: String,
     reservation: quota::ReservationDiagnostics,
+}
+#[derive(Clone, serde::Serialize)]
+struct ModelEstimatorStatus {
+    id: String,
+    input_estimator: crate::input_estimate::InputEstimator,
+    input_token_overhead: u64,
 }
 #[derive(serde::Serialize)]
 struct RootStatus {
@@ -123,6 +130,7 @@ struct Inner {
     queue: Mutex<Queue>,
     root_ids: Vec<String>,
     estimate_mode: &'static str,
+    model_estimators: Vec<ModelEstimatorStatus>,
     quota: crate::config::Quota,
     accounting: crate::config::Accounting,
     clock: Clock,
@@ -153,10 +161,25 @@ impl Admission {
                 queue: Mutex::new(Queue::new(ledger, config.roots.len())),
                 root_ids: config.roots.iter().map(|r| r.id.clone()).collect(),
                 estimate_mode: if matches!(config.quota.tpm, crate::config::Limit::Known(_)) {
-                    "json_utf8_bytes_plus_output_reservation"
+                    if config.models.iter().all(|model| {
+                        model.input_estimator == crate::input_estimate::InputEstimator::Utf8Bytes
+                    }) {
+                        "json_utf8_bytes_plus_output_reservation"
+                    } else {
+                        "model_json_estimate_plus_output_reservation"
+                    }
                 } else {
                     "tpm_unenforced"
                 },
+                model_estimators: config
+                    .models
+                    .iter()
+                    .map(|model| ModelEstimatorStatus {
+                        id: model.id.clone(),
+                        input_estimator: model.input_estimator,
+                        input_token_overhead: model.input_token_overhead,
+                    })
+                    .collect(),
                 quota: config.quota.clone(),
                 accounting: config.accounting,
                 clock,
@@ -300,6 +323,7 @@ impl Admission {
                 .barrier()
                 .map(|root| self.inner.root_ids[root].clone()),
             estimate_mode: self.inner.estimate_mode,
+            model_estimators: self.inner.model_estimators.clone(),
             rpm_mode: limit_mode(&self.inner.quota.rpm),
             tpm_mode: limit_mode(&self.inner.quota.tpm),
             rpm_capacity: capacity(&self.inner.quota.rpm),

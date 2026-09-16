@@ -25,6 +25,8 @@ fn config(address: std::net::SocketAddr) -> Config {
             tpm: Limit::Unknown,
         },
         models: vec![Model {
+            input_estimator: Default::default(),
+            input_token_overhead: 0,
             id: "fixture".into(),
             max_output_tokens: None,
         }],
@@ -384,7 +386,7 @@ async fn socket_ambiguity_503_redirect_and_partial_stream_have_exactly_one_wire_
         (Vec::new(), 502),
         (b"HTTP/1.1 503 Unavailable\r\nRetry-After: 0\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_vec(), 503),
         (b"HTTP/1.1 307 Redirect\r\nLocation: /v1/models\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_vec(), 307),
-        (b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: 999\r\nConnection: close\r\n\r\ndata: {\"error\":{\"code\":\"slow_down\"}}\n\n".to_vec(), 200),
+        (b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nX-Should-Retry: true\r\nContent-Length: 999\r\nConnection: close\r\n\r\ndata: {\"error\":{\"code\":\"slow_down\"}}\n\n".to_vec(), 200),
     ] {
         let upstream = UpstreamFixture::start(raw).await;
         let gateway = server::spawn(opted_config(upstream.address()), RuntimeCredentials::new(b"synthetic-control", None).unwrap()).await.unwrap();
@@ -789,5 +791,362 @@ async fn pre_head_rejection_body_failure_returns_502_keeps_cooldown_and_unknown_
                 .await
                 .expect("bounded pre-head transport regression");
         }
+    }
+}
+
+// Gate EOF after a response prefix: the observation checks ordering, not latency.
+async fn gated_rejection_case(
+    headers: &str,
+    enabled: bool,
+    head_before_eof: bool,
+    already_retried: bool,
+    truncated: bool,
+) {
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use tokio::io::AsyncWriteExt;
+    const ERROR: &[u8] = br#"{"error":{"code":"slow_down"}}"#;
+    let case = async {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let fixture_headers = headers.to_owned();
+        let attempts = Arc::new(AtomicUsize::new(0));
+        let observed_attempts = attempts.clone();
+        let (sent, received) = tokio::sync::oneshot::channel();
+        let (release, released) = tokio::sync::oneshot::channel();
+        let upstream = tokio::spawn(async move {
+            if already_retried {
+                let (mut socket, _) = listener.accept().await.unwrap();
+                support::fixture::read_until(&mut socket, b"\r\n\r\n").await;
+                attempts.fetch_add(1, Ordering::SeqCst);
+                socket
+                    .write_all(&rejection("Retry-After: 0\r\n", ERROR))
+                    .await
+                    .unwrap();
+                socket.shutdown().await.unwrap();
+            }
+            let (mut socket, _) = listener.accept().await.unwrap();
+            support::fixture::read_until(&mut socket, b"\r\n\r\n").await;
+            attempts.fetch_add(1, Ordering::SeqCst);
+            socket.write_all(format!("HTTP/1.1 429 Too Many Requests\r\nContent-Length: {}\r\n{fixture_headers}X-Fixture: original\r\nConnection: close\r\n\r\n", ERROR.len()).as_bytes()).await.unwrap();
+            socket.write_all(&ERROR[..1]).await.unwrap();
+            sent.send(()).unwrap();
+            released.await.unwrap();
+            if !truncated {
+                socket.write_all(&ERROR[1..]).await.unwrap();
+            }
+            socket.shutdown().await.unwrap();
+            loop {
+                let (mut socket, _) = listener.accept().await.unwrap();
+                support::fixture::read_until(&mut socket, b"\r\n\r\n").await;
+                attempts.fetch_add(1, Ordering::SeqCst);
+                socket
+                    .write_all(
+                        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}",
+                    )
+                    .await
+                    .unwrap();
+                socket.shutdown().await.unwrap();
+            }
+        });
+        let mut cfg = config(address);
+        cfg.retry_transient_429 = enabled;
+        let gateway = server::spawn(
+            cfg,
+            RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+        )
+        .await
+        .unwrap();
+        let client = reqwest::Client::builder()
+            .no_proxy()
+            .retry(reqwest::retry::never())
+            .build()
+            .unwrap();
+        let response = client
+            .get(format!("http://{}/r/a/v1/models", gateway.address()))
+            .send();
+        tokio::pin!(response);
+        // Poll the request concurrently so the fixture can observe its upstream attempt.
+        tokio::select! {
+            biased;
+            result = received => result.unwrap(),
+            result = &mut response => panic!("response completed before upstream prefix: {result:?}"),
+        }
+        let before_gate = tokio::time::timeout(Duration::from_millis(200), response.as_mut()).await;
+        let observed_before_gate = before_gate.is_ok();
+        release.send(()).unwrap();
+        let response = match before_gate {
+            Ok(response) => response.unwrap(),
+            Err(_) => response.await.unwrap(),
+        };
+        let retried_after_gate = enabled && !head_before_eof && !already_retried;
+        assert_eq!(
+            response.status(),
+            if retried_after_gate { 200 } else { 429 }
+        );
+        if !retried_after_gate {
+            assert_eq!(response.headers()["x-fixture"], "original");
+        }
+        let bytes = response.bytes().await;
+        if truncated {
+            assert!(
+                bytes.is_err(),
+                "original 429 must end with a downstream body error"
+            );
+        } else {
+            assert_eq!(
+                bytes.unwrap().as_ref(),
+                if retried_after_gate {
+                    &b"{}"[..]
+                } else {
+                    ERROR
+                }
+            );
+        }
+        let state = gateway_status(gateway.address()).await;
+        let expected_attempts = 1 + usize::from(already_retried || retried_after_gate);
+        assert_eq!(observed_attempts.load(Ordering::SeqCst), expected_attempts);
+        assert_eq!(state["upstream_attempts"], expected_attempts);
+        assert_eq!(state["admission"]["active"], 0);
+        assert_eq!(state["stored_request_bytes"], 0);
+        assert_eq!(state["terminal_upstream_error"], usize::from(truncated));
+        if !enabled && !head_before_eof {
+            assert!(
+                state["admission"]["shared_cooldown_ms"].as_u64().unwrap() > 0,
+                "missing timing still classifies the body for fallback cooldown"
+            );
+        }
+        gateway.shutdown().await.unwrap();
+        upstream.abort();
+        let _ = upstream.await;
+        assert_eq!(
+            observed_before_gate, head_before_eof,
+            "head/body gate ordering for {headers:?}, retry={enabled}, already_retried={already_retried}"
+        );
+    };
+    tokio::time::timeout(Duration::from_secs(5), case)
+        .await
+        .expect("bounded 429 gate regression");
+}
+
+#[tokio::test]
+async fn rejection_head_streams_when_body_cannot_change_retry_or_cooldown() {
+    for (headers, enabled) in [
+        (
+            "Content-Type: application/json\r\nRetry-After: 0\r\n",
+            false,
+        ),
+        ("Content-Type: text/plain\r\nRetry-After: 0\r\n", false),
+        ("Content-Type: text/plain\r\nRetry-After: 0\r\n", true),
+        ("Content-Type: text/plain\r\n", true),
+        ("Retry-After: 0\r\n", true),
+        (
+            "Content-Type: application/json\r\nContent-Type: text/plain\r\nRetry-After: 0\r\n",
+            true,
+        ),
+        (
+            "Content-Type: application/json\r\nContent-Encoding: IDENTITY\r\nRetry-After: 0\r\n",
+            true,
+        ),
+        (
+            "Content-Type: application/json\r\nRetry-After: malformed\r\n",
+            true,
+        ),
+    ] {
+        gated_rejection_case(headers, enabled, true, false, false).await;
+    }
+    gated_rejection_case(
+        "Content-Type: application/json\r\nRetry-After: 0\r\n",
+        true,
+        true,
+        true,
+        false,
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn rejection_head_waits_when_body_still_decides_retry_or_missing_timing_cooldown() {
+    for (headers, enabled) in [
+        ("Content-Type: application/json\r\n", false),
+        ("Content-Type: application/json\r\n", true),
+        ("Content-Type: application/json\r\nRetry-After: 0\r\n", true),
+        (
+            "Content-Type: Application/JSON; charset=utf-8\r\nContent-Encoding: identity\r\nRetry-After: 0\r\n",
+            true,
+        ),
+    ] {
+        gated_rejection_case(headers, enabled, false, false, false).await;
+    }
+}
+
+#[tokio::test]
+async fn rejection_head_skipped_probe_keeps_429_when_body_later_truncates() {
+    gated_rejection_case(
+        "Content-Type: application/json\r\nRetry-After: 0\r\n",
+        false,
+        true,
+        false,
+        true,
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn retry_veto_false_fields_block_replay_without_expanding_true() {
+    const ERROR: &[u8] = br#"{"error":{"code":"slow_down"}}"#;
+    for directive in [
+        "X-Should-Retry: false\r\n",
+        "X-Should-Retry: true\r\nX-Should-Retry: false\r\n",
+        "X-Should-Retry: \t false \t\r\n",
+    ] {
+        one_response_case(ERROR, &format!("Retry-After: 0\r\n{directive}"), true, 1).await;
+    }
+    for directive in ["true", "FALSE", "unknown", "false,true"] {
+        one_response_case(
+            ERROR,
+            &format!("Retry-After: 0\r\nX-Should-Retry: {directive}\r\n"),
+            true,
+            2,
+        )
+        .await;
+    }
+    one_response_case(
+        br#"{"error":{"code":"insufficient_quota"}}"#,
+        "Retry-After: 0\r\nX-Should-Retry: true\r\n",
+        true,
+        1,
+    )
+    .await;
+    let mut oversized = ERROR.to_vec();
+    oversized.resize(32 * 1024, b' ');
+    one_response_case(
+        &oversized,
+        "Retry-After: 0\r\nX-Should-Retry: true\r\n",
+        true,
+        1,
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn retry_veto_preserves_cooldown_and_only_skips_unneeded_body_probe() {
+    use tokio::io::AsyncWriteExt;
+    const ERROR: &[u8] = br#"{"error":{"code":"slow_down"}}"#;
+    for explicit_timing in [false, true] {
+        let case = async {
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let (sent, received) = tokio::sync::oneshot::channel();
+            let (release, released) = tokio::sync::oneshot::channel();
+            let mut cfg = opted_config(listener.local_addr().unwrap());
+            cfg.quota.rpm = Limit::Known(10.try_into().unwrap());
+            let upstream = tokio::spawn(async move {
+                let (mut socket, _) = listener.accept().await.unwrap();
+                support::fixture::read_until(&mut socket, b"\r\n\r\n").await;
+                let timing = if explicit_timing {
+                    "Retry-After: 2\r\n"
+                } else {
+                    ""
+                };
+                let raw = rejection(&format!("{timing}X-Should-Retry: false\r\n"), ERROR);
+                socket
+                    .write_all(&raw[..raw.len() - ERROR.len() + 1])
+                    .await
+                    .unwrap();
+                sent.send(()).unwrap();
+                released.await.unwrap();
+                socket.write_all(&ERROR[1..]).await.unwrap();
+                socket.shutdown().await.unwrap();
+                let (mut fresh, _) = listener.accept().await.unwrap();
+                support::fixture::read_until(&mut fresh, b"\r\n\r\n").await;
+                fresh
+                    .write_all(
+                        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}",
+                    )
+                    .await
+                    .unwrap();
+                fresh.shutdown().await.unwrap();
+            });
+            let clock = llmgw::admission::ManualClock::default();
+            let gateway = server::testing::spawn_with_clock(
+                cfg,
+                RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+                clock.clone(),
+                None,
+            )
+            .await
+            .unwrap();
+            clock.advance_to(Duration::from_secs(60));
+            let client = reqwest::Client::builder()
+                .no_proxy()
+                .retry(reqwest::retry::never())
+                .build()
+                .unwrap();
+            let response = client
+                .get(format!("http://{}/r/a/v1/models", gateway.address()))
+                .send();
+            tokio::pin!(response);
+            tokio::select! {
+                biased;
+                result = received => result.unwrap(),
+                result = &mut response => panic!("response before fixture prefix: {result:?}"),
+            }
+            let before_gate =
+                tokio::time::timeout(Duration::from_millis(200), response.as_mut()).await;
+            let early_head = before_gate.is_ok();
+            release.send(()).unwrap();
+            let response = match before_gate {
+                Ok(response) => response.unwrap(),
+                Err(_) => tokio::time::timeout(Duration::from_millis(500), response.as_mut())
+                    .await
+                    .expect("false forwards the rejection without waiting to replay")
+                    .unwrap(),
+            };
+            assert_eq!(
+                early_head, explicit_timing,
+                "timingless errors still require body classification"
+            );
+            assert_eq!(response.status(), 429);
+            assert_eq!(response.headers()["x-should-retry"], "false");
+            if explicit_timing {
+                assert_eq!(response.headers()["retry-after"], "2");
+            }
+            assert_eq!(response.bytes().await.unwrap().as_ref(), ERROR);
+            let first = server::testing::quota_snapshot(&gateway);
+            assert_eq!((first.starts, first.cleanups, first.active), (1, 1, 0));
+            assert_eq!(first.rpm_debited, 1);
+            let state = gateway_status(gateway.address()).await;
+            let cooldown = state["admission"]["shared_cooldown_ms"].as_u64().unwrap();
+            if explicit_timing {
+                assert_eq!(cooldown, 2000);
+            } else {
+                assert!((1000..=1250).contains(&cooldown));
+            }
+            assert_eq!(state["stored_request_bytes"], 0);
+            let address = gateway.address();
+            let fresh =
+                tokio::spawn(async move { send_raw(address, &request("/r/b/v1/models")).await });
+            while gateway_status(address).await["admission"]["queue_length"] != 1 {
+                tokio::task::yield_now().await;
+            }
+            clock.advance_to(Duration::from_millis(60_000 + cooldown - 1));
+            tokio::time::sleep(Duration::from_millis(20)).await;
+            assert!(
+                !fresh.is_finished(),
+                "another root must retain the server cooldown"
+            );
+            assert_eq!(server::testing::quota_snapshot(&gateway).starts, 1);
+            clock.advance_to(Duration::from_millis(60_000 + cooldown));
+            assert_eq!(status(&fresh.await.unwrap()), 200);
+            upstream.await.unwrap();
+            let last = server::testing::quota_snapshot(&gateway);
+            assert_eq!((last.starts, last.cleanups, last.active), (2, 2, 0));
+            assert_eq!(last.rpm_debited, 2);
+            assert_eq!(last.tpm_held, 0);
+            gateway.shutdown().await.unwrap();
+        };
+        tokio::time::timeout(Duration::from_secs(5), case)
+            .await
+            .expect("bounded retry-veto regression");
     }
 }

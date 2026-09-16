@@ -191,6 +191,7 @@ pub enum StartError {
     InvalidCredential(&'static str),
     InvalidStartupHold,
     InvalidCache,
+    UnavailableInputEstimator(crate::input_estimate::InputEstimator),
     MissingEnvironmentCredential,
     UnexpectedEnvironmentCredential,
     ReservedAuthenticationHeader,
@@ -221,6 +222,11 @@ impl fmt::Display for StartError {
             Self::InvalidCache => {
                 formatter.write_str("cache ttl_secs must be 1..3600 and max_history must be 1..64")
             }
+            Self::UnavailableInputEstimator(estimator) => write!(
+                formatter,
+                "input estimator {} requires an executable built with --features bpe",
+                estimator.name()
+            ),
             Self::InvalidStartupHold => {
                 formatter.write_str("startup_hold_secs must be between 0 and 3600")
             }
@@ -295,6 +301,11 @@ pub fn validate_start_config(config: &Config) -> Result<(), StartError> {
         return Err(StartError::InvalidConcurrency);
     }
     crate::config::registered_root_ids(&config.roots).map_err(|_| StartError::InvalidRoots)?;
+    for model in &config.models {
+        if !model.input_estimator.is_available() {
+            return Err(StartError::UnavailableInputEstimator(model.input_estimator));
+        }
+    }
     Ok(())
 }
 
@@ -344,6 +355,11 @@ async fn spawn_inner(
 ) -> Result<GatewayHandle, StartError> {
     validate_start_config(&config)?;
     credentials.validate_for(&config.upstream.auth)?;
+    if matches!(config.quota.tpm, crate::config::Limit::Known(_)) {
+        for model in &config.models {
+            model.input_estimator.prepare();
+        }
+    }
     let listener = TcpListener::bind(config.listen)
         .await
         .map_err(StartError::Bind)?;
@@ -790,7 +806,7 @@ async fn handle_request(
         &state.config.upstream.auth,
         state.credentials.upstream_token.as_ref().map(Secret::bytes),
     );
-    let cache = state.cache.as_ref().and_then(|cache| {
+    let mut cache = state.cache.as_ref().and_then(|cache| {
         cache.request(
             route.root_index,
             &upstream_url,
@@ -800,7 +816,7 @@ async fn handle_request(
             forbids_cache_reuse,
         )
     });
-    if let Some(hit) = cache.as_ref().and_then(crate::cache::Pending::lookup) {
+    if let Some(hit) = cache.as_mut().and_then(crate::cache::Pending::lookup) {
         return hit;
     }
     let queue_deadline = (tokio::time::Instant::now() + state.limits.capacity_wait).min(deadline);
@@ -816,6 +832,12 @@ async fn handle_request(
         () = tokio::time::sleep_until(queue_deadline) => {
             return protocol::error(StatusCode::GATEWAY_TIMEOUT, "gateway_queue_deadline");
         }
+        hit = async {
+            match cache.as_mut() {
+                Some(pending) => pending.wait_for_cached().await,
+                None => std::future::pending().await,
+            }
+        } => return hit,
         permit = state.admission.acquire(route.root_index, cost, route.endpoint, state.limits.capacity_wait.min(deadline.saturating_duration_since(tokio::time::Instant::now()))) => match permit {
             Ok(permit) => permit,
             Err(crate::admission::AcquireError::EstimateExceedsBudget) => return protocol::error(StatusCode::BAD_REQUEST, "estimate_exceeds_budget"),
@@ -824,6 +846,10 @@ async fn handle_request(
             Err(crate::admission::AcquireError::InvalidRoot) => return protocol::error(StatusCode::NOT_FOUND, "route_not_found"),
         }
     };
+    if let Some(hit) = cache.as_mut().and_then(crate::cache::Pending::lookup) {
+        // Returning drops the unstarted hold without charging quota or creating a worker.
+        return hit;
+    }
     let (head_sender, head_receiver) = tokio::sync::oneshot::channel();
     let worker = stream::forward(ForwardRequest {
         cache,

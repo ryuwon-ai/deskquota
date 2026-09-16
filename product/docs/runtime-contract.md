@@ -76,6 +76,15 @@ as estimated. Concurrency defaults to 1 and is bounded to 1–16. Existing
 accounting, retry, cancel, multi-root, and multi-model settings are preserved
 during reconfiguration unless the user explicitly replaces them.
 
+The default build uses `utf8_bytes` and skips tokenizer questions. With the
+explicit Cargo `bpe` feature, the model step also offers `cl100k_base` and
+`o200k_base` input estimates and asks for a framing allowance only for BPE.
+It explains the JSON estimate and vocabulary memory cost. Keeping the same
+model ID preserves its selected estimator and allowance; a renamed model starts
+with byte defaults unless explicitly changed. Editing the first model preserves
+additional model settings, route memberships and TOML comments. Renaming updates
+references to that model so existing routes remain valid.
+
 The optional model `max_output_tokens` value collected by setup is a
 user-supplied reservation fallback for local accounting when a request omits its
 own cap. It is not a verified provider limit. The gateway does not insert it
@@ -315,6 +324,14 @@ Tokio monotonic time in production. `known` is a nonzero local budget,
 Unknown is never evidence that the provider allows unlimited usage. Other
 machines' consumption and the provider's own window or accounting remain unknown.
 
+Setup labels known values as local rolling 60-second caps. Choosing unknown
+defers that quota's enforcement to the upstream and marks its limit unverified;
+it leaves concurrency, fairness, bounded queues and shared 429 cooldown active.
+A provider's advertised RPM number alone does not establish a rolling-window
+contract. A local cap is useful as an additional user-chosen budget, but can add
+waiting when the upstream refills capacity differently. No provider policy is
+detected automatically, and setup does not relax saved limits.
+
 If either quota is known, process startup uses `startup_hold_secs` (default 60,
 range 0–3600). Set 0 to disable this admission hold. A shorter hold accepts
 uncertainty about upstream requests sent before restart; it does not recover a
@@ -384,7 +401,8 @@ Authenticated `GET /_llmgw/status` preserves existing counters and adds a typed
 | `queue_length`, `roots[].queue_length` | Total/per-registered-root waiting tickets, excluding admitted holds |
 | `active` | Joint reservations, including admitted workers before first HTTP poll; existing top-level `active` counts worker lifetimes |
 | `blocked_reason`, `barrier_root` | Current queue blocking cause and selected protected root, or null |
-| `estimate_mode` | `json_utf8_bytes_plus_output_reservation` for known TPM, otherwise `tpm_unenforced` |
+| `estimate_mode` | Known TPM: `json_utf8_bytes_plus_output_reservation` when all models use bytes, otherwise `model_json_estimate_plus_output_reservation`; unknown/unlimited: `tpm_unenforced` |
+| `model_estimators` | Configured model IDs, `input_estimator` selectors and `input_token_overhead` allowances; active only for known TPM, never provider-exact counts |
 | `rpm_mode`, `tpm_mode`, `accounting` | Explicit known/unknown/unlimited and reserved/actual settings |
 | `rpm_capacity`, `tpm_capacity` | Known local capacity as a decimal string, otherwise null |
 | `rpm_debited`, `tpm_debited`, `tpm_held` | Exact local ledger sums as decimal strings, preserving values above u64 |
@@ -421,11 +439,53 @@ as HTTP, with a manual/paused monotonic clock and `exact_fixture` costs. Actual
 socket tests use real HTTP estimation/metadata policy and never test-cost headers.
 They are separate evidence classes, not a performance benchmark.
 
-Known TPM uses the complete original JSON UTF-8 byte count as an **input proxy**
-plus an output reservation. This is neither an exact tokenizer nor a hard upper
-bound for arbitrary templates, media or provider preprocessing; it proves
-neither provider TPM compliance nor optimal utilization. Accepted bodies are
-forwarded unchanged. No cap, usage flag or extra count-token call is inserted.
+## Token estimation and output bounds
+
+Known TPM uses each model's selected **input estimate** plus the unchanged
+output reservation. `input_estimator = "utf8_bytes"` is the default and counts
+the complete original JSON UTF-8 bytes with `input_token_overhead = 0`.
+In a `--features bpe` build, explicit `cl100k_base` and `o200k_base` selections count that same serialized JSON
+with the selected BPE encoding and add `input_token_overhead` (default 32;
+explicit zero allowed). Only byte mode requires zero overhead. Unknown selectors
+and invalid or negative allowances are configuration errors.
+
+The default build omits the optional `bpe-openai` dependency and its vocabularies.
+Serialized estimator names remain recognizable so explicit BPE settings produce
+an actionable missing-build-capability error, including with unknown/unlimited
+TPM. Config parsing, typed startup and setup persistence reject them before
+listening or replacing user configuration. There is no byte fallback, runtime
+download or vocabulary sidecar. Existing worker `status`/`off` do not parse the
+saved estimator; a rejected restart leaves that worker running.
+
+```toml
+[[models]]
+id = "your-model-id"
+input_estimator = "cl100k_base"
+input_token_overhead = 32
+# max_output_tokens is an optional output reservation fallback, unchanged.
+```
+
+These are not exact provider prompt counts or guaranteed upper bounds. JSON
+includes non-input fields and cannot reveal server templates or hidden tokens.
+Users must match the encoding and framing allowance to the upstream; protocol
+compatibility or an OpenAI-compatible URL does not identify a tokenizer. There
+is no automatic model-name inference, adaptive ratio, or byte-count clamp.
+Literal special-looking strings are ordinary text; the JSON is not normalized.
+Accepted bodies are forwarded unchanged. No cap, usage flag or extra
+count-token call is inserted.
+
+When enabled, the pinned native `bpe-openai` library bundles its vocabularies in the executable;
+there is no runtime download. Gateway construction prewarms only the selected
+encodings when TPM is known, before opening the listener, and requests share
+those instances. Config parsing, setup preview, doctor and status clients do not
+initialize vocabularies. Metadata and unknown/unlimited TPM skip counting.
+On the measured macOS gateway, idle RSS was about 9.9 MiB in byte mode,
+41.7 MiB with cl100k and 76.7 MiB with o200k. Earlier mandatory-BPE builds grew from 10.19 to
+59.87 MB because both vocabularies were bundled, even when unused. Unknown TPM
+with a BPE selection stayed at about 9.9 MiB idle RSS. These are startup samples,
+not peak memory or low-end hardware guarantees. See the
+[paired results and resource costs](../../reports/input-estimation-results-2026-09-16.md).
+Historical byte-mode measurements below describe their old binary.
 
 The following positive integer request fields take precedence over the configured
 model `max_output_tokens` default:
@@ -451,7 +511,7 @@ Known TPM rejects missing bounds (`output_bound_required`), zero, null, negative
 fractional or malformed inspected caps (`invalid_output_bound`), wrong-endpoint
 cap fields (`unsupported_output_bound_field`), and ambiguous Chat caps
 (`ambiguous_output_bound`). Chat generation count `n` must be absent or 1.
-Byte-plus-output arithmetic is checked; a request whose estimate exceeds capacity
+Input count plus overhead plus output arithmetic is checked; a request whose estimate exceeds capacity
 returns `400 estimate_exceeds_budget`, which does not claim its actual tokens
 exceed the provider limit. These errors occur before admission/upstream traffic.
 
@@ -839,7 +899,8 @@ quota group. Unknown TOML fields and unsupported enum values are errors.
   value.
 - `quota.rpm` and `quota.tpm` distinguish nonzero `known`, `unknown`, and
   `unlimited`, with joint quota admission implemented in Task 5.
-- Models have unique nonempty IDs and an optional nonzero output bound. Roots
+- Models have unique nonempty IDs, an optional nonzero output bound and the
+  explicit input estimator/allowance described above. Roots
   have unique URL-safe IDs, list configured models, and enable one or more
   exact endpoints.
 
@@ -893,8 +954,14 @@ transport failure, cancellation, and oversized responses are not stored.
 Cache completion and accounting usage are separate: missing usage retains the
 quota reservation even when otherwise complete text can be reused.
 
-Hits return the original body and essential content headers before upstream
-admission. Stale date, request-ID, rate-limit, and retry headers are not replayed.
+Hits return the original body and essential content headers without starting an
+upstream attempt. A request that initially misses also checks for a completed
+entry while waiting for initial admission, including quota, startup hold and
+shared cooldown. Cache completion wakes these waiters without re-enqueuing them
+or resetting FIFO order, aging, cancellation, or deadlines. A final recheck after
+admission returns an unused reservation if it finds a hit. Requests already sent
+upstream and internal retry waits retain their existing behavior; this is not
+full in-flight request coalescing. Stale date, request-ID, rate-limit, and retry headers are not replayed.
 Hits do not consume upstream RPM/TPM or add worker/usage observations. Separate
 `exact_cache` status counters describe local reuse; provider prompt-cache token
 counters keep their existing meaning. The cached body retains its original
@@ -902,8 +969,10 @@ usage fields; these describe the reused response, not a new upstream charge.
 
 `exact_cache` includes `enabled`, `considered`, `bypasses`, `hits`, `misses`, `stores`, `evictions`,
 `budget_bypasses`, `entries`, `retained_bytes`, and `budget_bytes`. Hits and
-misses count eligible lookups, not all incoming requests. A miss need not become
-a stored entry. `retained_bytes` includes active captures and replay ownership.
+misses count eligible requests, not individual rechecks or all incoming requests.
+A later hit reclassifies that request's initial miss exactly once; unrelated
+cache notifications do not add misses. A miss need not become a stored entry.
+`retained_bytes` includes active captures and replay ownership.
 
 `considered` counts policy evaluations after route/body validation while caching
 is enabled. Invalid ingress and disabled-cache traffic do not enter this count;
@@ -938,6 +1007,19 @@ ownership opt-in, not an assertion that client/SDK retries are disabled. The
 gateway does not modify the clients' own retry settings. Reqwest automatic
 retries and redirects remain explicitly disabled. Tests count the actual
 loopback upstream requests, including rejected and replayed attempts.
+
+Any `x-should-retry` field whose value is exactly lowercase `false` after
+trimming spaces and tabs vetoes internal replay. Repeated fields are inspected;
+one `false` wins over a separate `true`. `true` never broadens the existing
+eligibility rules. The veto does not remove a 429's explicit cooldown or its
+missing-timing classification and fallback cooldown. When explicit timing is
+present, a veto also removes the otherwise unnecessary replay-only body probe.
+Other values, including `FALSE` or a comma-joined value, are not interpreted as
+this exact SDK directive. Original headers and body remain unchanged.
+The negative directive follows the official
+[OpenAI](https://github.com/openai/openai-python/blob/main/src/openai/_base_client.py)
+and [Anthropic](https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/_base_client.py)
+Python clients inspected on 2026-09-16; their broader retry policies are not adopted.
 
 Only a complete HTTP 429 response with an identity-encoded `application/json`
 body of at most 16 KiB is considered for replay. The full body must be valid
@@ -987,6 +1069,16 @@ request body and admission hold are released once. Responses excluded from
 probing and failures detected after downstream headers retain the streaming
 failure behavior described above.
 
+The pre-header body probe runs only when its classification can still establish
+the missing-timing cooldown or qualify a remaining internal retry. Ineligible
+media types and responses whose body cannot affect either decision stream their
+original headers and body immediately. Header-derived cooldown is applied first
+even on these paths. The existing strict lowercase `identity` probe guard is
+preserved; this optimization does not expand the replay set. If a skipped body
+later fails, the client has already received the original 429 and sees a stream
+failure, rather than a replacement pre-header 502. Timingless eligible JSON still
+requires classification with retry disabled.
+
 A retry starts only after complete rejected-response EOF and before any
 response has been sent downstream. The rejected response and observation
 prefix are dropped, its execution/quota hold settles with unknown usage, and
@@ -1007,6 +1099,9 @@ releases the body without a new HTTP attempt. A group cooldown is never clamped
 to one request's deadline. New clients, other configured roots and metadata
 endpoints all use that same cooldown and queue. HTTP 503, redirects, ambiguous
 POST socket errors and downstream-started/partial streams never replay.
+503 timing headers are forwarded without creating a group-wide cooldown: a
+single response does not establish that every model or credential in the group
+is unavailable. This is a deliberate scope limit, not tested provider recovery.
 
 Classification sources (read 2026-09-12):
 [OpenAI error guide](https://developers.openai.com/api/docs/guides/error-codes),

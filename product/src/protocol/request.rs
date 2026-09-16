@@ -80,16 +80,18 @@ pub fn inspect_body(
         }
         Endpoint::Models | Endpoint::CountTokens => unreachable!(),
     };
+    let model = config
+        .models
+        .iter()
+        .find(|m| m.id == model)
+        .ok_or_else(|| error("model_not_allowed"))?;
     let output = cap
-        .or_else(|| {
-            config
-                .models
-                .iter()
-                .find(|m| m.id == model)
-                .and_then(|m| m.max_output_tokens.map(|n| n.get()))
-        })
+        .or_else(|| model.max_output_tokens.map(|n| n.get()))
         .ok_or_else(|| error("output_bound_required"))?;
-    let input = body.len() as u64;
+    let input = model
+        .input_estimator
+        .estimate(text, model.input_token_overhead)
+        .ok_or_else(|| error("estimate_exceeds_budget"))?;
     if input
         .checked_add(output)
         .is_none_or(|total| total > limit.get())
@@ -417,6 +419,122 @@ models = ["fixture"]
                     }
                 );
             }
+        }
+    }
+    #[cfg(feature = "bpe")]
+    #[test]
+    fn selected_estimator_keeps_endpoint_bounds_validation_and_unmetered_bypass() {
+        use crate::input_estimate::InputEstimator::{Cl100kBase, O200kBase};
+        let mut config = crate::config::parse(
+            br#"
+listen = "127.0.0.1:4141"
+[upstream]
+api_base = "http://127.0.0.1:9/v1"
+auth = { mode = "none" }
+[quota]
+rpm = { kind = "unlimited" }
+tpm = { kind = "known", value = 1000 }
+[[models]]
+id = "fixture"
+max_output_tokens = 77
+input_estimator = "cl100k_base"
+input_token_overhead = 32
+[[roots]]
+id = "test"
+endpoints = ["chat/completions", "messages", "responses"]
+models = ["fixture"]
+"#,
+        )
+        .unwrap();
+        let reserved = |cost| {
+            let mut ledger = Ledger::new(
+                Quota {
+                    rpm: Limit::Unlimited,
+                    tpm: Limit::Known(1000.try_into().unwrap()),
+                },
+                Accounting::Reserved,
+                1,
+                Duration::ZERO,
+                Duration::ZERO,
+            );
+            assert!(matches!(
+                ledger.admit(Duration::ZERO, cost),
+                Decision::Admitted(_)
+            ));
+            ledger.snapshot(Duration::ZERO).tpm_held
+        };
+        for mode in [Cl100kBase, O200kBase] {
+            config.models[0].input_estimator = mode;
+            for (endpoint, cap_field, input) in [
+                (
+                    Endpoint::ChatCompletions,
+                    "max_completion_tokens",
+                    r#""messages":[{"role":"user","content":"안녕하세요 hello"}]"#,
+                ),
+                (
+                    Endpoint::Messages,
+                    "max_tokens",
+                    r#""messages":[{"role":"user","content":"안녕하세요 hello"}]"#,
+                ),
+                (
+                    Endpoint::Responses,
+                    "max_output_tokens",
+                    r#""input":"안녕하세요 hello""#,
+                ),
+            ] {
+                let route = DataRoute {
+                    root_index: 0,
+                    endpoint,
+                };
+                for (cap, output) in [(format!(",\"{cap_field}\":19"), 19), (String::new(), 77)] {
+                    let body = format!("{{\"model\":\"fixture\",{input}{cap}}}");
+                    let expected = mode.estimate(&body, 32).unwrap() + output;
+                    let cost = inspect_body(&config, &route, &body.into())
+                        .unwrap_or_else(|_| panic!("valid bounds"));
+                    assert_eq!(reserved(cost), u128::from(expected));
+                }
+                for cap in ["0", "null", "-1", "1.5", "\"10\""] {
+                    let body = format!("{{\"model\":\"fixture\",{input},\"{cap_field}\":{cap}}}");
+                    assert!(inspect_body(&config, &route, &body.into()).is_err());
+                }
+                config.models[0].input_token_overhead = u64::MAX;
+                let body: bytes::Bytes =
+                    format!("{{\"model\":\"fixture\",{input},\"{cap_field}\":19}}").into();
+                assert!(inspect_body(&config, &route, &body).is_err());
+                for tpm in [Limit::Unknown, Limit::Unlimited] {
+                    config.quota.tpm = tpm;
+                    assert_eq!(
+                        reserved(
+                            inspect_body(&config, &route, &body)
+                                .unwrap_or_else(|_| panic!("unmetered"))
+                        ),
+                        0
+                    );
+                }
+                config.quota.tpm = Limit::Known(u64::MAX.try_into().unwrap());
+                config.models[0].input_token_overhead = 32;
+                let body: bytes::Bytes = format!(
+                    "{{\"model\":\"fixture\",{input},\"{cap_field}\":{}}}",
+                    u64::MAX
+                )
+                .into();
+                assert!(inspect_body(&config, &route, &body).is_err());
+                config.quota.tpm = Limit::Known(1000.try_into().unwrap());
+            }
+        }
+        let route = DataRoute {
+            root_index: 0,
+            endpoint: Endpoint::ChatCompletions,
+        };
+        for body in [
+            r#"{"model":"fixture","messages":[],"max_tokens":1,"max_completion_tokens":1}"#,
+            r#"{"model":"fixture","messages":[],"max_tokens":1,"max_tokens":2}"#,
+            r#"{"model":"fixture","messages":[],"max_tokens":1,"n":2}"#,
+            r#"{"model":"fixture","messages":[{"role":"user","content":[{"type":"image_url","image_url":"synthetic"}]}],"max_tokens":1}"#,
+        ] {
+            assert!(
+                inspect_body(&config, &route, &bytes::Bytes::from_static(body.as_bytes())).is_err()
+            );
         }
     }
 }

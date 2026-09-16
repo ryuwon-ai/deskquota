@@ -220,6 +220,12 @@ fn validate_models(inputs: Vec<ModelInput>) -> Result<Vec<Model>, ConfigError> {
         if !ids.insert(input.id.clone()) {
             return invalid("model ids must be unique");
         }
+        if !input.input_estimator.is_available() {
+            return invalid(format!(
+                "input estimator {} requires an executable built with --features bpe",
+                input.input_estimator.name()
+            ));
+        }
         let max_output_tokens = input
             .max_output_tokens
             .map(|value| {
@@ -230,9 +236,19 @@ fn validate_models(inputs: Vec<ModelInput>) -> Result<Vec<Model>, ConfigError> {
                 })
             })
             .transpose()?;
+        let input_token_overhead = input
+            .input_token_overhead
+            .unwrap_or_else(|| input.input_estimator.default_overhead());
+        if input.input_estimator == crate::input_estimate::InputEstimator::Utf8Bytes
+            && input_token_overhead != 0
+        {
+            return invalid("utf8_bytes requires input_token_overhead = 0");
+        }
         models.push(Model {
             id: input.id,
             max_output_tokens,
+            input_estimator: input.input_estimator,
+            input_token_overhead,
         });
     }
     Ok(models)

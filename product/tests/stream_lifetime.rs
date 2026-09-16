@@ -40,6 +40,8 @@ fn config(upstream: &GatedUpstreamFixture, policy: CancelPolicy) -> Config {
             tpm: Limit::Unknown,
         },
         models: vec![Model {
+            input_estimator: Default::default(),
+            input_token_overhead: 0,
             id: "fixture-model".to_owned(),
             max_output_tokens: None,
         }],

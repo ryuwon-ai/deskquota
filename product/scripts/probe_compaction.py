@@ -116,7 +116,7 @@ class Fixture:
 
 
 @contextlib.contextmanager
-def environment(binary, client, gateway, known=True):
+def environment(binary, client, gateway, known=True, input_estimator="utf8_bytes"):
     with tempfile.TemporaryDirectory(prefix="deskquota-compact-") as tmp:
         root = Path(tmp)
         if os.name == "nt":
@@ -162,6 +162,7 @@ kind = "{'known' if known else 'unknown'}"
 [[models]]
 id = "example-model"
 max_output_tokens = 16384
+input_estimator = "{input_estimator}"
 [[roots]]
 id = "audit"
 endpoints = ["chat/completions", "responses", "messages", "messages/count_tokens"]
@@ -201,8 +202,8 @@ def wait_event(ready, predicate, seconds=30):
     raise TimeoutError("expected event not observed")
 
 
-def pi_case(binary, executable, gateway):
-    with environment(binary, "pi", gateway) as (_, native, cwd, env, fixture, base):
+def pi_case(binary, executable, gateway, input_estimator="utf8_bytes"):
+    with environment(binary, "pi", gateway, input_estimator=input_estimator) as (_, native, cwd, env, fixture, base):
         models = json.loads(p.render_models(base))
         models["providers"][p.PROVIDER_NAME]["models"][0].update(contextWindow=128000, maxTokens=16384)
         p.write_private(native / "models.json", json.dumps(models))
@@ -235,8 +236,8 @@ def pi_case(binary, executable, gateway):
             return result
 
 
-def codex_case(binary, executable, gateway):
-    with environment(binary, "codex", gateway) as (_, native, cwd, env, fixture, base):
+def codex_case(binary, executable, gateway, input_estimator="utf8_bytes"):
+    with environment(binary, "codex", gateway, input_estimator=input_estimator) as (_, native, cwd, env, fixture, base):
         p.write_private(native / "config.toml", f'''model = "example-model"
 model_provider = "llmgw"
 model_context_window = 128000
@@ -276,8 +277,8 @@ def post(base, endpoint, payload):
         connection.close()
 
 
-def claude_case(binary, executable, gateway):
-    with environment(binary, "claude", gateway) as (_, _, cwd, env, fixture, base):
+def claude_case(binary, executable, gateway, input_estimator="utf8_bytes"):
+    with environment(binary, "claude", gateway, input_estimator=input_estimator) as (_, _, cwd, env, fixture, base):
         fixture.high_at, fixture.summary_at = 3, 4
         env.update({
             "ANTHROPIC_BASE_URL": base.removesuffix("/v1"),
@@ -314,8 +315,8 @@ def claude_case(binary, executable, gateway):
             return result
 
 
-def protocol_case(binary, known):
-    with environment(binary, "codex", True, known) as (_, _, _, _, fixture, base):
+def protocol_case(binary, known, input_estimator="utf8_bytes"):
+    with environment(binary, "codex", True, known, input_estimator) as (_, _, _, _, fixture, base):
         messages = {"model": "example-model", "messages": [{"role": "user", "content": "synthetic"}], "max_tokens": 16, "stream": True}
         cases = [
             ("count_tokens", "messages/count_tokens", messages, 200),
@@ -323,7 +324,7 @@ def protocol_case(binary, known):
             ("responses_context_management", "responses", {"model": "example-model", "input": "synthetic", "context_management": [{"type": "compaction", "compact_threshold": 100000}]}, 200),
             ("opaque_compaction_input", "responses", {"model": "example-model", "input": [{"type": "compaction", "encrypted_content": "synthetic-opaque"}]}, 400 if known else 200),
             ("compact_endpoint", "responses/compact", {"model": "example-model", "input": "synthetic"}, 404),
-            ("large_text_summary", "messages", dict(messages, messages=[{"role": "user", "content": "word " * 92000}]), 400 if known else 200),
+            ("large_text_summary", "messages", dict(messages, messages=[{"role": "user", "content": "word " * 92000}]), 400 if known and input_estimator == "utf8_bytes" else 200),
         ]
         results = []
         for name, endpoint, payload, expected in cases:
@@ -341,8 +342,8 @@ def protocol_case(binary, known):
         return {"client": "protocol", "known_tpm": known, "cases": results, "passed": all(row["current_behavior_confirmed"] for row in results)}
 
 
-def cache_case(binary):
-    with environment(binary, "pi", True) as (_, _, _, _, fixture, base):
+def cache_case(binary, input_estimator="utf8_bytes"):
+    with environment(binary, "pi", True, input_estimator=input_estimator) as (_, _, _, _, fixture, base):
         payload = {"model": "example-model", "messages": [{"role": "user", "content": "synthetic"}], "max_tokens": 16, "stream": True, "stream_options": {"include_usage": True}}
         first_status, first = post(base, "chat/completions", payload)
         second_status, second = post(base, "chat/completions", payload)
@@ -355,8 +356,11 @@ def main():
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--clients", nargs="+", choices=["pi", "codex", "claude"], default=["pi", "codex", "claude"])
+    parser.add_argument("--input-estimator", choices=["utf8_bytes", "cl100k_base", "o200k_base"], default="utf8_bytes")
     args = parser.parse_args()
     report = {"started_at": v.now(), "platform": platform.platform(), "python": platform.python_version(), "probe_sha256": p.sha256(Path(__file__)), "binary_sha256": p.sha256(args.binary), "synthetic_only": True, "gateway_settings": {"rpm": 18, "tpm": 450000, "concurrency": 3, "accounting": "actual", "startup_hold_secs": 0, "exact_cache": True}, "cases": [], "known_limitations": ["responses/compact returns 404", "known TPM rejects opaque compaction items", "known TPM rejects byte estimates above the configured budget"]}
+    report["gateway_settings"]["input_estimator"] = args.input_estimator
+    report["known_limitations"][-1] = "known TPM rejects configured input plus output estimates above the budget"
     for client, case in (("pi", pi_case), ("codex", codex_case), ("claude", claude_case)):
         if client not in args.clients:
             continue
@@ -367,17 +371,17 @@ def main():
         report[client + "_version"] = v.installed_version(client, Path(executable))[0]
         for gateway in (False, True):
             try:
-                result = case(args.binary, executable, gateway)
+                result = case(args.binary, executable, gateway, args.input_estimator)
             except Exception as error:
                 result = {"client": client, "gateway": gateway, "error": type(error).__name__, "passed": False}
             report["cases"].append(result)
             v.write(args.output, report)
             print(json.dumps(result), flush=True)
     for known in (True, False):
-        result = protocol_case(args.binary, known)
+        result = protocol_case(args.binary, known, args.input_estimator)
         report["cases"].append(result)
         print(json.dumps(result), flush=True)
-    result = cache_case(args.binary)
+    result = cache_case(args.binary, args.input_estimator)
     report["cases"].append(result)
     print(json.dumps(result), flush=True)
     report["finished_at"] = v.now()

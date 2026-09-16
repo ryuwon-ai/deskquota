@@ -14,7 +14,7 @@ enum Cost {
     Metadata,
     UnmeteredGeneration,
     Estimated {
-        input_bytes: u64,
+        input_tokens: u64,
         output_tokens: u64,
     },
     ExactFixture(u64),
@@ -26,9 +26,9 @@ impl RequestCost {
     /// Generation with unknown/unlimited TPM still has generation semantics.
     #[allow(non_upper_case_globals)]
     pub(crate) const UnmeteredGeneration: Self = Self(Cost::UnmeteredGeneration);
-    pub fn estimated(input_bytes: u64, output_tokens: u64) -> Self {
+    pub fn estimated(input_tokens: u64, output_tokens: u64) -> Self {
         Self(Cost::Estimated {
-            input_bytes,
+            input_tokens,
             output_tokens,
         })
     }
@@ -41,9 +41,9 @@ impl RequestCost {
         match self.0 {
             Cost::Metadata | Cost::UnmeteredGeneration => 0,
             Cost::Estimated {
-                input_bytes,
+                input_tokens,
                 output_tokens,
-            } => u128::from(input_bytes) + u128::from(output_tokens),
+            } => u128::from(input_tokens) + u128::from(output_tokens),
             Cost::ExactFixture(n) => u128::from(n),
         }
     }

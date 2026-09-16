@@ -8,7 +8,7 @@ use axum::http::{HeaderMap, Response, StatusCode};
 use serde::Serialize;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
-use tokio::sync::{OwnedSemaphorePermit, Semaphore};
+use tokio::sync::{Notify, OwnedSemaphorePermit, Semaphore};
 use tokio::time::Instant;
 
 use crate::config::{CacheConfig, Endpoint};
@@ -26,6 +26,7 @@ struct Inner {
     config: CacheConfig,
     budget: Arc<Semaphore>,
     state: Mutex<State>,
+    filled: Notify,
 }
 #[derive(Default)]
 struct State {
@@ -89,6 +90,12 @@ pub(crate) struct Snapshot {
 pub(crate) struct Pending {
     cache: ExactCache,
     key: Key,
+    outcome: LookupOutcome,
+}
+enum LookupOutcome {
+    Uncounted,
+    Miss,
+    Hit,
 }
 pub(crate) struct Capture {
     pending: Pending,
@@ -104,6 +111,7 @@ impl ExactCache {
             config,
             budget: Arc::new(Semaphore::new(BUDGET_BYTES)),
             state: Mutex::new(State::default()),
+            filled: Notify::new(),
         }))
     }
 
@@ -159,6 +167,7 @@ impl ExactCache {
         Some(Pending {
             cache: self.clone(),
             key: hash.finalize().into(),
+            outcome: LookupOutcome::Uncounted,
         })
     }
 
@@ -193,19 +202,48 @@ impl ExactCache {
 }
 
 impl Pending {
-    pub(crate) fn lookup(&self) -> Option<Response<Body>> {
+    pub(crate) fn lookup(&mut self) -> Option<Response<Body>> {
         let mut state = self.cache.0.state.lock().expect("cache mutex");
         state.entries.retain(|_, entry| {
             entry.inserted.elapsed() < Duration::from_secs(self.cache.0.config.ttl_secs)
         });
-        if let Some(entry) = state.entries.get(&self.key).cloned() {
-            state.hits += 1;
+        let entry = state.entries.get(&self.key).cloned();
+        match self.outcome {
+            LookupOutcome::Uncounted => {
+                self.outcome = if entry.is_some() {
+                    state.hits += 1;
+                    LookupOutcome::Hit
+                } else {
+                    state.misses += 1;
+                    LookupOutcome::Miss
+                };
+            }
+            LookupOutcome::Miss if entry.is_some() => {
+                state.misses -= 1;
+                state.hits += 1;
+                self.outcome = LookupOutcome::Hit;
+            }
+            _ => {}
+        }
+        if let Some(entry) = entry {
             let mut response = Response::new(Body::from(Bytes::from_owner(Replay(entry.clone()))));
             *response.headers_mut() = entry.headers.clone();
             Some(response)
         } else {
-            state.misses += 1;
             None
+        }
+    }
+
+    pub(crate) async fn wait_for_cached(&mut self) -> Response<Body> {
+        let cache = self.cache.clone();
+        loop {
+            let notified = cache.0.filled.notified();
+            tokio::pin!(notified);
+            notified.as_mut().enable();
+            if let Some(hit) = self.lookup() {
+                return hit;
+            }
+            notified.await;
         }
     }
 
@@ -342,6 +380,9 @@ impl Capture {
         }
         state.entries.insert(self.pending.key, entry);
         state.stores += 1;
+        drop(state);
+        // ponytail: wake the bounded waiter set; use per-key notifications only if profiling warrants it.
+        self.pending.cache.0.filled.notify_waiters();
     }
 }
 
@@ -853,6 +894,7 @@ mod tests {
         Pending {
             cache: cache.clone(),
             key: digest,
+            outcome: LookupOutcome::Uncounted,
         }
     }
     fn headers() -> HeaderMap {
@@ -876,6 +918,47 @@ mod tests {
         assert!(capture.observe(&vec![b'x'; count]));
         assert!(capture.observe(SUFFIX.as_bytes()));
         capture.commit(true);
+    }
+
+    #[tokio::test]
+    async fn queued_rechecks_count_once_and_observe_fills_before_or_after_waiting() {
+        use std::future::Future;
+        use std::task::Context;
+
+        let cache = ExactCache::new(CacheConfig::default());
+        let mut request = pending(&cache, 1);
+        assert!(request.lookup().is_none());
+        assert!(request.lookup().is_none());
+        let waker = futures_util::task::noop_waker();
+        let mut context = Context::from_waker(&waker);
+        {
+            let wait = request.wait_for_cached();
+            tokio::pin!(wait);
+            assert!(wait.as_mut().poll(&mut context).is_pending());
+            for key in 2..4 {
+                store(&cache, key, false);
+                assert!(wait.as_mut().poll(&mut context).is_pending());
+                let snapshot = ExactCache::snapshot(Some(&cache));
+                assert_eq!(snapshot.misses, 1);
+                assert_eq!(snapshot.hits, 0);
+            }
+            store(&cache, 1, false);
+            assert!(wait.as_mut().poll(&mut context).is_ready());
+        }
+        assert!(request.lookup().is_some());
+        let snapshot = ExactCache::snapshot(Some(&cache));
+        assert_eq!(snapshot.misses, 0);
+        assert_eq!(snapshot.hits, 1);
+
+        let mut late = pending(&cache, 4);
+        assert!(late.lookup().is_none());
+        store(&cache, 4, false);
+        tokio::time::timeout(Duration::from_secs(1), late.wait_for_cached())
+            .await
+            .expect("fill before wait registration must be observed");
+        let snapshot = ExactCache::snapshot(Some(&cache));
+        assert_eq!(snapshot.misses, 0);
+        assert_eq!(snapshot.hits, 2);
     }
 
     #[tokio::test]

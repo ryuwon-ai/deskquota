@@ -43,10 +43,12 @@ class Client:
         lines = head.decode("ascii").split("\r\n")
         status = int(lines[0].split()[1])
         fields = {}
+        response_headers = []
         for line in lines[1:]:
             if line:
                 k,v = line.split(":",1); fields[k.lower()] = v.strip()
-        result = dict(status=status, first_http_s=first_http, first_body_s=None, first_output_delta_s=None, terminal_marker_s=None, output="", body=b"", usage={"status": "missing"})
+                response_headers.append([k.lower(), v.strip(" \t")])
+        result = dict(status=status, headers=response_headers, first_http_s=first_http, first_body_s=None, first_output_delta_s=None, terminal_marker_s=None, output="", body=b"", usage={"status": "missing"})
         sse_pending = b""
         def observe(chunk):
             nonlocal sse_pending

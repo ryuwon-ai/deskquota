@@ -86,6 +86,8 @@ pub struct Quota {
 pub struct Model {
     pub id: String,
     pub max_output_tokens: Option<NonZeroU64>,
+    pub input_estimator: crate::input_estimate::InputEstimator,
+    pub input_token_overhead: u64,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -366,6 +368,9 @@ struct LimitInput {
 struct ModelInput {
     id: String,
     max_output_tokens: Option<u64>,
+    #[serde(default)]
+    input_estimator: crate::input_estimate::InputEstimator,
+    input_token_overhead: Option<u64>,
 }
 
 #[derive(Deserialize)]

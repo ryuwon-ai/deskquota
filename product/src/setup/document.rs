@@ -178,6 +178,20 @@ fn edit_models(item: &mut Item, original: &Config, config: &Config) -> Result<()
         if old.is_none_or(|old| old.id != model.id) {
             replace_field(table, "id", Value::from(model.id.as_str()));
         }
+        if old.is_none_or(|old| old.input_estimator != model.input_estimator) {
+            replace_field(
+                table,
+                "input_estimator",
+                Value::from(model.input_estimator.name()),
+            );
+        }
+        if old.is_none_or(|old| old.input_token_overhead != model.input_token_overhead) {
+            replace_field(
+                table,
+                "input_token_overhead",
+                Value::from(model.input_token_overhead as i64),
+            );
+        }
         if old.is_none_or(|old| old.max_output_tokens != model.max_output_tokens) {
             optional_field(
                 table,

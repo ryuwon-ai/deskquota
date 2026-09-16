@@ -61,9 +61,11 @@ pub fn render(
         ),
     };
     let display_limit = |limit: &Limit| match limit {
-        Limit::Known(value) => value.to_string(),
-        Limit::Unknown => "unknown".to_owned(),
-        Limit::Unlimited => "unlimited".to_owned(),
+        Limit::Known(value) => format!("{value} (local rolling 60-second cap)"),
+        Limit::Unknown => {
+            "unknown (defer to upstream; no local cap; upstream limit unverified)".to_owned()
+        }
+        Limit::Unlimited => "unlimited (explicitly no local quota cap)".to_owned(),
     };
     let known = |limit: &Limit| matches!(limit, Limit::Known(_));
     let quota = if draft.shared_with_other_pcs
@@ -127,6 +129,12 @@ pub fn render(
         || "none; request-supplied caps are used when present, and known TPM generation admission requires one because the gateway does not invent or inject a cap".to_owned(),
         |value| format!("{}; user-supplied accounting fallback used only when a request omits its cap, not a verified provider limit, and not injected or enforced upstream", value.get()),
     );
+    let model = &draft.config.models[0];
+    let output_bound = format!(
+        "{output_bound}; input estimate: {} + {} overhead tokens (serialized JSON, not provider-exact; only active with known TPM)",
+        model.input_estimator.name(),
+        model.input_token_overhead
+    );
     let transport = format!(
         "proxy: {}; TLS: system roots{}; verification remains enabled",
         if draft.config.upstream.proxy.is_some() {
@@ -146,7 +154,7 @@ pub fn render(
     );
     let cache = draft.config.cache.map_or_else(|| "disabled".to_owned(), |cache| format!("enabled; TTL {} seconds; at most {} messages; 4 MiB payload budget; exact reuse changes fresh sampling", cache.ttl_secs, cache.max_history));
     Ok(format!(
-        "config: {}\nstate: {} (final apply initializes protected local control token; preview and cancel create no state)\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; RPM: {rpm}; TPM: {tpm}; concurrency: {concurrency}; shared with other PCs: {}; separate input/output contract: {}\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to {} seconds after readiness\nexact response cache: {cache}\nlogin requested: {}; pending, registration not applied; after config save, exact OS target preview and separate confirmation\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
+        "config: {}\nstate: {} (final apply initializes protected local control token; preview and cancel create no state)\nsetup pending metadata: {} (intent only; no credentials)\nupstream original: {}\nupstream new normalized: {}\n{}\nOpenAI client base: {}\nMessages client base: {} (client appends /v1/messages -> {})\nprotocols: {:?}\nmodel: {}; reservation output bound: {}; listing: {}; capabilities: {}\nquota: {quota}; RPM: {rpm}; TPM: {tpm}; concurrency: {concurrency}; shared with other PCs: {}; separate input/output contract: {}\nquota policy: concurrency and shared upstream 429 cooldown still apply\nauth: {auth}\nquota startup hold: known RPM/TPM can hold admission for up to {} seconds after readiness\nexact response cache: {cache}\nlogin requested: {}; pending, registration not applied; after config save, exact OS target preview and separate confirmation\nclients: {}; pending, client files not changed\nfingerprint impact: {}\nfairness: configured route root {}; sessions sharing this root share one budget\n",
         config_path.display(),
         state.directory.display(),
         pending.display(),

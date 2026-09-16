@@ -223,6 +223,33 @@ changing a client. Existing token bytes are preserved. For an older or
 hand-written config without initialized state, `llmgw run` and `llmgw on` use
 the same protected lifecycle provisioning path.
 
+The default executable includes only UTF-8 byte estimation and skips tokenizer
+questions. To include offline BPE vocabularies in the same executable, build
+with `cargo build --locked --release --features bpe` (or add `--features bpe` to
+the existing source-install command). No runtime download or additional service
+is needed. An explicitly identified BPE-enabled archive uses the same installer
+and commands; this project has not published a release URL.
+
+In a BPE-enabled build, the model step still defaults to UTF-8 bytes. Explicit BPE
+choices (`cl100k_base`, `o200k_base`) add an adjustable framing allowance and
+vocabulary memory; select them only when they match the upstream. This is a
+serialized JSON estimate, not an exact server token count. Existing model
+choices survive setup reruns; renamed models return to byte defaults. See the
+[runtime contract](runtime-contract.md#token-estimation-and-output-bounds) for
+configuration and limitations.
+
+For each RPM/TPM setting, choose the enforcement you want: **Known** adds a local
+rolling 60-second cap; **Unknown** leaves that cap off and defers to the upstream,
+whose limit remains unverified; **Unlimited** explicitly leaves the local quota
+cap off. Concurrency and shared 429 cooldown remain active in all three cases.
+Entering a provider's advertised number does not automatically reproduce its
+refill policy. Keep a known cap when you want that additional local budget.
+
+A default build rejects an explicit BPE configuration before new startup or
+setup saving. Choose a BPE-enabled executable or explicitly change the estimator;
+there is no automatic fallback. `status` and `off` can still inspect and stop an
+existing BPE-configured worker. An unsupported `restart` fails before stopping it.
+
 After saving a config:
 
 ```sh

@@ -61,6 +61,8 @@ fn config(upstream: &UpstreamFixture, auth: Auth, base_query: bool) -> Config {
             tpm: Limit::Unknown,
         },
         models: vec![Model {
+            input_estimator: Default::default(),
+            input_token_overhead: 0,
             id: "fixture-model".to_owned(),
             max_output_tokens: None,
         }],
@@ -98,6 +100,8 @@ fn constructed_config(listen: &str) -> Config {
             tpm: Limit::Unknown,
         },
         models: vec![Model {
+            input_estimator: Default::default(),
+            input_token_overhead: 0,
             id: "fixture-model".to_owned(),
             max_output_tokens: None,
         }],

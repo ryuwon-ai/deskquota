@@ -79,6 +79,8 @@ pub struct ConnectionAnswers {
 pub struct ModelAnswers {
     pub id: String,
     pub max_output_tokens: Option<u64>,
+    pub input_estimator: Option<crate::input_estimate::InputEstimator>,
+    pub input_token_overhead: Option<u64>,
     pub listing_verified: bool,
     pub capabilities_verified: bool,
 }
@@ -88,6 +90,8 @@ impl ModelAnswers {
         Self {
             id: id.into(),
             max_output_tokens,
+            input_estimator: None,
+            input_token_overhead: None,
             listing_verified: false,
             capabilities_verified: false,
         }
@@ -317,12 +321,45 @@ impl SetupDraft {
 
     pub fn models(mut self, answers: ModelAnswers) -> Self {
         let max_output_tokens = answers.max_output_tokens.and_then(NonZeroU64::new);
-        self.config.models = vec![Model {
+        let existing = self
+            .config
+            .models
+            .iter()
+            .find(|model| model.id == answers.id);
+        let input_estimator = answers
+            .input_estimator
+            .or_else(|| existing.map(|model| model.input_estimator))
+            .unwrap_or_default();
+        let input_token_overhead = answers
+            .input_token_overhead
+            .or_else(|| {
+                existing
+                    .filter(|model| model.input_estimator == input_estimator)
+                    .map(|model| model.input_token_overhead)
+            })
+            .unwrap_or_else(|| input_estimator.default_overhead());
+        let model = Model {
             id: answers.id.clone(),
             max_output_tokens,
-        }];
+            input_estimator,
+            input_token_overhead,
+        };
+        if let Some(first) = self.config.models.first_mut() {
+            let old_id = std::mem::replace(first, model).id;
+            for root in &mut self.config.roots {
+                for id in &mut root.models {
+                    if *id == old_id {
+                        *id = answers.id.clone();
+                    }
+                }
+            }
+        } else {
+            self.config.models.push(model);
+        }
         if let Some(root) = self.config.roots.first_mut() {
-            root.models = vec![answers.id];
+            if root.models.is_empty() {
+                root.models.push(answers.id);
+            }
         }
         self.listing_verified = answers.listing_verified;
         self.capabilities_verified = answers.capabilities_verified;
@@ -368,6 +405,8 @@ impl SetupDraft {
             self.config.models.push(Model {
                 id: model_id.to_owned(),
                 max_output_tokens: None,
+                input_estimator: Default::default(),
+                input_token_overhead: 0,
             });
         }
         if let Some(root) = self.config.roots.iter_mut().find(|root| root.id == root_id) {
@@ -643,6 +682,8 @@ struct LimitOutput {
 struct ModelOutput<'a> {
     id: &'a str,
     max_output_tokens: Option<u64>,
+    input_estimator: crate::input_estimate::InputEstimator,
+    input_token_overhead: u64,
 }
 #[derive(Serialize)]
 struct RootOutput<'a> {
@@ -720,6 +761,8 @@ fn serialize_config(config: &Config) -> Result<String, Error> {
             .map(|model| ModelOutput {
                 id: &model.id,
                 max_output_tokens: model.max_output_tokens.map(NonZeroU64::get),
+                input_estimator: model.input_estimator,
+                input_token_overhead: model.input_token_overhead,
             })
             .collect(),
         roots: config

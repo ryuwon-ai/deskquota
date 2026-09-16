@@ -230,7 +230,7 @@ pub fn error(status: StatusCode, code: &'static str) -> Response<Body> {
             Some("Known TPM supports one Chat generation per request; omit n or set n to 1.")
         }
         "estimate_exceeds_budget" => Some(
-            "The JSON UTF-8 byte proxy plus output reservation exceeds the configured local TPM budget. This is an estimate, not an actual token count.",
+            "The configured JSON input estimate plus output reservation exceeds the configured local TPM budget. This is an estimate, not an actual token count.",
         ),
         _ => None,
     };

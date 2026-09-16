@@ -1203,6 +1203,9 @@ fn admission_details(value: &serde_json::Value) -> String {
     };
     let estimate = match field("estimate_mode") {
         "json_utf8_bytes_plus_output_reservation" => "request UTF-8 bytes + output reservation",
+        "model_json_estimate_plus_output_reservation" => {
+            "model-selected JSON estimate + output reservation (not provider-exact)"
+        }
         "tpm_unenforced" => "TPM unenforced",
         other => other,
     };
@@ -1211,6 +1214,25 @@ fn admission_details(value: &serde_json::Value) -> String {
         Some(root) => root.as_str().unwrap_or("n/a"),
         None => "n/a",
     };
+    let estimators = value["model_estimators"].as_array().map_or_else(
+        || "n/a".to_owned(),
+        |models| {
+            models
+                .iter()
+                .map(|model| {
+                    format!(
+                        "{}: {} + {} overhead tokens",
+                        model["id"].as_str().unwrap_or("n/a"),
+                        model["input_estimator"].as_str().unwrap_or("n/a"),
+                        model["input_token_overhead"]
+                            .as_u64()
+                            .map_or_else(|| "n/a".to_owned(), |n| n.to_string()),
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("; ")
+        },
+    );
     let reservation = &value["reservation"];
     let count = |name: &str| {
         reservation[name]
@@ -1223,6 +1245,7 @@ fn admission_details(value: &serde_json::Value) -> String {
          RPM: {}; capacity: {}; local debited: {}\n\
          TPM: {}; capacity: {}; local debited: {}; held: {}\n\
          accounting: {}; estimate: {estimate}\n\
+         configured input estimators (active only for known TPM): {estimators}\n\
          reservation observations (finished known-TPM generation attempts): samples: {}; unknown usage: {}\n\
          known samples only: reserved: {}; observed: {}; excess: {}; shortfall: {} tokens\n\
          reservation differences are not refundable quota; counters reset with worker\n",
@@ -1366,7 +1389,8 @@ mod status_tests {
             "blocked_reason": "tpm", "barrier_root": "interactive",
             "rpm_mode": "known", "rpm_capacity": "60", "rpm_debited": "4",
             "tpm_mode": "known", "tpm_capacity": "100", "tpm_debited": "36893488147419103230", "tpm_held": "20",
-            "accounting": "actual", "estimate_mode": "json_utf8_bytes_plus_output_reservation",
+            "accounting": "actual", "estimate_mode": "model_json_estimate_plus_output_reservation",
+            "model_estimators": [{"id":"fixture", "input_estimator":"cl100k_base", "input_token_overhead":32}],
             "reservation": {"samples":2, "unknown":1, "reserved_tokens":"2", "observed_tokens":"36893488147419103230", "excess_tokens":"0", "shortfall_tokens":"36893488147419103228"}
         }));
         assert_eq!(
@@ -1374,7 +1398,8 @@ mod status_tests {
             "queue reason (representative): local token budget does not fit; protected root: interactive\n\
             RPM: known; capacity: 60; local debited: 4\n\
             TPM: known; capacity: 100; local debited: 36893488147419103230; held: 20\n\
-            accounting: actual; estimate: request UTF-8 bytes + output reservation\n\
+            accounting: actual; estimate: model-selected JSON estimate + output reservation (not provider-exact)\n\
+            configured input estimators (active only for known TPM): fixture: cl100k_base + 32 overhead tokens\n\
             reservation observations (finished known-TPM generation attempts): samples: 2; unknown usage: 1\n\
             known samples only: reserved: 2; observed: 36893488147419103230; excess: 0; shortfall: 36893488147419103228 tokens\n\
             reservation differences are not refundable quota; counters reset with worker\n"

@@ -8,6 +8,7 @@ license = "MIT OR Apache-2.0"
 
 [features]
 bench-harness = []
+bpe = ["dep:bpe-openai"]
 
 [[example]]
 name = "bench_gateway"
@@ -16,6 +17,7 @@ required-features = ["bench-harness"]
 [dependencies]
 axum = { version = "=0.8.9", default-features = false, features = ["http1"] }
 bytes = "=1.11.1"
+bpe-openai = { version = "=0.3.1", optional = true }
 clap = { version = "=4.6.6", features = ["derive"] }
 dialoguer = { version = "=0.12.0", default-features = false }
 fs4 = { version = "=1.1.0", default-features = false, features = ["sync"] }

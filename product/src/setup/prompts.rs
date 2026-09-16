@@ -2,6 +2,15 @@
 use super::*;
 use dialoguer::{Confirm, Input, MultiSelect, Select, console::Term, theme::ColorfulTheme};
 
+fn validate_input_token_overhead(value: &str) -> Result<(), Error> {
+    match value.parse::<u64>() {
+        Ok(value) if value <= i64::MAX as u64 => Ok(()),
+        _ => Err(Error::message(
+            "input token overhead must be 0..=9223372036854775807 (TOML integer range)",
+        )),
+    }
+}
+
 pub struct DialoguerIo {
     term: Term,
     theme: ColorfulTheme,
@@ -71,7 +80,11 @@ impl DialoguerIo {
         };
         let choice = Select::with_theme(&self.theme)
             .with_prompt(name)
-            .items(["Known nonzero number", "Unknown", "Unlimited"])
+            .items([
+                "Known: local rolling 60-second cap",
+                "Unknown: defer to upstream; no local cap; upstream limit unverified",
+                "Unlimited: explicitly no local quota cap",
+            ])
             .default(default)
             .interact_on_opt(&self.term)
             .map_err(|error| Error::message(error.to_string()))?
@@ -330,11 +343,8 @@ impl PromptIo for DialoguerIo {
                             .map_or_else(|| "model-id".into(), |m| m.id.clone()),
                     )?
                 };
-                let current_cap = draft
-                    .config
-                    .models
-                    .first()
-                    .and_then(|model| model.max_output_tokens);
+                let existing_model = draft.config.models.iter().find(|model| model.id == id);
+                let current_cap = existing_model.and_then(|model| model.max_output_tokens);
                 let set_fallback = Confirm::with_theme(&self.theme)
                     .with_prompt("Set a user-chosen reservation fallback for requests that omit an output cap? This is not a verified provider limit")
                     .default(current_cap.is_some())
@@ -359,9 +369,65 @@ impl PromptIo for DialoguerIo {
                 } else {
                     None
                 };
+                use crate::input_estimate::InputEstimator;
+                let modes = [
+                    (
+                        InputEstimator::Utf8Bytes,
+                        "UTF-8 bytes (default, no vocabulary)",
+                    ),
+                    (
+                        InputEstimator::Cl100kBase,
+                        "cl100k_base (explicit BPE estimate)",
+                    ),
+                    (
+                        InputEstimator::O200kBase,
+                        "o200k_base (explicit BPE estimate)",
+                    ),
+                ]
+                .into_iter()
+                .filter(|(mode, _)| mode.is_available())
+                .collect::<Vec<_>>();
+                let current_mode = existing_model
+                    .map_or_else(InputEstimator::default, |model| model.input_estimator);
+                let selected = if modes.len() == 1 {
+                    0
+                } else {
+                    self.term.write_line("BPE counts serialized JSON, not exact provider input. Match your upstream encoding and framing; OpenAI-compatible APIs may use different tokenizers. Selected BPE adds vocabulary memory (roughly 32/67 MiB in a standalone probe).").map_err(|e| Error::message(e.to_string()))?;
+                    Select::with_theme(&self.theme)
+                        .with_prompt("Input estimate for known TPM")
+                        .items(modes.iter().map(|(_, label)| *label).collect::<Vec<_>>())
+                        .default(
+                            modes
+                                .iter()
+                                .position(|(mode, _)| *mode == current_mode)
+                                .unwrap_or(0),
+                        )
+                        .interact_on_opt(&self.term)
+                        .map_err(|e| Error::message(e.to_string()))?
+                        .ok_or_else(|| Error::message("cancel"))?
+                };
+                let input_estimator = modes[selected].0;
+                let input_token_overhead = if input_estimator == InputEstimator::Utf8Bytes {
+                    0
+                } else {
+                    let current = existing_model
+                        .filter(|model| model.input_estimator == input_estimator)
+                        .map_or(input_estimator.default_overhead(), |model| {
+                            model.input_token_overhead
+                        });
+                    self.validated_text(
+                        "Extra input tokens for server framing (estimate, not an upper bound)",
+                        current.to_string(),
+                        validate_input_token_overhead,
+                    )?
+                    .parse()
+                    .expect("validated overhead")
+                };
                 Ok(Flow::SetModels(ModelAnswers {
                     id,
                     max_output_tokens: cap,
+                    input_estimator: Some(input_estimator),
+                    input_token_overhead: Some(input_token_overhead),
                     listing_verified,
                     capabilities_verified: false,
                 }))
@@ -517,6 +583,30 @@ impl PromptIo for DialoguerIo {
                     _ => Flow::Cancel,
                 })
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn overhead_prompt_accepts_only_storable_nonnegative_toml_integers() {
+        for value in ["0", "+0", "32", "9223372036854775807"] {
+            assert!(super::validate_input_token_overhead(value).is_ok());
+            assert!(value.parse::<u64>().expect("accepted prompt must parse") <= i64::MAX as u64);
+        }
+        for value in [
+            "-0",
+            "-1",
+            "9223372036854775808",
+            "18446744073709551615",
+            "0.5",
+            "",
+        ] {
+            assert!(
+                super::validate_input_token_overhead(value).is_err(),
+                "{value}"
+            );
         }
     }
 }

@@ -23,24 +23,26 @@ fn integer(value: &str) -> Option<u64> {
 
 pub const MAX_ERROR_BODY: usize = 16 * 1024;
 
-/// Only a complete, bounded, identity JSON error with an explicit known code qualifies.
-/// Serde's named fields reject duplicate discriminators instead of last-value wins.
-pub fn transient(headers: &HeaderMap, bytes: &[u8]) -> bool {
-    if bytes.len() > MAX_ERROR_BODY
-        || !headers.get_all("content-type").iter().all(|h| {
+pub(crate) fn classifiable_representation(headers: &HeaderMap) -> bool {
+    headers.contains_key("content-type")
+        && headers.get_all("content-type").iter().all(|h| {
             h.to_str().ok().is_some_and(|s| {
                 s.split(';')
                     .next()
                     .is_some_and(|s| s.trim().eq_ignore_ascii_case("application/json"))
             })
         })
-        || !headers.contains_key("content-type")
-        || !headers.get_all("content-encoding").iter().all(|h| {
+        && headers.get_all("content-encoding").iter().all(|h| {
             h.to_str()
                 .ok()
                 .is_some_and(|s| s.eq_ignore_ascii_case("identity"))
         })
-    {
+}
+
+/// Only a complete, bounded, identity JSON error with an explicit known code qualifies.
+/// Serde's named fields reject duplicate discriminators instead of last-value wins.
+pub fn transient(headers: &HeaderMap, bytes: &[u8]) -> bool {
+    if bytes.len() > MAX_ERROR_BODY || !classifiable_representation(headers) {
         return false;
     }
     #[derive(serde::Deserialize)]
@@ -109,6 +111,15 @@ pub fn timing_allows_retry(headers: &HeaderMap) -> bool {
 }
 pub fn missing_timing(headers: &HeaderMap) -> bool {
     !headers.contains_key("retry-after") && !headers.contains_key("retry-after-ms")
+}
+
+pub(crate) fn server_forbids_retry(headers: &HeaderMap) -> bool {
+    headers.get_all("x-should-retry").iter().any(|value| {
+        value
+            .to_str()
+            .ok()
+            .is_some_and(|value| value.trim_matches([' ', '\t']) == "false")
+    })
 }
 
 // HTTP decimal syntax has no u64 digit limit. Preserve an oversized positive wait

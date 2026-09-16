@@ -7,6 +7,7 @@ pub mod config;
 pub mod config_patch;
 mod control;
 mod file_replace;
+pub mod input_estimate;
 pub mod lifecycle;
 mod metrics;
 mod protocol;

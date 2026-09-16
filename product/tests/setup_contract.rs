@@ -600,9 +600,10 @@ fn summary_shows_exact_quota_limits_and_concurrency_before_apply() {
         cache: None,
     });
     let summary = configured.summary(&temp.config()).unwrap();
-    assert!(summary.contains("RPM: 18; TPM: 450000; concurrency: 3"));
+    assert!(summary.contains("RPM: 18 (local rolling 60-second cap); TPM: 450000 (local rolling 60-second cap); concurrency: 3"));
     let summary = draft(4141).summary(&temp.config()).unwrap();
-    assert!(summary.contains("RPM: unlimited; TPM: unknown; concurrency: 1"));
+    assert!(summary.contains("RPM: unlimited (explicitly no local quota cap); TPM: unknown (defer to upstream; no local cap; upstream limit unverified); concurrency: 1"));
+    assert!(summary.contains("concurrency and shared upstream 429 cooldown still apply"));
     assert!(!temp.config().exists());
 }
 
@@ -1741,4 +1742,119 @@ fn cache_setup_enables_preserves_edits_and_removes_only_the_requested_table() {
         .validate()
         .is_err()
     );
+}
+
+#[cfg(feature = "bpe")]
+#[test]
+fn editing_first_model_retains_estimator_other_models_routes_and_comments() {
+    use llmgw::input_estimate::InputEstimator;
+    let temp = Temp::new("model-estimator-preserve");
+    let raw = r#"# user configuration
+listen = "127.0.0.1:4141"
+[upstream]
+api_base = "http://127.0.0.1:9/v1"
+auth = { mode = "none" }
+[quota]
+rpm = { kind = "unlimited" }
+tpm = { kind = "unknown" }
+[[models]]
+id = "a" # first model
+max_output_tokens = 20
+input_estimator = "cl100k_base" # chosen vocabulary
+input_token_overhead = 48
+[[models]]
+id = "b" # retained model
+max_output_tokens = 30
+input_estimator = "o200k_base"
+input_token_overhead = 64
+[[roots]]
+id = "first"
+endpoints = ["responses"]
+models = ["a", "b"]
+[[roots]]
+id = "second" # retained route
+endpoints = ["messages"]
+models = ["b"]
+"#;
+    fs::write(temp.config(), raw).unwrap();
+    let loaded = LoadedConfig::load(temp.config()).unwrap();
+    // Renaming the first model to an existing second ID must fail validation,
+    // rather than silently editing a different model or discarding either route.
+    assert!(
+        SetupDraft::from_loaded(&loaded)
+            .unwrap()
+            .models(ModelAnswers::manual("b", Some(50)))
+            .render_config()
+            .is_err()
+    );
+    let same = SetupDraft::from_loaded(&loaded)
+        .unwrap()
+        .models(ModelAnswers::manual("a", Some(50)));
+    let rendered = same.render_config().unwrap();
+    let parsed = llmgw::config::parse(rendered.as_bytes()).unwrap();
+    assert_eq!(parsed.models[0].max_output_tokens.unwrap().get(), 50);
+    assert_eq!(parsed.models[0].input_estimator, InputEstimator::Cl100kBase);
+    assert_eq!(parsed.models[0].input_token_overhead, 48);
+    assert_eq!(parsed.models[1], loaded.config.models[1]);
+    assert_eq!(parsed.roots, loaded.config.roots);
+    for comment in [
+        "# user configuration",
+        "# first model",
+        "# chosen vocabulary",
+        "# retained model",
+        "# retained route",
+    ] {
+        assert!(rendered.contains(comment));
+    }
+    let mut changed = ModelAnswers::manual("a", Some(50));
+    changed.input_estimator = Some(InputEstimator::O200kBase);
+    changed.input_token_overhead = Some(80);
+    let edited = SetupDraft::from_loaded(&loaded)
+        .unwrap()
+        .models(changed)
+        .render_config()
+        .unwrap();
+    let parsed = llmgw::config::parse(edited.as_bytes()).unwrap();
+    assert_eq!(parsed.models[0].input_estimator, InputEstimator::O200kBase);
+    assert_eq!(parsed.models[0].input_token_overhead, 80);
+    assert!(edited.contains("# chosen vocabulary"));
+    assert_eq!(parsed.models[1], loaded.config.models[1]);
+    assert_eq!(parsed.roots, loaded.config.roots);
+    let renamed = SetupDraft::from_loaded(&loaded)
+        .unwrap()
+        .models(ModelAnswers::manual("new", Some(60)))
+        .render_config()
+        .unwrap();
+    let parsed = llmgw::config::parse(renamed.as_bytes()).unwrap();
+    assert_eq!(parsed.models[0].id, "new");
+    assert_eq!(parsed.models[0].input_estimator, InputEstimator::Utf8Bytes);
+    assert_eq!(parsed.models[0].input_token_overhead, 0);
+    assert_eq!(parsed.models[1], loaded.config.models[1]);
+    assert_eq!(parsed.roots[0].models, ["new", "b"]);
+    assert_eq!(parsed.roots[1], loaded.config.roots[1]);
+}
+
+#[cfg(not(feature = "bpe"))]
+#[test]
+fn default_build_rejects_bpe_draft_before_replacing_existing_config() {
+    use llmgw::input_estimate::InputEstimator::{Cl100kBase, O200kBase};
+    let temp = Temp::new("missing-bpe-capability");
+    let original = format!(
+        "# preserve user comment\n{}",
+        draft(4141).render_config().unwrap()
+    );
+    fs::write(temp.config(), &original).unwrap();
+    let loaded = LoadedConfig::load(temp.config()).unwrap();
+    for estimator in [Cl100kBase, O200kBase] {
+        let mut answers = ModelAnswers::manual("model-a", Some(64));
+        answers.input_estimator = Some(estimator);
+        let edited = SetupDraft::from_loaded(&loaded).unwrap().models(answers);
+        let error = apply(&temp.config(), &edited, ApplyMode::SaveOnly)
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains(estimator.name()), "{error}");
+        assert!(error.contains("--features bpe"), "{error}");
+        assert_eq!(fs::read(temp.config()).unwrap(), original.as_bytes());
+        assert_eq!(fs::read_dir(&temp.dir).unwrap().count(), 1);
+    }
 }
