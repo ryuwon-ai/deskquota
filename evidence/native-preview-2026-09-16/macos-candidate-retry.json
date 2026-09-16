@@ -1,0 +1,505 @@
+{
+  "check": "explicit_retry_directives",
+  "at": "2026-09-16T05:08:28.979195+00:00",
+  "expectation": "retry-veto",
+  "scope": "Only retry-veto is adopted; shared 503 pause is an unadopted policy proposal",
+  "binary": "/Users/ryuwon/Library/Caches/deskquota-preview-20260916/installed/llmgw",
+  "binary_sha256": "91cb3595021355b6601768a12c92ca11ce355d063c6d184f9d9d5b70dd31168e",
+  "probe_sha256": "884445428df4a38a0545c600a614919064260c7e7387e254090fea128a5c9a8e",
+  "fixture_sha256": "cfc7a8f14717a70576f28db854cef0899318b477524eadd282f6d6e9bcf67f7c",
+  "cases": [
+    {
+      "name": "503_explicit_ms",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.0008644580084364861,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.000864,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "503_mixed_timing",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.0007585410203319043,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.000759,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "503_missing_timing",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.0007115410116966814,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.000712,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "503_malformed_timing",
+      "status": 503,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.0008185000042431056,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 503,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.000819,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "500_explicit_timing",
+      "status": 500,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": 0.000934209005208686,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 500,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.000934,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_false",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_false_missing_timing",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": true,
+      "shared_cooldown_ms": 1008,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_conflicting_true_false",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_true_transient",
+      "status": 429,
+      "expected_attempts": 2,
+      "observed_initial_attempts": 2,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "A1",
+          "at": 0.000377,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_true_permanent",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": false,
+      "shared_cooldown_ms": 0,
+      "followup_delay_seconds": null,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 1,
+      "upstream_attempts": 1,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        }
+      ]
+    },
+    {
+      "name": "429_false_explicit_pause",
+      "status": 429,
+      "expected_attempts": 1,
+      "observed_initial_attempts": 1,
+      "expected_pause": true,
+      "shared_cooldown_ms": 799,
+      "followup_delay_seconds": 0.804324374999851,
+      "checks": {
+        "attempts_match": true,
+        "shared_pause_matches": true,
+        "followup_respected_hint": true,
+        "original_wire_preserved": true
+      },
+      "passed": true,
+      "ingress": 2,
+      "upstream_attempts": 2,
+      "opt_in": true,
+      "control_stop_exit_zero": true,
+      "no_fixture_material_in_output": true,
+      "outcomes": [
+        {
+          "label": "A1",
+          "http_status": 429,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        },
+        {
+          "label": "B1",
+          "http_status": 200,
+          "body_matches_expected": true,
+          "body_origin": "upstream"
+        }
+      ],
+      "trace": [
+        {
+          "label": "A1",
+          "at": 0.0,
+          "endpoint": "chat/completions",
+          "body_preserved": true
+        },
+        {
+          "label": "B1",
+          "at": 0.804324,
+          "endpoint": "models",
+          "body_preserved": true
+        }
+      ]
+    }
+  ],
+  "passed": true,
+  "limitations": [
+    "Synthetic loopback contract checks, not latency benchmarks",
+    "One configured upstream shared by two roots",
+    "Unlimited RPM and unknown TPM, no quota-accounting claim",
+    "No real provider, client SDK, Windows, or paid API calls"
+  ],
+  "binary_unchanged": true
+}

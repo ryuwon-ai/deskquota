@@ -1,0 +1,160 @@
+{
+  "source_commit": "c838cdb24a8eb813a3a7c21ce1daf0e5cb1bf990",
+  "ci_url": "https://github.com/ryuwon-ai/deskquota/actions/runs/35059510506",
+  "ci_conclusion": "success",
+  "rust_default_tests": {
+    "aarch64-apple-darwin": {
+      "passed": 443,
+      "failed": 0,
+      "ignored": 0
+    },
+    "x86_64-pc-windows-msvc": {
+      "passed": 409,
+      "failed": 0,
+      "ignored": 1
+    }
+  },
+  "python_packaging_tests": 4,
+  "python_installer_tests": {
+    "macos": {
+      "passed": 14,
+      "skipped": 0
+    },
+    "windows": {
+      "passed": 5,
+      "skipped": 9
+    }
+  },
+  "platforms": {
+    "macos-arm64": {
+      "archive": "llmgw-macos-arm64.tar.gz",
+      "archive_bytes": 4296163,
+      "archive_sha256": "8a97c17746d398eff614036988493b86284e55bc5736afa37d8152adf62dc8f6",
+      "binary_sha256": "91cb3595021355b6601768a12c92ca11ce355d063c6d184f9d9d5b70dd31168e",
+      "members": [
+        "llmgw",
+        "README.md",
+        "docs/installation.md",
+        "docs/runtime-contract.md",
+        "docs/client-compatibility.md"
+      ],
+      "ci_acceptance": {
+        "check": "actual_foreground_binary_loopback_only",
+        "timestamp": "2026-09-16T05:31:36.786401+00:00",
+        "binary": "native-installed/llmgw",
+        "binary_sha256": "91cb3595021355b6601768a12c92ca11ce355d063c6d184f9d9d5b70dd31168e",
+        "os": "macOS-14.8.9-arm64-arm-64bit-Mach-O",
+        "python": "3.14.7",
+        "passed": true,
+        "upstream_attempts": 1,
+        "quota_fixture": {
+          "rpm": "unlimited",
+          "tpm": "unknown"
+        },
+        "checks": [
+          "config_specific_state_path",
+          "protected_temp_state_loaded",
+          "health",
+          "data_cannot_control",
+          "prefix_query_body_auth",
+          "control_stop_exit_zero",
+          "no_fixture_credentials_or_body_in_process_output"
+        ],
+        "limitations": [
+          "Synthetic HTTP fixture only; no LLM or agent task",
+          "No SSE lifecycle, quota, native setup, other OS or performance claim",
+          "Port selection uses a checked candidate, not socket activation"
+        ]
+      }
+    },
+    "windows-x64": {
+      "archive": "llmgw-windows-x64.zip",
+      "archive_bytes": 3878922,
+      "archive_sha256": "44fa698f547247e9e10b73a41f3c5aa8f18929ad837c58fa8ecf6dcc7e7aaa9f",
+      "binary_sha256": "e11562127a04149890a3193f3ed3b3571ea5becedc7f72bb1956aa01cb90cba4",
+      "members": [
+        "llmgw.exe",
+        "README.md",
+        "docs/installation.md",
+        "docs/runtime-contract.md",
+        "docs/client-compatibility.md"
+      ],
+      "ci_acceptance": {
+        "binary_sha256": "e11562127a04149890a3193f3ed3b3571ea5becedc7f72bb1956aa01cb90cba4",
+        "binary_bytes": 9557504,
+        "install_reinstall_bad_checksum": "passed",
+        "path_registry_unchanged": true,
+        "installer_preview": true,
+        "unavailable_on_runtime_path": {
+          "cargo": true,
+          "rustc": true,
+          "gcc": true,
+          "node": true,
+          "python": true,
+          "docker": true
+        },
+        "runtime_path_empty": true,
+        "cache": {
+          "requests": 82,
+          "upstream_attempts": 2,
+          "hits": 80,
+          "failures": 0,
+          "samples": {
+            "json": {
+              "miss_ms": 103.13870000004499,
+              "hit_count": 40,
+              "hit_p50_ms": 0.26430000002619636,
+              "hit_p95_ms": 0.29289999997672567,
+              "hit_p99_ms": 0.3416999998080428
+            },
+            "sse": {
+              "miss_ms": 101.28550000013092,
+              "hit_count": 40,
+              "hit_p50_ms": 0.1874999998108251,
+              "hit_p95_ms": 0.22619999981543515,
+              "hit_p99_ms": 0.299400000130845
+            }
+          }
+        },
+        "usage": {
+          "rpm_debited": "2",
+          "tpm_debited": "46",
+          "accounting": "actual"
+        },
+        "resources": {
+          "before": {
+            "working_set_bytes": 7049216,
+            "private_bytes": 1449984,
+            "threads": 9,
+            "handles": 88,
+            "cpu_seconds": 0.015625
+          },
+          "idle_64_start": {
+            "working_set_bytes": 7553024,
+            "private_bytes": 2596864,
+            "threads": 6,
+            "handles": 91,
+            "cpu_seconds": 0.015625
+          },
+          "idle_64_end": {
+            "working_set_bytes": 7553024,
+            "private_bytes": 2596864,
+            "threads": 6,
+            "handles": 91,
+            "cpu_seconds": 0.015625
+          },
+          "after": {
+            "working_set_bytes": 8404992,
+            "private_bytes": 2125824,
+            "threads": 7,
+            "handles": 97,
+            "cpu_seconds": 0.015625
+          }
+        },
+        "lifecycle": "on/status/off/idempotent-off passed",
+        "real_provider_called": false,
+        "measurement_scope": "synthetic 100ms loopback fixture; cache replay check, not provider or comparative benchmark"
+      }
+    }
+  }
+}

@@ -25,6 +25,8 @@
 | 사용자 로그인 자동 시작 | [Native Task 5 수용](evidence/native-task5-accepted.json). 명세·품질 통과, 실제 계정 등록·로그인 미검증 |
 | 작은 installer와 최종 메모리·실행 시간 측정 | [Native Task 6 수용](evidence/native-task6-accepted.json). macOS ARM 패키지 설치·재설치와 세 도구 왕복 확인 |
 | 자동 압축 호환성 | [macOS·Windows 네이티브 대조](reports/auto-compaction-audit-2026-09-16.md): 일반 요약과 다음 턴 통과. 전용 compact endpoint·opaque 입력·큰 바이트 추정 거절은 재현된 미지원 경계 |
+| 공개 네이티브 사전 릴리스 | [macOS ARM64·Windows x64 검증](reports/native-preview-release-2026-09-16.md): CI 산출물과 공개 파일의 체크섬 대조, Windows MSVC 정적 CRT·설치 검사·빈 PATH에서 실행, Mac 재시도 지시 검사. 실제 제공자 성능과 구분 |
+| NVIDIA 실측 준비 | [평가 범위와 실행 방법](reports/nvidia-api-evaluation.md): 호출·시간 한도가 있는 직접/게이트웨이 작업 및 실제 Pi 검사 준비. 오프라인 14개·Pi 가드 5개 검사 통과. 인증된 NVIDIA 호출은 0건이며 가입·약관 확인 및 키 발급 대기 |
 | 실제 Windows/Linux·저사양 PC·사용자 채택 | [Windows 10 x64 GNU 빌드·실행·클라이언트 검사](reports/windows-followup-and-improvements-2026-09-16.md) 진행. Windows 파일 교체의 간헐적 실패 원인, Linux·저사양 성능·사용자 채택은 미검증 |
 
 이전 Native Task 6의 macOS ARM 패키지는 별도로 보관한 로컬 산출물이다. 공개 저장소에는 [체크섬](product/artifacts/native-final-integration-package/llmgw-macos-arm64.tar.gz.sha256)과 검증 기록을 남겼다. 당시 Rust 테스트 370개와 첫 저장→연결→종료의 독립 재검토를 통과했다. 동일 패키지의 M4 32GiB 개발 PC 관측은 대기 메모리 9.73MiB(10표본), 시작 36.4–63.1ms·종료 35.6–45.3ms(각 5회)다. [측정 범위와 제한](product/artifacts/native-final-integration-package/acceptance/README.md)을 함께 읽는다. 이 수치는 후속 변경본의 성능이나 저사양·처리량 우위를 입증하지 않는다. 현재 소스의 추가 변경과 검증은 위 최신 보고서를, 실행 방법은 [설치 안내](product/docs/installation.md)를 따른다.

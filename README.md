@@ -65,6 +65,12 @@ Then run `llmgw setup` and `llmgw on`. No compiler, Docker, or WSL is needed.
 This is an unsigned preview (macOS ad-hoc signature only). Follow your OS and
 company security policy; signing and clean-machine acceptance remain unverified.
 
+The native preview passed CI on both platforms. Its Windows MSVC binary passed
+installation checks on Windows 10, then ran with an empty runtime PATH; no
+external VC/GNU runtime DLLs were found. See the [release verification](reports/native-preview-release-2026-09-16.md)
+for exact files, checks, and remaining limits. These are installation checks,
+not real-provider performance results.
+
 ### Build from this checkout
 
 A Rust toolchain is needed to build. The installed gateway itself needs no Rust,
