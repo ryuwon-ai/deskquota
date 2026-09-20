@@ -20,6 +20,9 @@ enum Cost {
     ExactFixture(u64),
 }
 impl RequestCost {
+    pub(super) fn is_generation(self) -> bool {
+        !matches!(self.0, Cost::Metadata)
+    }
     /// Models/count_tokens only: never settles as generation TPM usage.
     #[allow(non_upper_case_globals)]
     pub const Metadata: Self = Self(Cost::Metadata);
@@ -117,6 +120,11 @@ fn live(until: Option<Duration>, now: Duration) -> bool {
     until.is_some_and(|until| until > now)
 }
 impl Ledger {
+    pub(super) fn is_active_generation(&self, id: ReservationId) -> bool {
+        self.entries
+            .iter()
+            .any(|entry| entry.id == id && entry.active && !entry.metadata)
+    }
     pub fn new(
         quota: Quota,
         accounting: Accounting,

@@ -38,9 +38,9 @@ pub(crate) fn json_usage(endpoint: Endpoint, value: &Value) -> Option<ObservedUs
             )
         }
         Endpoint::Responses => {
-            if value.get("status")?.as_str()? != "completed"
-                || !value.get("incomplete_details").is_none_or(Value::is_null)
-            {
+            let completed = value.get("status").and_then(Value::as_str) == Some("completed")
+                && value.get("incomplete_details").is_none_or(Value::is_null);
+            if !completed && !super::responses::supported_incomplete(value) {
                 return None;
             }
             ("input_tokens", "output_tokens", "input_tokens_details")

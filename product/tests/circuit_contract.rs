@@ -170,6 +170,276 @@ async fn wait_status(gateway: &GatewayHandle, condition: impl Fn(&Value) -> bool
 }
 
 #[tokio::test]
+async fn short_server_timing_recovers_http_json_and_sse_without_rewriting_bytes() {
+    let error = r#"{"error":{"code":500,"message":"synthetic outage"}}"#;
+    for (code, media, body) in [
+        (503, "application/json", error.to_owned()),
+        (200, "application/json", error.to_owned()),
+        (
+            200,
+            "text/event-stream",
+            format!("data: {error}\n\ndata: [DONE]\n\n"),
+        ),
+    ] {
+        let wire = String::from_utf8(response(code, "Retry-After-Ms: 799\r\n", &body))
+            .unwrap()
+            .replace(
+                "Content-Type: application/json",
+                &format!("Content-Type: {media}"),
+            )
+            .into_bytes();
+        let upstream = ControlledUpstream::start(vec![wire], true).await;
+        let gateway = spawn(config(upstream.address)).await;
+        for _ in 0..3 {
+            let reply = request(&gateway).await;
+            assert_eq!(reply.status(), code);
+            assert_eq!(reply.bytes().await.unwrap().as_ref(), body.as_bytes());
+        }
+        wait_status(&gateway, |v| {
+            v["circuit_breaker"]["open"] == 1 && v["active"] == 0
+        })
+        .await;
+        let blocked = request(&gateway).await;
+        assert_eq!(blocked.status(), 503);
+        assert_eq!(blocked.headers()["retry-after"], "1", "{code} {media}");
+        assert_eq!(upstream.attempts(), 3);
+        upstream.set(vec![response(200, "", GOOD)]);
+        tokio::time::sleep(Duration::from_millis(1050)).await;
+        assert_eq!(
+            request(&gateway).await.bytes().await.unwrap().as_ref(),
+            GOOD.as_bytes()
+        );
+        let value = wait_status(&gateway, |v| v["circuit_breaker"]["recoveries"] == 1).await;
+        assert_eq!(value["circuit_breaker"]["probes"], 1);
+        assert_eq!(upstream.attempts(), 4);
+        gateway.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn http_200_stream_error_opens_circuit_without_rewriting_body() {
+    let body =
+        "data: {\"error\":{\"code\":500,\"message\":\"synthetic outage\"}}\n\ndata: [DONE]\n\n";
+    let wire = String::from_utf8(response(200, "Retry-After: 7\r\n", body))
+        .unwrap()
+        .replace(
+            "Content-Type: application/json",
+            "Content-Type: text/event-stream",
+        )
+        .into_bytes();
+    let upstream = UpstreamFixture::start(wire).await;
+    let gateway = spawn(config(upstream.address())).await;
+    for _ in 0..3 {
+        let reply = request(&gateway).await;
+        assert_eq!(reply.status(), 200);
+        assert_eq!(reply.bytes().await.unwrap().as_ref(), body.as_bytes());
+    }
+    let blocked = request(&gateway).await;
+    assert_eq!(blocked.status(), 503);
+    assert!(
+        blocked.headers()["retry-after"]
+            .to_str()
+            .unwrap()
+            .parse::<u64>()
+            .unwrap()
+            >= 6
+    );
+    assert!(
+        blocked
+            .text()
+            .await
+            .unwrap()
+            .contains("upstream_circuit_open")
+    );
+    assert_eq!(upstream.attempts(), 3);
+    let value = status(&gateway).await;
+    assert_eq!(value["response_errors"]["server"], 3);
+    assert_eq!(value["circuit_breaker"]["failures"], 3);
+    assert_eq!(value["terminal_body_eof"], 3);
+    assert_eq!(value["usage_unknown"], 3);
+    assert_eq!(value["admission"]["rpm_debited"], "3");
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn in_band_errors_are_classified_across_protocols_and_representations() {
+    for (endpoint, media, body, category) in [
+        (
+            "chat/completions",
+            "application/json",
+            r#"{"error":{"code":500}}"#,
+            "server",
+        ),
+        (
+            "responses",
+            "application/json",
+            r#"{"status":"failed","error":{"code":"server_error"}}"#,
+            "server",
+        ),
+        (
+            "responses",
+            "text/event-stream",
+            "data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"server_error\"}}}\n\n",
+            "server",
+        ),
+        (
+            "messages",
+            "text/event-stream",
+            "event: error\ndata: {\"type\":\"error\",\"error\":{\"type\":\"overloaded_error\"}}\n\n",
+            "server",
+        ),
+        (
+            "messages",
+            "application/json",
+            r#"{"type":"error","error":{"type":"api_error"}}"#,
+            "server",
+        ),
+        (
+            "chat/completions",
+            "text/event-stream",
+            "data: {\"error\":{\"code\":429}}\n\n",
+            "rate_limit",
+        ),
+        (
+            "chat/completions",
+            "application/json",
+            r#"{"error":{"type":"invalid_request_error"}}"#,
+            "client",
+        ),
+        (
+            "chat/completions",
+            "text/event-stream",
+            "event: error\ndata: unstructured\n\n",
+            "unknown",
+        ),
+    ] {
+        let wire = String::from_utf8(response(200, "", body))
+            .unwrap()
+            .replace(
+                "Content-Type: application/json",
+                &format!("Content-Type: {media}"),
+            )
+            .into_bytes();
+        let upstream = UpstreamFixture::start(wire).await;
+        let mut cfg = config(upstream.address());
+        cfg.retry_transient_429 = true;
+        cfg.cache = Some(config::CacheConfig::default());
+        let gateway = spawn(cfg).await;
+        let payload = match endpoint {
+            "responses" => json!({"model":"example-model","input":"synthetic request"}),
+            _ => {
+                json!({"model":"example-model","messages":[{"role":"user","content":"synthetic request"}],"max_tokens":10})
+            }
+        };
+        let attempts = if category == "server" { 3 } else { 4 };
+        for _ in 0..attempts {
+            let reply = client()
+                .post(format!(
+                    "http://{}/r/pi-work/v1/{endpoint}",
+                    gateway.address()
+                ))
+                .header("content-type", "application/json")
+                .body(payload.to_string())
+                .send()
+                .await
+                .unwrap();
+            assert_eq!(reply.status(), 200, "{endpoint} {category}");
+            assert_eq!(reply.bytes().await.unwrap().as_ref(), body.as_bytes());
+        }
+        let value = wait_status(&gateway, |v| v["active"] == 0).await;
+        assert_eq!(value["response_errors"][category], attempts);
+        assert_eq!(
+            value["circuit_breaker"]["failures"],
+            if category == "server" { 3 } else { 0 }
+        );
+        assert_eq!(
+            value["circuit_breaker"]["open"],
+            u64::from(category == "server")
+        );
+        assert_eq!(value["exact_cache"]["stores"], 0);
+        assert_eq!(value["usage_known"], 0);
+        assert_eq!(value["admission"]["shared_cooldown_ms"], 0);
+        assert_eq!(
+            upstream.attempts(),
+            attempts as usize,
+            "no post-header retries"
+        );
+        gateway.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn in_band_client_error_is_neutral_and_cannot_recover_a_probe() {
+    let failure = response(200, "", r#"{"error":{"code":503}}"#);
+    let neutral = response(200, "", r#"{"error":{"code":429}}"#);
+    let upstream = ControlledUpstream::start(
+        vec![
+            failure.clone(),
+            neutral.clone(),
+            failure.clone(),
+            neutral.clone(),
+            failure,
+        ],
+        true,
+    )
+    .await;
+    let gateway = spawn(config(upstream.address)).await;
+    for _ in 0..5 {
+        let reply = request(&gateway).await;
+        assert_eq!(reply.status(), 200);
+        reply.bytes().await.unwrap();
+    }
+    wait_status(&gateway, |v| v["circuit_breaker"]["open"] == 1).await;
+    assert_eq!(
+        upstream.attempts(),
+        5,
+        "neutral errors did not reset the server-failure streak"
+    );
+    upstream.set(vec![neutral, response(200, "", GOOD)]);
+    tokio::time::sleep(Duration::from_millis(5100)).await;
+    request(&gateway).await.bytes().await.unwrap();
+    let value = wait_status(&gateway, |v| v["active"] == 0).await;
+    assert_eq!(value["circuit_breaker"]["recoveries"], 0);
+    assert_eq!(value["circuit_breaker"]["probes"], 1);
+    assert_eq!(value["circuit_breaker"]["half_open"], 0);
+    assert_eq!(request(&gateway).await.text().await.unwrap(), GOOD);
+    let value = wait_status(&gateway, |v| v["active"] == 0).await;
+    assert_eq!(value["circuit_breaker"]["recoveries"], 1);
+    assert_eq!(value["circuit_breaker"]["probes"], 2);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn explicit_sse_server_error_is_recorded_before_http_eof() {
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let gateway = spawn(config(listener.local_addr().unwrap())).await;
+    let (finish, finished) = tokio::sync::oneshot::channel::<()>();
+    let task = tokio::spawn(async move {
+        let (mut socket, _) = listener.accept().await.unwrap();
+        support::fixture::read_request(&mut socket).await.unwrap();
+        let body = "data: {\"error\":{\"code\":500}}\n\n";
+        let head = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n{:x}\r\n{body}\r\n",
+            body.len()
+        );
+        socket.write_all(head.as_bytes()).await.unwrap();
+        finished.await.unwrap();
+        socket.write_all(b"0\r\n\r\n").await.unwrap();
+    });
+    let reply = request(&gateway).await;
+    let value = wait_status(&gateway, |v| v["response_errors"]["server"] == 1).await;
+    assert_eq!(value["terminal_body_eof"], 0);
+    assert_eq!(value["circuit_breaker"]["failures"], 1);
+    finish.send(()).unwrap();
+    reply.bytes().await.unwrap();
+    let value = wait_status(&gateway, |v| v["active"] == 0).await;
+    assert_eq!(value["response_errors"]["server"], 1);
+    assert_eq!(value["circuit_breaker"]["failures"], 1);
+    task.await.unwrap();
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
 async fn consecutive_503_opens_without_an_extra_attempt_or_quota_charge() {
     let upstream = UpstreamFixture::start(
         b"HTTP/1.1 503 Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_vec(),
@@ -315,31 +585,160 @@ async fn cache_hits_survive_open_circuit_and_recovery_admits_one_probe_including
             .unwrap()
     });
     wait_status(&gateway, |v| v["circuit_breaker"]["half_open"] == 1).await;
-    let blocked = send(
-        gateway.address(),
-        "pi-work",
-        "example-model",
-        "synthetic-one",
-        true,
-    )
-    .await;
-    assert!(
-        String::from_utf8(blocked.bytes().await.unwrap().to_vec())
+    let follower = tokio::spawn(async move {
+        send(address, "pi-work", "example-model", "synthetic-one", true)
+            .await
+            .bytes()
+            .await
             .unwrap()
-            .contains("upstream_circuit_open")
+    });
+    tokio::time::sleep(Duration::from_millis(30)).await;
+    assert!(
+        !follower.is_finished(),
+        "a half-open follower must await the real probe"
     );
     assert_eq!(upstream.attempts(), 5);
     upstream.gate.send(true).unwrap();
     assert_eq!(probe.await.unwrap(), GOOD);
+    assert_eq!(follower.await.unwrap(), GOOD);
     assert_eq!(
         upstream.attempts(),
-        6,
+        7,
         "429 retry acquires its own guard and cannot reject itself"
     );
     let value = wait_status(&gateway, |v| v["active"] == 0).await;
     assert_eq!(value["circuit_breaker"]["recoveries"], 1);
     assert_eq!(value["circuit_breaker"]["tracked_attempts"], 0);
-    assert_eq!(value["admission"]["rpm_debited"], "6");
+    assert_eq!(value["admission"]["rpm_debited"], "7");
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn late_half_open_race_releases_quota_and_keeps_original_admission_deadline() {
+    let upstream =
+        ControlledUpstream::start(vec![response(503, "Retry-After-Ms: 1\r\n", "")], true).await;
+    let mut cfg = config(upstream.address);
+    cfg.concurrency = 2;
+    let clock = llmgw::admission::ManualClock::default();
+    let (gate, rx) = watch::channel(true);
+    let gateway = server::testing::spawn_with_clock(
+        cfg,
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+        clock.clone(),
+        Some(rx),
+    )
+    .await
+    .unwrap();
+    for _ in 0..3 {
+        request(&gateway).await.bytes().await.unwrap();
+    }
+    wait_status(&gateway, |v| {
+        v["active"] == 0 && v["circuit_breaker"]["open"] == 1
+    })
+    .await;
+    upstream.set(vec![response(200, "", GOOD)]);
+    upstream.gate.send(false).unwrap();
+    gate.send(false).unwrap();
+    tokio::time::sleep(Duration::from_millis(1050)).await;
+    let mut requests = tokio::task::JoinSet::new();
+    for _ in 0..2 {
+        let address = gateway.address();
+        requests.spawn(async move {
+            let response = send(address, "pi-work", "example-model", "synthetic-one", true).await;
+            (response.status().as_u16(), response.bytes().await.unwrap())
+        });
+    }
+    wait_status(&gateway, |v| v["active"] == 2).await;
+    assert_eq!(upstream.attempts(), 3);
+    clock.advance_to(Duration::from_secs(119));
+    gate.send(true).unwrap();
+    let value = wait_status(&gateway, |v| {
+        v["circuit_breaker"]["waiters"] == 1 && v["admission"]["active"] == 1
+    })
+    .await;
+    assert_eq!(upstream.attempts(), 4, "only the probe reaches the wire");
+    assert_eq!(
+        value["admission"]["rpm_debited"], "1",
+        "the other reservation is canceled without debit"
+    );
+    assert_eq!(server::testing::quota_snapshot(&gateway).starts, 4);
+    clock.advance_to(Duration::from_secs(120));
+    upstream.gate.send(true).unwrap();
+    let mut codes = Vec::new();
+    while let Some(result) = requests.join_next().await {
+        let (code, body) = result.unwrap();
+        if code == 200 {
+            assert_eq!(body, GOOD);
+        } else {
+            assert!(
+                String::from_utf8(body.to_vec())
+                    .unwrap()
+                    .contains("gateway_queue_deadline")
+            );
+        }
+        codes.push(code);
+    }
+    codes.sort_unstable();
+    assert_eq!(codes, [200, 504]);
+    let value = wait_status(&gateway, |v| {
+        v["active"] == 0 && v["circuit_breaker"]["waiters"] == 0
+    })
+    .await;
+    assert_eq!(upstream.attempts(), 4);
+    assert_eq!(value["circuit_breaker"]["recoveries"], 1);
+    gateway.shutdown().await.unwrap();
+}
+
+#[tokio::test]
+async fn canceled_half_open_probe_wakes_follower_without_claiming_recovery() {
+    use support::fixture::{abort_socket, open_raw};
+    let upstream =
+        ControlledUpstream::start(vec![response(503, "Retry-After-Ms: 1\r\n", "")], true).await;
+    let mut cfg = config(upstream.address);
+    cfg.cancel_policy = config::CancelPolicy::Close;
+    cfg.concurrency = 2;
+    let gateway = spawn(cfg).await;
+    for _ in 0..3 {
+        request(&gateway).await.bytes().await.unwrap();
+    }
+    wait_status(&gateway, |v| v["active"] == 0).await;
+    upstream.set(vec![response(200, "", GOOD)]);
+    upstream.gate.send(false).unwrap();
+    tokio::time::sleep(Duration::from_millis(1050)).await;
+    let body =
+        r#"{"model":"example-model","messages":[{"role":"user","content":"synthetic request"}]}"#;
+    let raw = format!(
+        "POST /r/pi-work/v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nAuthorization: Bearer synthetic-one\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+        body.len()
+    );
+    let probe = open_raw(gateway.address(), raw.as_bytes()).await;
+    wait_status(&gateway, |v| {
+        v["circuit_breaker"]["half_open"] == 1 && upstream.attempts() == 4
+    })
+    .await;
+    let address = gateway.address();
+    let follower = tokio::spawn(async move {
+        send(address, "pi-work", "example-model", "synthetic-one", true)
+            .await
+            .bytes()
+            .await
+            .unwrap()
+    });
+    wait_status(&gateway, |v| v["circuit_breaker"]["waiters"] == 1).await;
+    abort_socket(probe);
+    let value = wait_status(&gateway, |v| {
+        v["circuit_breaker"]["probes"] == 2 && upstream.attempts() == 5
+    })
+    .await;
+    assert_eq!(value["circuit_breaker"]["recoveries"], 0);
+    assert_eq!(value["circuit_breaker"]["waiters"], 0);
+    assert!(!follower.is_finished());
+    upstream.gate.send(true).unwrap();
+    assert_eq!(follower.await.unwrap(), GOOD);
+    let value = wait_status(&gateway, |v| v["active"] == 0).await;
+    assert_eq!(value["circuit_breaker"]["recoveries"], 1);
+    assert_eq!(value["circuit_breaker"]["tracked_attempts"], 0);
+    assert_eq!(upstream.attempts(), 5);
     gateway.shutdown().await.unwrap();
 }
 
@@ -429,7 +828,10 @@ async fn coalesced_followers_reuse_success_after_the_owners_authorized_429_retry
                 .unwrap()
         });
     }
-    wait_status(&gateway, |v| v["exact_cache"]["waiters"] == 2).await;
+    wait_status(&gateway, |v| {
+        v["exact_cache"]["waiters"] == 2 && upstream.attempts() == 1
+    })
+    .await;
     assert_eq!(upstream.attempts(), 1);
     upstream.gate.send(true).unwrap();
     while let Some(result) = requests.join_next().await {

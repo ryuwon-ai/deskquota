@@ -51,6 +51,50 @@ fn request(path: &str) -> Vec<u8> {
 fn rejection(header: &str, body: &[u8]) -> Vec<u8> {
     [format!("HTTP/1.1 429 Too Many Requests\r\nContent-Type: application/json\r\nContent-Length: {}\r\n{header}Connection: close\r\n\r\n", body.len()).into_bytes(), body.to_vec()].concat()
 }
+
+#[tokio::test]
+async fn successful_exhaustion_feedback_gates_the_next_wire_request() {
+    let upstream = UpstreamFixture::start(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\nX-Ratelimit-Remaining-Requests: 0\r\nX-Ratelimit-Reset-Requests: 400ms\r\nConnection: close\r\n\r\n{}".to_vec()).await;
+    let clock = llmgw::admission::ManualClock::default();
+    let gateway = server::testing::spawn_with_clock(
+        config(upstream.address()),
+        RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+        clock.clone(),
+        None,
+    )
+    .await
+    .unwrap();
+    clock.advance_to(Duration::from_secs(60));
+    let first = send_raw(gateway.address(), &request("/r/a/v1/models")).await;
+    assert_eq!(status(&first), 200);
+    assert_eq!(response_body(&first), b"{}");
+    let address = gateway.address();
+    let second = tokio::spawn(async move { send_raw(address, &request("/r/b/v1/models")).await });
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert_eq!(
+        upstream.attempts(),
+        1,
+        "successful exact-zero feedback must gate the next request"
+    );
+    assert!(!second.is_finished());
+    clock.advance_to(Duration::from_millis(60_399));
+    tokio::time::sleep(Duration::from_millis(10)).await;
+    assert_eq!(upstream.attempts(), 1);
+    clock.advance_to(Duration::from_millis(60_400));
+    let second = tokio::time::timeout(Duration::from_secs(2), second)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(status(&second), 200);
+    assert_eq!(response_body(&second), b"{}");
+    assert_eq!(upstream.attempts(), 2);
+    let state = gateway_status(gateway.address()).await;
+    assert_eq!(
+        state["admission"]["shared_cooldown_ms"], 400,
+        "probe's own new zero cannot be cleared by its200 status"
+    );
+    gateway.shutdown().await.unwrap();
+}
 #[tokio::test]
 async fn retry_after_survives_request_deadline_and_new_root_metadata_client() {
     let raw = br#"{"error":{"type":"rate_limit_error"}}"#;

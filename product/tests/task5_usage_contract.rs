@@ -5,6 +5,7 @@ use llmgw::config::{
     Accounting, Auth, CancelPolicy, Config, Endpoint, Limit, Model, Quota, Root, Upstream,
 };
 use llmgw::server::{self, RuntimeCredentials};
+use serde_json::{Value, json};
 use std::time::Duration;
 use support::fixture::{UpstreamFixture, response_body, send_raw, status};
 
@@ -14,6 +15,36 @@ const RESP_FINAL: &str = "data: {\"type\":\"response.completed\",\"response\":{\
 const MESSAGES_USAGE: &str = "event: message_start\ndata: {\"type\":\"message_start\",\"message\":{\"usage\":{\"input_tokens\":17,\"output_tokens\":1,\"cache_creation_input_tokens\":3,\"cache_read_input_tokens\":2}}}\n\nevent: message_delta\ndata: {\"type\":\"message_delta\",\"usage\":{\"output_tokens\":9}}\n\n";
 const MESSAGE_STOP: &str = "event: message_stop\ndata: {\"type\":\"message_stop\"}\n\n";
 const ERROR: &str = "data: {\"type\":\"error\",\"error\":{\"type\":\"synthetic_error\"}}\n\n";
+
+fn incomplete_response(reason: &str) -> Value {
+    json!({"status":"incomplete","error":null,"incomplete_details":{"reason":reason},"usage":{"input_tokens":20,"output_tokens":3,"input_tokens_details":{"cached_tokens":7}}})
+}
+
+fn incomplete_event(response: &Value) -> String {
+    format!(
+        "data: {}\n\n",
+        json!({"type":"response.incomplete","response":response})
+    )
+}
+
+async fn verify_incomplete(response: &Value, known: Option<u128>, accounting: Accounting) {
+    verify_response(
+        Endpoint::Responses,
+        &response.to_string(),
+        known,
+        accounting,
+        "200 OK",
+        "Content-Type: application/json\r\n",
+    )
+    .await;
+    verify_mode(
+        Endpoint::Responses,
+        &incomplete_event(response),
+        known,
+        accounting,
+    )
+    .await;
+}
 
 async fn verify(endpoint: Endpoint, sse: &str, known: Option<u128>) {
     verify_mode(endpoint, sse, known, Accounting::Actual).await;
@@ -204,6 +235,222 @@ async fn responses_later_completed_without_usage_cannot_reuse_stale_usage() {
     )
     .await;
 }
+
+#[tokio::test]
+async fn responses_incomplete_json_and_sse_settle_valid_usage_and_keep_reserved_estimate() {
+    for reason in ["max_output_tokens", "content_filter"] {
+        let mut response = incomplete_response(reason);
+        for error_present in [true, false] {
+            if !error_present {
+                response.as_object_mut().unwrap().remove("error");
+            }
+            verify_incomplete(&response, Some(23), Accounting::Actual).await;
+            verify_incomplete(&response, Some(23), Accounting::Reserved).await;
+        }
+        response["usage"]["output_tokens"] = json!(1200);
+        verify_incomplete(&response, Some(1220), Accounting::Actual).await;
+        response["usage"] = json!({"input_tokens":0,"output_tokens":0});
+        verify_incomplete(&response, Some(0), Accounting::Actual).await;
+    }
+}
+
+#[tokio::test]
+async fn responses_valid_incomplete_repeats_settle_but_mixed_completed_terminals_do_not() {
+    for reason in ["max_output_tokens", "content_filter"] {
+        let terminal = incomplete_event(&incomplete_response(reason));
+        verify(
+            Endpoint::Responses,
+            &format!("{terminal}data: {{\"type\":\"synthetic.notice\"}}\n\n{terminal}"),
+            Some(23),
+        )
+        .await;
+        for mixed in [
+            format!("{RESP_FINAL}{terminal}"),
+            format!("{terminal}{RESP_FINAL}"),
+        ] {
+            verify(Endpoint::Responses, &mixed, None).await;
+        }
+    }
+}
+
+#[tokio::test]
+async fn responses_invalid_incomplete_envelopes_and_usage_stay_unknown() {
+    let valid = incomplete_response("max_output_tokens");
+    let terminal = incomplete_event(&valid);
+    let mut invalid = Vec::new();
+    for field in ["status", "incomplete_details", "usage"] {
+        let mut response = valid.clone();
+        response.as_object_mut().unwrap().remove(field);
+        invalid.push(response);
+    }
+    for (pointer, replacement) in [
+        ("/status", json!("completed")),
+        ("/status", json!("failed")),
+        ("/status", Value::Null),
+        ("/error", json!({"type":"synthetic_error"})),
+        ("/incomplete_details", Value::Null),
+        ("/incomplete_details", json!({})),
+        ("/incomplete_details/reason", json!("unknown_reason")),
+        ("/incomplete_details/reason", json!(3)),
+        ("/usage", Value::Null),
+        ("/usage", json!({"total_tokens":23})),
+        ("/usage/input_tokens", json!(-1)),
+        ("/usage/output_tokens", json!(1.5)),
+        ("/usage/output_tokens", json!("3")),
+        ("/usage/output_tokens", Value::Null),
+        ("/usage/output_tokens", json!(true)),
+        ("/usage/input_tokens_details", json!("invalid")),
+        ("/usage/input_tokens_details/cached_tokens", json!(21)),
+        ("/usage/input_tokens_details/cached_tokens", json!(-1)),
+    ] {
+        let mut response = valid.clone();
+        *response.pointer_mut(pointer).unwrap() = replacement;
+        invalid.push(response);
+    }
+    for response in invalid {
+        verify_incomplete(&response, None, Accounting::Actual).await;
+        let bad = incomplete_event(&response);
+        for sse in [format!("{bad}{terminal}"), format!("{terminal}{bad}")] {
+            verify(Endpoint::Responses, &sse, None).await;
+        }
+    }
+}
+
+#[tokio::test]
+async fn responses_incomplete_errors_and_decreasing_repeats_keep_reservation() {
+    for reason in ["max_output_tokens", "content_filter"] {
+        let response = incomplete_response(reason);
+        let terminal = incomplete_event(&response);
+        for error in [
+            ERROR,
+            "data: {\"type\":\"response.failed\"}\n\n",
+            "event: error\ndata: {\"message\":\"synthetic failure\"}\n\n",
+        ] {
+            for sse in [format!("{error}{terminal}"), format!("{terminal}{error}")] {
+                verify(Endpoint::Responses, &sse, None).await;
+            }
+        }
+        for pointer in [
+            "/usage/input_tokens",
+            "/usage/output_tokens",
+            "/usage/input_tokens_details/cached_tokens",
+        ] {
+            let mut decreasing = response.clone();
+            let count = decreasing.pointer_mut(pointer).unwrap();
+            *count = json!(count.as_u64().unwrap() - 1);
+            verify(
+                Endpoint::Responses,
+                &format!("{terminal}{}{terminal}", incomplete_event(&decreasing)),
+                None,
+            )
+            .await;
+        }
+    }
+}
+
+#[tokio::test]
+async fn responses_overflow_is_unknown_and_cannot_be_repaired_by_a_later_terminal() {
+    for status in ["completed", "incomplete"] {
+        let mut response = incomplete_response("max_output_tokens");
+        response["status"] = json!(status);
+        if status == "completed" {
+            response["incomplete_details"] = Value::Null;
+        }
+        let terminal = format!(
+            "data: {}\n\n",
+            json!({"type":format!("response.{status}"),"response":response})
+        );
+        response["usage"]["input_tokens"] = json!(u64::MAX);
+        response["usage"]["output_tokens"] = json!(1);
+        verify_response(
+            Endpoint::Responses,
+            &response.to_string(),
+            None,
+            Accounting::Actual,
+            "200 OK",
+            "Content-Type: application/json\r\n",
+        )
+        .await;
+        let overflow = format!(
+            "data: {}\n\n",
+            json!({"type":format!("response.{status}"),"response":response})
+        );
+        for sse in [overflow.clone(), format!("{overflow}{terminal}")] {
+            verify(Endpoint::Responses, &sse, None).await;
+        }
+    }
+}
+
+#[tokio::test]
+async fn responses_incomplete_usage_waits_for_clean_json_and_sse_eof() {
+    use support::fixture::{GatedUpstreamFixture, open_raw, read_until};
+    use tokio::io::AsyncReadExt;
+
+    let response = incomplete_response("max_output_tokens");
+    for stream in [false, true] {
+        let payload = if stream {
+            incomplete_event(&response)
+        } else {
+            response.to_string()
+        };
+        for fail_body in [false, true] {
+            let chunks = vec![payload.as_bytes().to_vec()];
+            let upstream = if !stream {
+                GatedUpstreamFixture::start_json(chunks, vec![], fail_body).await
+            } else if fail_body {
+                GatedUpstreamFixture::start_with_body_error(chunks, vec![]).await
+            } else {
+                GatedUpstreamFixture::start(chunks, vec![]).await
+            };
+            let mut config =
+                test_config(upstream.address(), Endpoint::Responses, Accounting::Actual);
+            config.startup_hold_secs = 0;
+            let gateway = server::spawn(
+                config,
+                RuntimeCredentials::new(b"synthetic-control", None).unwrap(),
+            )
+            .await
+            .unwrap();
+            let body = r#"{"model":"synthetic","input":"synthetic"}"#;
+            let request = format!(
+                "POST /r/review-fix/v1/responses HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            let mut socket = open_raw(gateway.address(), request.as_bytes()).await;
+            upstream.release_first();
+            let mut received = read_until(&mut socket, payload.as_bytes()).await;
+            let before = server::testing::quota_snapshot(&gateway);
+            assert_eq!(before.cleanups, 0);
+            assert_eq!(before.active, 1, "terminal usage cannot release the slot");
+            assert_eq!(before.tpm_debited, body.len() as u128 + 300);
+            upstream.release_final();
+            upstream.release_eof();
+            tokio::time::timeout(Duration::from_secs(2), socket.read_to_end(&mut received))
+                .await
+                .unwrap()
+                .unwrap();
+            let after = server::testing::quota_snapshot(&gateway);
+            assert_eq!(after.cleanups, 1);
+            assert_eq!(after.active, 0);
+            assert_eq!(
+                after.tpm_debited,
+                if fail_body {
+                    body.len() as u128 + 300
+                } else {
+                    23
+                }
+            );
+            let metrics: Value = serde_json::from_slice(
+                &server::testing::shutdown_with_status(gateway)
+                    .await
+                    .unwrap(),
+            )
+            .unwrap();
+            assert_eq!(metrics["usage_known"], u64::from(!fail_body));
+        }
+    }
+}
+
 #[tokio::test]
 async fn consistent_repeated_terminal_reports_and_unknown_events_remain_supported() {
     let unknown = "data: {\"type\":\"synthetic.notice\"}\n\n";

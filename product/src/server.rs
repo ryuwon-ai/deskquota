@@ -831,11 +831,20 @@ async fn handle_request(
         &request_headers,
         &state.config.upstream.auth,
     );
-    if let Err(open) = circuit.check() {
+    let queue_deadline = (tokio::time::Instant::now()
+        + state.limits.capacity_wait.min(Duration::from_secs(120)))
+    .min(deadline);
+    let mut stop = state.stop.subscribe();
+    let ready = tokio::select! {
+        biased;
+        () = wait_for_stop(&mut stop) => return protocol::error(StatusCode::SERVICE_UNAVAILABLE, "gateway_stopping"),
+        () = wait_for_stop(&mut downstream_disconnect) => return protocol::error(StatusCode::BAD_REQUEST, "downstream_disconnected"),
+        () = tokio::time::sleep_until(queue_deadline) => return protocol::error(StatusCode::GATEWAY_TIMEOUT, "gateway_queue_deadline"),
+        ready = circuit.wait() => ready,
+    };
+    if let Err(open) = ready {
         return open.into_response();
     }
-    let queue_deadline = (tokio::time::Instant::now() + state.limits.capacity_wait).min(deadline);
-    let mut stop = state.stop.subscribe();
     if let Some(pending) = cache.as_mut() {
         let hit = tokio::select! {
             biased;
@@ -847,7 +856,14 @@ async fn handle_request(
         if let Some(hit) = hit {
             return hit;
         }
-        if let Err(open) = circuit.check() {
+        let ready = tokio::select! {
+            biased;
+            () = wait_for_stop(&mut stop) => return protocol::error(StatusCode::SERVICE_UNAVAILABLE, "gateway_stopping"),
+            () = wait_for_stop(&mut downstream_disconnect) => return protocol::error(StatusCode::BAD_REQUEST, "downstream_disconnected"),
+            () = tokio::time::sleep_until(queue_deadline) => return protocol::error(StatusCode::GATEWAY_TIMEOUT, "gateway_queue_deadline"),
+            ready = circuit.wait() => ready,
+        };
+        if let Err(open) = ready {
             return open.into_response();
         }
     }
@@ -887,6 +903,7 @@ async fn handle_request(
         cancel_policy: state.config.cancel_policy,
         retry_transient_429: state.config.retry_transient_429,
         deadline,
+        queue_deadline,
         admission_hold,
         prestart_gate: state.prestart_gate.clone(),
         stop: state.stop.subscribe(),

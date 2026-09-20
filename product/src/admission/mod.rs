@@ -1,4 +1,5 @@
 //! Joint concurrency/RPM/TPM ownership. No quota or execution hold exists while waiting.
+mod feedback;
 mod queue;
 pub mod quota;
 pub mod retry;
@@ -258,6 +259,8 @@ impl Admission {
                     admission: self.clone(),
                     id,
                     started: false,
+                    generation: 0,
+                    exhaustion_observed: false,
                     usage: None,
                     endpoint,
                     wait_started: now,
@@ -363,6 +366,8 @@ pub struct Hold {
     admission: Admission,
     id: ReservationId,
     started: bool,
+    generation: u64,
+    exhaustion_observed: bool,
     usage: Option<ObservedUsage>,
     endpoint: Endpoint,
     wait_started: Duration,
@@ -372,7 +377,7 @@ pub struct Hold {
 }
 impl Hold {
     /// Settle the previous attempt before entering the same queue with its original aging/deadline.
-    pub async fn retry(self) -> Result<Self, AcquireError> {
+    pub fn retry(self) -> impl std::future::Future<Output = Result<Self, AcquireError>> + Send {
         let admission = self.admission.clone();
         let (root, cost, endpoint, started, deadline) = (
             self.root,
@@ -382,12 +387,11 @@ impl Hold {
             self.queue_deadline,
         );
         drop(self);
-        admission
-            .acquire_at(root, cost, endpoint, started, deadline)
-            .await
-    }
-    pub(crate) fn cooldown(&self, delay: Duration) {
-        self.admission.cooldown(delay);
+        async move {
+            admission
+                .acquire_at(root, cost, endpoint, started, deadline)
+                .await
+        }
     }
     pub fn wait_started(&self) -> Duration {
         self.wait_started
@@ -395,18 +399,69 @@ impl Hold {
     pub fn queue_deadline(&self) -> Duration {
         self.queue_deadline
     }
-    pub fn start(&mut self) {
+    /// Final atomic quota/recovery check before any wire debit.
+    pub fn start(&mut self) -> bool {
         if !self.started {
-            self.started = self
-                .admission
-                .inner
-                .queue
-                .lock()
-                .expect("queue lock")
-                .ledger
-                .start(self.admission.inner.clock.now(), self.id);
-            self.admission.inner.notify.notify_waiters();
+            let inner = &self.admission.inner;
+            let mut queue = inner.queue.lock().expect("queue lock");
+            let now = inner.clock.now();
+            if !queue.can_start(now, self.id, self.cost) {
+                return false;
+            }
+            self.started = queue.ledger.start(now, self.id);
+            self.generation = queue.generation;
+            drop(queue);
+            inner.notify.notify_waiters();
         }
+        self.started
+    }
+    pub(crate) fn headers(
+        &mut self,
+        status: axum::http::StatusCode,
+        headers: &axum::http::HeaderMap,
+    ) {
+        let observed_at = std::time::SystemTime::now();
+        let hint = feedback::exhausted(headers, observed_at);
+        let inner = &self.admission.inner;
+        let mut queue = inner.queue.lock().expect("queue lock");
+        let now = inner.clock.now();
+        if status == axum::http::StatusCode::TOO_MANY_REQUESTS
+            && let Some(delay) = retry::header_delay(headers, observed_at)
+        {
+            // Relative server timing starts at headers, never at delayed error-body EOF.
+            queue.cooldown_until = queue.cooldown_until.max(now.saturating_add(delay));
+        }
+        if let Some(hint) = hint {
+            queue.arm_recovery(
+                now,
+                hint.delay,
+                hint.generation_only || self.cost.is_generation(),
+            );
+            self.exhaustion_observed = true;
+        }
+        if status == axum::http::StatusCode::OK {
+            // The response's new zero is processed first; it cannot prove its own recovery.
+            queue.accepted(now, self.id, self.generation);
+        } else if status != axum::http::StatusCode::TOO_MANY_REQUESTS {
+            queue.release_probe(self.id);
+        }
+        drop(queue);
+        inner.notify.notify_waiters();
+    }
+    pub(crate) fn rejected(&self, headers: &axum::http::HeaderMap, recognized: bool) {
+        let inner = &self.admission.inner;
+        let mut queue = inner.queue.lock().expect("queue lock");
+        if recognized && !self.exhaustion_observed {
+            let now = inner.clock.now();
+            let has_timing = retry::header_delay(headers, std::time::SystemTime::now()).is_some();
+            if has_timing || retry::missing_timing(headers) {
+                queue.throttle(now, self.generation, self.cost, has_timing);
+            }
+        }
+        // An ambiguous rejection or canceled probe must not strand its followers.
+        queue.release_probe(self.id);
+        drop(queue);
+        inner.notify.notify_waiters();
     }
     pub(crate) fn usage(&mut self, usage: Option<ObservedUsage>) {
         self.usage = usage;
@@ -426,6 +481,7 @@ impl Drop for Hold {
         } else {
             ledger.cancel(inner.clock.now(), self.id);
         }
+        queue.release_probe(self.id);
         drop(queue);
         inner.notify.notify_waiters();
     }
@@ -435,6 +491,300 @@ impl Drop for Hold {
 mod tests {
     use super::*;
     use crate::config::{Accounting, Auth, CancelPolicy, Limit, Quota, Upstream};
+
+    fn recovery_config() -> Config {
+        Config {
+            listen: "127.0.0.1:0".parse().unwrap(),
+            concurrency: 4,
+            startup_hold_secs: 0,
+            cache: None,
+            cancel_policy: CancelPolicy::Drain,
+            accounting: Accounting::Reserved,
+            retry_transient_429: false,
+            upstream: Upstream {
+                api_base: "http://127.0.0.1:9".parse().unwrap(),
+                auth: Auth::None,
+                proxy: None,
+                ca_bundle: None,
+            },
+            quota: Quota {
+                rpm: Limit::Known(100.try_into().unwrap()),
+                tpm: Limit::Known(1000.try_into().unwrap()),
+            },
+            models: vec![],
+            roots: vec![crate::config::Root {
+                id: "test".into(),
+                endpoints: vec![Endpoint::ChatCompletions, Endpoint::Models],
+                models: vec![],
+            }],
+        }
+    }
+
+    async fn timed_rejection_at(eof: Duration) {
+        use axum::http::{HeaderMap, HeaderValue, StatusCode};
+        let clock = ManualClock::default();
+        let admission = Admission::new(&recovery_config(), Some(clock.clone()));
+        let mut request = admission
+            .acquire(
+                0,
+                RequestCost::exact_fixture(10),
+                Endpoint::ChatCompletions,
+                Duration::from_secs(120),
+            )
+            .await
+            .unwrap();
+        assert!(request.start());
+        let mut headers = HeaderMap::new();
+        headers.insert("retry-after-ms", HeaderValue::from_static("1000"));
+        request.headers(StatusCode::TOO_MANY_REQUESTS, &headers);
+        clock.advance_to(eof);
+        request.rejected(&headers, true);
+        assert_eq!(
+            admission.status().shared_cooldown_ms,
+            Duration::from_secs(1).saturating_sub(eof).as_millis() as u64,
+            "reading the rejected body consumes the header wait instead of restarting it"
+        );
+    }
+
+    #[tokio::test]
+    async fn timed_rejection_eof_before_header_deadline_keeps_only_remaining_wait() {
+        timed_rejection_at(Duration::from_millis(200)).await;
+    }
+
+    #[tokio::test]
+    async fn timed_rejection_eof_after_header_deadline_adds_no_wait() {
+        timed_rejection_at(Duration::from_millis(1200)).await;
+    }
+
+    #[tokio::test]
+    async fn timed_rejection_preserves_a_later_longer_cooldown() {
+        use axum::http::{HeaderMap, HeaderValue, StatusCode};
+        let clock = ManualClock::default();
+        let admission = Admission::new(&recovery_config(), Some(clock.clone()));
+        let cost = RequestCost::exact_fixture(10);
+        let mut first = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        let mut second = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        assert!(first.start());
+        assert!(second.start());
+        let mut short = HeaderMap::new();
+        short.insert("retry-after-ms", HeaderValue::from_static("1000"));
+        first.headers(StatusCode::TOO_MANY_REQUESTS, &short);
+        clock.advance_to(Duration::from_millis(100));
+        let mut long = HeaderMap::new();
+        long.insert("retry-after-ms", HeaderValue::from_static("3000"));
+        second.headers(StatusCode::TOO_MANY_REQUESTS, &long);
+        second.rejected(&long, true);
+        clock.advance_to(Duration::from_millis(2500));
+        first.rejected(&short, true);
+        assert_eq!(
+            admission.status().shared_cooldown_ms,
+            600,
+            "the later response's deadline survives without either body adding time"
+        );
+    }
+
+    #[tokio::test]
+    async fn stale_timed_rejection_eof_preserves_a_newer_generation_probe() {
+        use axum::http::{HeaderMap, HeaderValue, StatusCode};
+        let clock = ManualClock::default();
+        let admission = Admission::new(&recovery_config(), Some(clock.clone()));
+        let cost = RequestCost::exact_fixture(10);
+        let mut first = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        let mut second = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        assert!(first.start());
+        assert!(second.start());
+        let mut headers = HeaderMap::new();
+        headers.insert("retry-after-ms", HeaderValue::from_static("1000"));
+        first.headers(StatusCode::TOO_MANY_REQUESTS, &headers);
+        second.rejected(&HeaderMap::new(), true);
+        drop(second);
+        clock.advance_to(Duration::from_secs(2));
+        let mut probe = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        assert!(probe.start());
+        first.rejected(&headers, true);
+        let (generation, can_start) = {
+            let queue = admission.inner.queue.lock().unwrap();
+            (
+                queue.generation,
+                queue.can_start(Duration::from_secs(2), probe.id, cost),
+            )
+        };
+        assert_eq!(generation, probe.generation);
+        assert!(can_start);
+        let follower =
+            admission.acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120));
+        tokio::pin!(follower);
+        assert!(
+            tokio::time::timeout(Duration::from_millis(20), &mut follower)
+                .await
+                .is_err(),
+            "stale EOF cannot admit a second recovery probe"
+        );
+        probe.headers(StatusCode::OK, &HeaderMap::new());
+        let follower = tokio::time::timeout(Duration::from_secs(1), follower)
+            .await
+            .unwrap()
+            .unwrap();
+        drop((first, probe, follower));
+        assert_eq!(admission.snapshot().active, 0);
+    }
+
+    #[tokio::test]
+    async fn held_request_rechecks_new_gate_without_debit_and_stale_success_cannot_heal() {
+        use axum::http::{HeaderMap, HeaderValue, StatusCode};
+        let clock = ManualClock::default();
+        let admission = Admission::new(&recovery_config(), Some(clock.clone()));
+        let cost = RequestCost::exact_fixture(10);
+        let mut first = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        assert!(first.start());
+        let mut held = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "x-ratelimit-remaining-requests",
+            HeaderValue::from_static("0"),
+        );
+        headers.insert("x-ratelimit-reset-requests", HeaderValue::from_static("1s"));
+        first.headers(StatusCode::OK, &headers);
+        let before = admission.snapshot();
+        assert!(!held.start());
+        let after = admission.snapshot();
+        assert_eq!(
+            (
+                after.starts,
+                after.rpm_debited,
+                after.tpm_debited,
+                after.tpm_held
+            ),
+            (
+                before.starts,
+                before.rpm_debited,
+                before.tpm_debited,
+                before.tpm_held
+            )
+        );
+        let reacquire = held.retry();
+        assert_eq!(
+            admission.snapshot().active,
+            1,
+            "unstarted hold drops before future polling"
+        );
+        clock.advance_to(Duration::from_secs(1));
+        let mut probe = reacquire.await.unwrap();
+        assert!(probe.start());
+        first.headers(StatusCode::OK, &HeaderMap::new());
+        let follower_admission = admission.clone();
+        let follower = tokio::spawn(async move {
+            follower_admission
+                .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+                .await
+        });
+        for _ in 0..10 {
+            tokio::task::yield_now().await;
+        }
+        assert!(!follower.is_finished());
+        assert_eq!(
+            admission.snapshot().active,
+            2,
+            "queued follower holds no quota or slot"
+        );
+        probe.headers(StatusCode::OK, &HeaderMap::new());
+        let follower = tokio::time::timeout(Duration::from_secs(1), follower)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            admission.snapshot().active,
+            3,
+            "accepted probe headers release followers before stream EOF"
+        );
+        drop((first, probe, follower));
+        assert_eq!(admission.snapshot().active, 0);
+    }
+
+    #[tokio::test]
+    async fn metadata_cannot_clear_generation_recovery_and_canceled_probe_yields_ownership() {
+        use axum::http::{HeaderMap, StatusCode};
+        let clock = ManualClock::default();
+        let admission = Admission::new(&recovery_config(), Some(clock.clone()));
+        let cost = RequestCost::exact_fixture(10);
+        let mut first = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        assert!(first.start());
+        first.rejected(&HeaderMap::new(), true);
+        drop(first);
+        clock.advance_to(Duration::from_secs(2));
+        let mut metadata = admission
+            .acquire(
+                0,
+                RequestCost::Metadata,
+                Endpoint::Models,
+                Duration::from_secs(120),
+            )
+            .await
+            .unwrap();
+        assert!(metadata.start());
+        metadata.headers(StatusCode::OK, &HeaderMap::new());
+        let probe = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        let follower_admission = admission.clone();
+        let follower = tokio::spawn(async move {
+            follower_admission
+                .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+                .await
+        });
+        for _ in 0..10 {
+            tokio::task::yield_now().await;
+        }
+        assert!(
+            !follower.is_finished(),
+            "metadata200 did not heal the generation gate"
+        );
+        drop(probe);
+        let mut follower = tokio::time::timeout(Duration::from_secs(1), follower)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        assert!(follower.start());
+        assert_eq!(
+            admission.snapshot().starts,
+            3,
+            "canceled unstarted probe was not debited"
+        );
+        follower.headers(StatusCode::SERVICE_UNAVAILABLE, &HeaderMap::new());
+        let next = admission
+            .acquire(0, cost, Endpoint::ChatCompletions, Duration::from_secs(120))
+            .await
+            .unwrap();
+        drop((metadata, follower, next));
+        assert_eq!(admission.snapshot().active, 0);
+    }
     #[tokio::test]
     async fn unpolled_worker_future_still_owns_and_releases_admission() {
         let config = Config {
@@ -482,6 +832,32 @@ mod tests {
         assert_eq!(s.cleanups, 1);
         assert_eq!(s.starts, 0);
     }
+    #[tokio::test]
+    async fn retry_eagerly_releases_an_unstarted_hold_before_future_is_polled() {
+        let mut config =
+            crate::config::parse(include_bytes!("../../examples/fixture.toml")).unwrap();
+        config.startup_hold_secs = 0;
+        let clock = ManualClock::default();
+        let admission = Admission::new(&config, Some(clock.clone()));
+        let hold = admission
+            .acquire(
+                0,
+                RequestCost::Metadata,
+                Endpoint::Models,
+                Duration::from_secs(2),
+            )
+            .await
+            .unwrap();
+        let retry = hold.retry();
+        assert_eq!(admission.snapshot().active, 0);
+        assert_eq!(admission.snapshot().starts, 0);
+        clock.advance_to(Duration::from_secs(2));
+        assert!(
+            matches!(retry.await, Err(AcquireError::Deadline)),
+            "release must not renew the queue deadline"
+        );
+    }
+
     #[tokio::test(start_paused = true)]
     async fn starting_provisional_hold_wakes_waiters_to_schedule_its_expiry() {
         let config = Config {

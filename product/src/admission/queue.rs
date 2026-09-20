@@ -21,11 +21,19 @@ struct Waiting {
     bypasses: u8,
 }
 
+struct Recovery {
+    generation_only: bool,
+    probe: Option<ReservationId>,
+}
+
 pub(super) struct Queue {
     pub ledger: Ledger,
     #[cfg(feature = "bench-harness")]
     pub policy: BenchmarkPolicy,
     pub cooldown_until: Duration,
+    pub generation: u64,
+    recovery: Option<Recovery>,
+    no_hint_stage: usize,
     roots: Vec<VecDeque<Waiting>>,
     cursor: usize,
     sequence: u64,
@@ -38,6 +46,9 @@ impl Queue {
             #[cfg(feature = "bench-harness")]
             policy: BenchmarkPolicy::Rr,
             cooldown_until: Duration::ZERO,
+            generation: 0,
+            recovery: None,
+            no_hint_stage: 0,
             roots: (0..roots).map(|_| VecDeque::new()).collect(),
             cursor: 0,
             sequence: 0,
@@ -52,6 +63,81 @@ impl Queue {
     }
     pub fn barrier(&self) -> Option<usize> {
         self.barrier.map(|(root, _)| root)
+    }
+    fn eligible(&self, cost: RequestCost) -> bool {
+        self.recovery.as_ref().is_none_or(|recovery| {
+            (recovery.generation_only && !cost.is_generation()) || recovery.probe.is_none()
+        })
+    }
+    pub fn can_start(&self, now: Duration, id: ReservationId, cost: RequestCost) -> bool {
+        now >= self.cooldown_until
+            && self.recovery.as_ref().is_none_or(|recovery| {
+                (recovery.generation_only && !cost.is_generation()) || recovery.probe == Some(id)
+            })
+    }
+    pub fn arm_recovery(&mut self, now: Duration, delay: Duration, generation_only: bool) {
+        self.cooldown_until = self.cooldown_until.max(now.saturating_add(delay));
+        let generation_only =
+            generation_only || self.recovery.as_ref().is_some_and(|r| r.generation_only);
+        self.generation = self.generation.wrapping_add(1);
+        self.recovery = Some(Recovery {
+            generation_only,
+            probe: None,
+        });
+    }
+    pub fn throttle(
+        &mut self,
+        now: Duration,
+        generation: u64,
+        cost: RequestCost,
+        has_timing: bool,
+    ) {
+        // Old error bodies cannot multiply backoff or replace a newer recovery probe.
+        if generation != self.generation {
+            if cost.is_generation() && self.recovery.as_ref().is_some_and(|r| !r.generation_only) {
+                // Deduplicate timing, not eligibility: an older generation429 still
+                // invalidates a metadata probe's claim to prove generation recovery.
+                let keep_probe = self
+                    .recovery
+                    .as_ref()
+                    .and_then(|r| r.probe)
+                    .is_some_and(|id| self.ledger.is_active_generation(id));
+                let recovery = self.recovery.as_mut().expect("checked active recovery");
+                recovery.generation_only = true;
+                if !keep_probe {
+                    self.generation = self.generation.wrapping_add(1);
+                    recovery.probe = None;
+                }
+            }
+            return;
+        }
+        let delay = if has_timing {
+            // Hold::headers already applied the server's wait to the shared deadline.
+            Duration::ZERO
+        } else {
+            const SECONDS: [u64; 6] = [1, 3, 5, 10, 20, 30];
+            let delay = Duration::from_secs(SECONDS[self.no_hint_stage])
+                + Duration::from_millis(rand::random_range(0..=250));
+            self.no_hint_stage = (self.no_hint_stage + 1).min(SECONDS.len() - 1);
+            delay
+        };
+        self.arm_recovery(now, delay, cost.is_generation());
+    }
+    pub fn accepted(&mut self, now: Duration, id: ReservationId, generation: u64) {
+        if generation == self.generation
+            && now >= self.cooldown_until
+            && self.recovery.as_ref().is_some_and(|r| r.probe == Some(id))
+        {
+            self.recovery = None;
+            self.no_hint_stage = 0;
+        }
+    }
+    pub fn release_probe(&mut self, id: ReservationId) {
+        if let Some(recovery) = self.recovery.as_mut() {
+            if recovery.probe == Some(id) {
+                recovery.probe = None;
+            }
+        }
     }
     pub fn enqueue(
         &mut self,
@@ -93,6 +179,7 @@ impl Queue {
         }
         if let Some(Ok(id)) = result.lock().expect("ticket lock").take() {
             self.ledger.cancel(now, id);
+            self.release_probe(id);
         }
         self.protect(now);
     }
@@ -146,7 +233,8 @@ impl Queue {
             let mut fits = [false; 16];
             for (root, q) in self.roots.iter().enumerate() {
                 if let Some(head) = q.front() {
-                    fits[root] = self.ledger.check(now, head.cost).is_ok();
+                    fits[root] =
+                        self.ledger.check(now, head.cost).is_ok() && self.eligible(head.cost);
                 }
             }
             let selected = if let Some((root, _)) = self.barrier {
@@ -198,6 +286,11 @@ impl Queue {
             let Decision::Admitted(id) = self.ledger.admit(now, head.cost) else {
                 unreachable!("same-owner checked admission");
             };
+            if let Some(recovery) = self.recovery.as_mut() {
+                if !recovery.generation_only || head.cost.is_generation() {
+                    recovery.probe = Some(id);
+                }
+            }
             *head.result.lock().expect("ticket lock") = Some(Ok(id));
             self.cursor = (root + 1) % self.roots.len();
         }
@@ -225,6 +318,14 @@ impl Queue {
         if now < self.cooldown_until {
             return Some("upstream_cooldown");
         }
+        if self
+            .roots
+            .iter()
+            .filter_map(|q| q.front())
+            .any(|head| !self.eligible(head.cost))
+        {
+            return Some("upstream_recovery");
+        }
         if let Some((root, _)) = self.barrier {
             return self.roots[root]
                 .front()
@@ -241,6 +342,230 @@ impl Queue {
 mod diagnostics_tests {
     use super::*;
     use crate::config::{Accounting, Limit, Quota};
+
+    fn recovery_queue() -> Queue {
+        Queue::new(
+            Ledger::new(
+                Quota {
+                    rpm: Limit::Unlimited,
+                    tpm: Limit::Unknown,
+                },
+                Accounting::Reserved,
+                4,
+                Duration::ZERO,
+                Duration::ZERO,
+            ),
+            2,
+        )
+    }
+    fn enqueue(queue: &mut Queue, root: usize, cost: RequestCost, now: Duration) -> ResultCell {
+        queue
+            .enqueue(root, cost, now, now + Duration::from_secs(120))
+            .unwrap()
+    }
+
+    #[test]
+    fn no_hint_generations_back_off_once_and_only_one_generation_probe_recovers() {
+        let mut queue = recovery_queue();
+        let cost = RequestCost::exact_fixture(1);
+        let mut now = Duration::ZERO;
+        for seconds in [1, 3, 5, 10, 20, 30, 30] {
+            let generation = queue.generation;
+            queue.throttle(now, generation, cost, false);
+            let until = queue.cooldown_until;
+            assert!(until - now >= Duration::from_secs(seconds));
+            assert!(until - now <= Duration::from_millis(seconds * 1000 + 250));
+            queue.throttle(now, generation, cost, false);
+            assert_eq!(
+                queue.cooldown_until, until,
+                "concurrent old429 cannot extend a no-hint generation"
+            );
+            now = until;
+        }
+        let generation = queue.generation;
+        let first = enqueue(&mut queue, 0, cost, now);
+        let second = enqueue(&mut queue, 0, cost, now);
+        let metadata = enqueue(&mut queue, 1, RequestCost::Metadata, now);
+        queue.drive(now);
+        let id = first.lock().unwrap().take().unwrap().unwrap();
+        let metadata_id = metadata.lock().unwrap().take().unwrap().unwrap();
+        assert!(queue.can_start(now, id, cost));
+        assert!(queue.can_start(now, metadata_id, RequestCost::Metadata));
+        assert!(second.lock().unwrap().is_none());
+        queue.accepted(now, metadata_id, generation);
+        queue.accepted(now, id, generation - 1);
+        queue.drive(now);
+        assert!(
+            second.lock().unwrap().is_none(),
+            "metadata and stale success cannot clear a generation gate"
+        );
+        queue.accepted(now, id, generation);
+        queue.drive(now);
+        assert!(second.lock().unwrap().is_some());
+        assert_eq!(queue.no_hint_stage, 0);
+    }
+
+    #[test]
+    fn canceled_or_failed_probe_releases_ownership_and_new_feedback_survives_success() {
+        let mut queue = recovery_queue();
+        let now = Duration::ZERO;
+        let cost = RequestCost::Metadata;
+        queue.arm_recovery(now, Duration::ZERO, false);
+        let first = enqueue(&mut queue, 0, cost, now);
+        let second = enqueue(&mut queue, 1, cost, now);
+        queue.drive(now);
+        assert!(first.lock().unwrap().is_some());
+        assert!(second.lock().unwrap().is_none());
+        queue.cancel(now, 0, &first);
+        queue.drive(now);
+        let id = second.lock().unwrap().take().unwrap().unwrap();
+        let generation = queue.generation;
+        let stage = queue.no_hint_stage;
+        queue.release_probe(id);
+        assert_eq!(queue.generation, generation);
+        assert_eq!(queue.no_hint_stage, stage);
+        let next = enqueue(&mut queue, 0, cost, now);
+        queue.drive(now);
+        let next_id = next.lock().unwrap().take().unwrap().unwrap();
+        queue.arm_recovery(now, Duration::from_secs(5), true);
+        queue.accepted(now, next_id, generation);
+        assert_eq!(queue.cooldown_until, Duration::from_secs(5));
+        assert!(!queue.can_start(now, next_id, cost));
+        assert!(queue.recovery.as_ref().unwrap().generation_only);
+    }
+
+    #[test]
+    fn metadata_at_same_root_head_does_not_claim_or_block_generation_probe() {
+        let mut queue = recovery_queue();
+        let now = Duration::ZERO;
+        queue.arm_recovery(now, Duration::ZERO, true);
+        let metadata = enqueue(&mut queue, 0, RequestCost::Metadata, now);
+        let generation = enqueue(&mut queue, 0, RequestCost::exact_fixture(1), now);
+        let follower = enqueue(&mut queue, 0, RequestCost::exact_fixture(1), now);
+        queue.drive(now);
+        let metadata_id = metadata.lock().unwrap().take().unwrap().unwrap();
+        let generation_id = generation.lock().unwrap().take().unwrap().unwrap();
+        assert_eq!(queue.recovery.as_ref().unwrap().probe, Some(generation_id));
+        queue.accepted(now, metadata_id, queue.generation);
+        queue.drive(now);
+        assert!(follower.lock().unwrap().is_none());
+        queue.accepted(now, generation_id, queue.generation);
+        queue.drive(now);
+        assert!(follower.lock().unwrap().is_some());
+    }
+
+    fn stale_generation_rejection_strengthens_metadata_gate(
+        during_probe: bool,
+        started: bool,
+        has_timing: bool,
+    ) {
+        let mut queue = recovery_queue();
+        let old_generation = queue.generation;
+        queue.throttle(Duration::ZERO, old_generation, RequestCost::Metadata, false);
+        let until = queue.cooldown_until;
+        let stage = queue.no_hint_stage;
+        let cost = RequestCost::exact_fixture(1);
+        if !during_probe {
+            queue.throttle(Duration::ZERO, old_generation, cost, has_timing);
+        }
+        let metadata = enqueue(&mut queue, 0, RequestCost::Metadata, until);
+        queue.drive(until);
+        let metadata_id = metadata.lock().unwrap().take().unwrap().unwrap();
+        let metadata_generation = queue.generation;
+        assert!(queue.can_start(until, metadata_id, RequestCost::Metadata));
+        if started {
+            assert!(queue.ledger.start(until, metadata_id));
+        }
+        if during_probe {
+            assert_eq!(queue.recovery.as_ref().unwrap().probe, Some(metadata_id));
+            queue.throttle(until, old_generation, cost, has_timing);
+        }
+        assert!(
+            queue.recovery.as_ref().unwrap().generation_only,
+            "stale generation429 must retain generation-only recovery eligibility"
+        );
+        assert_eq!(
+            queue.recovery.as_ref().unwrap().probe,
+            None,
+            "metadata probe ownership must be invalidated when eligibility strengthens"
+        );
+        assert_eq!(queue.no_hint_stage, stage);
+        assert_eq!(queue.cooldown_until, until);
+        let generation = enqueue(&mut queue, 0, cost, until);
+        let follower = enqueue(&mut queue, 0, cost, until);
+        queue.drive(until);
+        let generation_id = generation.lock().unwrap().take().unwrap().unwrap();
+        queue.accepted(until, metadata_id, metadata_generation);
+        queue.drive(until);
+        assert!(
+            follower.lock().unwrap().is_none(),
+            "metadata200 cannot heal the stronger gate"
+        );
+        queue.accepted(until, generation_id, queue.generation);
+        queue.drive(until);
+        assert!(follower.lock().unwrap().is_some());
+    }
+
+    #[test]
+    fn stale_generation_429_before_metadata_probe_strengthens_recovery_without_backoff() {
+        for (started, has_timing) in [(false, false), (true, false), (false, true), (true, true)] {
+            stale_generation_rejection_strengthens_metadata_gate(false, started, has_timing);
+        }
+    }
+
+    #[test]
+    fn stale_generation_429_during_metadata_probe_invalidates_its_recovery_ownership() {
+        for (started, has_timing) in [(false, false), (true, false), (false, true), (true, true)] {
+            stale_generation_rejection_strengthens_metadata_gate(true, started, has_timing);
+        }
+    }
+
+    #[test]
+    fn stale_generation_429_preserves_an_already_eligible_generation_probe() {
+        for (started, has_timing) in [(false, false), (true, false), (false, true), (true, true)] {
+            let mut queue = recovery_queue();
+            let old_generation = queue.generation;
+            queue.throttle(Duration::ZERO, old_generation, RequestCost::Metadata, false);
+            let until = queue.cooldown_until;
+            let stage = queue.no_hint_stage;
+            let cost = RequestCost::exact_fixture(1);
+            let probe = enqueue(&mut queue, 0, cost, until);
+            let follower = enqueue(&mut queue, 0, cost, until);
+            queue.drive(until);
+            let probe_id = probe.lock().unwrap().take().unwrap().unwrap();
+            let probe_generation = queue.generation;
+            assert!(queue.can_start(until, probe_id, cost));
+            if started {
+                assert!(queue.ledger.start(until, probe_id));
+            }
+            queue.throttle(until, old_generation, cost, has_timing);
+            queue.throttle(until, old_generation, cost, has_timing);
+            assert!(queue.recovery.as_ref().unwrap().generation_only);
+            assert_eq!(
+                queue.recovery.as_ref().unwrap().probe,
+                Some(probe_id),
+                "an already-eligible generation probe must remain the sole recovery owner"
+            );
+            assert_eq!(queue.generation, probe_generation);
+            assert_eq!(queue.no_hint_stage, stage);
+            assert_eq!(queue.cooldown_until, until);
+            queue.drive(until);
+            assert!(
+                follower.lock().unwrap().is_none(),
+                "promotion cannot start a second generation probe"
+            );
+            if !started {
+                assert!(queue.can_start(until, probe_id, cost));
+                assert!(queue.ledger.start(until, probe_id));
+            }
+            queue.accepted(until, probe_id, probe_generation);
+            queue.drive(until);
+            assert!(
+                follower.lock().unwrap().is_some(),
+                "the retained generation probe can prove recovery"
+            );
+        }
+    }
 
     #[test]
     fn protected_head_reports_resource_and_empty_cooldown_has_no_blocker() {

@@ -10,8 +10,10 @@ mod json;
 pub(crate) use json::json_usage;
 mod messages;
 mod request;
+mod response_error;
 mod responses;
 pub use request::inspect_body;
+pub(crate) use response_error::{ResponseError, response_error};
 
 pub const DATA_TOKEN_HEADER: &str = "x-llmgw-token";
 
@@ -46,6 +48,8 @@ impl ObservedUsage {
 
 pub(crate) struct EndpointObserver {
     inner: EndpointObserverInner,
+    endpoint: Endpoint,
+    response_error: Option<ResponseError>,
 }
 
 enum EndpointObserverInner {
@@ -67,19 +71,43 @@ impl EndpointObserver {
             Endpoint::Messages => EndpointObserverInner::Messages(messages::Observer::new(cache)),
             Endpoint::CountTokens | Endpoint::Models => EndpointObserverInner::Unsupported,
         };
-        Self { inner }
+        Self {
+            inner,
+            endpoint,
+            response_error: None,
+        }
     }
 
     pub(crate) fn observe(&mut self, event: Option<&str>, data: &[u8]) {
-        if event == Some("error") {
+        if data == b"[DONE]" && event != Some("error") {
+            match &mut self.inner {
+                EndpointObserverInner::Completions(observer) => observer.done(),
+                _ => self.mark_invalid(),
+            }
+            return;
+        }
+        let Ok(value) = serde_json::from_slice::<serde_json::Value>(data) else {
+            if event == Some("error") {
+                self.response_error.get_or_insert(ResponseError::Unknown);
+            }
+            self.mark_invalid();
+            return;
+        };
+        if let Some(error) = response_error(self.endpoint, event, &value) {
+            // First explicit error is sticky, even if a later event claims completion.
+            self.response_error.get_or_insert(error);
             self.mark_invalid();
         }
         match &mut self.inner {
-            EndpointObserverInner::Completions(observer) => observer.observe(data),
-            EndpointObserverInner::Responses(observer) => observer.observe(data),
-            EndpointObserverInner::Messages(observer) => observer.observe(event, data),
+            EndpointObserverInner::Completions(observer) => observer.observe(&value),
+            EndpointObserverInner::Responses(observer) => observer.observe(&value),
+            EndpointObserverInner::Messages(observer) => observer.observe(event, &value),
             EndpointObserverInner::Unsupported => {}
         }
+    }
+
+    pub(crate) fn response_error(&self) -> Option<ResponseError> {
+        self.response_error
     }
 
     pub(crate) fn mark_invalid(&mut self) {

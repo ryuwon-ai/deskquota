@@ -37,6 +37,7 @@ struct State {
     coordination_bypasses: u64,
     considered: u64,
     bypasses: Bypasses,
+    not_stored: NotStoredCounts,
     hits: u64,
     misses: u64,
     stores: u64,
@@ -52,6 +53,27 @@ struct Bypasses {
     tools_state: u64,
     history: u64,
     unsupported_shape: u64,
+}
+
+#[derive(Clone, Copy, Default, Serialize)]
+struct NotStoredCounts {
+    status: u64,
+    response_cache_control: u64,
+    unsafe_headers: u64,
+    encoding: u64,
+    representation: u64,
+    size: u64,
+    incomplete_or_unsafe: u64,
+}
+
+enum NotStored {
+    Status,
+    ResponseCacheControl,
+    UnsafeHeaders,
+    Encoding,
+    Representation,
+    Size,
+    IncompleteOrUnsafe,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -81,6 +103,7 @@ pub(crate) struct Snapshot {
     enabled: bool,
     considered: u64,
     bypasses: Bypasses,
+    not_stored: NotStoredCounts,
     hits: u64,
     misses: u64,
     stores: u64,
@@ -101,6 +124,8 @@ pub(crate) struct Pending {
     outcome: LookupOutcome,
     flight: Flight,
     waited: bool,
+    // A captured body must either commit or record one reason, including early task exits.
+    capture_pending: bool,
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Flight {
@@ -187,6 +212,7 @@ impl ExactCache {
             outcome: LookupOutcome::Uncounted,
             flight: Flight::Unclaimed,
             waited: false,
+            capture_pending: false,
         })
     }
 
@@ -195,6 +221,7 @@ impl ExactCache {
             enabled: cache.is_some(),
             considered: 0,
             bypasses: Bypasses::default(),
+            not_stored: NotStoredCounts::default(),
             hits: 0,
             misses: 0,
             stores: 0,
@@ -212,6 +239,7 @@ impl ExactCache {
             let state = cache.0.state.lock().expect("cache mutex");
             result.considered = state.considered;
             result.bypasses = state.bypasses;
+            result.not_stored = state.not_stored;
             result.hits = state.hits;
             result.misses = state.misses;
             result.stores = state.stores;
@@ -315,14 +343,16 @@ impl Pending {
     }
 
     pub(crate) fn capture(
-        self,
+        mut self,
         status: StatusCode,
         original: &HeaderMap,
         forwarded: &HeaderMap,
     ) -> Option<Capture> {
-        if status != StatusCode::OK
-            || forbids_reuse(original)
-            || original.contains_key("set-cookie")
+        let rejection = if status != StatusCode::OK {
+            Some(NotStored::Status)
+        } else if forbids_reuse(original) {
+            Some(NotStored::ResponseCacheControl)
+        } else if original.contains_key("set-cookie")
             || original.get_all("vary").iter().any(|value| {
                 value.to_str().map_or(true, |value| {
                     value.split(',').any(|field| {
@@ -331,38 +361,60 @@ impl Pending {
                     })
                 })
             })
-            || original
-                .get_all("content-encoding")
-                .iter()
-                .any(|value| !value.as_bytes().eq_ignore_ascii_case(b"identity"))
-            || original.get_all("content-length").iter().any(|value| {
-                value
-                    .to_str()
-                    .ok()
-                    .and_then(|value| value.parse::<usize>().ok())
-                    .is_none_or(|value| value > ENTRY_BYTES)
-            })
         {
+            Some(NotStored::UnsafeHeaders)
+        } else if original
+            .get_all("content-encoding")
+            .iter()
+            .any(|value| !value.as_bytes().eq_ignore_ascii_case(b"identity"))
+        {
+            Some(NotStored::Encoding)
+        } else if original.get_all("content-length").iter().any(|value| {
+            value
+                .to_str()
+                .ok()
+                .and_then(|value| value.parse::<usize>().ok())
+                .is_none_or(|value| value > ENTRY_BYTES)
+        }) {
+            Some(NotStored::Size)
+        } else {
+            None
+        };
+        if let Some(reason) = rejection {
+            self.record_not_stored(reason);
             return None;
         }
         let names = ["content-type", "content-encoding", "content-language"];
         let mut types = forwarded.get_all("content-type").iter();
-        let media = types.next()?.to_str().ok()?.split(';').next()?.trim();
+        let media = types
+            .next()
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.split(';').next())
+            .map(str::trim);
         if types.next().is_some()
-            || !(media.eq_ignore_ascii_case("application/json")
-                || media.eq_ignore_ascii_case("text/event-stream"))
+            || !media.is_some_and(|media| {
+                media.eq_ignore_ascii_case("application/json")
+                    || media.eq_ignore_ascii_case("text/event-stream")
+            })
         {
+            self.record_not_stored(NotStored::Representation);
             return None;
         }
-        let header_bytes = names.iter().try_fold(2usize, |total, name| {
-            forwarded
-                .get_all(*name)
-                .iter()
-                .try_fold(total, |total, value| {
-                    total.checked_add(name.len() + value.as_bytes().len() + 4)
-                })
-        })?;
-        let limit = ENTRY_BYTES.checked_sub(header_bytes)?;
+        let limit = names
+            .iter()
+            .try_fold(2usize, |total, name| {
+                forwarded
+                    .get_all(*name)
+                    .iter()
+                    .try_fold(total, |total, value| {
+                        total.checked_add(name.len() + value.as_bytes().len() + 4)
+                    })
+            })
+            .and_then(|header_bytes| ENTRY_BYTES.checked_sub(header_bytes));
+        let Some(limit) = limit else {
+            self.record_not_stored(NotStored::Size);
+            return None;
+        };
         let permit = {
             let mut state = self.cache.0.state.lock().expect("cache mutex");
             loop {
@@ -393,6 +445,7 @@ impl Pending {
                 );
             }
         }
+        self.capture_pending = true;
         Some(Capture {
             pending: self,
             body: Vec::with_capacity(limit),
@@ -401,10 +454,33 @@ impl Pending {
             limit,
         })
     }
+
+    pub(crate) fn reject_status(mut self) {
+        self.record_not_stored(NotStored::Status);
+    }
+
+    fn record_not_stored(&mut self, reason: NotStored) {
+        self.capture_pending = false;
+        let mut state = self.cache.0.state.lock().expect("cache mutex");
+        let counts = &mut state.not_stored;
+        let count = match reason {
+            NotStored::Status => &mut counts.status,
+            NotStored::ResponseCacheControl => &mut counts.response_cache_control,
+            NotStored::UnsafeHeaders => &mut counts.unsafe_headers,
+            NotStored::Encoding => &mut counts.encoding,
+            NotStored::Representation => &mut counts.representation,
+            NotStored::Size => &mut counts.size,
+            NotStored::IncompleteOrUnsafe => &mut counts.incomplete_or_unsafe,
+        };
+        *count = count.saturating_add(1);
+    }
 }
 
 impl Drop for Pending {
     fn drop(&mut self) {
+        if self.capture_pending {
+            self.record_not_stored(NotStored::IncompleteOrUnsafe);
+        }
         if !matches!(self.flight, Flight::Waiting | Flight::Owner) {
             return;
         }
@@ -441,6 +517,9 @@ fn evict(state: &mut State) -> bool {
 impl Capture {
     pub(crate) fn observe(&mut self, bytes: &[u8]) -> bool {
         if bytes.len() > self.limit - self.body.len() {
+            if self.pending.capture_pending {
+                self.pending.record_not_stored(NotStored::Size);
+            }
             return false;
         }
         // Copy from upstream before delivery; never retain the delivery semaphore owner.
@@ -448,9 +527,10 @@ impl Capture {
         true
     }
     pub(crate) fn commit(mut self, complete: bool) {
-        if !complete {
+        if !complete || !self.pending.capture_pending {
             return;
         }
+        self.pending.capture_pending = false;
         let body = self.body.into_boxed_slice();
         let retained = body.len() + stored_size(&self.headers);
         drop(self.permit.split(ENTRY_BYTES - retained));
@@ -987,6 +1067,7 @@ mod tests {
             outcome: LookupOutcome::Uncounted,
             flight: Flight::Unclaimed,
             waited: false,
+            capture_pending: false,
         }
     }
     fn headers() -> HeaderMap {
@@ -1113,7 +1194,13 @@ mod tests {
         let headers = headers();
         let mut capture = owner.capture(StatusCode::OK, &headers, &headers).unwrap();
         assert!(!capture.observe(&vec![0; ENTRY_BYTES]));
+        assert!(!capture.observe(&vec![0; ENTRY_BYTES]));
         drop(capture);
+        let counts = ExactCache::snapshot(Some(&cache)).not_stored;
+        assert_eq!(counts.status, 1);
+        assert_eq!(counts.response_cache_control, 1);
+        assert_eq!(counts.size, 1);
+        assert_eq!(counts.incomplete_or_unsafe, 0);
         assert_eq!(ExactCache::snapshot(Some(&cache)).inflight_keys, 0);
         assert_eq!(ExactCache::snapshot(Some(&cache)).retained_bytes, 0);
     }
@@ -1215,11 +1302,27 @@ mod tests {
                 .capture(StatusCode::OK, &headers, &headers)
                 .is_none()
         );
+        let snapshot = ExactCache::snapshot(Some(&cache));
+        assert_eq!(snapshot.budget_bypasses, 1);
+        assert!(
+            serde_json::to_value(snapshot.not_stored)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .values()
+                .all(|value| value == 0)
+        );
         assert_eq!(
             ExactCache::snapshot(Some(&cache)).retained_bytes,
             BUDGET_BYTES
         );
         drop(captures);
+        assert_eq!(
+            ExactCache::snapshot(Some(&cache))
+                .not_stored
+                .incomplete_or_unsafe,
+            16
+        );
         for key in 0..200 {
             store(&cache, key, false);
         }

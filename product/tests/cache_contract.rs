@@ -99,6 +99,90 @@ async fn status(gateway: &GatewayHandle) -> Value {
 }
 const PATH: &str = "/r/one/v1/chat/completions";
 
+fn assert_not_stored(cache: &Value, reason: &str, expected: u64) {
+    let counts = cache["not_stored"]
+        .as_object()
+        .expect("response cache diagnostics");
+    assert_eq!(counts.len(), 7, "only bounded aggregate reason names");
+    assert_eq!(counts[reason], expected, "{reason}");
+    assert_eq!(
+        counts
+            .values()
+            .map(|value| value.as_u64().unwrap())
+            .sum::<u64>(),
+        expected,
+        "one terminal reason per response"
+    );
+}
+
+#[tokio::test]
+async fn response_cache_diagnostics_explain_no_cache_and_preserve_policy_precedence() {
+    for stream in [false, true] {
+        let media = if stream {
+            "text/event-stream"
+        } else {
+            "application/json"
+        };
+        let output = if stream {
+            [DELTA, STOP, USAGE, DONE].concat()
+        } else {
+            JSON_RESPONSE.to_owned()
+        };
+        let oversized = "x".repeat(270_000);
+        for (code, media, headers, output, reason) in [
+            (
+                200,
+                media,
+                "Cache-Control: no-cache\r\n",
+                output.as_str(),
+                "response_cache_control",
+            ),
+            (
+                200,
+                media,
+                "Cache-Control: no-cache\r\nSet-Cookie: synthetic=yes\r\n",
+                oversized.as_str(),
+                "response_cache_control",
+            ),
+            (
+                500,
+                media,
+                "Cache-Control: no-cache\r\n",
+                output.as_str(),
+                "status",
+            ),
+            (200, media, "Vary: *\r\n", output.as_str(), "unsafe_headers"),
+            (
+                200,
+                media,
+                "Content-Encoding: gzip\r\n",
+                output.as_str(),
+                "encoding",
+            ),
+            (200, "text/plain", "", output.as_str(), "representation"),
+            (200, media, "", oversized.as_str(), "size"),
+        ] {
+            let upstream =
+                UpstreamFixture::start(upstream_response(code, media, headers, output)).await;
+            let gateway = spawn_gateway(config(upstream.address())).await;
+            for _ in 0..2 {
+                let response = send(&gateway, PATH, &request(stream), &[]).await;
+                assert_eq!(response.status(), code);
+                assert_eq!(response.bytes().await.unwrap(), output);
+            }
+            let metrics = status(&gateway).await;
+            let cache = &metrics["exact_cache"];
+            assert_eq!(upstream.attempts(), 2);
+            assert_eq!(cache["misses"], 2);
+            assert_eq!(cache["stores"], 0);
+            assert_eq!(cache["hits"], 0);
+            assert_eq!(cache["retained_bytes"], 0);
+            assert_not_stored(cache, reason, 2);
+            gateway.shutdown().await.unwrap();
+        }
+    }
+}
+
 async fn wait_for_queue(gateway: &GatewayHandle, length: usize) {
     tokio::time::timeout(Duration::from_secs(2), async {
         while status(gateway).await["admission"]["queue_length"] != length {
@@ -424,6 +508,7 @@ async fn retry_count_only_reruns_reuse_json_and_sse_and_forward_original_metadat
         assert_eq!(value["exact_cache"]["misses"], 1);
         assert_eq!(value["admission"]["reservation"]["samples"], 1);
         assert_eq!(value["admission"]["reservation"]["observed_tokens"], "23");
+        assert_not_stored(&value["exact_cache"], "incomplete_or_unsafe", 0);
         gateway.shutdown().await.unwrap();
     }
 }
@@ -462,6 +547,7 @@ async fn original_vary_retry_metadata_forbids_json_and_sse_storage() {
             "original Vary must prevent reuse even after hop-by-hop scrubbing"
         );
         assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
+        assert_not_stored(&status(&gateway).await["exact_cache"], "unsafe_headers", 2);
         gateway.shutdown().await.unwrap();
     }
 }
@@ -530,6 +616,7 @@ async fn cache_policy_denominator_includes_bypasses_but_excludes_invalid_ingress
         assert_eq!(cache["bypasses"][reason], 1, "{reason}");
     }
     assert_eq!(upstream.attempts(), 7);
+    assert_not_stored(cache, "incomplete_or_unsafe", 0);
     gateway.shutdown().await.unwrap();
 }
 
@@ -871,6 +958,11 @@ async fn abandoned_downstream_drains_without_committing_and_body_errors_never_ca
     .await
     .unwrap();
     assert_eq!(status(&gateway).await["exact_cache"]["inflight_keys"], 0);
+    assert_not_stored(
+        &status(&gateway).await["exact_cache"],
+        "incomplete_or_unsafe",
+        1,
+    );
     let replacement = send(&gateway, PATH, &request(true), &[]).await;
     assert_eq!(
         upstream.attempts(),
@@ -915,6 +1007,11 @@ async fn abandoned_downstream_drains_without_committing_and_body_errors_never_ca
     }
     assert_eq!(upstream.attempts(), 2);
     assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
+    assert_not_stored(
+        &status(&gateway).await["exact_cache"],
+        "incomplete_or_unsafe",
+        2,
+    );
     gateway.shutdown().await.unwrap();
 }
 
@@ -1081,6 +1178,7 @@ async fn expired_entries_miss_and_disabled_cache_does_not_capture() {
             .all(|v| v == 0)
     );
     assert_eq!(status["exact_cache"]["retained_bytes"], 0);
+    assert_not_stored(&status["exact_cache"], "incomplete_or_unsafe", 0);
     gateway.shutdown().await.unwrap();
 }
 
@@ -1294,6 +1392,7 @@ async fn oversized_chunked_capture_releases_its_budget_before_eof() {
     let value = status(&gateway).await;
     assert_eq!(value["exact_cache"]["retained_bytes"], 0);
     assert_eq!(value["exact_cache"]["inflight_keys"], 0);
+    assert_not_stored(&value["exact_cache"], "size", 1);
     let replacement = send(&gateway, PATH, &request(true), &[]).await;
     assert_eq!(
         upstream.attempts(),
@@ -1306,6 +1405,7 @@ async fn oversized_chunked_capture_releases_its_budget_before_eof() {
     replacement.bytes().await.unwrap();
     assert_eq!(upstream.attempts(), 2);
     assert_eq!(status(&gateway).await["exact_cache"]["stores"], 0);
+    assert_not_stored(&status(&gateway).await["exact_cache"], "size", 2);
     gateway.shutdown().await.unwrap();
 }
 
@@ -1332,6 +1432,43 @@ async fn incomplete_tool_or_refusal_json_is_forwarded_but_never_stored() {
         }
         assert_eq!(upstream.attempts(), 2);
         gateway.shutdown().await.unwrap();
+    }
+}
+
+#[tokio::test]
+async fn responses_incomplete_usage_settles_without_json_or_sse_cache_reuse() {
+    for reason in ["max_output_tokens", "content_filter"] {
+        let response = json!({"status":"incomplete","error":null,"incomplete_details":{"reason":reason},"output":[{"type":"message","role":"assistant","status":"completed","content":[{"type":"output_text","text":"partial answer","annotations":[]}]}],"usage":{"input_tokens":20,"output_tokens":3,"input_tokens_details":{"cached_tokens":7}}});
+        for stream in [false, true] {
+            let (media, output) = if stream {
+                (
+                    "text/event-stream",
+                    format!(
+                        "data: {}\n\n",
+                        json!({"type":"response.incomplete","response":response})
+                    ),
+                )
+            } else {
+                ("application/json", response.to_string())
+            };
+            let body = json!({"model":"synthetic","input":"classify","store":false,"stream":stream,"max_output_tokens":64});
+            let upstream = UpstreamFixture::start(upstream_response(200, media, "", &output)).await;
+            let gateway = spawn_gateway(config(upstream.address())).await;
+            for _ in 0..2 {
+                let result = send(&gateway, "/r/one/v1/responses", &body, &[]).await;
+                assert_eq!(result.status(), 200);
+                assert_eq!(result.bytes().await.unwrap(), output);
+            }
+            assert_eq!(upstream.attempts(), 2);
+            assert_eq!(server::testing::quota_snapshot(&gateway).tpm_debited, 46);
+            let metrics = status(&gateway).await;
+            assert_eq!(metrics["usage_known"], 2);
+            assert_eq!(metrics["exact_cache"]["misses"], 2);
+            assert_eq!(metrics["exact_cache"]["stores"], 0);
+            assert_eq!(metrics["exact_cache"]["hits"], 0);
+            assert_not_stored(&metrics["exact_cache"], "incomplete_or_unsafe", 2);
+            gateway.shutdown().await.unwrap();
+        }
     }
 }
 

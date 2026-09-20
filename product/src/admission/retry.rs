@@ -86,10 +86,6 @@ pub fn transient(headers: &HeaderMap, bytes: &[u8]) -> bool {
         }
 }
 
-pub fn fallback_delay() -> Duration {
-    Duration::from_millis(1000 + rand::random_range(0..=250))
-}
-
 fn seconds_or_date(value: &str, now: SystemTime) -> Option<Duration> {
     integer(value).map(Duration::from_secs).or_else(|| {
         httpdate::parse_http_date(value)

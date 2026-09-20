@@ -1,6 +1,17 @@
 use serde_json::Value;
 
 use super::{ObservedUsage, nested_token, token};
+use crate::config::Endpoint;
+
+pub(super) fn supported_incomplete(response: &Value) -> bool {
+    response.get("status").and_then(Value::as_str) == Some("incomplete")
+        && matches!(
+            response
+                .pointer("/incomplete_details/reason")
+                .and_then(Value::as_str),
+            Some("max_output_tokens" | "content_filter")
+        )
+}
 
 pub(super) struct Observer {
     cache: Option<crate::cache::StreamCompletion>,
@@ -24,16 +35,9 @@ impl Observer {
         }
     }
 
-    pub(super) fn observe(&mut self, data: &[u8]) {
-        let Ok(value) = serde_json::from_slice::<Value>(data) else {
-            if let Some(cache) = &mut self.cache {
-                cache.invalidate();
-            }
-            self.invalid = true;
-            return;
-        };
+    pub(super) fn observe(&mut self, value: &Value) {
         if let Some(cache) = &mut self.cache {
-            cache.observe(None, &value);
+            cache.observe(None, value);
         }
         let Some(kind) = value.get("type").and_then(Value::as_str) else {
             return;
@@ -49,12 +53,16 @@ impl Observer {
             self.output_delta = true;
         }
         match kind {
-            "response.completed" => {
+            "response.completed" | "response.incomplete" => {
+                let completed = kind == "response.completed";
+                self.invalid |= self.terminal && self.completed != completed;
                 self.terminal = true;
-                self.completed = true;
-                if value
-                    .pointer("/response/status")
-                    .is_some_and(|status| status.as_str() != Some("completed"))
+                self.completed = completed;
+                if (completed
+                    && value
+                        .pointer("/response/status")
+                        .is_some_and(|status| status.as_str() != Some("completed")))
+                    || (!completed && !supported_incomplete(&value["response"]))
                     || value
                         .pointer("/response/error")
                         .is_some_and(|error| !error.is_null())
@@ -77,22 +85,20 @@ impl Observer {
                                     return;
                                 }
                             };
-                        if cached > input_tokens {
-                            self.invalid = true;
-                            return;
-                        }
                         let observed = ObservedUsage {
                             input_tokens,
                             output_tokens,
                             cache_creation_input_tokens: 0,
                             cache_read_input_tokens: cached,
                         };
-                        if self.usage.is_some_and(|previous| {
-                            observed.input_tokens < previous.input_tokens
-                                || observed.output_tokens < previous.output_tokens
-                                || observed.cache_read_input_tokens
-                                    < previous.cache_read_input_tokens
-                        }) {
+                        if observed.total(Endpoint::Responses).is_none()
+                            || self.usage.is_some_and(|previous| {
+                                observed.input_tokens < previous.input_tokens
+                                    || observed.output_tokens < previous.output_tokens
+                                    || observed.cache_read_input_tokens
+                                        < previous.cache_read_input_tokens
+                            })
+                        {
                             self.invalid = true;
                             return;
                         }
@@ -101,7 +107,7 @@ impl Observer {
                     _ => self.invalid = true,
                 }
             }
-            "response.incomplete" | "response.failed" | "error" => {
+            "response.failed" | "error" => {
                 self.terminal = true;
                 // Sticky across either ordering of unsuccessful/successful
                 // terminal events: stale completed usage must never settle.
@@ -133,7 +139,7 @@ impl Observer {
     }
 
     pub(super) fn finish(&self) -> Option<ObservedUsage> {
-        (!self.invalid && self.terminal && self.completed)
+        (!self.invalid && self.terminal)
             .then_some(self.usage)
             .flatten()
     }

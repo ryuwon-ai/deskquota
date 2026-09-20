@@ -10,7 +10,7 @@ use tokio::time::Instant;
 use crate::admission::Hold;
 use crate::config::{CancelPolicy, Endpoint};
 use crate::metrics::{Metrics, TerminalReason};
-use crate::protocol::{EndpointObserver, ObservedUsage};
+use crate::protocol::{EndpointObserver, ObservedUsage, ResponseError};
 use crate::transport::body_budget::BudgetedBody;
 use crate::transport::{headers, upstream::UpstreamClient};
 
@@ -43,6 +43,7 @@ pub struct ForwardRequest {
     pub cancel_policy: CancelPolicy,
     pub retry_transient_429: bool,
     pub deadline: Instant,
+    pub queue_deadline: Instant,
     pub admission_hold: Hold,
     pub prestart_gate: Option<tokio::sync::watch::Receiver<bool>>,
     pub stop: tokio::sync::watch::Receiver<bool>,
@@ -109,6 +110,7 @@ pub async fn forward(request: ForwardRequest) {
         cancel_policy,
         retry_transient_429,
         deadline,
+        queue_deadline,
         admission_hold,
         mut prestart_gate,
         mut stop,
@@ -134,7 +136,7 @@ pub async fn forward(request: ForwardRequest) {
                 biased;
                 () = tokio::time::sleep_until(deadline) => {
                     if attempt_started {
-                        if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(std::time::Duration::ZERO); }
+                        if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(None); }
                     }
                     let _ = head.send(Err(HeadError::Deadline));
                     guard.finish(TerminalReason::Deadline, None);
@@ -174,22 +176,49 @@ pub async fn forward(request: ForwardRequest) {
                 }
                 response = async {
                     if !attempt_started {
-                        if let Some(gate) = prestart_gate.as_mut() { wait_for_signal(gate).await; }
-                        circuit_attempt = Some(circuit.start().map_err(HeadError::Circuit)?);
-                        guard.admission_hold.as_mut().expect("worker owns admission").start();
+                        circuit_attempt = Some(tokio::time::timeout_at(queue_deadline, async {
+                            if let Some(gate) = prestart_gate.as_mut() { wait_for_signal(gate).await; }
+                            loop {
+                                if Instant::now() >= queue_deadline {
+                                    return Err(HeadError::Admission(crate::admission::AcquireError::Deadline));
+                                }
+                                match circuit.start() {
+                                    Ok(attempt) => {
+                                        if guard.admission_hold.as_mut().expect("worker owns admission").start() {
+                                            return Ok(attempt);
+                                        }
+                                        // A new quota gate raced the held reservation. Neither wire nor debit occurred.
+                                        drop(attempt);
+                                        let acquire = guard.admission_hold.take().expect("worker owns admission").retry();
+                                        guard.admission_hold = Some(acquire.await.map_err(HeadError::Admission)?);
+                                    }
+                                    Err(crate::circuit::Open::Probing) => {
+                                        // Release the unstarted reservation now, before waiting for the probe.
+                                        let acquire = guard.admission_hold.take().expect("worker owns admission").retry();
+                                        circuit.wait().await.map_err(HeadError::Circuit)?;
+                                        guard.admission_hold = Some(acquire.await.map_err(HeadError::Admission)?);
+                                    }
+                                    Err(open) => return Err(HeadError::Circuit(open)),
+                                }
+                            }
+                        }).await.map_err(|_| HeadError::Admission(crate::admission::AcquireError::Deadline))??);
                         attempt_started = true;
                         metrics.record_upstream_attempt();
                     }
                     send.as_mut().await.map_err(|error| {
                         if !error.is_builder() {
-                            if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(std::time::Duration::ZERO); }
+                            if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(None); }
                         }
                         HeadError::Upstream
                     })
                 } => match response {
                     Ok(response) => break response,
                     Err(error) => {
-                        let reason = if matches!(&error, HeadError::Circuit(_)) { TerminalReason::AdmissionRejected } else { TerminalReason::UpstreamError };
+                        let reason = match &error {
+                            HeadError::Admission(crate::admission::AcquireError::Deadline) => TerminalReason::Deadline,
+                            HeadError::Circuit(_) | HeadError::Admission(_) => TerminalReason::AdmissionRejected,
+                            _ => TerminalReason::UpstreamError,
+                        };
                         let _ = head.send(Err(error));
                         guard.finish(reason, None);
                         return;
@@ -202,6 +231,11 @@ pub async fn forward(request: ForwardRequest) {
             .as_mut()
             .expect("started wire attempt")
             .headers(response.status(), response.headers());
+        guard
+            .admission_hold
+            .as_mut()
+            .expect("worker owns admission")
+            .headers(response.status(), response.headers());
         let can_retry = response.status() == StatusCode::TOO_MANY_REQUESTS
             && retry_transient_429
             && !retried
@@ -209,22 +243,13 @@ pub async fn forward(request: ForwardRequest) {
             && !crate::admission::retry::server_forbids_retry(response.headers())
             && crate::admission::retry::timing_allows_retry(response.headers());
         if response.status() != StatusCode::OK && !can_retry {
-            cache = None;
+            if let Some(cache) = cache.take() {
+                cache.reject_status();
+            }
         }
 
         let mut prefix = RetryPrefix::default();
         if response.status() == axum::http::StatusCode::TOO_MANY_REQUESTS {
-            let delay = crate::admission::retry::header_delay(
-                response.headers(),
-                std::time::SystemTime::now(),
-            );
-            if let Some(delay) = delay {
-                guard
-                    .admission_hold
-                    .as_ref()
-                    .expect("worker owns admission")
-                    .cooldown(delay);
-            }
             let needs_body =
                 crate::admission::retry::missing_timing(response.headers()) || can_retry;
             let probing = async {
@@ -258,7 +283,7 @@ pub async fn forward(request: ForwardRequest) {
                         Ok(prefix) => break prefix,
                         Err(error) => {
                             if !error.is_timeout() {
-                                if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(std::time::Duration::ZERO); }
+                                if let Some(attempt) = circuit_attempt.as_mut() { attempt.failure(None); }
                             }
                             let _ = head.send(Err(HeadError::Upstream));
                             guard.finish(TerminalReason::UpstreamError, None);
@@ -271,12 +296,12 @@ pub async fn forward(request: ForwardRequest) {
         }
         let recognized = prefix.complete
             && crate::admission::retry::transient(response.headers(), &prefix.bytes);
-        if recognized && crate::admission::retry::missing_timing(response.headers()) {
+        if response.status() == StatusCode::TOO_MANY_REQUESTS {
             guard
                 .admission_hold
                 .as_ref()
                 .expect("worker owns admission")
-                .cooldown(crate::admission::retry::fallback_delay());
+                .rejected(response.headers(), recognized);
         }
         if recognized && can_retry && !disconnected {
             // Complete rejected response EOF was observed; drop the local HTTP body before releasing its hold.
@@ -323,6 +348,7 @@ pub async fn forward(request: ForwardRequest) {
     let status = response.status();
     let mut response_headers = response.headers().clone();
     let representation = observable_representation(status, &response_headers);
+    let error_delay = crate::circuit::failure_delay(&response_headers);
     headers::prepare_response(&mut response_headers);
     let mut capture = cache
         .filter(|_| !disconnected)
@@ -347,6 +373,7 @@ pub async fn forward(request: ForwardRequest) {
     let mut output_delta_recorded = false;
     let mut terminal_marker_recorded = false;
     let mut overflow_recorded = false;
+    let mut response_error_recorded = false;
 
     loop {
         let next = if downstream_open {
@@ -404,11 +431,25 @@ pub async fn forward(request: ForwardRequest) {
 
         let Some(next) = next else {
             metrics.record_response_body_eof();
-            circuit_attempt
-                .take()
-                .expect("completed wire attempt")
-                .complete();
-            let (usage, cache_complete) = observer.finish();
+            let (usage, cache_complete, error) = observer.finish();
+            if let Some(error) = error {
+                if !response_error_recorded {
+                    metrics.record_response_error(error);
+                    if error == ResponseError::Server {
+                        circuit_attempt
+                            .as_mut()
+                            .expect("wire attempt")
+                            .failure(error_delay);
+                    }
+                }
+                // A client/rate/unknown error cannot prove that a half-open probe recovered.
+                drop(circuit_attempt.take());
+            } else {
+                circuit_attempt
+                    .take()
+                    .expect("completed wire attempt")
+                    .complete();
+            }
             if downstream_open && !body_tx.is_closed() && !*downstream_disconnect.borrow() {
                 if let Some(capture) = capture.take() {
                     capture.commit(cache_complete);
@@ -424,7 +465,7 @@ pub async fn forward(request: ForwardRequest) {
                 // Total body timeout includes downstream backpressure; it is not an outage signal.
                 if !error.is_timeout() {
                     if let Some(attempt) = circuit_attempt.as_mut() {
-                        attempt.failure(std::time::Duration::ZERO);
+                        attempt.failure(None);
                     }
                 }
                 signal_body(
@@ -446,6 +487,18 @@ pub async fn forward(request: ForwardRequest) {
             capture = None;
         }
         observer.observe(&bytes);
+        if !response_error_recorded {
+            if let Some(error) = observer.response_error() {
+                response_error_recorded = true;
+                metrics.record_response_error(error);
+                if error == ResponseError::Server {
+                    circuit_attempt
+                        .as_mut()
+                        .expect("wire attempt")
+                        .failure(error_delay);
+                }
+            }
+        }
         if observer.first_output_delta() && !output_delta_recorded {
             output_delta_recorded = true;
             metrics.record_first_observed_output_delta();
@@ -736,12 +789,20 @@ impl ResponseObserver {
         }
     }
 
+    fn response_error(&self) -> Option<ResponseError> {
+        match self {
+            Self::Sse(sse) => sse.endpoint.response_error(),
+            _ => None,
+        }
+    }
+
     // Called only at clean HTTP EOF. JSON parsing never delays the first body chunk.
-    fn finish(&self) -> (Option<ObservedUsage>, bool) {
+    fn finish(&self) -> (Option<ObservedUsage>, bool, Option<ResponseError>) {
         match self {
             Self::Sse(sse) if !sse.overflowed => (
                 sse.endpoint.finish(),
                 sse.at_event_boundary() && sse.endpoint.cache_complete(),
+                sse.endpoint.response_error(),
             ),
             Self::Json {
                 endpoint,
@@ -752,14 +813,18 @@ impl ResponseObserver {
             } => {
                 let Ok(value) = serde_json::from_slice::<serde_json::Value>(&storage[..*used])
                 else {
-                    return (None, false);
+                    return (None, false, None);
                 };
+                if let Some(error) = crate::protocol::response_error(*endpoint, None, &value) {
+                    return (None, false, Some(error));
+                }
                 (
                     crate::protocol::json_usage(*endpoint, &value),
                     *cache && crate::cache::complete_json(*endpoint, &value),
+                    None,
                 )
             }
-            _ => (None, false),
+            _ => (None, false, self.response_error()),
         }
     }
 }
@@ -1036,7 +1101,7 @@ async fn wait_for_signal(signal: &mut tokio::sync::watch::Receiver<bool>) {
 mod tests {
     use crate::config::Endpoint;
 
-    use super::{MAX_EVENT_METADATA, SseDecoder};
+    use super::{MAX_EVENT_METADATA, ResponseError, ResponseObserver, SseDecoder};
 
     #[test]
     fn json_observer_storage_stops_at_limit_and_header_ambiguity_is_unknown() {
@@ -1073,6 +1138,36 @@ mod tests {
             HeaderValue::from_bytes(b"application/json;\xff").unwrap(),
         );
         assert!(observable_representation(StatusCode::OK, &headers).is_none());
+    }
+
+    #[test]
+    fn explicit_error_is_sticky_across_chunks_completion_and_overflow() {
+        for (body, expected) in [
+            (
+                "event: error\ndata: {\"error\":{\"code\":500}}\n\n",
+                ResponseError::Server,
+            ),
+            (
+                "event: error\ndata: invalid-json\n\n",
+                ResponseError::Unknown,
+            ),
+        ] {
+            let mut observer =
+                ResponseObserver::new(Endpoint::ChatCompletions, Some("text/event-stream"), true);
+            for byte in body.bytes() {
+                observer.observe(&[byte]);
+            }
+            assert_eq!(observer.response_error(), Some(expected));
+            observer.observe(b"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1}}\n\ndata: [DONE]\n\n");
+            let (usage, cache, error) = observer.finish();
+            assert!(usage.is_none());
+            assert!(!cache);
+            assert_eq!(error, Some(expected));
+            observer.observe(b"data: ");
+            observer.observe(&vec![b'x'; MAX_EVENT_METADATA + 1]);
+            assert!(observer.overflowed());
+            assert_eq!(observer.finish().2, Some(expected));
+        }
     }
 
     #[test]

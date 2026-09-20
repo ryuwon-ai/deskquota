@@ -32,16 +32,9 @@ impl Observer {
         }
     }
 
-    pub(super) fn observe(&mut self, event: Option<&str>, data: &[u8]) {
-        let Ok(value) = serde_json::from_slice::<Value>(data) else {
-            if let Some(cache) = &mut self.cache {
-                cache.invalidate();
-            }
-            self.invalid = true;
-            return;
-        };
+    pub(super) fn observe(&mut self, event: Option<&str>, value: &Value) {
         if let Some(cache) = &mut self.cache {
-            cache.observe(event, &value);
+            cache.observe(event, value);
         }
         let kind = value.get("type").and_then(Value::as_str).or(event);
         match kind {

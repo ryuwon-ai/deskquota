@@ -1100,6 +1100,12 @@ fn display(value: &serde_json::Value, off: bool) {
             cache["coordination_bypasses"]
         );
     }
+    if let Some(errors) = value.pointer("/runtime/response_errors") {
+        println!(
+            "HTTP 200 response errors: server: {}; rate limit: {}; client: {}; unknown: {}",
+            errors["server"], errors["rate_limit"], errors["client"], errors["unknown"]
+        );
+    }
     if let Some(circuit) = value.pointer("/runtime/circuit_breaker") {
         println!(
             "upstream circuits: {} open, {} probing; failures: {}; rejected calls: {}; recoveries: {}; tracking capacity bypasses: {}",
@@ -1189,10 +1195,29 @@ fn cache_details(value: &serde_json::Value) -> String {
         )
     })
     .join("; ");
+    let not_stored = [
+        "status",
+        "response_cache_control",
+        "unsafe_headers",
+        "encoding",
+        "representation",
+        "size",
+        "incomplete_or_unsafe",
+    ]
+    .map(|name| {
+        format!(
+            "{name}: {}",
+            value["not_stored"][name]
+                .as_u64()
+                .map_or_else(|| "n/a".to_owned(), |n| n.to_string())
+        )
+    })
+    .join("; ");
     format!(
         "exact cache: {enabled}; hits: {}; eligible misses: {}; entries: {}; retained: {}/{} bytes\n\
          cache policy evaluations (enabled, validated requests): {}; bypasses: {bypasses}\n\
-         capture budget bypasses: {}; counters reset with worker; store rejection is separate from request eligibility",
+         capture budget bypasses: {}; counters reset with worker; store rejection is separate from request eligibility\n\
+         cache not stored (one final reason per examined fill): {not_stored}",
         number("hits"),
         number("misses"),
         number("entries"),
@@ -1393,14 +1418,25 @@ mod status_tests {
             ),
             "exact cache: enabled; hits: 7; eligible misses: 3; entries: 2; retained: 40/4194304 bytes\n\
             cache policy evaluations (enabled, validated requests): n/a; bypasses: request_cache_control: n/a; size: n/a; endpoint: n/a; tools_state: n/a; history: n/a; unsupported_shape: n/a\n\
-            capture budget bypasses: n/a; counters reset with worker; store rejection is separate from request eligibility"
+            capture budget bypasses: n/a; counters reset with worker; store rejection is separate from request eligibility\n\
+            cache not stored (one final reason per examined fill): status: n/a; response_cache_control: n/a; unsafe_headers: n/a; encoding: n/a; representation: n/a; size: n/a; incomplete_or_unsafe: n/a"
         );
         assert_eq!(
             super::cache_details(&serde_json::Value::Null),
             "exact cache: n/a; hits: n/a; eligible misses: n/a; entries: n/a; retained: n/a/n/a bytes\n\
             cache policy evaluations (enabled, validated requests): n/a; bypasses: request_cache_control: n/a; size: n/a; endpoint: n/a; tools_state: n/a; history: n/a; unsupported_shape: n/a\n\
-            capture budget bypasses: n/a; counters reset with worker; store rejection is separate from request eligibility"
+            capture budget bypasses: n/a; counters reset with worker; store rejection is separate from request eligibility\n\
+            cache not stored (one final reason per examined fill): status: n/a; response_cache_control: n/a; unsafe_headers: n/a; encoding: n/a; representation: n/a; size: n/a; incomplete_or_unsafe: n/a"
         );
+    }
+
+    #[test]
+    fn cache_response_reasons_display_the_recorded_counts() {
+        let text = super::cache_details(&serde_json::json!({"not_stored": {
+            "status":1, "response_cache_control":2, "unsafe_headers":3, "encoding":4,
+            "representation":5, "size":6, "incomplete_or_unsafe":7
+        }}));
+        assert!(text.contains("status: 1; response_cache_control: 2; unsafe_headers: 3; encoding: 4; representation: 5; size: 6; incomplete_or_unsafe: 7"));
     }
 
     #[test]

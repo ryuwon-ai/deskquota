@@ -23,23 +23,16 @@ impl Observer {
         }
     }
 
-    pub(super) fn observe(&mut self, data: &[u8]) {
-        if data == b"[DONE]" {
-            if let Some(cache) = &mut self.cache {
-                cache.done();
-            }
-            self.terminal = true;
-            return;
-        }
-        let Ok(value) = serde_json::from_slice::<Value>(data) else {
-            if let Some(cache) = &mut self.cache {
-                cache.invalidate();
-            }
-            self.invalid = true;
-            return;
-        };
+    pub(super) fn done(&mut self) {
         if let Some(cache) = &mut self.cache {
-            cache.observe(None, &value);
+            cache.done();
+        }
+        self.terminal = true;
+    }
+
+    pub(super) fn observe(&mut self, value: &Value) {
+        if let Some(cache) = &mut self.cache {
+            cache.observe(None, value);
         }
         if value.get("error").is_some_and(|error| !error.is_null()) {
             self.invalid = true;

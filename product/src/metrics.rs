@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use crate::protocol::ObservedUsage;
+use crate::protocol::{ObservedUsage, ResponseError};
 
 #[derive(Clone)]
 pub struct Metrics {
@@ -27,6 +27,10 @@ struct Inner {
     first_observed_output_delta: AtomicU64,
     terminal_marker: AtomicU64,
     response_body_eof: AtomicU64,
+    response_error_server: AtomicU64,
+    response_error_rate_limit: AtomicU64,
+    response_error_client: AtomicU64,
+    response_error_unknown: AtomicU64,
     queued_response_bytes: AtomicU64,
     max_queued_response_bytes: AtomicU64,
     observed_input_tokens: AtomicU64,
@@ -67,6 +71,10 @@ impl Metrics {
                 first_observed_output_delta: AtomicU64::new(0),
                 terminal_marker: AtomicU64::new(0),
                 response_body_eof: AtomicU64::new(0),
+                response_error_server: AtomicU64::new(0),
+                response_error_rate_limit: AtomicU64::new(0),
+                response_error_client: AtomicU64::new(0),
+                response_error_unknown: AtomicU64::new(0),
                 queued_response_bytes: AtomicU64::new(0),
                 max_queued_response_bytes: AtomicU64::new(0),
                 observed_input_tokens: AtomicU64::new(0),
@@ -113,6 +121,16 @@ impl Metrics {
 
     pub fn record_response_body_eof(&self) {
         self.inner.response_body_eof.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub(crate) fn record_response_error(&self, error: ResponseError) {
+        match error {
+            ResponseError::Server => &self.inner.response_error_server,
+            ResponseError::RateLimit => &self.inner.response_error_rate_limit,
+            ResponseError::Client => &self.inner.response_error_client,
+            ResponseError::Unknown => &self.inner.response_error_unknown,
+        }
+        .fetch_add(1, Ordering::Relaxed);
     }
 
     pub fn record_observer_overflow(&self) {
@@ -195,7 +213,8 @@ impl Metrics {
                 "\"first_body_byte\":{},\"first_observed_output_delta\":{},\"terminal_marker\":{},",
                 "\"response_body_eof\":{},\"queued_response_bytes\":{},\"max_queued_response_bytes\":{},",
                 "\"observed_input_tokens\":{},\"observed_output_tokens\":{},",
-                "\"observed_cache_creation_tokens\":{},\"observed_cache_read_tokens\":{}}}"
+                "\"observed_cache_creation_tokens\":{},\"observed_cache_read_tokens\":{},",
+                "\"response_errors\":{{\"server\":{},\"rate_limit\":{},\"client\":{},\"unknown\":{}}}}}"
             ),
             load(&self.inner.requests), load(&self.inner.upstream_attempts),
             load(&self.inner.active), load(&self.inner.draining),
@@ -211,6 +230,8 @@ impl Metrics {
             load(&self.inner.observed_output_tokens),
             load(&self.inner.observed_cache_creation_tokens),
             load(&self.inner.observed_cache_read_tokens),
+            load(&self.inner.response_error_server), load(&self.inner.response_error_rate_limit),
+            load(&self.inner.response_error_client), load(&self.inner.response_error_unknown),
         )
         .into_bytes()
     }
