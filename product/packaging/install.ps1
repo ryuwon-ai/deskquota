@@ -51,9 +51,8 @@ try {
         $allowed = @{
             "llmgw.exe" = $true
             "README.md" = $true
-            "docs/installation.md" = $true
-            "docs/runtime-contract.md" = $true
-            "docs/client-compatibility.md" = $true
+            "LICENSE-MIT" = $true
+            "LICENSE-APACHE" = $true
         }
         $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         $binaryEntry = $null

@@ -1,19 +1,61 @@
-# Local dependencies and third-party checkouts are recorded by their manifests.
+# Internal research, plans, measurements and generated artifacts.
+/AGENTS.md
+/HARNESS.md
+/RESEARCH.md
+/docs/
+/reports/
+/evidence/
+/papers/
 /references/
-/.venvs/
+/assets/README.md
+/product/docs/
+/product/artifacts/
+
+# Local research runners; keep the native CI smoke test public.
+/scripts/*
+!/scripts/probe-product-cli.py
+/product/scripts/benchmark_input_estimation.py
+
+# Build output and local dependency environments.
 **/target/
+/native-target/
+/native-installed/
+/dist/
+/build/
+/.cache/
+/.venv/
+/.venvs/
+**/node_modules/
 **/__pycache__/
 *.py[cod]
 .DS_Store
 
-# Research outputs are curated explicitly when creating a snapshot.
-# Existing tracked evidence remains versioned; new runs require deliberate staging.
-/evidence/
-/product/artifacts/
-/papers/*
-!/papers/manifest.json
+# Local agent/editor settings and runtime data.
+/.codex/
+/.claude/
+/.agents/
+/.idea/
+/.vscode/
+/data/
+/tmp/
+*.log
+*.jsonl
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-wal
+*.db-shm
 
-# Credentials and local environment files never belong in a snapshot.
+# Credentials, certificates and machine-local configuration.
 .env
 .env.*
 !.env.example
+*.local.toml
+*.key
+*.pem
+# Deliberately public localhost TLS fixtures used by regression tests.
+!/product/tests/fixtures/setup-localhost-cert.pem
+!/product/tests/fixtures/setup-localhost-key.pem
+!/product/tests/fixtures/setup-localhost-server.pem

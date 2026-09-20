@@ -60,9 +60,8 @@ class PosixInstallerTests(unittest.TestCase):
         member_names = members or (
             "llmgw",
             "README.md",
-            "docs/installation.md",
-            "docs/runtime-contract.md",
-            "docs/client-compatibility.md",
+            "LICENSE-MIT",
+            "LICENSE-APACHE",
         )
         archive = self.release / "llmgw-test.tar.gz"
         with tarfile.open(archive, "w:gz") as output:

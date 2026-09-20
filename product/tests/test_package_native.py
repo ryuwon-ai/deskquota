@@ -20,20 +20,22 @@ def load_module():
     return module
 
 
+def write_documents(product):
+    product.mkdir()
+    (product / "README.md").write_text("Public usage guide\n")
+    for name in ("LICENSE-MIT", "LICENSE-APACHE"):
+        (product.parent / name).write_text(name)
+    (product / "docs").mkdir()
+    (product / "docs/internal.md").write_text("Unpublished fixture notes")
+
+
 class PackageNativeTests(unittest.TestCase):
     def test_binary_identity_is_bound_to_captured_archive_member(self):
         module = load_module()
         with tempfile.TemporaryDirectory(prefix="llmgw-package-interleave-") as raw:
             root = Path(raw)
             product = root / "product"
-            (product / "docs").mkdir(parents=True)
-            for name in (
-                "README.md",
-                "docs/installation.md",
-                "docs/runtime-contract.md",
-                "docs/client-compatibility.md",
-            ):
-                (product / name).write_text(name, encoding="utf-8")
+            write_documents(product)
             binary = root / "llmgw"
             captured = b"captured-archive-member"
             replacement = b"concurrent-path-replacement"
@@ -64,21 +66,17 @@ class PackageNativeTests(unittest.TestCase):
             self.assertEqual(binary.read_bytes(), replacement)
             self.assertEqual(result["binary_sha256"], hashlib.sha256(member).hexdigest())
 
-    def test_tar_contains_only_binary_and_required_user_docs(self):
+    def test_tar_contains_only_binary_readme_and_licenses(self):
         module = load_module()
         with tempfile.TemporaryDirectory(prefix="llmgw-package-test-") as raw:
             root = Path(raw)
             product = root / "product"
-            (product / "docs").mkdir(parents=True)
-            for name in ("README.md", "docs/installation.md", "docs/runtime-contract.md", "docs/client-compatibility.md"):
-                path = product / name
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(f"fixture {name}\n", encoding="utf-8")
+            write_documents(product)
             binary = root / "llmgw"
             binary.write_bytes(b"fixture-native-binary")
             output = root / "llmgw-test.tar.gz"
             result = module.package_native(binary, product, output)
-            self.assertEqual(result["members"], module.PACKAGE_MEMBERS)
+            self.assertEqual(result["members"], ("llmgw", "README.md", "LICENSE-MIT", "LICENSE-APACHE"))
             with tarfile.open(output, "r:gz") as archive:
                 members = archive.getmembers()
                 self.assertEqual([entry.name for entry in members], list(module.PACKAGE_MEMBERS))
@@ -95,9 +93,7 @@ class PackageNativeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="llmgw-package-deterministic-") as raw:
             root = Path(raw)
             product = root / "product"
-            (product / "docs").mkdir(parents=True)
-            for name in ("README.md", "docs/installation.md", "docs/runtime-contract.md", "docs/client-compatibility.md"):
-                (product / name).write_text(name, encoding="utf-8")
+            write_documents(product)
             binary = root / "llmgw"
             binary.write_bytes(b"same")
             first = root / "first.tar.gz"
@@ -114,9 +110,7 @@ class PackageNativeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             product = root / "product"
-            (product / "docs").mkdir(parents=True)
-            for name in module.PACKAGE_MEMBERS[1:]:
-                (product / name).write_text(name, encoding="utf-8")
+            write_documents(product)
             binary = root / "llmgw.exe"
             binary.write_bytes(b"native-fixture")
             first, second = root / "first.zip", root / "second.zip"

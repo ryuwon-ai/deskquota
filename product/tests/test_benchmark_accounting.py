@@ -198,7 +198,7 @@ class AccountingRulesTests(unittest.TestCase):
         self.assertEqual(identity["benchmark"], {"used": False})
         self.assertIn("scripts/benchmark_accounting.py", identity["sources"])
         self.assertIn("tests/test_benchmark_accounting.py", identity["sources"])
-        self.assertIn("docs/benchmark-method.md", identity["sources"])
+        self.assertFalse(any(name.startswith("docs/") for name in identity["sources"]))
 
 
 class UsageObservationTests(unittest.IsolatedAsyncioTestCase):

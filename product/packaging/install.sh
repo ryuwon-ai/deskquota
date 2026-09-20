@@ -131,7 +131,7 @@ tar -tvzf "$archive_file" >"$details" || fail "archive details cannot be listed"
 awk 'substr($0, 1, 1) != "-" { exit 1 }' "$details" || fail "archive links and non-files are not allowed"
 while IFS= read -r member; do
     case "$member" in
-        llmgw|README.md|docs/installation.md|docs/runtime-contract.md|docs/client-compatibility.md) ;;
+        llmgw|README.md|LICENSE-MIT|LICENSE-APACHE) ;;
         *) fail "unexpected_archive_entry: $member" ;;
     esac
 done <"$members"

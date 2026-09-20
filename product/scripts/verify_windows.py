@@ -58,8 +58,9 @@ def verify(binary, work, product):
     archive = work / "llmgw-windows-x64.zip"
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, strict_timestamps=False) as z:
         z.write(binary, "llmgw.exe")
-        for name in ["README.md", "docs/installation.md", "docs/runtime-contract.md", "docs/client-compatibility.md"]:
-            z.write(product / name, name)
+        z.write(product / "README.md", "README.md")
+        for name in ("LICENSE-MIT", "LICENSE-APACHE"):
+            z.write(product.parent / name, name)
     manifest = work / "checksums.sha256"
     manifest.write_text(f"{sha(archive)}  {archive.name}\n", encoding="ascii")
     install_dir = work / "installed space"

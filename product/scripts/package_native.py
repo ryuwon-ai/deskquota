@@ -17,9 +17,8 @@ PRODUCT = Path(__file__).resolve().parents[1]
 PACKAGE_MEMBERS = (
     "llmgw",
     "README.md",
-    "docs/installation.md",
-    "docs/runtime-contract.md",
-    "docs/client-compatibility.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE",
 )
 
 
@@ -48,9 +47,10 @@ def package_native(binary: Path, product: Path, output: Path) -> dict[str, objec
     if not contents[executable]:
         raise ValueError("binary_is_empty")
     for name in PACKAGE_MEMBERS[1:]:
-        source = product / name
+        directory = product if name == "README.md" else product.parent
+        source = directory / name
         path = source.resolve(strict=True)
-        if not path.is_relative_to(product) or source.is_symlink() or not path.is_file():
+        if not path.is_relative_to(directory) or source.is_symlink() or not path.is_file():
             raise ValueError(f"invalid_package_document:{name}")
         contents[name] = path.read_bytes()
 

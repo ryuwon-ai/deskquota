@@ -409,7 +409,7 @@ async def run_arm(arm, seed, windows, binary, reference, phase, directory):
     return run
 
 def identities(binary, reference, mode):
-    source_paths = sorted(p for folder in ("src", "scripts", "examples", "fixtures/workloads", "tests", "docs") for p in (HERE/folder).rglob("*") if p.is_file() and "__pycache__" not in p.parts)
+    source_paths = sorted(p for folder in ("src", "scripts", "examples", "fixtures/workloads", "tests") for p in (HERE/folder).rglob("*") if p.is_file() and "__pycache__" not in p.parts)
     source_paths += [HERE/name for name in ("Cargo.toml", "Cargo.lock", "rust-toolchain.toml")]
     sources = {str(p.relative_to(HERE)): digest(p) for p in source_paths}
     benchmark_identity = ({"path": str(reference), "sha256": digest(reference), "features": ["bench-harness"]}

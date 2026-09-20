@@ -1,113 +1,0 @@
-[?25l? Setup: Environment ›
-❯ Continue
-  Cancel
-[3A[2K[1B[2K[1B[2K[1B[3A✔ Setup: Environment · Continue
-[?25h[?25l? Environment preset (defaults only; protocol remains your choice) ›
-  Local LLM
-  Corporate LLM
-❯ External API
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Environment preset (defaults only; protocol remains your choice) · External API
-[?25h[?25l? Setup: Connection ›
-❯ Continue
-  Back
-  Cancel
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Setup: Connection · Continue
-[?25h? Upstream API base (prefix preserved; /v1 is not duplicated) (http://127.0.0.1:9/company/v1) › 
-[2K✔ Upstream API base (prefix preserved; /v1 is not duplicated) · http://127.0.0.1:9/company/v1
-[?25l? Actually supported endpoint formats; unknown is never enabled ›
-⬚ Completions
-✔ Responses
-⬚ Messages
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Actually supported endpoint formats; unknown is never enabled · Responses
-[?25h[?25l? Upstream auth ›
-  Forward incoming header
-  Environment reference
-❯ None
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Upstream auth · None
-[?25h[?25l? Setup: Models ›
-❯ Continue
-  Back
-  Cancel
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Setup: Models · Continue
-[?25h? Keep all existing models and routes unchanged? (y/n) › yes[?25l[2K✔ Keep all existing models and routes unchanged? · yes
-[?25h[?25l? Setup: Quota ›
-❯ Continue
-  Back
-  Cancel
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Setup: Quota · Continue
-[?25h[?25l? RPM ›
-  Known nonzero number
-  Unknown
-❯ Unlimited
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ RPM · Unlimited
-[?25h[?25l? TPM ›
-  Known nonzero number
-  Unknown
-❯ Unlimited
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ TPM · Unlimited
-[?25h? Is this same quota shared by other PCs? (y/n) › no[?25l[2K✔ Is this same quota shared by other PCs? · no
-[?25h? Does the provider specify separate input/output limits? (v0.1 reports this as estimated) (y/n) › no[?25l[2K✔ Does the provider specify separate input/output limits? (v0.1 reports this as estimated) · no
-[?25h? Concurrency 1..16 (3) › [2K✔ Concurrency 1..16 · 3
-[?25l? Setup: Run ›
-❯ Continue
-  Back
-  Cancel
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Setup: Run · Continue
-[?25h? Local loopback port (52473) › [2K✔ Local loopback port · 52473
-? Request start at next login? (recorded pending; registration is a later task) (y/n) › no[?25l[2K✔ Request start at next login? (recorded pending; registration is a later task) · no
-[?25h[?25l? Setup: Tools ›
-❯ Continue
-  Back
-  Cancel
-
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Setup: Tools · Continue
-[?25h[?25l? Client intents (pending only; no client file is changed) ›
-⬚ Pi
-⬚ Claude Code
-
-⬚ Codex
-⬚ Manual
-[5A[2K[1B[2K[1B[2K[1B[2K[1B[2K[1B[5A✔ Client intents (pending only; no client file is changed) · 
-[?25h[?25l? Setup: Apply ›
-❯ Continue
-  Back
-  Cancel
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A✔ Setup: Apply · Continue
-[?25hconfig: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task2-spec-review/rereview-f8/scratch/expected_guard_on/gateway 설정.toml
-state: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task2-spec-review/rereview-f8/scratch/expected_guard_on/.llmgw-0c033de39d91b8da4d7a993b218668cb1af27ec373b26b43395981148c05f8aa
-setup pending metadata: /Users/ryuwon/Desktop/ryuwon-project/llm-gateway-research/evidence/native-task2-spec-review/rereview-f8/scratch/expected_guard_on/.gateway 설정.toml.setup-pending.json (intent only; no credentials)
-upstream original: http://127.0.0.1:9/company/v1
-upstream new normalized: http://127.0.0.1:9/company/v1
-proxy: disabled; TLS: system roots; verification remains enabled
-OpenAI client base: http://127.0.0.1:52473/r/pi/v1
-Messages client base: http://127.0.0.1:52473/r/pi (client appends /v1/messages -> http://127.0.0.1:52473/r/pi/v1/messages)
-protocols: [Responses]
-model: model-a; reservation output bound: 64; user-supplied accounting fallback used only when a request omits its cap, not a verified provider limit, and not injected or enforced upstream; listing: unverified/manual; capabilities: unverified
-quota: estimated; shared with other PCs: false; separate input/output contract: false
-auth: none
-quota startup hold: known RPM/TPM can hold admission for up to 60 seconds after readiness
-login requested: no; pending, registration not applied
-clients: none; pending, client files not changed
-fingerprint impact: desired a4a8c798513325fe6b7203232b2c1469ff922bba66b24a132fe829b8d6d258d1; lifecycle state is stopped; Save and start starts this configuration and verifies authenticated readiness
-fairness: configured route root pi; sessions sharing this root share one budget
-
-[?25l? Apply ›
-  Save and start
-❯ Save only
-  Back
-  Cancel
-[4A[2K[1B[2K[1B[2K[1B[2K[1B[4A❯ Save and start
-  Save only
-  Back
-  Cancel
-[5A[2K[1B[2K[1B[2K[1B[2K[1B[2K[1B[5A✔ Apply · Save and start
-[?25herror: configuration_changed_before_start
