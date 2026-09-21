@@ -7,7 +7,7 @@ use crate::{
     server::{self, RuntimeCredentials},
 };
 use identity::{Identity, Record};
-use process::Lock;
+pub(crate) use process::Lock;
 use serde_json::{Value, json};
 use std::{
     io::{self, Write},

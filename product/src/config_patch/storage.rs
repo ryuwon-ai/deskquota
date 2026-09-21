@@ -1,5 +1,5 @@
 use super::Error;
-use fs4::FileExt;
+use crate::lifecycle::Lock;
 use std::{
     ffi::OsString,
     fs::{self, OpenOptions},
@@ -236,7 +236,7 @@ pub(crate) fn journal_lock_path(journal_path: &Path) -> PathBuf {
     journal_path.with_file_name(name)
 }
 
-pub(crate) fn lock_path(path: &Path, kind: &str) -> Result<fs::File, Error> {
+pub(crate) fn lock_path(path: &Path, kind: &str) -> Result<Lock, Error> {
     let parent = path
         .parent()
         .ok_or_else(|| Error::message("config patch lock path has no parent"))?;
@@ -245,7 +245,7 @@ pub(crate) fn lock_path(path: &Path, kind: &str) -> Result<fs::File, Error> {
     try_lock(file, kind)
 }
 
-pub(crate) fn lock_resource(resource: &Path) -> Result<(fs::File, PathBuf), Error> {
+pub(crate) fn lock_resource(resource: &Path) -> Result<(Lock, PathBuf), Error> {
     let initial = normalize_resource_path(resource)?;
     let parent = initial
         .parent()
@@ -257,9 +257,9 @@ pub(crate) fn lock_resource(resource: &Path) -> Result<(fs::File, PathBuf), Erro
     Ok((try_lock(file, "client resource")?, normalized))
 }
 
-fn try_lock(file: fs::File, kind: &str) -> Result<fs::File, Error> {
-    match FileExt::try_lock(&file) {
-        Ok(()) => Ok(file),
+fn try_lock(file: fs::File, kind: &str) -> Result<Lock, Error> {
+    match Lock::acquire(file) {
+        Ok(lock) => Ok(lock),
         Err(fs4::TryLockError::WouldBlock) => Err(Error::message(format!(
             "another llmgw {kind} edit is in progress; retry after it finishes"
         ))),
@@ -553,6 +553,25 @@ mod tests {
         fn drop(&mut self) {
             let _ = fs::remove_dir_all(&self.0);
         }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn completed_transaction_releases_lock_with_duplicate_handle_open() {
+        let fixture = Fixture::new();
+        let directory = fixture.0.join("state");
+        crate::lifecycle::platform::directory(&directory).unwrap();
+        let path = directory.join("transaction.lock");
+        let file = crate::lifecycle::platform::open(&path, true, false).unwrap();
+        let duplicate = file.try_clone().unwrap();
+        let guard = try_lock(file, "transaction").unwrap();
+        assert!(lock_path(&path, "transaction").is_err());
+
+        drop(guard);
+        let next = lock_path(&path, "transaction");
+        assert!(next.is_ok(), "completed owner must release its lock");
+        drop(next);
+        drop(duplicate);
     }
 
     #[test]

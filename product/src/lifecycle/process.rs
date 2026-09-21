@@ -13,10 +13,14 @@ pub struct Lock {
     _file: File,
 }
 impl Lock {
+    pub(crate) fn acquire(file: File) -> Result<Self, fs4::TryLockError> {
+        FileExt::try_lock(&file)?;
+        Ok(Self { _file: file })
+    }
     pub fn attempt(paths: &StatePaths, name: &str) -> io::Result<Option<Self>> {
         let file = platform::open(&paths.directory.join(name), true, false)?;
-        match FileExt::try_lock(&file) {
-            Ok(()) => Ok(Some(Self { _file: file })),
+        match Self::acquire(file) {
+            Ok(lock) => Ok(Some(lock)),
             Err(fs4::TryLockError::WouldBlock) => Ok(None),
             Err(fs4::TryLockError::Error(e)) => Err(e),
         }
@@ -32,6 +36,12 @@ impl Lock {
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
+    }
+}
+impl Drop for Lock {
+    fn drop(&mut self) {
+        // Closing alone can retain the lock through a forked or duplicated handle.
+        let _ = FileExt::unlock(&self._file);
     }
 }
 pub fn spawn(config: &Path, fingerprint: &str) -> io::Result<Child> {
