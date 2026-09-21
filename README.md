@@ -9,7 +9,7 @@
   <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue" alt="MIT or Apache-2.0 license"></a>
 </p>
 <p align="center">English · <a href="README.ko.md">한국어</a></p>
-<p align="center"><a href="#why-deskquota">Why DeskQuota</a> · <a href="#get-started">Get started</a> · <a href="#connect-your-tools">Connect your tools</a> · <a href="#choose-your-limits">Configuration</a></p>
+<p align="center"><a href="#why-deskquota">Why DeskQuota</a> · <a href="#performance-at-a-glance">Performance</a> · <a href="#get-started">Get started</a> · <a href="#connect-your-tools">Connect your tools</a> · <a href="#choose-your-limits">Configuration</a></p>
 
 ---
 
@@ -38,6 +38,43 @@ Set it up with `llmgw setup`. Start with `llmgw on`. Stop with `llmgw off`.
 The focus is **quota efficiency across tools, with the footprint of a local utility**.
 Scheduling, caching and recovery work together in the same process, with bounded
 queues and a bounded in-memory cache.
+
+## Performance at a glance
+
+| Idle worker memory | Local HTTP round-trip p95 | Upstream calls per identical burst |
+| :---: | :---: | :---: |
+| **9.56 MiB** | **0.45 ms** | **10 → 1** |
+
+**90% fewer upstream calls. A 9.0× faster duplicate batch.** Enabling exact caching
+reduced completion time for ten identical requests from **1,035 ms to 114 ms**.
+Both cache-off and cache-on configurations completed **50/50 requests** across five runs.
+
+Native `on` / `off` took **39 ms / 35 ms** respectively, measured as the median of
+three start/stop cycles.
+
+<details>
+<summary>Benchmark setup and measurement definitions</summary>
+
+- **Build and host:** September 21, 2026; Apple M4, 32 GiB RAM, macOS 26.5.1.
+  Rust 1.88 release build with default features, source
+  [`03f4009`](https://github.com/ryuwon-ai/deskquota/commit/03f4009085c6ef8fceea84c07fb69f26118c3de3),
+  from the [native CI package](https://github.com/ryuwon-ai/deskquota/actions/runs/35546518243).
+- **HTTP latency:** five alternating direct/gateway pairs, 100 sequential SSE
+  requests after five warmups per run, reused connections, cache off and no quota
+  wait. All **500/500 requests per path** completed. Numbers are the median of
+  five per-run p95 values: **0.22 ms direct, 0.45 ms through DeskQuota**. Timing
+  covers the client and loopback HTTP fixture; the fixture adds no generation delay.
+- **Exact cache:** five alternating off/on pairs using the same executable,
+  ten identical JSON requests per burst, a fresh cache, concurrency 1, ample quota
+  and startup hold disabled. The fixture holds responses until the burst is queued,
+  then adds a fixed **100 ms service time per upstream call**. Batch time runs
+  from first submission to last validated completion; reported times are medians
+  of five batches. Upstream calls total **50 without caching, 5 with caching**.
+- **Memory and lifecycle:** idle RSS is the median of 30 samples across three
+  workers. Start/stop times measure CLI lifecycle completion; the configured
+  quota startup hold is separate from process startup.
+
+</details>
 
 ## Built for the way you work
 
