@@ -2,23 +2,53 @@
   <img src="assets/deskquota-hero.png" alt="DeskQuota — Your LLM quota, managed at your desk." width="100%">
 </p>
 
-<p align="center"><strong>Keep your tools. Share your LLM limits.</strong></p>
-<p align="center">A lightweight local gateway for agents and scripts using the same limited LLM endpoint.</p>
+<p align="center"><strong>More work from the LLM quota you already have.</strong></p>
+<p align="center">Keep your tools. Let DeskQuota coordinate the limits.</p>
+<p align="center">
+  <a href="https://github.com/ryuwon-ai/deskquota/actions/workflows/native.yml"><img src="https://github.com/ryuwon-ai/deskquota/actions/workflows/native.yml/badge.svg?branch=develop" alt="Native packages CI"></a>
+  <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-blue" alt="MIT or Apache-2.0 license"></a>
+</p>
 <p align="center">English · <a href="README.ko.md">한국어</a></p>
-<p align="center"><a href="#get-started">Get started</a> · <a href="#connect-your-tools">Connect your tools</a> · <a href="#choose-your-limits">Choose your limits</a></p>
+<p align="center"><a href="#why-deskquota">Why DeskQuota</a> · <a href="#get-started">Get started</a> · <a href="#connect-your-tools">Connect your tools</a> · <a href="#choose-your-limits">Configuration</a></p>
 
 ---
 
-One agent is coding. Another is reviewing. A script retries in the background.
-They share an API allowance, but none can see what the others are doing.
+**DeskQuota is a lightweight LLM gateway built to make limited capacity go further.**
+It brings request scheduling, exact caching, token accounting and recovery together
+for Claude Code, Codex, Pi and your own scripts.
 
-**DeskQuota gives those requests one place to coordinate.** It runs on your PC,
-between your existing tools and one company, hosted, or local LLM endpoint.
-It schedules requests within your limits, reuses eligible identical responses,
-and coordinates recovery when the upstream is busy or failing.
+Run it on your PC, point your tools at localhost, and give them one place to share
+a hosted API, company endpoint or local LLM. Each instance coordinates one upstream
+endpoint and the traffic you send through it.
 
-**One Rust executable. No Docker, WSL, Python, Node, or database needed to run it.**
-The terminal command is `llmgw`.
+**One Rust executable. No Docker, WSL, Python, Node, Redis or database to operate.**
+Set it up with `llmgw setup`. Start with `llmgw on`. Stop with `llmgw off`.
+
+## Why DeskQuota
+
+| Advantage | What you get |
+|---|---|
+| **Spend quota on useful work** | One shared RPM, TPM and concurrency budget coordinates outgoing requests across your tools. |
+| **Skip repeat generation** | Optional exact TTL caching serves eligible identical requests without another upstream call. Concurrent duplicates can share one cache fill. |
+| **Give every agent a turn** | Fair scheduling across configured client queues, with starvation protection for requests waiting their turn. |
+| **Recover as a group** | Shared `429` cooldowns, provider retry/reset signals and circuit protection coordinate recovery across callers. |
+| **Reclaim unused token reservations** | Supported final usage, including streaming usage, settles the tokens actually consumed and releases unused reservations. |
+| **Keep the workflow you like** | Standard API authentication, managed client connection profiles and native commands. No custom data-token header required. |
+
+The focus is **quota efficiency across tools, with the footprint of a local utility**.
+Scheduling, caching and recovery work together in the same process, with bounded
+queues and a bounded in-memory cache.
+
+## Built for the way you work
+
+- **Coding, reviewing and automating in parallel.** Give each configured client
+  queue a turn while they share the same allowance.
+- **Repeating classifiers, scripts or short requests.** Reuse eligible identical
+  answers through exact caching, saving both a provider round trip and quota.
+- **Working with an API plan or company endpoint.** Set the RPM, TPM and concurrency
+  you want your tools to share, and coordinate provider cooldowns in one place.
+- **Running a local model on a busy PC.** Bound simultaneous requests and queue
+  excess work before it reaches the model server.
 
 ```text
 Claude Code ─┐
@@ -26,22 +56,7 @@ Codex ───────┼──► DeskQuota on localhost ──► Your LL
 Pi / scripts ┘      quota · queue · cache · recovery
 ```
 
-## What it handles
-
-| When… | DeskQuota… |
-|---|---|
-| Several tools share an allowance | Tracks RPM, TPM and concurrency across this instance. |
-| One workload fills the queue | Gives configured client queues turns, with starvation protection. |
-| An eligible identical request repeats | Reuses a complete response; concurrent duplicates can share one cache fill. |
-| The provider returns `429` | Shares cooldown and valid retry/reset signals across waiting requests. |
-| An upstream repeatedly fails | Uses bounded circuit protection and one recovery probe per protected scope. |
-| A response streams back | Forwards chunks and reconciles reservations with supported final usage. |
-
 ## Get started
-
-**Early preview.** This README describes the source checkout. Published
-`v0.1.0-preview.1` packages predate several cache and recovery improvements.
-Build from source for the current implementation.
 
 ### Native packages
 
@@ -53,6 +68,9 @@ You can transfer these four files to an offline PC for installation.
 |---|---|---|
 | macOS · Apple silicon | `llmgw-macos-arm64.tar.gz` | `install.sh` |
 | Windows · x64 | `llmgw-windows-x64.zip` | `install.ps1` |
+
+The published package version is `v0.1.0-preview.1`. For the latest cache and recovery
+features described here, [build from source](#build-from-source).
 
 <details>
 <summary>macOS installation</summary>
@@ -156,6 +174,16 @@ Forward mode passes normal `Authorization` or `x-api-key` authentication; no
 custom data token is required. The worker binds to loopback and protects lifecycle
 controls separately. A chat subscription or browser login is not an API credential.
 
+<details>
+<summary>Protocol and compaction support</summary>
+
+Chat Completions, Messages and HTTP Responses are forwarded in their original
+API format. The upstream supplies the model capabilities. `/responses/compact`
+is unsupported; known-TPM inspection rejects opaque compaction inputs and input
+estimates exceeding the configured budget.
+
+</details>
+
 ## Choose your limits
 
 | Setting | Meaning |
@@ -167,6 +195,9 @@ controls separately. A chat subscription or browser login is not an API credenti
 Concurrency and shared cooldown still apply. A continuously refilling provider
 allowance differs from a rolling window. Use a numeric cap when you want that
 local budget; it cannot account for other PCs spending the same allowance.
+
+<details>
+<summary>Token accounting, cache and recovery settings</summary>
 
 - **Tokens:** new configurations use `actual` to reconcile reservations with valid
   final usage. Input estimates are approximate; missing usage retains the reservation.
@@ -184,20 +215,13 @@ local budget; it cannot account for other PCs spending the same allowance.
 
 Run `llmgw restart` after editing the saved configuration.
 
-## Boundaries
+</details>
 
-- One instance manages one endpoint and its own traffic. It cannot increase quota,
-  observe every outside consumer, or pause and resume a running generation.
-- Waiting can preserve completion opportunities while increasing latency. An
-  already well-paced single client may gain little from another gateway.
-- Native-client automatic compaction has been exercised, but `/responses/compact`
-  is unsupported. Known-TPM inspection rejects opaque compaction inputs and
-  estimates exceeding the configured budget.
-- macOS and Windows have native packaging workflows. Current Windows client
-  reliability, long-running workloads and low-end hardware need broader validation.
-  There is no universal speed or zero-429 guarantee.
+## Contributing
 
-## Development
+New client profiles, bug fixes and focused improvements are welcome.
+[Open an issue](https://github.com/ryuwon-ai/deskquota/issues) with a reproducible
+problem or a workflow you want to improve.
 
 From `product/`:
 
@@ -207,10 +231,6 @@ cargo fmt --check
 cargo clippy --locked --all-targets --all-features -- -D warnings
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
-
-Tests use synthetic fixtures. Keep build outputs outside synced folders such as
-iCloud Desktop. Research notes, raw measurements, generated data and local
-credentials stay out of Git; source, regression tests and CI remain versioned.
 
 For bug reports, include the client version, sanitized configuration, expected
 behavior and a minimal reproduction. Remove keys, company URLs, prompts and
