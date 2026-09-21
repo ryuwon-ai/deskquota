@@ -43,7 +43,7 @@ queues and a bounded in-memory cache.
 
 | Idle worker memory | Local HTTP round-trip p95 | Upstream calls per identical burst |
 | :---: | :---: | :---: |
-| **9.56 MiB** | **0.45 ms** | **10 → 1** |
+| **9.59 MiB** | **0.46 ms** | **10 → 1** |
 
 **90% fewer upstream calls. A 9.0× faster duplicate batch.** Enabling exact caching
 reduced completion time for ten identical requests from **1,035 ms to 114 ms**.
@@ -52,6 +52,34 @@ Both cache-off and cache-on configurations completed **50/50 requests** across f
 Native `on` / `off` took **39 ms / 35 ms** respectively, measured as the median of
 three start/stop cycles.
 
+### Compared with Bifrost and LiteLLM
+
+**A smaller footprint and lower latency on the local request path.** In the same
+loopback SSE workload, DeskQuota used **84% less idle memory than Bifrost** and
+**97% less than LiteLLM**. Its HTTP round-trip p95 was **44% lower than Bifrost**
+and **92% lower than LiteLLM** with the versions and configurations below.
+
+| Local SSE workload | DeskQuota | [Bifrost](https://github.com/maximhq/bifrost) · transports/v2.1.1 | [LiteLLM](https://github.com/BerriAI/litellm) · v1.100.1 |
+|---|---:|---:|---:|
+| Idle process RSS | **9.59 MiB** | 60.41 MiB | 286.05 MiB |
+| HTTP round-trip p95 | **0.46 ms** | 0.82 ms | 5.74 ms |
+| Validated completions | 500/500 | 500/500 | 500/500 |
+
+**Shared recovery cuts redundant upstream calls.** During a one-second `429`
+outage, DeskQuota completed the same **40/40 requests** with **44% fewer upstream
+calls than Bifrost** and **59% fewer than LiteLLM**.
+
+| One-second `429` outage · five runs | DeskQuota | Bifrost | LiteLLM |
+|---|---:|---:|---:|
+| Total upstream calls, including retries | **45** | 80 | 109 |
+| Validated completions | 40/40 | 40/40 | 40/40 |
+| Request completion p95, including retry waits | 1.42 s | **1.32 s** | 1.69 s |
+
+Here, shared recovery traded about **0.10 s of p95 latency versus Bifrost** for
+**44% fewer upstream calls**. These tables measure HTTP handling and recovery;
+model generation time remains upstream. DeskQuota focuses on coordinating one
+endpoint; Bifrost and LiteLLM also cover multi-provider routing and API translation.
+
 <details>
 <summary>Benchmark setup and measurement definitions</summary>
 
@@ -59,19 +87,42 @@ three start/stop cycles.
   Rust 1.88 release build with default features, source
   [`03f4009`](https://github.com/ryuwon-ai/deskquota/commit/03f4009085c6ef8fceea84c07fb69f26118c3de3),
   from the [native CI package](https://github.com/ryuwon-ai/deskquota/actions/runs/35546518243).
-- **HTTP latency:** five alternating direct/gateway pairs, 100 sequential SSE
-  requests after five warmups per run, reused connections, cache off and no quota
-  wait. All **500/500 requests per path** completed. Numbers are the median of
-  five per-run p95 values: **0.22 ms direct, 0.45 ms through DeskQuota**. Timing
-  covers the client and loopback HTTP fixture; the fixture adds no generation delay.
+- **Compared builds:** Bifrost HTTP transport
+  [`transports/v2.1.1`](https://github.com/maximhq/bifrost/tree/c193745d2a713e9f58f021d43e138df5eb7e038a),
+  built from source with the upstream load-test UI placeholder; LiteLLM
+  [`v1.100.1`](https://github.com/BerriAI/litellm/tree/1dba17b10ded12ad0021edb453ba2c54e4637928),
+  installed from PyPI in an isolated Python environment. Bifrost used file-only
+  configuration with governance, logging and telemetry disabled; LiteLLM used one
+  deployment and one worker, with spend logging and telemetry disabled. No Redis
+  or database services were used. These are pinned releases, not a comparison of
+  every feature or each project's published high-concurrency benchmark.
+- **HTTP latency and memory:** five runs per path, rotating direct, DeskQuota,
+  Bifrost and LiteLLM; 100 sequential SSE requests after five warmups per run,
+  reused connections, cache and retries off, no quota wait, upstream concurrency
+  cap 2. LiteLLM used `usage-based-routing-v2`, pre-call checks and nonbinding
+  RPM/TPM limits. All **500/500 requests per path** completed. Latency is the
+  median of five per-run p95 values; direct HTTP was **0.23 ms**. Timing covers
+  the client and loopback fixture, which adds no generation delay. RSS is the
+  median of five idle gateway-process samples before warmup; it excludes the
+  client and fixture. Percentage reductions use unrounded medians.
+- **Recovery:** five runs per gateway in rotating order; eight SSE requests per
+  run arriving 100 ms apart, a one-second upstream `429` outage with remaining
+  delay in `retry-after-ms`, then 100 ms service per call at concurrency 2.
+  All paths used the same client retry policy: at most four attempts, provider
+  hints or seeded exponential backoff, and a five-second deadline per request.
+  Gateway retries and caches were off. DeskQuota used provider-managed limits
+  and shared cooldowns; Bifrost used the file-only configuration above; LiteLLM
+  used `simple-shuffle` without local RPM/TPM or pre-call checks. Completion
+  latency includes retry waits; p95 is the median of five per-run values. Calls
+  include failed attempts, and all **40/40 requests per gateway** completed.
+  A separate requested-usage check passed for all three before measurement.
 - **Exact cache:** five alternating off/on pairs using the same executable,
   ten identical JSON requests per burst, a fresh cache, concurrency 1, ample quota
   and startup hold disabled. The fixture holds responses until the burst is queued,
   then adds a fixed **100 ms service time per upstream call**. Batch time runs
   from first submission to last validated completion; reported times are medians
   of five batches. Upstream calls total **50 without caching, 5 with caching**.
-- **Memory and lifecycle:** idle RSS is the median of 30 samples across three
-  workers. Start/stop times measure CLI lifecycle completion; the configured
+- **Lifecycle:** start/stop times measure CLI lifecycle completion; the configured
   quota startup hold is separate from process startup.
 
 </details>
