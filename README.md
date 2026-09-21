@@ -22,6 +22,11 @@ a hosted API, company endpoint or local LLM. Each instance coordinates one upstr
 endpoint and the traffic you send through it.
 
 **One Rust executable. No Docker, WSL, Python, Node, Redis or database to operate.**
+
+Some organizations restrict Docker or WSL under their security policies.
+DeskQuota ships as a native executable to support these environments without
+requiring either runtime.
+
 Set it up with `llmgw setup`. Start with `llmgw on`. Stop with `llmgw off`.
 
 ## Why DeskQuota
