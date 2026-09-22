@@ -92,6 +92,8 @@ endpoint; Bifrost and LiteLLM also cover multi-provider routing and API translat
   Rust 1.88 release build with default features, source
   [`03f4009`](https://github.com/ryuwon-ai/deskquota/commit/03f4009085c6ef8fceea84c07fb69f26118c3de3),
   from the [native CI package](https://github.com/ryuwon-ai/deskquota/actions/runs/35546518243).
+  These pinned measurements predate default BPE estimation. See the separate
+  [current tokenizer memory measurements](#tokenizer-memory) for known-TPM routes.
 - **Compared builds:** Bifrost HTTP transport
   [`transports/v2.1.1`](https://github.com/maximhq/bifrost/tree/c193745d2a713e9f58f021d43e138df5eb7e038a),
   built from source with the upstream load-test UI placeholder; LiteLLM
@@ -131,6 +133,32 @@ endpoint; Bifrost and LiteLLM also cover multi-provider routing and API translat
   quota startup hold is separate from process startup.
 
 </details>
+
+<a id="tokenizer-memory"></a>
+
+### Multilingual estimation with less memory
+
+Count-only, read-only dictionaries reduce memory without changing the selected
+tokenizer's counts. Compared with the previous dictionary storage:
+
+| Estimator | Idle RSS, before → after | RSS after a long request, before → after |
+| :--- | :---: | :---: |
+| `cl100k_base` (default) | **41.75 → 11.78 MiB** | **45.86 → 17.36 MiB** |
+| `o200k_base` | **76.77 → 12.77 MiB** | **79.83 → 18.53 MiB** |
+
+September 22, 2026; Apple M4, 32 GiB, macOS 26.5.1, Rust 1.88 release builds.
+Five alternating pairs per configuration, ~452 KB synthetic multilingual requests,
+cache off, concurrency 3 and nonbinding quotas. These are gateway-only RSS medians,
+separate from the earlier competitor comparison. The final build also fixes JSON
+normalization for deeply nested tool schemas and large numeric literals.
+All **1,410/1,410 requests** completed,
+including a control with no local TPM cap. The median sampled concurrent peak for the
+default estimator fell **51.80 → 23.77 MiB**; sampling can miss transient peaks.
+
+Trade-offs remain: default-estimator long-request HTTP time was **9.37 → 9.94 ms**,
+while a three-request concurrent batch took **12.35 → 14.00 ms**. Isolated counting
+of a 467 KB unbroken Base64 string was **3.3–7.4% slower** across the two encodings.
+Counts matched the pinned upstream implementation in **604,758 differential cases**.
 
 ## Built for the way you work
 
@@ -211,8 +239,9 @@ CARGO_TARGET_DIR="$HOME/.cache/deskquota/cargo" cargo install --locked --path .
 ```
 
 Keep Cargo's binary directory on PATH. Windows source builds need MSVC or GNU;
-the prebuilt package needs neither. Add `--features bpe` only for the optional
-tokenizer-based estimator, which uses more memory.
+the prebuilt package needs neither. Multilingual BPE estimation is included by
+default. Known-TPM routes load the selected vocabulary and use additional memory;
+the byte-only build is available with `--no-default-features`.
 
 ### Set up once, start when you need it
 
@@ -295,6 +324,14 @@ local budget; it cannot account for other PCs spending the same allowance.
 - **Tokens:** new configurations use `actual` to reconcile reservations with valid
   final usage. Input estimates are approximate; missing usage retains the reservation.
   Use `reserved` when the provider's quota contract requires it.
+- **Multilingual input:** standard builds default to `cl100k_base` with 32 extra
+  tokens for framing. JSON formatting and Unicode escapes are normalized for
+  estimation; the upstream receives the original body. This avoids treating each
+  UTF-8 byte as a token. It is still an estimate, especially for Claude or models
+  with a different tokenizer. Existing explicit `input_estimator = "utf8_bytes"`
+  settings remain byte-based: change that line to `"cl100k_base"` in the relevant
+  `[[models]]` section and set `input_token_overhead = 32`. Local TPM rejections
+  are not model context errors and do not trigger client auto-compaction.
 - **Exact cache:** off by default. Enable it in setup, or add `[cache]` with
   `ttl_secs = 300` and `max_history = 3`. Payload storage is bounded to 4 MiB.
   Eligible identical text requests reuse an earlier complete answer and its usage.
