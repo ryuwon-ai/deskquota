@@ -258,7 +258,7 @@ pub fn error(status: StatusCode, code: &'static str) -> Response<Body> {
             Some("Known TPM supports one Chat generation per request; omit n or set n to 1.")
         }
         "estimate_exceeds_budget" => Some(
-            "The configured JSON input estimate plus output reservation exceeds the configured local TPM budget. This is an estimate, not an actual token count.",
+            "The configured JSON input estimate plus output reservation exceeds the configured local TPM budget. This is an estimate, not an actual token count or a model context-window error. Review input_estimator (utf8_bytes counts bytes as tokens), input_token_overhead and the output limit, or shorten the request.",
         ),
         _ => None,
     };

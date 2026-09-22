@@ -373,11 +373,11 @@ impl PromptIo for DialoguerIo {
                 let modes = [
                     (
                         InputEstimator::Utf8Bytes,
-                        "UTF-8 bytes (default, no vocabulary)",
+                        "UTF-8 bytes (strict byte bound; can reject valid long contexts)",
                     ),
                     (
                         InputEstimator::Cl100kBase,
-                        "cl100k_base (explicit BPE estimate)",
+                        "cl100k_base (default multilingual BPE estimate)",
                     ),
                     (
                         InputEstimator::O200kBase,
@@ -392,7 +392,7 @@ impl PromptIo for DialoguerIo {
                 let selected = if modes.len() == 1 {
                     0
                 } else {
-                    self.term.write_line("BPE counts serialized JSON, not exact provider input. Match your upstream encoding and framing; OpenAI-compatible APIs may use different tokenizers. Selected BPE adds vocabulary memory (roughly 32/67 MiB in a standalone probe).").map_err(|e| Error::message(e.to_string()))?;
+                    self.term.write_line("BPE estimates normalized JSON across languages, not exact provider input. Claude and other models can use different tokenizers. UTF-8 byte counts can greatly overestimate long contexts. BPE uses additional memory; see the README for measured usage.").map_err(|e| Error::message(e.to_string()))?;
                     Select::with_theme(&self.theme)
                         .with_prompt("Input estimate for known TPM")
                         .items(modes.iter().map(|(_, label)| *label).collect::<Vec<_>>())

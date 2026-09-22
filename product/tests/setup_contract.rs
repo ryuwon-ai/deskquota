@@ -1827,8 +1827,8 @@ models = ["b"]
         .unwrap();
     let parsed = llmgw::config::parse(renamed.as_bytes()).unwrap();
     assert_eq!(parsed.models[0].id, "new");
-    assert_eq!(parsed.models[0].input_estimator, InputEstimator::Utf8Bytes);
-    assert_eq!(parsed.models[0].input_token_overhead, 0);
+    assert_eq!(parsed.models[0].input_estimator, InputEstimator::Cl100kBase);
+    assert_eq!(parsed.models[0].input_token_overhead, 32);
     assert_eq!(parsed.models[1], loaded.config.models[1]);
     assert_eq!(parsed.roots[0].models, ["new", "b"]);
     assert_eq!(parsed.roots[1], loaded.config.roots[1]);
@@ -1836,7 +1836,7 @@ models = ["b"]
 
 #[cfg(not(feature = "bpe"))]
 #[test]
-fn default_build_rejects_bpe_draft_before_replacing_existing_config() {
+fn byte_only_build_rejects_bpe_draft_before_replacing_existing_config() {
     use llmgw::input_estimate::InputEstimator::{Cl100kBase, O200kBase};
     let temp = Temp::new("missing-bpe-capability");
     let original = format!(

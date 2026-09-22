@@ -25,7 +25,8 @@ fn config(address: std::net::SocketAddr) -> Config {
             tpm: Limit::Unknown,
         },
         models: vec![Model {
-            input_estimator: Default::default(),
+            // Keep byte-exact reservation fixtures independent of the shipped estimator.
+            input_estimator: llmgw::input_estimate::InputEstimator::Utf8Bytes,
             input_token_overhead: 0,
             id: "fixture".into(),
             max_output_tokens: None,

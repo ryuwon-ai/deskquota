@@ -91,7 +91,9 @@ pub fn inspect_body(
         .ok_or_else(|| error("output_bound_required"))?;
     let input = model
         .input_estimator
-        .estimate(text, model.input_token_overhead)
+        .estimate_json(text, 0)
+        .ok_or_else(|| error("invalid_json"))?
+        .checked_add(model.input_token_overhead)
         .ok_or_else(|| error("estimate_exceeds_budget"))?;
     if input
         .checked_add(output)
@@ -490,7 +492,7 @@ models = ["fixture"]
                 };
                 for (cap, output) in [(format!(",\"{cap_field}\":19"), 19), (String::new(), 77)] {
                     let body = format!("{{\"model\":\"fixture\",{input}{cap}}}");
-                    let expected = mode.estimate(&body, 32).unwrap() + output;
+                    let expected = mode.estimate_json(&body, 32).unwrap() + output;
                     let (cost, _) = inspect_body(&config, &route, &body.into())
                         .unwrap_or_else(|_| panic!("valid bounds"));
                     assert_eq!(reserved(cost), u128::from(expected));

@@ -766,7 +766,8 @@ fn test_config(
             tpm: Limit::Known(1000.try_into().unwrap()),
         },
         models: vec![Model {
-            input_estimator: Default::default(),
+            // Keep byte-exact reservation fixtures independent of the shipped estimator.
+            input_estimator: llmgw::input_estimate::InputEstimator::Utf8Bytes,
             input_token_overhead: 0,
             id: "synthetic".into(),
             max_output_tokens: Some(300.try_into().unwrap()),

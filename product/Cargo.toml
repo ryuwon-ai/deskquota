@@ -7,17 +7,21 @@ description = "Native local quota gateway"
 license = "MIT OR Apache-2.0"
 
 [features]
+default = ["bpe"]
 bench-harness = []
-bpe = ["dep:bpe-openai"]
+bpe = ["dep:bpe-openai", "dep:bpe", "dep:aneubeck-daachorse", "dep:rmp-serde", "dep:regex-automata"]
 
 [[example]]
 name = "bench_gateway"
 required-features = ["bench-harness"]
 
+[[example]]
+name = "bench_tokenizer"
+required-features = ["bpe"]
+
 [dependencies]
 axum = { version = "=0.8.9", default-features = false, features = ["http1"] }
 bytes = "=1.11.1"
-bpe-openai = { version = "=0.3.1", optional = true }
 clap = { version = "=4.6.6", features = ["derive"] }
 dialoguer = { version = "=0.12.0", default-features = false }
 fs4 = { version = "=1.1.0", default-features = false, features = ["sync"] }
@@ -31,6 +35,7 @@ jsonc-parser = { version = "=0.33.1", default-features = false, features = ["cst
 libc = "=0.2.183"
 quick-xml = { version = "=0.42.0", default-features = false }
 rand = { version = "=0.10.2", default-features = false, features = ["thread_rng"] }
+regex-automata = { version = "=0.4.18", optional = true }
 reqwest = { version = "=0.13.5", default-features = false, features = ["rustls", "stream", "http2"] }
 serde = { version = "=1.0.228", features = ["derive"] }
 serde_json = "=1.0.149"
@@ -50,9 +55,18 @@ exacl = { version = "=0.13.0", default-features = false }
 windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Threading", "Win32_Networking_WinSock"] }
 
 [dev-dependencies]
+bpe-openai = "=0.3.1"
 rustls = "=0.23.44"
 tokio = { version = "=1.49.0", features = ["test-util"] }
 tokio-rustls = "=0.26.5"
+
+[build-dependencies]
+bpe-openai = { version = "=0.3.1", optional = true }
+# The build-time serializer mirror depends on these exact upstream formats.
+bpe = { version = "=0.2.2", optional = true }
+aneubeck-daachorse = { version = "=1.1.1", optional = true }
+rmp-serde = { version = "=1.3.1", optional = true }
+serde = { version = "=1.0.228", features = ["derive"] }
 
 [lints.rust]
 unsafe_code = "deny"

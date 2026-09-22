@@ -406,7 +406,8 @@ impl SetupDraft {
                 id: model_id.to_owned(),
                 max_output_tokens: None,
                 input_estimator: Default::default(),
-                input_token_overhead: 0,
+                input_token_overhead: crate::input_estimate::InputEstimator::default()
+                    .default_overhead(),
             });
         }
         if let Some(root) = self.config.roots.iter_mut().find(|root| root.id == root_id) {
